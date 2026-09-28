@@ -101,6 +101,50 @@ function PostMedia({ media }) {
   );
 }
 
+function PostComments({ comments, onAdd, issuerName, isOwner }) {
+  const [draft, setDraft] = useState('');
+  const send = () => {
+    if (!draft.trim()) return;
+    onAdd(draft.trim());
+    setDraft('');
+  };
+  const avatar = (label, isIssuer) => (
+    <div style={{ width:28, height:28, borderRadius:'50%', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-h)', fontWeight:700, fontSize:12,
+      background: isIssuer ? 'var(--accent-bg)' : 'var(--surface2)', color: isIssuer ? 'var(--accent-text)' : 'var(--sec)' }}>
+      {label.slice(0,1).toUpperCase()}
+    </div>
+  );
+
+  return (
+    <div style={{ marginTop:12, display:'flex', flexDirection:'column', gap:10 }}>
+      {comments.length === 0 && (
+        <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>Todavía no hay comentarios. ¡Sé el primero!</div>
+      )}
+      {comments.map(c => (
+        <div key={c.id} style={{ display:'flex', gap:8 }}>
+          {avatar(c.author, c.isIssuer)}
+          <div style={{ flex:1, minWidth:0, background:'var(--surface2)', borderRadius:12, padding:'8px 12px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
+              <span style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:12.5, color:'var(--text)' }}>{c.author}</span>
+              {c.isIssuer && <span style={{ padding:'1px 6px', borderRadius:999, background:'var(--accent-bg)', color:'var(--accent-text)', fontFamily:'var(--font-b)', fontWeight:700, fontSize:9.5 }}>Emisor</span>}
+              <span style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>· {c.date}</span>
+            </div>
+            <div style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--text)', lineHeight:1.5, whiteSpace:'pre-wrap', overflowWrap:'anywhere' }}>{c.text}</div>
+          </div>
+        </div>
+      ))}
+      <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+        {avatar(isOwner ? issuerName : 'Vos', isOwner)}
+        <input value={draft} onChange={e => setDraft(e.target.value)} maxLength={500}
+          onKeyDown={e => { if (e.key === 'Enter') send(); }}
+          placeholder={isOwner ? 'Responder como emisor...' : 'Escribí un comentario...'}
+          style={{ flex:1, minWidth:0, border:'1px solid var(--border-l)', borderRadius:999, padding:'8px 14px', fontFamily:'var(--font-b)', fontSize:13, color:'var(--text)', background:'var(--surface)', outline:'none' }} />
+        <PBtn variant="accent" small disabled={!draft.trim()} onClick={send} style={{ opacity: draft.trim() ? 1 : 0.5 }}>Enviar</PBtn>
+      </div>
+    </div>
+  );
+}
+
 function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
   const [text, setText] = useState('');
   const [milestone, setMilestone] = useState(false);
@@ -147,6 +191,18 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
 
   const toggleLike = (id) => setPosts(p => p.map(post => post.id === id
     ? { ...post, liked: !post.liked, likes: post.likes + (post.liked ? -1 : 1) }
+    : post));
+
+  // Anyone who can see the feed can comment; the owner's replies are tagged
+  // as the issuer. Like posts, comments live in page state until there's a
+  // backend to persist them.
+  const [openComments, setOpenComments] = useState([]);
+  const toggleComments = (id) => setOpenComments(o => o.includes(id) ? o.filter(x => x !== id) : [...o, id]);
+  const addComment = (postId, text) => setPosts(p => p.map(post => post.id === postId
+    ? { ...post, comments: [...(post.comments || []), {
+        id: Date.now(), date: 'Ahora', text,
+        author: a.isMine ? issuerName : 'Vos', isIssuer: !!a.isMine,
+      }] }
     : post));
 
   return (
@@ -249,10 +305,15 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
               <button onClick={() => toggleLike(post.id)} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: post.liked ? 'var(--neg)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
                 {post.liked ? '♥' : '♡'} {post.likes}
               </button>
-              <div style={{ display:'flex', alignItems:'center', gap:6, color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:12.5 }}>
-                💬 Comentarios
-              </div>
+              <button onClick={() => toggleComments(post.id)} aria-expanded={openComments.includes(post.id)}
+                style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: openComments.includes(post.id) ? 'var(--text)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
+                💬 {post.comments?.length ? `${post.comments.length} ${post.comments.length === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
+              </button>
             </div>
+            {openComments.includes(post.id) && (
+              <PostComments comments={post.comments || []} onAdd={text => addComment(post.id, text)}
+                issuerName={issuerName} isOwner={!!a.isMine} />
+            )}
           </div>
         ))}
       </div>
@@ -309,7 +370,8 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
   // Feed posts live here (not inside ProjectFeed) so the Actualizaciones tab
   // can read the same milestone-flagged posts and jump back to them.
   const [posts, setPosts] = useState([
-    { id: 1, date: '10 Jun 2026', text: 'Se distribuyeron $38,400 USDC entre 412 holders.', milestone: true, img: null, likes: 31, liked: false },
+    { id: 1, date: '10 Jun 2026', text: 'Se distribuyeron $38,400 USDC entre 412 holders.', milestone: true, img: null, likes: 31, liked: false,
+      comments: [{ id: 11, date: '10 Jun 2026', author: 'Lucía M.', text: '¡Llegó puntual como siempre! 👏', isIssuer: false }] },
     { id: 2, date: '28 May 2026', text: 'Auditoría operativa sin observaciones.', milestone: true, img: null, likes: 15, liked: false },
     { id: 3, date: '15 May 2026', text: `El proyecto alcanzó el ${a.sold}% de financiación.`, milestone: true, img: null, likes: 24, liked: false },
     { id: 4, date: '02 May 2026', text: 'Se firmó contrato de operación por 24 meses adicionales.', milestone: false, img: null, likes: 8, liked: false },
