@@ -4,6 +4,8 @@ import { PCard, PBtn, PTag, PProgress, PImg, PDiv, PDonut, PArea, PScanLink, Ico
 import { fmtUSD, fmtUSD2, MY_HOLDINGS } from '../data';
 import { addPendingPayment } from '../lib/keypayInbox';
 import { DEV_MODE } from '../lib/devSession';
+import { useProjectPosts, isFeedLive, issuerNameOf, postMedia } from '../lib/projectFeed';
+import { PostMedia, PostComments } from '../components/feed';
 
 // ─── Media carousel ───────────────────────────────────────────────────────────
 function MediaCarousel({ images = [] }) {
@@ -77,73 +79,12 @@ function MediaCarousel({ images = [] }) {
 // Only shown once a project is live (Operativo), fully funded, or flagged
 // early (feedEnabled) — before that there's nothing operational to post
 // about yet. Posts flagged as "hito" also surface in the Actualizaciones
-// timeline; clicking one there jumps back here and briefly highlights it.
+// timeline and in the global Feed; clicking one there jumps back here and
+// briefly highlights it.
 // The composer itself only renders for the project's actual owner (isMine) —
 // everyone else just reads the feed, same as any investor would. The owner
 // can attach photos and videos (up to MAX_FEED_MEDIA per post).
 const MAX_FEED_MEDIA = 10;
-
-// Seed posts still use the older single `img` field.
-const postMedia = (post) => post.media || (post.img ? [{ id: post.img, type: 'image', url: post.img }] : []);
-
-function PostMedia({ media }) {
-  if (!media.length) return null;
-  const single = media.length === 1;
-  return (
-    <div style={{ display:'grid', gridTemplateColumns: single ? '1fr' : '1fr 1fr', gap:6, marginBottom:10 }}>
-      {media.map(m => m.type === 'video'
-        ? <video key={m.id} src={m.url} controls playsInline preload="metadata"
-            style={{ width:'100%', maxHeight: single ? 360 : 200, borderRadius:12, background:'#000', display:'block' }} />
-        : <img key={m.id} src={m.url} alt=""
-            style={{ width:'100%', height: single ? 'auto' : 200, maxHeight: single ? 280 : 200, objectFit:'cover', borderRadius:12, display:'block' }} />
-      )}
-    </div>
-  );
-}
-
-function PostComments({ comments, onAdd, issuerName, isOwner }) {
-  const [draft, setDraft] = useState('');
-  const send = () => {
-    if (!draft.trim()) return;
-    onAdd(draft.trim());
-    setDraft('');
-  };
-  const avatar = (label, isIssuer) => (
-    <div style={{ width:28, height:28, borderRadius:'50%', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-h)', fontWeight:700, fontSize:12,
-      background: isIssuer ? 'var(--accent-bg)' : 'var(--surface2)', color: isIssuer ? 'var(--accent-text)' : 'var(--sec)' }}>
-      {label.slice(0,1).toUpperCase()}
-    </div>
-  );
-
-  return (
-    <div style={{ marginTop:12, display:'flex', flexDirection:'column', gap:10 }}>
-      {comments.length === 0 && (
-        <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>Todavía no hay comentarios. ¡Sé el primero!</div>
-      )}
-      {comments.map(c => (
-        <div key={c.id} style={{ display:'flex', gap:8 }}>
-          {avatar(c.author, c.isIssuer)}
-          <div style={{ flex:1, minWidth:0, background:'var(--surface2)', borderRadius:12, padding:'8px 12px' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
-              <span style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:12.5, color:'var(--text)' }}>{c.author}</span>
-              {c.isIssuer && <span style={{ padding:'1px 6px', borderRadius:999, background:'var(--accent-bg)', color:'var(--accent-text)', fontFamily:'var(--font-b)', fontWeight:700, fontSize:9.5 }}>Emisor</span>}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>· {c.date}</span>
-            </div>
-            <div style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--text)', lineHeight:1.5, whiteSpace:'pre-wrap', overflowWrap:'anywhere' }}>{c.text}</div>
-          </div>
-        </div>
-      ))}
-      <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-        {avatar(isOwner ? issuerName : 'Vos', isOwner)}
-        <input value={draft} onChange={e => setDraft(e.target.value)} maxLength={500}
-          onKeyDown={e => { if (e.key === 'Enter') send(); }}
-          placeholder={isOwner ? 'Responder como emisor...' : 'Escribí un comentario...'}
-          style={{ flex:1, minWidth:0, border:'1px solid var(--border-l)', borderRadius:999, padding:'8px 14px', fontFamily:'var(--font-b)', fontSize:13, color:'var(--text)', background:'var(--surface)', outline:'none' }} />
-        <PBtn variant="accent" small disabled={!draft.trim()} onClick={send} style={{ opacity: draft.trim() ? 1 : 0.5 }}>Enviar</PBtn>
-      </div>
-    </div>
-  );
-}
 
 function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
   const [text, setText] = useState('');
@@ -152,7 +93,7 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
   const [uploads, setUploads] = useState([]); // [{ id, type: 'image'|'video', url, name }]
   const [uploadError, setUploadError] = useState('');
   const fileRef = useRef(null);
-  const issuerName = a.issuer === 'keychain' ? 'KEYCHAIN' : (a.company || '');
+  const issuerName = issuerNameOf(a);
   const canPublish = text.trim() || img || uploads.length > 0;
 
   // No backend yet: files stay in the browser as object URLs, so uploaded
@@ -185,7 +126,7 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
   const publish = () => {
     if (!canPublish) return;
     const media = [...(img ? [{ id: img, type: 'image', url: img }] : []), ...uploads];
-    setPosts(p => [{ id: Date.now(), date: 'Ahora', text: text.trim(), milestone, media, likes: 0, liked: false }, ...p]);
+    setPosts(p => [{ id: Date.now(), ts: Date.now(), date: 'Ahora', text: text.trim(), milestone, media, likes: 0, liked: false, comments: [] }, ...p]);
     setText(''); setMilestone(false); setImg(null); setUploads([]); setUploadError('');
   };
 
@@ -348,14 +289,12 @@ function projectState(a, { isLive, holding }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ProductDetail({ nav, asset: a, fromRoute }) {
-  const [tab, setTab]       = useState('resumen');
+  // Coming from the global Feed? Open straight on this project's Feed tab,
+  // scrolled to the post that was clicked.
+  const [tab, setTab]       = useState(a.focusPostId ? 'feed' : 'resumen');
   const [tokens, setTokens] = useState(10);
   const left = a.totalTokens - Math.round(a.totalTokens * a.sold / 100);
-  // Feed exists once the project is running, fully funded, OR was explicitly
-  // flagged early (feedEnabled) — some projects start building/buying the
-  // underlying asset before their raise closes and want to post progress
-  // during that window too.
-  const isLive = a.stage === 'Operativo' || a.sold >= 100 || a.feedEnabled === true;
+  const isLive = isFeedLive(a);
   const tabs = [
     ['resumen','Resumen'],
     ...(isLive ? [['feed','Feed']] : []),
@@ -367,17 +306,11 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
   // only default to Mercado Primario when we don't know the origin.
   const backRoute = fromRoute || 'primario';
 
-  // Feed posts live here (not inside ProjectFeed) so the Actualizaciones tab
-  // can read the same milestone-flagged posts and jump back to them.
-  const [posts, setPosts] = useState([
-    { id: 1, date: '10 Jun 2026', text: 'Se distribuyeron $38,400 USDC entre 412 holders.', milestone: true, img: null, likes: 31, liked: false,
-      comments: [{ id: 11, date: '10 Jun 2026', author: 'Lucía M.', text: '¡Llegó puntual como siempre! 👏', isIssuer: false }] },
-    { id: 2, date: '28 May 2026', text: 'Auditoría operativa sin observaciones.', milestone: true, img: null, likes: 15, liked: false },
-    { id: 3, date: '15 May 2026', text: `El proyecto alcanzó el ${a.sold}% de financiación.`, milestone: true, img: null, likes: 24, liked: false },
-    { id: 4, date: '02 May 2026', text: 'Se firmó contrato de operación por 24 meses adicionales.', milestone: false, img: null, likes: 8, liked: false },
-  ]);
+  // Posts live in the shared feed store (lib/projectFeed) so the
+  // Actualizaciones tab and the global Feed read the same milestone posts.
+  const [posts, setPosts] = useProjectPosts(a);
   const [highlightId, setHighlightId] = useState(null);
-  const [scrollToId, setScrollToId] = useState(null);
+  const [scrollToId, setScrollToId] = useState(a.focusPostId ?? null);
   const postRefs = useRef({});
   const registerPostRef = (id, el) => { postRefs.current[id] = el; };
 

@@ -97,7 +97,8 @@ const SUBSIDIARIES = [
 ];
 
 const investorItems = [
-  { id: 'dashboard',    label: 'Inicio',             labelMobile: 'Inicio',        icon: Icons.dash      },
+  { id: 'feed',         label: 'Feed',               labelMobile: 'Feed',          icon: Icons.feed      },
+  { id: 'dashboard',    label: 'Mi dashboard',       labelMobile: 'Dashboard',     icon: Icons.dash      },
   { id: 'primario',     label: 'Tokenizaciones',     labelMobile: 'Tokens',        icon: HexIcon         },
   { id: 'secundario',   label: 'Mercado Secundario', labelMobile: 'Secundario',    icon: Icons.secondary },
   { id: 'token',        label: 'Token KYCN',         labelMobile: 'Token KYCN',    icon: Token3dIcon     },
@@ -129,7 +130,7 @@ const LogoutIcon = (
 
 // Sizes the hover pill's label text against the icon/gap/chevron chrome that
 // surrounds it (see the pill's paddingLeft/gap/paddingRight below), so short
-// labels ("Inicio") get a snug pill instead of the longest label's width.
+// labels ("Feed") get a snug pill instead of the longest label's width.
 let measureCtx = null;
 function measurePillWidth(label) {
   if (!measureCtx) measureCtx = document.createElement('canvas').getContext('2d');
@@ -325,7 +326,7 @@ function SidebarDrawer({ route, nav, role, onClose, onLogout }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px', marginBottom: 20 }}>
-          <button onClick={() => handleNav('dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <button onClick={() => handleNav('feed')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <PLogo size={14} />
           </button>
           <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid var(--border-l)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ter)' }}>
@@ -477,7 +478,7 @@ export default function Sidebar({ route, nav, role, theme, collapsed, setCollaps
             ref={logoRef}
             onMouseEnter={handleLogoEnter}
             onMouseLeave={handleLogoLeave}
-            onClick={() => nav('dashboard')} title="Inicio"
+            onClick={() => nav('feed')} title="Feed"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: 36, height: 36 }}
           >
             <img src={logoIcon} alt="Inicio" style={{ position: 'absolute', width: 36, height: 36, objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />
@@ -488,7 +489,7 @@ export default function Sidebar({ route, nav, role, theme, collapsed, setCollaps
             ref={logoRef}
             onMouseEnter={handleLogoEnter}
             onMouseLeave={handleLogoLeave}
-            onClick={() => nav('dashboard')}
+            onClick={() => nav('feed')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, position: 'relative', height: 42 }}
           >
             <img src={logoFull} alt="KEY CHAIN" style={{ height: 42, width: 'auto', objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />

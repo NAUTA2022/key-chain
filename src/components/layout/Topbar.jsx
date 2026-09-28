@@ -316,7 +316,7 @@ export default function Topbar({ theme, setTheme, nav, route, prefs, setPrefs, s
         </button>
 
         {/* Logo centered — link a inicio */}
-        <button onClick={() => nav('dashboard')} style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+        <button onClick={() => nav('feed')} style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
           <img src={theme === 'dark' ? '/iconow.png' : '/icono.png'} alt="KEY CHAIN" style={{ height: 34, width: 'auto', objectFit: 'contain', display: 'block' }} />
         </button>
 

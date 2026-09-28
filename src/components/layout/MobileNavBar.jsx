@@ -19,11 +19,11 @@ const ProfileIcon = (
 );
 
 const INVESTOR_TABS = [
-  { id: 'dashboard',    label: 'Inicio',  icon: Icons.dash  },
-  { id: 'primario',     label: 'Tokens',  icon: HexIcon     },
-  { id: 'pertenencias', label: 'Wallet',  icon: Icons.wallet},
-  { id: 'token',        label: 'KYCN',    icon: KYCNIcon    },
-  { id: 'perfil',       label: 'Perfil',  icon: ProfileIcon },
+  { id: 'feed',         label: 'Feed',      icon: Icons.feed  },
+  { id: 'dashboard',    label: 'Dashboard', icon: Icons.dash  },
+  { id: 'primario',     label: 'Tokens',    icon: HexIcon     },
+  { id: 'pertenencias', label: 'Wallet',    icon: Icons.wallet},
+  { id: 'perfil',       label: 'Perfil',    icon: ProfileIcon },
 ];
 
 const ADMIN_TABS = [

@@ -16,6 +16,7 @@ import Dashboard from './pages/Dashboard';
 import PrimaryMarket from './pages/PrimaryMarket';
 import SecondaryMarket from './pages/SecondaryMarket';
 import ProductDetail from './pages/ProductDetail';
+import GlobalFeed from './pages/GlobalFeed';
 import Checkout from './pages/Checkout';
 import TokenUtility from './pages/TokenUtility';
 import Holdings from './pages/Holdings';
@@ -83,6 +84,7 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
 
   const page = () => {
     switch (route) {
+      case 'feed':         return <GlobalFeed nav={nav} />;
       case 'dashboard':    return <Dashboard nav={nav} />;
       case 'primario':     return <PrimaryMarket nav={nav} rubro={prefs.rubro} />;
       case 'secundario':   return <SecondaryMarket nav={nav} />;
@@ -263,12 +265,12 @@ function KeychainApp() {
   const [rubro, setRubro]         = useState('Todos');
   const [role, setRole]           = useState('investor');
   const [collapsed, setCollapsed] = useState(false);
-  const [route, setRoute]         = useState('dashboard');
+  const [route, setRoute]         = useState('feed');
   const [routeData, setRouteData] = useState(null);
   // Tracks the route we just came from, so pages like ProductDetail can send
   // "volver" back to wherever the user actually arrived from (Mercado
   // Primario vs. Secundario vs. Dashboard) instead of a single hardcoded tab.
-  const prevRouteRef = useRef('dashboard');
+  const prevRouteRef = useRef('feed');
 
   const [adminAuthOpen, setAdminAuthOpen] = useState(false);
   const [adminEmail, setAdminEmail]       = useState('');
@@ -353,7 +355,7 @@ function KeychainApp() {
           prefs={prefs} setPrefs={setPrefs}
           role={role}
           collapsed={collapsed} setCollapsed={setCollapsed}
-          onLogout={() => { endDevSession(); setView('landing'); setRoute('dashboard'); }}
+          onLogout={() => { endDevSession(); setView('landing'); setRoute('feed'); }}
         />
       )}
 
