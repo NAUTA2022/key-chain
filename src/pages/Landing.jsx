@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from
 import { PLogo, PTag, PImg, Icons } from '../components/ui';
 import StrategySimulator from '../components/StrategySimulator';
 import { RWA_ASSETS, FACT_TOKEN } from '../data';
-import { DEV_LOGIN_ENABLED } from '../lib/devSession';
+import { DEV_MODE } from '../lib/devSession';
 
 const STATS = [
   { v: '$28.4M', l: 'Capital invertido' },
@@ -175,7 +175,7 @@ export default function Landing({ onEnter, onDevEnter }) {
             screen instead of opening a wallet connect flow of its own, so
             there's exactly one login experience for the whole platform. */}
         <div className="connect-btn-wrap land-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {DEV_LOGIN_ENABLED && onDevEnter && (
+          {DEV_MODE && onDevEnter && (
             <button onClick={onDevEnter} title="Entrar sin wallet (solo desarrollo)" style={DEV_BTN}>Entrar dev</button>
           )}
           <button
@@ -249,7 +249,7 @@ export default function Landing({ onEnter, onDevEnter }) {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,1), 0 4px 14px rgba(0,0,0,0.40)',
                 }}
               >Iniciar sesión</button>
-              {DEV_LOGIN_ENABLED && onDevEnter && (
+              {DEV_MODE && onDevEnter && (
                 <button
                   onClick={() => { setMenuOpen(false); onDevEnter(); }}
                   style={{ ...DEV_BTN, marginTop: 10, width: '100%', height: 'auto', padding: '12px 20px', fontSize: 15, borderRadius: 12 }}

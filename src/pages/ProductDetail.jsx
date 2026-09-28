@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PCard, PBtn, PTag, PProgress, PImg, PDiv, PDonut, PArea, PScanLink, Icons, CompanyTag } from '../components/ui';
 import { fmtUSD, fmtUSD2, MY_HOLDINGS } from '../data';
 import { addPendingPayment } from '../lib/keypayInbox';
+import { DEV_MODE } from '../lib/devSession';
 
 // ─── Media carousel ───────────────────────────────────────────────────────────
 function MediaCarousel({ images = [] }) {
@@ -177,6 +178,31 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
   );
 }
 
+// ─── Dev state banner ─────────────────────────────────────────────────────────
+// Developer-only (DEV_MODE): spells out which state a project is in and what
+// the page should show because of it, so every asset — not just the [QA]
+// fixtures — is self-explanatory while testing. Fixtures add their `devNote`
+// on top as the specific thing to verify.
+const ISSUER_LABEL = { keychain: 'KEYCHAIN', verified: 'Verificado', community: 'Comunidad' };
+
+function projectState(a, { isLive, holding }) {
+  const funding = a.sold <= 0 ? 'Nuevo · sin financiamiento'
+    : a.sold >= 100 ? 'Financiado 100%'
+    : a.stage === 'Operativo' ? `${a.sold}% de tokens vendidos`
+    : `En financiamiento · ${a.sold}%`;
+  const feedWhy = a.stage === 'Operativo' ? 'stage="Operativo"'
+    : a.sold >= 100 ? 'sold>=100'
+    : a.feedEnabled ? 'feedEnabled=true'
+    : 'sold<100 y feedEnabled=false';
+  return [
+    ['Etapa', `${a.stage} — ${funding}`],
+    ['Feed y Actualizaciones', `${isLive ? 'Visibles' : 'Ocultos'} (${feedWhy})`],
+    ['Publicar en el Feed', a.isMine ? 'Sí — es mi proyecto (isMine)' : 'No — solo lectura'],
+    ['Mi inversión', holding ? `Sí — ${holding.tokens} tokens${isLive ? ', con "Ver avances"' : ', sin "Ver avances"'}` : 'No'],
+    ['Emisor', ISSUER_LABEL[a.issuer] || a.issuer || '—'],
+  ];
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ProductDetail({ nav, asset: a, fromRoute }) {
   const [tab, setTab]       = useState('resumen');
@@ -211,7 +237,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
   const postRefs = useRef({});
   const registerPostRef = (id, el) => { postRefs.current[id] = el; };
 
-  // QA-only state banner — see `devNote` on the asset fixtures in data/index.js.
+  // Dev-only state banner (see projectState above).
   const [devNoteOpen, setDevNoteOpen] = useState(true);
 
   const goToPost = (id) => { setTab('feed'); setScrollToId(id); };
@@ -363,19 +389,28 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
 
         {/* ── Right column (buy panel) — starts at same top as image ── */}
         <div style={{ position:'sticky', top:62 }}>
-          {/* QA fixture banner — this whole block (and the `devNote` field on
-              the asset) exists only to make test-state assets self-explanatory
-              while reviewing. DEVELOPERS: delete this block and every
-              `devNote` in data/index.js before shipping to production. */}
-          {a.devNote && devNoteOpen && (
+          {/* Dev-only state banner — hidden in production builds (DEV_MODE). */}
+          {DEV_MODE && devNoteOpen && (
             <div style={{ position:'relative', marginBottom:14, padding:'14px 38px 14px 16px', borderRadius:14, background:'rgba(245,158,11,0.12)', border:'1.5px dashed rgba(245,158,11,0.55)' }}>
               <button onClick={() => setDevNoteOpen(false)} aria-label="Cerrar aviso"
                 style={{ position:'absolute', top:10, right:10, width:22, height:22, borderRadius:7, border:'none', background:'rgba(245,158,11,0.18)', color:'#f59e0b', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, lineHeight:1 }}>
                 ✕
               </button>
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:11, color:'#f59e0b', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:6 }}>⚠ Aviso para desarrolladores (QA)</div>
-              <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--text)', lineHeight:1.5, marginBottom:8 }}>{a.devNote}</div>
-              <div style={{ fontFamily:'var(--font-b)', fontSize:10.5, color:'var(--ter)', fontStyle:'italic' }}>Este bloque es solo para pruebas — bórrenlo (y el campo "devNote" del activo) antes de subir a producción.</div>
+              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:11, color:'#f59e0b', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>⚠ Aviso para desarrolladores · Estado del proyecto</div>
+              <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', columnGap:10, rowGap:4, marginBottom: a.devNote ? 10 : 0 }}>
+                {projectState(a, { isLive, holding }).map(([k, v]) => (
+                  <div key={k} style={{ display:'contents' }}>
+                    <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'var(--ter)', whiteSpace:'nowrap' }}>{k}</span>
+                    <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--text)', fontWeight:600, lineHeight:1.45 }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+              {a.devNote && (
+                <div style={{ paddingTop:10, borderTop:'1px dashed rgba(245,158,11,0.35)' }}>
+                  <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:10.5, color:'#f59e0b', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:4 }}>Qué verificar (QA)</div>
+                  <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--text)', lineHeight:1.5 }}>{a.devNote}</div>
+                </div>
+              )}
             </div>
           )}
 

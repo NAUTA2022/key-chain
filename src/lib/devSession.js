@@ -1,19 +1,21 @@
 import { useSyncExternalStore } from 'react';
 import { useActiveAccount, useActiveWallet, useDisconnect } from 'thirdweb/react';
 
-// "Entrar dev": a fake session that lets you get past every login gate
-// without connecting a wallet through thirdweb, so the app can be tested
-// anywhere (e.g. the cloud preview). Only enabled in `npm run dev` or when
-// the build sets VITE_DEV_LOGIN=true — never in a normal production build.
-export const DEV_LOGIN_ENABLED =
+// Developer-only tooling ("Entrar dev" button, per-project state banner).
+// Only enabled in `npm run dev` or when the build sets VITE_DEV_LOGIN=true —
+// never in a normal production build.
+export const DEV_MODE =
   import.meta.env.DEV || import.meta.env.VITE_DEV_LOGIN === 'true';
 
+// "Entrar dev": a fake session that lets you get past every login gate
+// without connecting a wallet through thirdweb, so the app can be tested
+// anywhere (e.g. the cloud preview).
 const KEY = 'kc_dev_session';
 const DEV_ACCOUNT = { address: '0xDeDe00000000000000000000000000000000DeDe', isDev: true };
 const listeners = new Set();
 
 function readFlag() {
-  if (!DEV_LOGIN_ENABLED) return false;
+  if (!DEV_MODE) return false;
   try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
 }
 
@@ -33,7 +35,7 @@ function subscribe(fn) {
   return () => listeners.delete(fn);
 }
 
-export function startDevSession() { if (DEV_LOGIN_ENABLED) setActive(true); }
+export function startDevSession() { if (DEV_MODE) setActive(true); }
 export function endDevSession() { setActive(false); }
 
 // Drop-in for thirdweb's useActiveAccount(): the real wallet wins, otherwise
