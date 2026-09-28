@@ -43,6 +43,7 @@
   --gl-nav:    rgba(0,0,0,0.44);
   --gl-nav-a:  rgba(0,0,0,0.88);
   --gl-panel:  rgba(255,255,255,0.82);
+  --gl-panel-strong: rgba(255,255,255,0.95);
 }
 
 [data-theme="dark"] {
@@ -86,6 +87,7 @@
   --gl-nav:    rgba(255,255,255,0.42);
   --gl-nav-a:  rgba(255,255,255,0.92);
   --gl-panel:  rgba(18,18,18,0.82);
+  --gl-panel-strong: rgba(18,18,18,0.95);
 }
 
 [data-palette="verde"] { --accent: oklch(0.72 0.20 145); --accent-bg: oklch(0.94 0.065 145); --accent-text: oklch(0.38 0.13 145); }

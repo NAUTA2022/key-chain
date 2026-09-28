@@ -157,8 +157,11 @@ function NotifPanel({ open, onClose }) {
         transition={{ duration: 0.15 }}
         style={{
           position: 'absolute', top: 52, right: 0, width: 360, zIndex: 95,
-          background: 'var(--gl-panel)', backdropFilter: 'blur(12px) saturate(160%) brightness(1.02)',
-          WebkitBackdropFilter: 'blur(12px) saturate(160%) brightness(1.02)',
+          // Stronger than --gl-panel: this sits inside the Topbar, which has
+          // its own backdrop-filter, so the panel's blur barely reaches the
+          // page behind it — the extra opacity is what keeps it readable.
+          background: 'var(--gl-panel-strong)', backdropFilter: 'blur(28px) saturate(160%) brightness(1.02)',
+          WebkitBackdropFilter: 'blur(28px) saturate(160%) brightness(1.02)',
           borderRadius: 18, boxShadow: 'var(--sh-lg)',
           border: '1px solid var(--gl-bd)', overflow: 'hidden',
           maxWidth: 'calc(100vw - 24px)',
