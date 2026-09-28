@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useActiveAccount, useDisconnect } from 'thirdweb/react';
+import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
 import KeyPayLogin from './KeyPayLogin';
 import { CartCheckout, KP_VARS } from './KeyPay';
 import { addPendingPayment, getPendingPayments } from '../lib/keypayInbox';
@@ -719,8 +719,8 @@ function TabBar({ tab, setTab }) {
 // existing KeyPay checkout/pending-payment infrastructure rather than
 // building new auth or payment plumbing.
 export default function KeyRural() {
-  const account = useActiveAccount();
-  const { disconnect } = useDisconnect();
+  const account = useSessionAccount();
+  const disconnect = useSessionDisconnect();
   const routerNavigate = useNavigate();
   const isMobile = useMobile(DESKTOP_BP);
   const [showLogin, setShowLogin] = useState(false);

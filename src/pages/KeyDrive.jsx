@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useActiveAccount, useDisconnect } from 'thirdweb/react';
+import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
 import KeyPayLogin from './KeyPayLogin';
 import { CartCheckout, KP_VARS } from './KeyPay';
 import { addPendingPayment, getPendingPayments } from '../lib/keypayInbox';
@@ -976,7 +976,7 @@ function ActivityScreen({ history }) {
 
 // ─── Account tab ──────────────────────────────────────────────────────────────
 function AccountScreen({ onLogout }) {
-  const account = useActiveAccount();
+  const account = useSessionAccount();
   return (
     <div style={{ flex:1, overflowY:'auto', padding:'20px 18px' }}>
       <div style={{ maxWidth:640, margin:'0 auto' }}>
@@ -1008,8 +1008,8 @@ const SEED_HISTORY = [
 // root <ThirdwebProvider>) and its own tab navigation instead of relying on
 // an external nav/routeData pair.
 export default function KeyDrive() {
-  const account = useActiveAccount();
-  const { disconnect } = useDisconnect();
+  const account = useSessionAccount();
+  const disconnect = useSessionDisconnect();
   const routerNavigate = useNavigate();
   const isMobile = useMobile(DESKTOP_BP);
   const [tab, setTab] = useState('home');

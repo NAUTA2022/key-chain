@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import { ThirdwebProvider, useActiveAccount } from 'thirdweb/react';
+import { ThirdwebProvider } from 'thirdweb/react';
+import { useSessionAccount, startDevSession, endDevSession } from './lib/devSession';
 import { AnimatePresence, motion } from 'framer-motion';
 import { playMouseMove } from './lib/sound';
 
@@ -253,7 +254,7 @@ const PLATFORM_PATHS = {
 };
 
 function KeychainApp() {
-  const account = useActiveAccount();
+  const account = useSessionAccount();
   const navigate = useNavigate();
   const [view, setView]           = useState('landing');
   const [theme, setTheme]         = useState('dark');
@@ -341,7 +342,7 @@ function KeychainApp() {
 
   return (
     <>
-      {view === 'landing' && <Landing onEnter={() => setView('login')} />}
+      {view === 'landing' && <Landing onEnter={() => setView('login')} onDevEnter={startDevSession} />}
       {view === 'login' && (
         <KeyPayLogin onSuccess={() => setView('app')} onBack={() => setView('landing')} />
       )}
@@ -352,7 +353,7 @@ function KeychainApp() {
           prefs={prefs} setPrefs={setPrefs}
           role={role}
           collapsed={collapsed} setCollapsed={setCollapsed}
-          onLogout={() => { setView('landing'); setRoute('dashboard'); }}
+          onLogout={() => { endDevSession(); setView('landing'); setRoute('dashboard'); }}
         />
       )}
 

@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from
 import { PLogo, PTag, PImg, Icons } from '../components/ui';
 import StrategySimulator from '../components/StrategySimulator';
 import { RWA_ASSETS, FACT_TOKEN } from '../data';
+import { DEV_LOGIN_ENABLED } from '../lib/devSession';
 
 const STATS = [
   { v: '$28.4M', l: 'Capital invertido' },
@@ -45,8 +46,17 @@ const LG_SM = {
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12)',
 };
 
+// "Entrar dev" — skips the wallet login (see lib/devSession). Dashed amber so
+// it never gets mistaken for the real "Iniciar sesión" button.
+const DEV_BTN = {
+  padding: '6px 14px', fontSize: 13, fontFamily: 'var(--font-b)',
+  fontWeight: 700, borderRadius: 10, cursor: 'pointer', height: 36,
+  background: 'rgba(255,184,0,0.10)', color: '#ffc94d',
+  border: '1px dashed rgba(255,184,0,0.55)',
+};
 
-export default function Landing({ onEnter }) {
+
+export default function Landing({ onEnter, onDevEnter }) {
   const featured  = RWA_ASSETS.slice(0, 3);
   const spotRef   = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -164,7 +174,10 @@ export default function Landing({ onEnter }) {
         {/* Desktop connect button — routes to the centralized Key Pay login
             screen instead of opening a wallet connect flow of its own, so
             there's exactly one login experience for the whole platform. */}
-        <div className="connect-btn-wrap land-nav-links">
+        <div className="connect-btn-wrap land-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {DEV_LOGIN_ENABLED && onDevEnter && (
+            <button onClick={onDevEnter} title="Entrar sin wallet (solo desarrollo)" style={DEV_BTN}>Entrar dev</button>
+          )}
           <button
             onClick={onEnter}
             style={{
@@ -236,6 +249,12 @@ export default function Landing({ onEnter }) {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,1), 0 4px 14px rgba(0,0,0,0.40)',
                 }}
               >Iniciar sesión</button>
+              {DEV_LOGIN_ENABLED && onDevEnter && (
+                <button
+                  onClick={() => { setMenuOpen(false); onDevEnter(); }}
+                  style={{ ...DEV_BTN, marginTop: 10, width: '100%', height: 'auto', padding: '12px 20px', fontSize: 15, borderRadius: 12 }}
+                >Entrar dev</button>
+              )}
             </div>
           </motion.div>
         )}
