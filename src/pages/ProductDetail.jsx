@@ -79,17 +79,70 @@ function MediaCarousel({ images = [] }) {
 // about yet. Posts flagged as "hito" also surface in the Actualizaciones
 // timeline; clicking one there jumps back here and briefly highlights it.
 // The composer itself only renders for the project's actual owner (isMine) —
-// everyone else just reads the feed, same as any investor would.
+// everyone else just reads the feed, same as any investor would. The owner
+// can attach photos and videos (up to MAX_FEED_MEDIA per post).
+const MAX_FEED_MEDIA = 10;
+
+// Seed posts still use the older single `img` field.
+const postMedia = (post) => post.media || (post.img ? [{ id: post.img, type: 'image', url: post.img }] : []);
+
+function PostMedia({ media }) {
+  if (!media.length) return null;
+  const single = media.length === 1;
+  return (
+    <div style={{ display:'grid', gridTemplateColumns: single ? '1fr' : '1fr 1fr', gap:6, marginBottom:10 }}>
+      {media.map(m => m.type === 'video'
+        ? <video key={m.id} src={m.url} controls playsInline preload="metadata"
+            style={{ width:'100%', maxHeight: single ? 360 : 200, borderRadius:12, background:'#000', display:'block' }} />
+        : <img key={m.id} src={m.url} alt=""
+            style={{ width:'100%', height: single ? 'auto' : 200, maxHeight: single ? 280 : 200, objectFit:'cover', borderRadius:12, display:'block' }} />
+      )}
+    </div>
+  );
+}
+
 function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
   const [text, setText] = useState('');
   const [milestone, setMilestone] = useState(false);
   const [img, setImg] = useState(null);
+  const [uploads, setUploads] = useState([]); // [{ id, type: 'image'|'video', url, name }]
+  const [uploadError, setUploadError] = useState('');
+  const fileRef = useRef(null);
   const issuerName = a.issuer === 'keychain' ? 'KEYCHAIN' : (a.company || '');
+  const canPublish = text.trim() || img || uploads.length > 0;
+
+  // No backend yet: files stay in the browser as object URLs, so uploaded
+  // media lives until the page reloads. Swap this for a real upload (and
+  // store the returned URLs on the post) once the feed is persisted.
+  const addFiles = (fileList) => {
+    const files = [...fileList];
+    const valid = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    const room = MAX_FEED_MEDIA - uploads.length;
+    const accepted = valid.slice(0, Math.max(room, 0));
+    setUploadError(
+      valid.length < files.length ? 'Solo se pueden subir fotos o videos.'
+      : accepted.length < valid.length ? `Máximo ${MAX_FEED_MEDIA} archivos por publicación.`
+      : ''
+    );
+    setUploads(u => [...u, ...accepted.map(f => ({
+      id: `${f.name}-${f.lastModified}-${Math.random()}`,
+      type: f.type.startsWith('video/') ? 'video' : 'image',
+      url: URL.createObjectURL(f),
+      name: f.name,
+    }))]);
+  };
+
+  const removeUpload = (id) => setUploads(u => {
+    const gone = u.find(m => m.id === id);
+    if (gone) URL.revokeObjectURL(gone.url);
+    return u.filter(m => m.id !== id);
+  });
 
   const publish = () => {
-    if (!text.trim()) return;
-    setPosts(p => [{ id: Date.now(), date: 'Ahora', text: text.trim(), milestone, img, likes: 0, liked: false }, ...p]);
-    setText(''); setMilestone(false); setImg(null);
+    if (!canPublish) return;
+    const media = [...(img ? [{ id: img, type: 'image', url: img }] : []), ...uploads];
+    setPosts(p => [{ id: Date.now(), date: 'Ahora', text: text.trim(), milestone, media, likes: 0, liked: false }, ...p]);
+    setText(''); setMilestone(false); setImg(null); setUploads([]); setUploadError('');
   };
 
   const toggleLike = (id) => setPosts(p => p.map(post => post.id === id
@@ -120,12 +173,41 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
                 ))}
               </div>
             )}
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:12 }}>
-              <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>
-                <input type="checkbox" checked={milestone} onChange={e => setMilestone(e.target.checked)} />
-                Marcar como hito
-              </label>
-              <PBtn variant="accent" small disabled={!text.trim()} onClick={publish} style={{ opacity: text.trim() ? 1 : 0.5 }}>Publicar</PBtn>
+            {uploads.length > 0 && (
+              <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginTop:10 }}>
+                {uploads.map(m => (
+                  <div key={m.id} style={{ position:'relative', width:78, height:60, borderRadius:10, overflow:'hidden', background:'var(--surface2)', flexShrink:0 }}>
+                    {m.type === 'video'
+                      ? <video src={m.url} muted playsInline preload="metadata" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                      : <img src={m.url} alt={m.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />}
+                    {m.type === 'video' && (
+                      <span style={{ position:'absolute', left:5, bottom:4, padding:'1px 5px', borderRadius:5, background:'rgba(0,0,0,0.65)', color:'#fff', fontFamily:'var(--font-b)', fontSize:9.5, fontWeight:700 }}>▶ Video</span>
+                    )}
+                    <button onClick={() => removeUpload(m.id)} aria-label={`Quitar ${m.name}`}
+                      style={{ position:'absolute', top:4, right:4, width:18, height:18, borderRadius:6, border:'none', background:'rgba(0,0,0,0.65)', color:'#fff', cursor:'pointer', fontSize:10, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', padding:0 }}>
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {uploadError && (
+              <div style={{ marginTop:8, fontFamily:'var(--font-b)', fontSize:12, color:'var(--neg)' }}>{uploadError}</div>
+            )}
+            <input ref={fileRef} type="file" accept="image/*,video/*" multiple hidden
+              onChange={e => { addFiles(e.target.files); e.target.value = ''; }} />
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginTop:12, flexWrap:'wrap' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
+                <button onClick={() => fileRef.current?.click()} disabled={uploads.length >= MAX_FEED_MEDIA}
+                  style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:10, border:'1px solid var(--border-l)', background:'var(--surface2)', color:'var(--text)', fontFamily:'var(--font-b)', fontSize:12.5, fontWeight:600, cursor: uploads.length >= MAX_FEED_MEDIA ? 'not-allowed' : 'pointer', opacity: uploads.length >= MAX_FEED_MEDIA ? 0.5 : 1 }}>
+                  {Icons.plus} Fotos / videos
+                </button>
+                <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>
+                  <input type="checkbox" checked={milestone} onChange={e => setMilestone(e.target.checked)} />
+                  Marcar como hito
+                </label>
+              </div>
+              <PBtn variant="accent" small disabled={!canPublish} onClick={publish} style={{ opacity: canPublish ? 1 : 0.5 }}>Publicar</PBtn>
             </div>
           </div>
         </div>
@@ -161,8 +243,8 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
                 </span>
               )}
             </div>
-            <div style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--text)', lineHeight:1.55, marginBottom: post.img ? 12 : 10 }}>{post.text}</div>
-            {post.img && <img src={post.img} alt="" style={{ width:'100%', maxHeight:280, objectFit:'cover', borderRadius:12, marginBottom:10, display:'block' }} />}
+            {post.text && <div style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--text)', lineHeight:1.55, marginBottom: postMedia(post).length ? 12 : 10 }}>{post.text}</div>}
+            <PostMedia media={postMedia(post)} />
             <div style={{ display:'flex', alignItems:'center', gap:18, paddingTop:8, borderTop:'1px solid var(--border-l)' }}>
               <button onClick={() => toggleLike(post.id)} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: post.liked ? 'var(--neg)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
                 {post.liked ? '♥' : '♡'} {post.likes}
