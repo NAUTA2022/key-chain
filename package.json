@@ -1,0 +1,54 @@
+{
+  "name": "factoract-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "alias": {
+    "thirdweb/react": "./src/stubs/thirdweb-react.jsx",
+    "thirdweb/chains": "./src/stubs/thirdweb-chains.js",
+    "thirdweb": "./src/stubs/thirdweb.js"
+  },
+  "staticFiles": {
+    "staticPath": "public",
+    "watcherGlob": "**"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "parcel build index.html",
+    "dev:static": "node static-server.mjs",
+    "dev:x402": "node server/x402-server.mjs",
+    "build:static": "node build-esbuild.mjs",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@react-three/postprocessing": "^3.0.4",
+    "@tailwindcss/vite": "^4.3.1",
+    "downshift": "^9.4.0",
+    "framer-motion": "^12.40.0",
+    "leaflet": "^1.9.4",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-icons": "^5.6.0",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.18.1",
+    "tailwindcss": "^4.3.1",
+    "thirdweb": "^5.120.1",
+    "three": "0.184.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
+    "parcel": "^2.16.4",
+    "parcel-reporter-static-files-copy": "^1.5.3",
+    "vite": "^5.4.21"
+  }
+}

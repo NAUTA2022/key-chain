@@ -1,0 +1,7 @@
+.vercel
+node_modules
+dist
+.parcel-cache
+*.timestamp-*.mjs
+.env
+.env.local

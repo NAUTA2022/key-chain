@@ -1,0 +1,757 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Inter:wght@400;450;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
+
+:root, [data-theme="light"] {
+  --font-h: "DM Sans", sans-serif;
+  --font-b: "Inter", sans-serif;
+  --accent-fg: #ffffff;
+  --bg: oklch(0.972 0.004 240);
+  --surface: #ffffff;
+  --surface2: oklch(0.955 0.004 240);
+  --border: oklch(0.90 0.005 240);
+  --border-l: oklch(0.937 0.004 240);
+  --text: oklch(0.13 0.01 250);
+  --sec: oklch(0.46 0.008 250);
+  --ter: oklch(0.62 0.006 245);
+  --accent: oklch(0.22 0 0);
+  --accent-bg: oklch(0.93 0 0);
+  --accent-text: oklch(0.28 0 0);
+  --neg: oklch(0.55 0.18 25);
+  --neg-bg: oklch(0.95 0.04 25);
+  --pos: oklch(0.55 0.16 145);
+  --av1: oklch(0.88 0.01 250);
+  --av2: oklch(0.80 0.012 260);
+  --sh-sm: 0 1px 3px rgba(15,18,25,0.05);
+  --sh-md: 0 1px 3px rgba(15,18,25,0.04), 0 6px 24px rgba(15,18,25,0.05);
+  --sh-lg: 0 12px 48px rgba(15,18,25,0.13);
+  /* Adaptive glass system */
+  --gl-bg:     rgba(255,255,255,0.76);
+  --gl-bg2:    rgba(255,255,255,0.92);
+  --gl-bg3:    rgba(0,0,0,0.05);
+  --gl-bg4:    rgba(0,0,0,0.03);
+  --gl-bd:     rgba(0,0,0,0.08);
+  --gl-bd2:    rgba(0,0,0,0.16);
+  --gl-icon:   rgba(0,0,0,0.05);
+  --gl-ibd:    rgba(0,0,0,0.08);
+  --gl-icon-c: rgba(0,0,0,0.48);
+  --gl-div:    rgba(0,0,0,0.06);
+  --gl-t4:     rgba(0,0,0,0.28);
+  --gl-prd-a:  rgba(0,0,0,0.08);
+  --gl-prd-i:  rgba(0,0,0,0.03);
+  --gl-prd-ca: rgba(0,0,0,0.82);
+  --gl-prd-ci: rgba(0,0,0,0.36);
+  --gl-link:   rgba(0,0,0,0.44);
+  --gl-nav:    rgba(0,0,0,0.44);
+  --gl-nav-a:  rgba(0,0,0,0.88);
+  --gl-panel:  rgba(255,255,255,0.82);
+}
+
+[data-theme="dark"] {
+  --bg:        #090909;
+  --surface:   rgba(0,0,0,0.50);
+  --surface2:  rgba(0,0,0,0.55);
+  --border:    rgba(255,255,255,0.10);
+  --border-l:  rgba(255,255,255,0.07);
+  --text:      rgba(255,255,255,0.95);
+  --sec:       rgba(255,255,255,0.52);
+  --ter:       rgba(255,255,255,0.30);
+  --accent:         rgba(255,255,255,0.95);
+  --accent-bg:      rgba(255,255,255,0.09);
+  --accent-text:    rgba(255,255,255,0.92);
+  --accent-fg:      #050505;
+  --neg:     oklch(0.68 0.18 25);
+  --neg-bg:  rgba(255,70,70,0.10);
+  --pos:     oklch(0.72 0.17 145);
+  --av1:     rgba(255,255,255,0.16);
+  --av2:     rgba(255,255,255,0.10);
+  --sh-sm: 0 1px 4px rgba(0,0,0,0.65);
+  --sh-md: 0 4px 16px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+  --sh-lg: 0 20px 64px rgba(0,0,0,0.80);
+  /* Adaptive glass system */
+  --gl-bg:     rgba(255,255,255,0.045);
+  --gl-bg2:    rgba(255,255,255,0.07);
+  --gl-bg3:    rgba(255,255,255,0.10);
+  --gl-bg4:    rgba(255,255,255,0.05);
+  --gl-bd:     rgba(255,255,255,0.10);
+  --gl-bd2:    rgba(255,255,255,0.22);
+  --gl-icon:   rgba(255,255,255,0.07);
+  --gl-ibd:    rgba(255,255,255,0.10);
+  --gl-icon-c: rgba(255,255,255,0.55);
+  --gl-div:    rgba(255,255,255,0.06);
+  --gl-t4:     rgba(255,255,255,0.22);
+  --gl-prd-a:  rgba(255,255,255,0.12);
+  --gl-prd-i:  rgba(255,255,255,0.04);
+  --gl-prd-ca: rgba(255,255,255,0.90);
+  --gl-prd-ci: rgba(255,255,255,0.32);
+  --gl-link:   rgba(255,255,255,0.45);
+  --gl-nav:    rgba(255,255,255,0.42);
+  --gl-nav-a:  rgba(255,255,255,0.92);
+  --gl-panel:  rgba(18,18,18,0.82);
+}
+
+[data-palette="verde"] { --accent: oklch(0.72 0.20 145); --accent-bg: oklch(0.94 0.065 145); --accent-text: oklch(0.38 0.13 145); }
+[data-theme="dark"][data-palette="verde"] { --accent: oklch(0.78 0.21 145); --accent-bg: oklch(0.30 0.07 145); --accent-text: oklch(0.82 0.17 145); }
+[data-palette="rojo"] { --accent: oklch(0.58 0.20 27); --accent-bg: oklch(0.94 0.045 27); --accent-text: oklch(0.42 0.16 27); }
+[data-theme="dark"][data-palette="rojo"] { --accent: oklch(0.66 0.20 27); --accent-bg: oklch(0.30 0.07 27); --accent-text: oklch(0.80 0.14 27); }
+[data-palette="azul"] { --accent: oklch(0.55 0.18 255); --accent-bg: oklch(0.93 0.045 255); --accent-text: oklch(0.42 0.15 255); }
+[data-theme="dark"][data-palette="azul"] { --accent: oklch(0.68 0.16 255); --accent-bg: oklch(0.30 0.07 255); --accent-text: oklch(0.82 0.10 255); }
+[data-palette="marron"] { --accent: oklch(0.50 0.10 55); --accent-bg: oklch(0.93 0.035 70); --accent-text: oklch(0.40 0.09 55); }
+[data-theme="dark"][data-palette="marron"] { --accent: oklch(0.66 0.11 60); --accent-bg: oklch(0.30 0.045 60); --accent-text: oklch(0.82 0.08 70); }
+[data-palette="mono"] { --accent: oklch(0.22 0 0); --accent-bg: oklch(0.93 0 0); --accent-text: oklch(0.28 0 0); --accent-fg: #ffffff; }
+[data-theme="dark"][data-palette="mono"] { --accent: oklch(0.93 0 0); --accent-bg: oklch(0.34 0 0); --accent-text: oklch(0.92 0 0); --accent-fg: oklch(0.16 0 0); }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.09) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  background-attachment: fixed;
+  color: var(--text); font-family: var(--font-b); -webkit-font-smoothing: antialiased;
+}
+[data-theme="light"] body {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.10) 1.5px, transparent 1.5px);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATED BORDER & GLOW EFFECTS
+   ═══════════════════════════════════════════════════════ */
+
+/* Animatable CSS property for conic-gradient rotation */
+@property --ba {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+/* Nav icon neon travel angle */
+@property --na {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes border-spin     { to { --ba: 360deg; } }
+@keyframes neon-travel     { to { --na: 360deg; } }
+@keyframes nav-bar-travel  { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── Liquid glass nav icon ───────────────────────────────── */
+.nav-icon-glass {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  isolation: isolate;
+}
+/* Travelling neon light — border arc */
+.nav-icon-glass::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 13px;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--na),
+    transparent 0%,
+    transparent 65%,
+    rgba(255,255,255,0.55) 78%,
+    rgba(255,255,255,1)    85%,
+    rgba(255,255,255,0.55) 92%,
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: neon-travel 1.8s linear infinite paused;
+  pointer-events: none;
+  z-index: 2;
+}
+/* Inner highlight on hover/active */
+.nav-icon-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.10) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Hover state */
+.nav-icon-glass:hover,
+.nav-icon-glass.is-active {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.20), 0 0 16px rgba(255,255,255,0.08);
+}
+.nav-icon-glass:hover::before,
+.nav-icon-glass.is-active::before {
+  animation-play-state: running;
+}
+.nav-icon-glass:hover::after,
+.nav-icon-glass.is-active::after {
+  opacity: 1;
+}
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1;    }
+}
+@keyframes shimmer-x {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%);  }
+}
+
+/* ── Prism ring (metallic silver with prismatic glints) ── */
+/* Usage: <div class="prism-ring" style="width:Xpx; height:Xpx"> */
+.prism-ring {
+  position: relative;
+  isolation: isolate;
+  border-radius: 50%;
+}
+.prism-ring::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from var(--ba),
+    #1c1c1e   0%,
+    #3a3a3c  6%,
+    #8a7060  9%,
+    #d4a843 11%,
+    #fff5cc 12%,
+    #c8902a 13.5%,
+    #2a1a0a 17%,
+    #1a1a22 25%,
+    #0e1828 34%,
+    #1a3a52 40%,
+    #00c2d4 43%,
+    #a0e8f0 44%,
+    #00a0b8 45.5%,
+    #0e1828 50%,
+    #16102a 60%,
+    #3a1860 64%,
+    #8a40c8 66.5%,
+    #c080f0 67.5%,
+    #6830a8 69%,
+    #1a1222 74%,
+    #1c1c22 85%,
+    #1c1c1e 100%
+  );
+  animation: border-spin 6s linear infinite;
+  z-index: -1;
+}
+.prism-ring::after {
+  content: '';
+  position: absolute;
+  inset: 1.5px;
+  border-radius: 50%;
+  background: #111;
+  z-index: -1;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* ── Animated gradient border wrapper ────────────────── */
+/* Usage: <div class="anim-border" style="borderRadius:18px; padding:1.5px">
+            <YourCard style="borderRadius:17px" />
+          </div>                                          */
+.anim-border {
+  background: conic-gradient(
+    from var(--ba),
+    #7c3aed 0%, #2563eb 25%, #06b6d4 45%,
+    #7c3aed 55%, #db2777 75%, #f97316 90%, #7c3aed 100%
+  );
+  animation: border-spin 5s linear infinite;
+  padding: 1.5px;
+}
+.anim-border-slow {
+  background: conic-gradient(
+    from var(--ba),
+    #7c3aed 0%, #2563eb 30%,
+    #0ea5e9 50%, #2563eb 70%, #7c3aed 100%
+  );
+  animation: border-spin 9s linear infinite;
+  padding: 1px;
+  opacity: 0.85;
+}
+
+/* ── Dual ambient glow (orange-left / blue-right) ────── */
+.dual-glow {
+  box-shadow:
+    -10px 0 35px rgba(239,100,60,0.40),
+     10px 0 35px rgba(59,130,246,0.40),
+    0 6px 28px rgba(0,0,0,0.18);
+  animation: glow-breathe 4s ease-in-out infinite;
+}
+
+/* ── Shimmer surface (moving light stripe) ───────────── */
+.shimmer-surface {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255,255,255,0.12) 50%,
+    transparent 65%
+  );
+  animation: shimmer-x 3.5s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIQUID GLASS  ·  Apple-inspired monochromatic system
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Dot pattern background ──────────────────────────────── */
+.dot-pattern, .grid-overlay {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.22) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+[data-theme="light"] .dot-pattern,
+[data-theme="light"] .grid-overlay {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.12) 1px, transparent 1px);
+}
+
+/* ── Dots que se iluminan cerca del cursor ────────────────── */
+.dot-cursor-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.65) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  -webkit-mask: radial-gradient(180px circle at var(--cx, -9999px) var(--cy, -9999px), black 0%, transparent 100%);
+  mask: radial-gradient(180px circle at var(--cx, -9999px) var(--cy, -9999px), black 0%, transparent 100%);
+}
+[data-theme="light"] .dot-cursor-glow {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.5) 1.5px, transparent 1.5px);
+}
+
+/* ── Logo hover wave — blue dots expanding from logo position ── */
+.dot-logo-wave {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgba(48,120,255,1) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  background-attachment: fixed;
+  opacity: 0;
+  transition: opacity 0.35s;
+  -webkit-mask: radial-gradient(var(--wr, 0px) circle at var(--lx, -9999px) var(--ly, -9999px), black 0%, transparent 100%);
+  mask: radial-gradient(var(--wr, 0px) circle at var(--lx, -9999px) var(--ly, -9999px), black 0%, transparent 100%);
+}
+.dot-logo-wave.active { opacity: 1; }
+
+/* ── Core Liquid Glass surface ───────────────────────────── */
+/* Apply with .lg  |  JS sets --mx/--my via onMouseMove for hover glow */
+.lg, .glass-card {
+  background: rgba(0,0,0,0.50);
+  backdrop-filter: blur(2px) saturate(140%);
+  -webkit-backdrop-filter: blur(2px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.11);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -1px 0 rgba(0,0,0,0.28),
+    0 24px 70px rgba(0,0,0,0.75),
+    0 6px 20px rgba(0,0,0,0.55);
+}
+
+/* Top-edge specular line */
+.lg::before, .glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(255,255,255,0.18) 30%,
+    rgba(255,255,255,0.26) 50%,
+    rgba(255,255,255,0.18) 70%,
+    transparent 95%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Inner top-left reflection */
+.lg::after, .glass-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 55%; height: 45%;
+  background: radial-gradient(ellipse at 15% 0%, rgba(255,255,255,0.04) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+.lg > *, .glass-card > * { position: relative; z-index: 3; }
+
+/* ── Interactive (cursor-reactive) glow variant ──────────── */
+/* Glow comes from the global .cursor-light layer in App.jsx  */
+/* Cards just lift + brighten border on hover — no ::after     */
+.glow-card {
+  background: rgba(0,0,0,0.50);
+  backdrop-filter: blur(2px) saturate(140%);
+  -webkit-backdrop-filter: blur(2px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 24px 70px rgba(0,0,0,0.75);
+  transition: border-color 0.3s, box-shadow 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* Specular top line */
+.glow-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(255,255,255,0.18) 30%,
+    rgba(255,255,255,0.26) 50%,
+    rgba(255,255,255,0.18) 70%,
+    transparent 95%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Hover: lift + stronger border — global cursor light does the glow */
+.glow-card:hover {
+  border-color: rgba(255,255,255,0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 28px 80px rgba(0,0,0,0.75),
+    0 6px 24px rgba(0,0,0,0.55);
+  transform: translateY(-2px);
+}
+.glow-card > * { position: relative; z-index: 3; }
+
+/* ── Light-mode overrides for glass cards ───────────────────── */
+[data-theme="light"] .lg,
+[data-theme="light"] .glass-card,
+[data-theme="light"] .glow-card {
+  background: rgba(255,255,255,0.62);
+  backdrop-filter: blur(56px) saturate(180%) brightness(1.06);
+  -webkit-backdrop-filter: blur(56px) saturate(180%) brightness(1.06);
+  border-color: rgba(0,0,0,0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 2px 8px rgba(0,0,0,0.05),
+    0 8px 32px rgba(0,0,0,0.08);
+}
+[data-theme="light"] .lg::before,
+[data-theme="light"] .glass-card::before,
+[data-theme="light"] .glow-card::before {
+  background: linear-gradient(90deg,
+    transparent 5%, rgba(255,255,255,0.65) 30%,
+    rgba(255,255,255,0.90) 50%, rgba(255,255,255,0.65) 70%, transparent 95%
+  );
+}
+[data-theme="light"] .lg::after,
+[data-theme="light"] .glass-card::after {
+  background: radial-gradient(ellipse at 15% 0%, rgba(255,255,255,0.45) 0%, transparent 65%);
+}
+[data-theme="light"] .glow-card:hover {
+  border-color: rgba(0,0,0,0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 4px 20px rgba(0,0,0,0.09),
+    0 12px 40px rgba(0,0,0,0.09);
+  transform: translateY(-2px);
+}
+[data-theme="light"] .glow-text,
+[data-theme="light"] .lg-stat { color: var(--text); text-shadow: none; }
+[data-theme="light"] .nav-icon-glass {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.09);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+}
+[data-theme="light"] .nav-icon-glass.is-active,
+[data-theme="light"] .nav-icon-glass:hover {
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.15);
+}
+
+/* ── Landing ConnectButton wrapper — constrain ThirdWeb height ── */
+.connect-btn-wrap {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  flex-shrink: 0;
+  transform-origin: center right;
+  transform: scale(0.78);
+}
+.connect-btn-full,
+.connect-btn-full > *,
+.connect-btn-full button { width: 100% !important; transform: none !important; }
+
+/* ── Travelling neon glint on navbar bottom border ─────────── */
+.navbar-glow {
+  position: relative;
+}
+.navbar-glow::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 55%,
+    rgba(255,255,255,0.38) 70%,
+    rgba(255,255,255,0.80) 78%,
+    rgba(255,255,255,1)    82%,
+    rgba(255,255,255,0.80) 86%,
+    rgba(255,255,255,0.38) 93%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: nav-bar-travel 3.2s linear infinite;
+  z-index: 10;
+}
+[data-theme="light"] .navbar-glow::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 55%,
+    rgba(0,0,0,0.12) 70%,
+    rgba(0,0,0,0.30) 78%,
+    rgba(0,0,0,0.48) 82%,
+    rgba(0,0,0,0.30) 86%,
+    rgba(0,0,0,0.12) 93%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: nav-bar-travel 3.2s linear infinite;
+}
+
+/* ── Topbar icon button overrides (same glass effect, slightly larger) ── */
+.topbar-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+}
+
+/* ── Global cursor spotlight (single layer in App.jsx) ────── */
+/* Fixed overlay that broadcasts the light to all glass cards  */
+.cursor-light {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    700px circle at var(--cx, -9999px) var(--cy, -9999px),
+    rgba(255,255,255,0.055) 0%,
+    rgba(255,255,255,0.018) 40%,
+    transparent 70%
+  );
+}
+[data-theme="light"] .cursor-light {
+  background: none;
+}
+
+/* ── Small glass (inputs, badges, chips) ─────────────────── */
+.lg-sm {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 6px 20px rgba(0,0,0,0.50);
+}
+
+/* ── Primary stat text (bright white) ────────────────────── */
+.glow-text, .lg-stat {
+  color: rgba(255,255,255,0.95);
+  text-shadow: 0 0 20px rgba(255,255,255,0.12);
+}
+
+/* ── Premium glass button ────────────────────────────────── */
+.btn-glow, .lg-btn {
+  background: rgba(255,255,255,0.92);
+  color: #060606;
+  border: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 8px 28px rgba(0,0,0,0.45);
+  transition: all 0.25s ease-out;
+}
+.btn-glow:hover, .lg-btn:hover {
+  background: rgba(255,255,255,0.98);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 12px 36px rgba(0,0,0,0.55);
+  transform: translateY(-1px);
+}
+
+/* ── Blue halo: disabled ─────────────────────────────────── */
+.blue-halo::after { display: none; }
+
+/* ── Theme-aware logo ────────────────────────────────────── */
+.p-logo-dark  { display: block; }
+.p-logo-light { display: none;  }
+[data-theme="light"] .p-logo-dark  { display: none;  }
+[data-theme="light"] .p-logo-light { display: block; }
+
+/* ── Subtle divider ──────────────────────────────────────── */
+.lg-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+/* ── Ambient blobs animation ─────────────────────────────── */
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(20px, -15px) scale(1.03); }
+  66%       { transform: translate(-15px, 8px) scale(0.97); }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 0.9; transform: scale(1.05); }
+}
+@keyframes chart-draw {
+  from { stroke-dashoffset: 300; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ──────────────────────────────────────────────────────── */
+
+@keyframes navBlobExpand {
+  0%   { border-radius: 50%; width: 42px; opacity: 0.7; transform: scale(0.85); }
+  30%  { border-radius: 22px 40px 40px 22px; width: max(80px, calc(var(--pill-w, 200px) * 0.4)); transform: scale(1.04); }
+  60%  { border-radius: 20px 30px 30px 20px; width: max(110px, calc(var(--pill-w, 200px) * 0.7)); }
+  100% { border-radius: 14px; width: var(--pill-w, 200px); opacity: 1; transform: scale(1); }
+}
+@keyframes navTextIn {
+  0%   { opacity: 0; transform: translateX(-6px); }
+  60%  { opacity: 0; }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ── Responsive helpers ───────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Page padding */
+  .g-page { padding: 16px 14px 80px !important; }
+
+  /* KPI grids: 4-col → 2-col */
+  .g-kpi { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Shortcut grids: 6-col → 3-col */
+  .g-shortcuts { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* Dashboard main/bottom multi-col → single col */
+  .g-dash-main { grid-template-columns: 1fr !important; }
+  .g-dash-bot  { grid-template-columns: 1fr !important; }
+
+  /* Generic 2-col splits → single col */
+  .g-split { grid-template-columns: 1fr !important; }
+
+  /* Card grids: 3-col → 1-col */
+  .g-cards { grid-template-columns: 1fr !important; }
+
+  /* 2-col card grids → 1-col */
+  .g-cards-2 { grid-template-columns: 1fr !important; }
+
+  /* Featured hero layout → stack */
+  .g-featured { flex-direction: column !important; }
+  .g-featured > * { width: 100% !important; }
+
+  /* Section headers → stack */
+  .g-section-row { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+
+  /* Landing responsive */
+  .land-hero       { flex-direction: column !important; gap: 32px !important; }
+  .land-hero-img   { display: none !important; }
+  .land-invest-grid { grid-template-columns: 1fr !important; }
+  .land-feat-grid  { grid-template-columns: 1fr !important; }
+  .land-steps-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .land-asset-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .land-hero-stats { gap: 20px !important; flex-wrap: wrap !important; }
+  .land-nav { padding: 0 16px !important; }
+  .land-hamburger { display: flex !important; }
+  .sim-grid { grid-template-columns: 1fr !important; }
+  .land-section    { padding: 48px 16px !important; }
+  .land-cta-section { padding: 48px 16px !important; }
+  .land-nav-links  { display: none !important; }
+  .land-steps-line { display: none !important; }
+
+  /* New hero — mobile layout */
+  .land-hero-section  { padding: 12px 20px 0 !important; display: flex !important; flex-direction: column !important; }
+  .land-hero-badge    { display: none !important; }
+  .land-hero-visual   { order: -1 !important; margin-bottom: 8px !important; }
+  .land-hero-h1       { order: 1 !important; font-size: 38px !important; margin: 0 0 14px !important; }
+  .land-hero-sub      { order: 2 !important; font-size: 15px !important; margin: 0 0 20px !important; }
+  .land-hero-ctas     { order: 3 !important; flex-direction: column !important; gap: 10px !important; margin-bottom: 0 !important; }
+  .land-hero-stats    { order: 10 !important; }
+  .land-cta-primary   { width: 100% !important; border-radius: 16px !important; padding: 16px !important; font-size: 16px !important; }
+  .land-cta-secondary { width: 100% !important; border-radius: 16px !important; padding: 16px !important; font-size: 16px !important; }
+
+  /* Hero title font shrink */
+  .land-hero h1 { font-size: 38px !important; }
+
+  /* Section h2 shrink */
+  .land-section h2 { font-size: 28px !important; }
+  .land-cta-section h2 { font-size: 32px !important; }
+
+  /* ── Market grids: 2 cards per row ─── */
+  .g-market-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Asset card image — shorter on mobile */
+  .market-card-img { height: 108px !important; }
+
+  /* Asset card body — tighter padding */
+  .market-card-body {
+    padding: 10px 11px 12px !important;
+    gap: 8px !important;
+  }
+
+  /* Title: 1 line, truncated */
+  .market-card-title {
+    font-size: 13.5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Hide location row */
+  .market-card-loc { display: none !important; }
+
+  /* Stats row: hide Disponibles, stretch Token + APY */
+  .market-stat-disp { display: none !important; }
+  .market-card-stats { justify-content: flex-start !important; gap: 18px !important; }
+
+  /* Secondary market: price row stacks at very tight widths */
+  .sec-price-row { flex-wrap: wrap !important; gap: 6px !important; }
+  .sec-ask { font-size: 16px !important; }
+  .sec-real { display: none !important; }
+  .sec-life { display: none !important; }
+  .sec-actions { flex-direction: column !important; }
+  .sec-actions button:last-child { display: none !important; }
+}
