@@ -130,6 +130,44 @@ export function useProjectPosts(a) {
   return [postsOf(a), (updater) => setProjectPosts(a, updater)];
 }
 
+// ─── Featured profiles ────────────────────────────────────────────────────────
+// One profile per issuer with a live feed (the author shown on its posts).
+const PROFILE_BIO = {
+  KEYCHAIN:   'Plataforma de tokenización de activos reales. Proyectos propios en autos, campos, drones e inmuebles.',
+  AutoMax:    'Flotas de vehículos tokenizadas operando en ride-hailing y logística urbana.',
+  CarRent:    'Renta premium de vehículos de colección y alta gama para eventos.',
+  AgroToken:  'Campos productivos de soja, maíz y cítricos en la zona núcleo argentina.',
+  VitivinARG: 'Viñedos y bodegas boutique de altura, con exportación directa.',
+  DroneAgro:  'Drones agrícolas para pulverización y relevamiento de precisión.',
+  SkyOps:     'Operaciones con drones para inspección, seguridad y producciones audiovisuales.',
+  PropChain:  'Oficinas y edificios corporativos tokenizados en España y LATAM.',
+  EuroRent:   'Apartamentos turísticos y de larga estadía en las principales ciudades de Europa.',
+  HomeChain:  'Residencias premium en alquiler en Buenos Aires, Miami y Nueva York.',
+  LogiCorp:   'Centros logísticos y de distribución last-mile pre-alquilados.',
+};
+
+export function featuredProfiles() {
+  const byName = new Map();
+  RWA_ASSETS.filter(a => isFeedLive(a) && a.cat !== 'QA').forEach(a => {
+    const name = issuerNameOf(a);
+    const p = byName.get(name) || { name, assets: [], investors: 0 };
+    p.assets.push(a);
+    p.investors += Math.round((a.totalTokens * a.sold) / 100 / 24);
+    byName.set(name, p);
+  });
+  return [...byName.values()]
+    .map(p => ({
+      name: p.name,
+      handle: p.name.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      cover: (p.assets[0].images || [p.assets[0].img])[0],
+      bio: PROFILE_BIO[p.name] || `Emisor de ${p.assets.length} proyectos tokenizados en KEYCHAIN.`,
+      verified: p.name === 'KEYCHAIN' || p.assets.some(a => a.issuer === 'verified' || a.issuer === 'keychain'),
+      projects: p.assets.length,
+      followers: p.investors * 7,
+    }))
+    .sort((x, y) => y.followers - x.followers);
+}
+
 // Milestone posts from every live project, newest first.
 export function useGlobalMilestones() {
   useVersion();

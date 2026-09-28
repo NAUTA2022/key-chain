@@ -2,22 +2,25 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PBtn } from '../components/ui';
 import { PostMedia, PostComments } from '../components/feed';
-import { useGlobalMilestones, setProjectPosts, issuerNameOf, postMedia } from '../lib/projectFeed';
+import ProfileCard from '../components/ProfileCard';
+import { useGlobalMilestones, setProjectPosts, issuerNameOf, postMedia, featuredProfiles } from '../lib/projectFeed';
 
-// Global Feed — the first thing investors see: only the milestone ("hito")
-// posts of every live project, newest first. Regular posts stay inside each
-// project's own Feed tab. "Ver proyecto" opens that project on its Feed tab,
-// scrolled to the post.
+// Global Feed — the first thing investors see: featured issuer profiles on
+// top, then only the milestone ("hito") posts of every live project, newest
+// first. Regular posts stay inside each project's own Feed tab. Clicking a
+// profile narrows the posts to that issuer; "Ver proyecto" opens that project
+// on its Feed tab, scrolled to the post.
 const PAGE = 12;
 
 export default function GlobalFeed({ nav }) {
   const items = useGlobalMilestones();
-  const cats = ['Todos', ...new Set(items.map(i => i.asset.cat))];
-  const [cat, setCat] = useState('Todos');
+  const [profiles] = useState(featuredProfiles);
+  const [followed, setFollowed] = useState([]);
+  const [author, setAuthor] = useState(null); // clicking a profile shows only its posts
   const [shown, setShown] = useState(PAGE);
   const [openComments, setOpenComments] = useState([]);
 
-  const filtered = cat === 'Todos' ? items : items.filter(i => i.asset.cat === cat);
+  const filtered = author ? items.filter(i => issuerNameOf(i.asset) === author) : items;
   const visible = filtered.slice(0, shown);
 
   const updatePost = (asset, postId, fn) =>
@@ -33,35 +36,34 @@ export default function GlobalFeed({ nav }) {
   const toggleComments = (key) => setOpenComments(o => (o.includes(key) ? o.filter(x => x !== key) : [...o, key]));
 
   return (
-    <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 720, margin: '0 auto' }}>
-      <div style={{ marginBottom: 18 }}>
-        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
-          style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 24, color: 'var(--text)', letterSpacing: '-0.02em' }}>
-          Feed
-        </motion.div>
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 3 }}>
-          Los hitos de todos los proyectos del ecosistema KEYCHAIN.
-        </div>
-      </div>
-
-      {/* Category filter */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
-        {cats.map(c => (
-          <button key={c} onClick={() => { setCat(c); setShown(PAGE); }}
-            style={{
-              padding: '6px 14px', borderRadius: 999, cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600,
-              border: `1px solid ${cat === c ? 'var(--accent)' : 'var(--border-l)'}`,
-              background: cat === c ? 'var(--accent-bg)' : 'var(--surface)',
-              color: cat === c ? 'var(--accent-text)' : 'var(--sec)',
-            }}>
-            {c}
-          </button>
+    <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+        style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--text)', marginBottom: 12 }}>
+        Perfiles destacados
+      </motion.div>
+      <div style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', paddingBottom: 8, marginBottom: 22 }}>
+        {profiles.map(p => (
+          <ProfileCard key={p.name} profile={p}
+            following={followed.includes(p.name)}
+            onFollow={() => setFollowed(f => (f.includes(p.name) ? f.filter(x => x !== p.name) : [...f, p.name]))}
+            selected={author === p.name}
+            onSelect={() => { setAuthor(a => (a === p.name ? null : p.name)); setShown(PAGE); }} />
         ))}
       </div>
 
+      {author && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>
+          Publicaciones de <b style={{ color: 'var(--text)' }}>{author}</b>
+          <button onClick={() => setAuthor(null)} aria-label="Ver todas las publicaciones"
+            style={{ border: '1px solid var(--border-l)', background: 'var(--surface)', color: 'var(--sec)', borderRadius: 999, padding: '2px 10px', cursor: 'pointer', fontSize: 12 }}>
+            ✕ Ver todas
+          </button>
+        </div>
+      )}
+
       {visible.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--ter)', fontFamily: 'var(--font-b)', fontSize: 13.5 }}>
-          Todavía no hay hitos publicados{cat !== 'Todos' ? ` en ${cat}` : ''}.
+          Todavía no hay publicaciones.
         </div>
       )}
 
