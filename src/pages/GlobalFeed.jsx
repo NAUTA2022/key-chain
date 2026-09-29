@@ -11,6 +11,9 @@ import { useGlobalMilestones, setProjectPosts, issuerNameOf, postMedia, featured
 // profile narrows the posts to that issuer; "Ver proyecto" opens that project
 // on its Feed tab, scrolled to the post.
 const PAGE = 12;
+// Width of the soft fade on the profiles rail edges. It's a mask, so the
+// cards fade into whatever is behind them — works in light and dark themes.
+const RAIL_FADE = 72;
 
 const NO_FILTERS = { cat: 'Todos', country: 'Todos', author: 'Todos', media: 'Todos', following: 'Todos', sort: 'recent' };
 const hasFilters = (f) => Object.keys(NO_FILTERS).some(k => f[k] !== NO_FILTERS[k]);
@@ -88,6 +91,16 @@ export default function GlobalFeed({ nav }) {
   const [filters, setFilters] = useState(NO_FILTERS);
   const [shown, setShown] = useState(PAGE);
   const [openComments, setOpenComments] = useState([]);
+  // Which edges of the profiles rail still have cards hidden past them, so
+  // the fade only shows where there's more to scroll to.
+  const [railEdges, setRailEdges] = useState({ left: false, right: true });
+  const onRailScroll = (e) => {
+    const el = e.currentTarget;
+    const left = el.scrollLeft > 4;
+    const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 4;
+    if (left !== railEdges.left || right !== railEdges.right) setRailEdges({ left, right });
+  };
+  const railMask = `linear-gradient(to right, ${railEdges.left ? 'transparent' : '#000'} 0, #000 ${RAIL_FADE}px, #000 calc(100% - ${RAIL_FADE}px), ${railEdges.right ? 'transparent' : '#000'} 100%)`;
   const author = filters.author === 'Todos' ? null : filters.author; // also set by clicking a profile
   const setAuthor = (fn) => {
     setFilters(f => {
@@ -134,7 +147,8 @@ export default function GlobalFeed({ nav }) {
         style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--text)', marginBottom: 12 }}>
         Perfiles destacados
       </motion.div>
-      <div className="no-scrollbar" style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', marginBottom: 20 }}>
+      <div className="no-scrollbar" onScroll={onRailScroll}
+        style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', marginBottom: 20, maskImage: railMask, WebkitMaskImage: railMask }}>
         {profiles.map(p => (
           <ProfileCard key={p.name} profile={p}
             following={followed.includes(p.name)}
