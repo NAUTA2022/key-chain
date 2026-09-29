@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PBtn, Icons } from '../components/ui';
 import { PostMedia, PostComments } from '../components/feed';
 import ProfileCard from '../components/ProfileCard';
+import { useDragScroll } from '../hooks/useDragScroll';
 import { useGlobalMilestones, setProjectPosts, issuerNameOf, postMedia, featuredProfiles } from '../lib/projectFeed';
 
 // Global Feed — the first thing investors see: featured issuer profiles on
@@ -94,6 +95,7 @@ export default function GlobalFeed({ nav }) {
   // Which edges of the profiles rail still have cards hidden past them, so
   // the fade only shows where there's more to scroll to.
   const [railEdges, setRailEdges] = useState({ left: false, right: true });
+  const railDrag = useDragScroll(); // mouse drag; touch keeps native swipe
   const onRailScroll = (e) => {
     const el = e.currentTarget;
     const left = el.scrollLeft > 4;
@@ -147,8 +149,8 @@ export default function GlobalFeed({ nav }) {
         style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--text)', marginBottom: 12 }}>
         Perfiles destacados
       </motion.div>
-      <div className="no-scrollbar" onScroll={onRailScroll}
-        style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', marginBottom: 20, maskImage: railMask, WebkitMaskImage: railMask }}>
+      <div className="no-scrollbar" onScroll={onRailScroll} {...railDrag}
+        style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', marginBottom: 20, maskImage: railMask, WebkitMaskImage: railMask, cursor: 'grab' }}>
         {profiles.map(p => (
           <ProfileCard key={p.name} profile={p}
             following={followed.includes(p.name)}
