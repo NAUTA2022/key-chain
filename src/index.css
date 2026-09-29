@@ -654,6 +654,10 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
+/* Horizontal rails (e.g. Feed's featured profiles) that scroll without a bar */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* ── Responsive helpers ───────────────────────────────────────────── */
 @media (max-width: 767px) {
   /* Page padding */
