@@ -164,8 +164,35 @@ export function featuredProfiles() {
       verified: p.name === 'KEYCHAIN' || p.assets.some(a => a.issuer === 'verified' || a.issuer === 'keychain'),
       projects: p.assets.length,
       followers: p.investors * 7,
+      liveAssets: p.assets,
+      // Every project this issuer has, including ones still raising.
+      allAssets: RWA_ASSETS.filter(a => a.cat !== 'QA' && issuerNameOf(a) === p.name),
     }))
     .sort((x, y) => y.followers - x.followers);
+}
+
+export const fmtCount = (n) => (n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, '')}K` : String(n));
+
+export const profileByName =(name) => featuredProfiles().find(p => p.name === name) || null;
+
+// ─── Following ────────────────────────────────────────────────────────────────
+// Shared so "Seguir" stays in sync between the Feed and the company profile.
+let followed = [];
+export function useFollowing() {
+  useVersion();
+  const toggle = (name) => {
+    followed = followed.includes(name) ? followed.filter(x => x !== name) : [...followed, name];
+    emit();
+  };
+  return [followed, toggle];
+}
+
+// Every post (milestones and regular updates) from the given projects, newest first.
+export function useAssetsPosts(assets) {
+  useVersion();
+  return assets
+    .flatMap(a => postsOf(a).map(post => ({ post, asset: a })))
+    .sort((x, y) => (y.post.ts ?? 0) - (x.post.ts ?? 0));
 }
 
 // Milestone posts from every live project, newest first.

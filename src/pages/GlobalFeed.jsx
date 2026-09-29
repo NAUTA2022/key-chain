@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PBtn, Icons } from '../components/ui';
-import { PostMedia, PostComments } from '../components/feed';
-import ProfileCard from '../components/ProfileCard';
+import FeedPostCard from '../components/FeedPostCard';
+import ProfileCard, { ProfileStory } from '../components/ProfileCard';
 import { useDragScroll } from '../hooks/useDragScroll';
-import { useGlobalMilestones, setProjectPosts, issuerNameOf, postMedia, featuredProfiles } from '../lib/projectFeed';
+import { useMobile } from '../hooks/useMobile';
+import { useGlobalMilestones, useFollowing, issuerNameOf, postMedia, featuredProfiles } from '../lib/projectFeed';
 
 // Global Feed — the first thing investors see: featured issuer profiles on
-// top, then only the milestone ("hito") posts of every live project, newest
-// first. Regular posts stay inside each project's own Feed tab. Clicking a
-// profile narrows the posts to that issuer; "Ver proyecto" opens that project
-// on its Feed tab, scrolled to the post.
+// top (cards on desktop, Instagram-stories circles on mobile; either opens
+// the company profile), a search + filter bar, then only the milestone
+// ("hito") posts of every live project, newest first. Regular posts stay
+// inside each project's own Feed tab and on the company profile.
 const PAGE = 12;
 // Width of the soft fade on the profiles rail edges. It's a mask, so the
 // cards fade into whatever is behind them — works in light and dark themes.
@@ -87,11 +88,11 @@ function FilterGroup({ label, value, onChange, options, labels }) {
 export default function GlobalFeed({ nav }) {
   const items = useGlobalMilestones();
   const [profiles] = useState(featuredProfiles);
-  const [followed, setFollowed] = useState([]);
+  const [followed, toggleFollow] = useFollowing();
+  const isMobile = useMobile();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState(NO_FILTERS);
   const [shown, setShown] = useState(PAGE);
-  const [openComments, setOpenComments] = useState([]);
   // Which edges of the profiles rail still have cards hidden past them, so
   // the fade only shows where there's more to scroll to.
   const [railEdges, setRailEdges] = useState({ left: false, right: true });
@@ -103,14 +104,7 @@ export default function GlobalFeed({ nav }) {
     if (left !== railEdges.left || right !== railEdges.right) setRailEdges({ left, right });
   };
   const railMask = `linear-gradient(to right, ${railEdges.left ? 'transparent' : '#000'} 0, #000 ${RAIL_FADE}px, #000 calc(100% - ${RAIL_FADE}px), ${railEdges.right ? 'transparent' : '#000'} 100%)`;
-  const author = filters.author === 'Todos' ? null : filters.author; // also set by clicking a profile
-  const setAuthor = (fn) => {
-    setFilters(f => {
-      const next = fn(f.author === 'Todos' ? null : f.author);
-      return { ...f, author: next || 'Todos' };
-    });
-    setShown(PAGE);
-  };
+  const author = filters.author === 'Todos' ? null : filters.author;
 
   const cats = ['Todos', ...new Set(items.map(i => i.asset.cat))];
   const countries = ['Todos', ...new Set(items.map(i => i.asset.country).filter(Boolean))];
@@ -130,18 +124,7 @@ export default function GlobalFeed({ nav }) {
     })
     .sort((x, y) => (filters.sort === 'popular' ? y.post.likes - x.post.likes : 0));
   const visible = filtered.slice(0, shown);
-
-  const updatePost = (asset, postId, fn) =>
-    setProjectPosts(asset, posts => posts.map(p => (p.id === postId ? fn(p) : p)));
-  const toggleLike = (asset, postId) => updatePost(asset, postId, p =>
-    ({ ...p, liked: !p.liked, likes: p.likes + (p.liked ? -1 : 1) }));
-  const addComment = (asset, postId, text) => updatePost(asset, postId, p => ({
-    ...p, comments: [...(p.comments || []), {
-      id: Date.now(), date: 'Ahora', text,
-      author: asset.isMine ? issuerNameOf(asset) : 'Vos', isIssuer: !!asset.isMine,
-    }],
-  }));
-  const toggleComments = (key) => setOpenComments(o => (o.includes(key) ? o.filter(x => x !== key) : [...o, key]));
+  const openProfile = (name) => nav('empresa', name);
 
   return (
     <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
@@ -150,13 +133,13 @@ export default function GlobalFeed({ nav }) {
         Perfiles destacados
       </motion.div>
       <div className="no-scrollbar" onScroll={onRailScroll} {...railDrag}
-        style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', marginBottom: 20, maskImage: railMask, WebkitMaskImage: railMask, cursor: 'grab' }}>
-        {profiles.map(p => (
-          <ProfileCard key={p.name} profile={p}
-            following={followed.includes(p.name)}
-            onFollow={() => setFollowed(f => (f.includes(p.name) ? f.filter(x => x !== p.name) : [...f, p.name]))}
-            selected={author === p.name}
-            onSelect={() => { setAuthor(a => (a === p.name ? null : p.name)); setShown(PAGE); }} />
+        style={{ display: 'flex', gap: isMobile ? 12 : 14, overflowX: 'auto', scrollSnapType: 'x mandatory', marginBottom: 20, maskImage: railMask, WebkitMaskImage: railMask, cursor: 'grab' }}>
+        {profiles.map(p => (isMobile
+          ? <ProfileStory key={p.name} profile={p} onOpen={() => openProfile(p.name)} />
+          : <ProfileCard key={p.name} profile={p}
+              following={followed.includes(p.name)}
+              onFollow={() => toggleFollow(p.name)}
+              onOpen={() => openProfile(p.name)} />
         ))}
       </div>
 
@@ -173,55 +156,9 @@ export default function GlobalFeed({ nav }) {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {visible.map(({ post, asset }) => {
-          const key = `${asset.id}:${post.id}`;
-          const media = postMedia(post);
-          const open = openComments.includes(key);
-          return (
-            <div key={key} style={{ background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 16, padding: '16px 18px' }}>
-              {/* Project header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                <img src={asset.img} alt="" style={{ width: 38, height: 38, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <button onClick={() => nav('detalle', asset)}
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', maxWidth: '100%',
-                      fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
-                    {asset.name}
-                  </button>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)' }}>
-                    {issuerNameOf(asset)} · {asset.cat} · {post.date}
-                  </div>
-                </div>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 999, background: 'var(--accent-bg)', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 10.5, flexShrink: 0 }}>
-                  ★ Hito
-                </span>
-              </div>
-
-              {post.text && (
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--text)', lineHeight: 1.55, marginBottom: media.length ? 12 : 10 }}>{post.text}</div>
-              )}
-              <PostMedia media={media} />
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 18, paddingTop: 8, borderTop: '1px solid var(--border-l)' }}>
-                <button onClick={() => toggleLike(asset, post.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: post.liked ? 'var(--neg)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, padding: 0 }}>
-                  {post.liked ? '♥' : '♡'} {post.likes}
-                </button>
-                <button onClick={() => toggleComments(key)} aria-expanded={open}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: open ? 'var(--text)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, padding: 0 }}>
-                  💬 {post.comments?.length ? `${post.comments.length} ${post.comments.length === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
-                </button>
-                <button onClick={() => nav('detalle', { ...asset, focusPostId: post.id })}
-                  style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, padding: 0 }}>
-                  Ver proyecto →
-                </button>
-              </div>
-              {open && (
-                <PostComments comments={post.comments || []} onAdd={text => addComment(asset, post.id, text)}
-                  issuerName={issuerNameOf(asset)} isOwner={!!asset.isMine} />
-              )}
-            </div>
-          );
-        })}
+        {visible.map(({ post, asset }) => (
+          <FeedPostCard key={`${asset.id}:${post.id}`} post={post} asset={asset} nav={nav} />
+        ))}
       </div>
 
       {shown < filtered.length && (

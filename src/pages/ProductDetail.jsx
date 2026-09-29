@@ -337,7 +337,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
   return (
     <div style={{ padding:'24px 32px 40px', maxWidth:1200, margin:'0 auto' }}>
       {/* Back */}
-      <button onClick={() => nav(backRoute)}
+      <button onClick={() => (backRoute === 'empresa' ? nav('empresa', issuerNameOf(a)) : nav(backRoute))}
         style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color:'var(--sec)', fontFamily:'var(--font-b)', fontSize:13.5, marginBottom:18, padding:0 }}>
         {Icons.back} Volver al mercado
       </button>

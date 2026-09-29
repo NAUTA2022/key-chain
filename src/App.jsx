@@ -17,6 +17,7 @@ import PrimaryMarket from './pages/PrimaryMarket';
 import SecondaryMarket from './pages/SecondaryMarket';
 import ProductDetail from './pages/ProductDetail';
 import GlobalFeed from './pages/GlobalFeed';
+import CompanyProfile from './pages/CompanyProfile';
 import Checkout from './pages/Checkout';
 import TokenUtility from './pages/TokenUtility';
 import Holdings from './pages/Holdings';
@@ -85,6 +86,7 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
   const page = () => {
     switch (route) {
       case 'feed':         return <GlobalFeed nav={nav} />;
+      case 'empresa':      return <CompanyProfile key={routeData} nav={nav} name={routeData} fromRoute={prevRoute} />;
       case 'dashboard':    return <Dashboard nav={nav} />;
       case 'primario':     return <PrimaryMarket nav={nav} rubro={prefs.rubro} />;
       case 'secundario':   return <SecondaryMarket nav={nav} />;
