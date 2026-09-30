@@ -248,7 +248,7 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
               </button>
               <button onClick={() => toggleComments(post.id)} aria-expanded={openComments.includes(post.id)}
                 style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: openComments.includes(post.id) ? 'var(--text)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
-                💬 {post.comments?.length ? `${post.comments.length} ${post.comments.length === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
+                {Icons.comment} {post.comments?.length ? `${post.comments.length} ${post.comments.length === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
               </button>
             </div>
             {openComments.includes(post.id) && (

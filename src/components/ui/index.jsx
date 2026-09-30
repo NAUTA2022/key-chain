@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 export const Icons = {
+  comment: <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12a8.5 8.5 0 01-12.6 7.4L3 21l1.6-5.1A8.5 8.5 0 1121 12z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></svg>,
   feed: <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.7"/><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></svg>,
   dash: <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.7"/><rect x="13" y="3" width="8" height="5" rx="2" stroke="currentColor" strokeWidth="1.7"/><rect x="13" y="10" width="8" height="11" rx="2" stroke="currentColor" strokeWidth="1.7"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.7"/></svg>,
   primary: <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-6 9 6v11a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M9 21v-7h6v7" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></svg>,

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SquareMedia, PostComments } from './feed';
+import { Icons } from './ui';
 import { setProjectPosts, issuerNameOf, postMedia } from '../lib/projectFeed';
 
 // One post as shown in the global Feed and on a company profile, laid out
@@ -50,7 +51,7 @@ export default function FeedPostCard({ post, asset, nav }) {
         </button>
         <button onClick={() => setOpen(o => !o)} aria-expanded={open}
           style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: open ? 'var(--text)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, padding: 0 }}>
-          💬 {post.comments?.length ? `${post.comments.length} ${post.comments.length === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
+          {Icons.comment} {post.comments?.length ? `${post.comments.length} ${post.comments.length === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
         </button>
         <button onClick={() => nav('detalle', { ...asset, focusPostId: post.id })}
           style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, padding: 0 }}>
