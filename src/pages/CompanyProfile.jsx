@@ -2,22 +2,21 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PBtn, PProgress, CompanyAvatar, Icons } from '../components/ui';
 import { fmtUSD } from '../data';
-import FeedPostCard from '../components/FeedPostCard';
+import FeedBrowser from '../components/FeedBrowser';
 import { VerifiedBadge } from '../components/ProfileCard';
 import { profileByName, useFollowing, useAssetsPosts, fmtCount } from '../lib/projectFeed';
 import { useMobile } from '../hooks/useMobile';
 
 // Company (issuer) profile — opened from the Feed's featured profiles or any
 // issuer name on a post. Cover, avatar, Seguir, bio and counts on top; then
-// its posts (every update from its live projects) and all its projects.
-const PAGE = 12; // multiple of the feed grid's 3 columns
+// its posts (every update from its live projects, browsed like the Feed) and
+// all its projects.
 
 export default function CompanyProfile({ nav, name, fromRoute }) {
   const isMobile = useMobile();
   const profile = profileByName(name);
   const [followed, toggleFollow] = useFollowing();
   const [tab, setTab] = useState('posts');
-  const [shown, setShown] = useState(PAGE);
   const posts = useAssetsPosts(profile?.liveAssets || []);
   // Routes that need routeData (a project, another profile) can't be
   // re-entered without it, so those fall back to the Feed.
@@ -94,23 +93,9 @@ export default function CompanyProfile({ nav, name, fromRoute }) {
         ))}
       </div>
 
-      {tab === 'posts' && (
-        <>
-          {posts.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--ter)', fontFamily: 'var(--font-b)', fontSize: 13.5 }}>Todavía no hay publicaciones.</div>
-          )}
-          <div className="feed-grid">
-            {posts.slice(0, shown).map(({ post, asset }) => (
-              <FeedPostCard key={`${asset.id}:${post.id}`} post={post} asset={asset} nav={nav} />
-            ))}
-          </div>
-          {shown < posts.length && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-              <PBtn variant="secondary" onClick={() => setShown(s => s + PAGE)}>Cargar más</PBtn>
-            </div>
-          )}
-        </>
-      )}
+      {/* Same posts browser as the Feed: search, filters and the magnet
+          toolbar; the company header above is the magnet zone. */}
+      {tab === 'posts' && <FeedBrowser items={posts} nav={nav} />}
 
       {tab === 'projects' && (
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
