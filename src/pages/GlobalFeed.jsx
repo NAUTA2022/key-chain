@@ -62,7 +62,8 @@ function ClearButton({ onClear }) {
   );
 }
 
-function FeedFilterSidebar({ search, setSearch, filters, setFilter, options, onClear }) {
+// Desktop right column: filters only (the search box sits above the posts).
+function FeedFilterSidebar({ search, filters, setFilter, options, onClear }) {
   const active = hasFilters(filters) || !!search;
   return (
     <div style={{ padding: '18px 18px 20px', background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 18, display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -75,7 +76,6 @@ function FeedFilterSidebar({ search, setSearch, filters, setFilter, options, onC
           </button>
         )}
       </div>
-      <SearchInput search={search} setSearch={setSearch} />
       <FilterGroups filters={filters} setFilter={setFilter} options={options} />
     </div>
   );
@@ -209,19 +209,23 @@ export default function GlobalFeed({ nav }) {
       </div>
 
       {isDesktop ? (
-        // Desktop: posts span the first two of three columns, one big square
-        // post per row; the third column holds search + filters, expanded
-        // and sticky while scrolling.
+        // Desktop: search + posts span the first two of three columns, one
+        // big square post per row; the third column holds the filters,
+        // expanded and sticky while scrolling.
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 24, alignItems: 'start' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>{postList}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <SearchInput search={search} setSearch={filterProps.setSearch} />
+            {postList}
+          </div>
           <div style={{ position: 'sticky', top: 16 }}>
             <FeedFilterSidebar {...filterProps} />
           </div>
         </div>
       ) : (
         <>
+          {/* Tablet & mobile: one full-width column of square posts */}
           <FeedFilterBar {...filterProps} />
-          <div className="feed-grid">{postList}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>{postList}</div>
         </>
       )}
     </div>
