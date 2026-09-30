@@ -133,7 +133,12 @@ body {
 
 @keyframes border-spin     { to { --ba: 360deg; } }
 @keyframes neon-travel     { to { --na: 360deg; } }
-@keyframes nav-bar-travel  { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+/* Seamless loop for the navbar glow line (background-size: 220%): with a
+   220% tile, background-position % moves it by -1.2 × width per 100%, so
+   183.333% → 0% slides it exactly one tile (2.2 × width) and the last frame
+   matches the first. The old 200% → -200% slid 2.18 tiles, so every third
+   pass got cut off when the loop restarted. */
+@keyframes nav-bar-travel  { 0% { background-position: 183.333% 0; } 100% { background-position: 0% 0; } }
 
 /* ── Liquid glass nav icon ───────────────────────────────── */
 .nav-icon-glass {
@@ -528,7 +533,7 @@ body {
     transparent 100%
   );
   background-size: 220% 100%;
-  animation: nav-bar-travel 3.2s linear infinite;
+  animation: nav-bar-travel 1.4667s linear infinite; /* same speed as before: one pass per loop */
   z-index: 10;
 }
 [data-theme="light"] .navbar-glow::after {
@@ -544,7 +549,7 @@ body {
     transparent 100%
   );
   background-size: 220% 100%;
-  animation: nav-bar-travel 3.2s linear infinite;
+  animation: nav-bar-travel 1.4667s linear infinite; /* same speed as before: one pass per loop */
 }
 
 /* ── Topbar icon button overrides (same glass effect, slightly larger) ── */
