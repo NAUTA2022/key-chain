@@ -1,26 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
-import { useMotionValue } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 // Drives the Feed's "magnet" toolbar. `sentinelRef` marks where the toolbar
-// naturally starts (right under the featured-profiles rail):
-// - stuck:  the toolbar reached `pinTop` px from the top of the scroll area
-//           and is pinned there.
-// - reveal: while pinned, the user scrolled up, so a copy of the profiles
-//           rail should slide in above the toolbar; scrolling down hides it.
-// - instant: reveal just turned off because the real rail scrolled back to
-//           exactly where the copy sits (`handoff` px above the toolbar), so
-//           the swap must happen with no animation.
-// - sentinelTop: motion value with the sentinel's live distance from the top
-//           of the scroll area, for positions that follow the scroll.
+// naturally starts (right under the featured-profiles rail).
+// - stuck: the toolbar reached `pinTop` px from the top of the scroll area
+//   and is pinned there.
+// - Magnet: when the user stops scrolling with the page left halfway through
+//   the top area (profiles partly visible), it glides to the nearest rest
+//   point in the direction they were going: all the way up (profiles fully
+//   shown) when scrolling up, or down to where the toolbar pins (profiles
+//   gone) when scrolling down. The profiles never show anywhere but at the
+//   top of the page.
 // The scroll area is the app's <main> (see App.jsx Shell), falling back to
 // the window.
-const DIRECTION_THRESHOLD = 6; // px per frame before a direction change counts
+const SETTLE_MS = 140; // no scroll events for this long = the user let go
 
-export function useMagnetScroll(sentinelRef, { pinTop = 0, handoff = 0 } = {}) {
-  const [state, setState] = useState({ stuck: false, reveal: false, instant: false });
-  const sentinelTop = useMotionValue(Number.POSITIVE_INFINITY);
-  const config = useRef({ pinTop, handoff });
-  useEffect(() => { config.current = { pinTop, handoff }; }, [pinTop, handoff]);
+export function useMagnetScroll(sentinelRef, pinTop = 0) {
+  const [stuck, setStuck] = useState(false);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -28,33 +23,30 @@ export function useMagnetScroll(sentinelRef, { pinTop = 0, handoff = 0 } = {}) {
     const scroller = sentinel.closest('main') || window;
     const scrollTop = () => (scroller === window ? window.scrollY : scroller.scrollTop);
     const areaTop = () => (scroller === window ? 0 : scroller.getBoundingClientRect().top);
+    const scrollTo = (top) => scroller.scrollTo({ top, behavior: 'smooth' });
     let last = scrollTop();
+    let direction = 0;
     let raf = 0;
+    let settle = 0;
 
     const update = () => {
       const st = scrollTop();
-      const delta = st - last;
+      if (st !== last) direction = Math.sign(st - last);
       last = st;
-      const top = sentinel.getBoundingClientRect().top - areaTop();
-      sentinelTop.set(top);
-      const { pinTop: pin, handoff: hand } = config.current;
-      const stuck = top <= pin;
-      setState(prev => {
-        let { reveal } = prev;
-        let instant = false;
-        if (top >= pin + hand) {
-          if (reveal) { reveal = false; instant = true; }
-        } else if (delta > DIRECTION_THRESHOLD) {
-          reveal = false;
-        } else if (delta < -DIRECTION_THRESHOLD && (stuck || reveal)) {
-          reveal = true;
-        }
-        return prev.stuck === stuck && prev.reveal === reveal && prev.instant === instant ? prev : { stuck, reveal, instant };
-      });
+      setStuck(sentinel.getBoundingClientRect().top - areaTop() <= pinTop);
+    };
+    const snap = () => {
+      const st = scrollTop();
+      // Scroll position at which the toolbar pins (= profiles fully gone).
+      const pinAt = st + sentinel.getBoundingClientRect().top - areaTop() - pinTop;
+      if (st <= 1 || st >= pinAt - 1) return; // already at a rest point
+      scrollTo(direction < 0 ? 0 : pinAt);
     };
     const onScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(update);
+      clearTimeout(settle);
+      settle = setTimeout(snap, SETTLE_MS);
     };
 
     scroller.addEventListener('scroll', onScroll, { passive: true });
@@ -62,8 +54,9 @@ export function useMagnetScroll(sentinelRef, { pinTop = 0, handoff = 0 } = {}) {
     return () => {
       scroller.removeEventListener('scroll', onScroll);
       cancelAnimationFrame(raf);
+      clearTimeout(settle);
     };
-  }, [sentinelRef, sentinelTop]);
+  }, [sentinelRef, pinTop]);
 
-  return { ...state, sentinelTop };
+  return { stuck };
 }
