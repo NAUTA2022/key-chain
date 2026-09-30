@@ -654,6 +654,12 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
+/* Feed posts (global Feed, company profile): square-media cards in a grid —
+   3 columns on desktop, 2 on tablet, 1 on phones. */
+.feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 16px; align-items: start; }
+.feed-grid > * { min-width: 0; } /* let the media carousel shrink to its column */
+@media (max-width: 720px) { .feed-grid { grid-template-columns: minmax(0, 1fr); } }
+
 /* Horizontal rails (e.g. Feed's featured profiles) that scroll without a bar */
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }

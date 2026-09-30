@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { PostMedia, PostComments } from './feed';
+import { SquareMedia, PostComments } from './feed';
 import { setProjectPosts, issuerNameOf, postMedia } from '../lib/projectFeed';
 
-// One post as shown in the global Feed and on a company profile: project
-// header (issuer name opens the company profile), text, media, likes,
-// comments and "Ver proyecto".
+// One post as shown in the global Feed and on a company profile, laid out
+// like Instagram: project header (issuer name opens the company profile),
+// square media, likes/comments/"Ver proyecto", then the caption.
 export default function FeedPostCard({ post, asset, nav }) {
   const [open, setOpen] = useState(false);
   const media = postMedia(post);
@@ -42,12 +42,9 @@ export default function FeedPostCard({ post, asset, nav }) {
         )}
       </div>
 
-      {post.text && (
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--text)', lineHeight: 1.55, marginBottom: media.length ? 12 : 10 }}>{post.text}</div>
-      )}
-      <PostMedia media={media} />
+      <SquareMedia media={media} />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 18, paddingTop: 8, borderTop: '1px solid var(--border-l)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '4px 0 8px' }}>
         <button onClick={toggleLike} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: post.liked ? 'var(--neg)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, padding: 0 }}>
           {post.liked ? '♥' : '♡'} {post.likes}
         </button>
@@ -60,6 +57,11 @@ export default function FeedPostCard({ post, asset, nav }) {
           Ver proyecto →
         </button>
       </div>
+      {post.text && (
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--text)', lineHeight: 1.55 }}>
+          <b style={{ fontWeight: 700 }}>{issuer}</b> {post.text}
+        </div>
+      )}
       {open && (
         <PostComments comments={post.comments || []} onAdd={addComment} issuerName={issuer} isOwner={!!asset.isMine} />
       )}

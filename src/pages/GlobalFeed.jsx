@@ -155,7 +155,7 @@ export default function GlobalFeed({ nav }) {
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="feed-grid">
         {visible.map(({ post, asset }) => (
           <FeedPostCard key={`${asset.id}:${post.id}`} post={post} asset={asset} nav={nav} />
         ))}

@@ -10,7 +10,7 @@ import { useMobile } from '../hooks/useMobile';
 // Company (issuer) profile — opened from the Feed's featured profiles or any
 // issuer name on a post. Cover, avatar, Seguir, bio and counts on top; then
 // its posts (every update from its live projects) and all its projects.
-const PAGE = 10;
+const PAGE = 12; // multiple of the feed grid's 3 columns
 
 export default function CompanyProfile({ nav, name, fromRoute }) {
   const isMobile = useMobile();
@@ -99,7 +99,7 @@ export default function CompanyProfile({ nav, name, fromRoute }) {
           {posts.length === 0 && (
             <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--ter)', fontFamily: 'var(--font-b)', fontSize: 13.5 }}>Todavía no hay publicaciones.</div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="feed-grid">
             {posts.slice(0, shown).map(({ post, asset }) => (
               <FeedPostCard key={`${asset.id}:${post.id}`} post={post} asset={asset} nav={nav} />
             ))}
