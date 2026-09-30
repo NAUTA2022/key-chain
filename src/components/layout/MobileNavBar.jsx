@@ -65,8 +65,10 @@ export default function MobileNavBar({ nav, route, role }) {
             {active && (
               <motion.div
                 layoutId="mobile-tab-indicator"
+                // Centered with auto margins, not translateX(-50%): the
+                // layoutId animation drives `transform` itself and would drop it.
                 style={{
-                  position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+                  position: 'absolute', top: 0, left: 0, right: 0, margin: '0 auto',
                   width: 28, height: 2, borderRadius: 99, background: 'var(--accent)',
                 }}
               />
