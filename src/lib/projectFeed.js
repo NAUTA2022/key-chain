@@ -63,9 +63,30 @@ const COMMENTS = ['¡Llegó puntual como siempre! 👏', 'Excelente noticia, gra
 
 const photo = (src, n) => ({ id: `${src}#${n}`, type: 'image', url: src });
 
+// Every local photo per category, so carousel posts can show more shots
+// than a single project has.
+let catPhotos = null;
+const photosOfCat = (cat) => {
+  if (!catPhotos) {
+    catPhotos = {};
+    RWA_ASSETS.forEach(a => (a.images || [a.img]).forEach(src => {
+      const list = (catPhotos[a.cat] ||= []);
+      if (!list.includes(src)) list.push(src);
+    }));
+  }
+  return catPhotos[cat] || [];
+};
+
 function seedPosts(a) {
   const imgs = a.images?.length ? a.images : [a.img];
   const pic = (i) => photo(imgs[i % imgs.length], i);
+  // n distinct photos: the project's own first, then its category's,
+  // rotated per project so neighbours in the feed don't repeat the same set.
+  const carousel = (n, from = 0) => {
+    const pool = photosOfCat(a.cat);
+    const rotated = pool.slice(a.id % (pool.length || 1)).concat(pool.slice(0, a.id % (pool.length || 1)));
+    return [...new Set([...imgs.slice(from), ...rotated])].slice(0, n).map((src, i) => photo(src, `c${from}-${i}`));
+  };
   const video = CAT_VIDEO[a.cat];
   const [updateText, videoText] = CAT_UPDATE[a.cat] || DEFAULT_UPDATE;
   const monthly = Math.round((a.valuation * a.apy) / 100 / 12);
@@ -84,13 +105,18 @@ function seedPosts(a) {
       media: [pic(0)], likes: 18 + (a.id % 23),
       comments: [{ id: `${a.id}-1c`, date: fmtPostDate(at(2, 7)), author: pick(0), text: COMMENTS[a.id % COMMENTS.length], isIssuer: false }] },
     { id: `${a.id}-2`, ts: at(6, 5), milestone: false, text: updateText,
-      media: [pic(1), pic(2)], likes: 6 + (a.id % 9) },
+      media: carousel(3, 1), likes: 6 + (a.id % 9) },
+    // Category milestone: a 3–5 photo carousel, or the category video
+    // followed by two photos (mixed carousel).
     { id: `${a.id}-3`, ts: at(0, 3), milestone: true,
       text: withVideo ? `${hito} ${videoText}` : hito,
-      media: withVideo ? [{ id: `${a.id}-v`, type: 'video', url: video }] : [pic(2)], likes: 12 + (a.id % 17) },
+      media: withVideo
+        ? [{ id: `${a.id}-v`, type: 'video', url: video }, ...carousel(2, 1)]
+        : carousel(3 + (a.id % 3), 1),
+      likes: 12 + (a.id % 17) },
     { id: `${a.id}-4`, ts: at(4, 11), milestone: true,
       text: a.sold >= 100 ? '¡Ronda cerrada! El proyecto se financió al 100%.' : `El proyecto alcanzó el ${a.sold}% de financiación.`,
-      media: [pic(3)], likes: 20 + (a.id % 13) },
+      media: a.id % 3 === 1 ? carousel(3) : [pic(3)], likes: 20 + (a.id % 13) },
     { id: `${a.id}-5`, ts: at(30, 2), milestone: false, text: 'Se firmó contrato de operación por 24 meses adicionales.',
       media: [], likes: 4 + (a.id % 7) },
   ];
