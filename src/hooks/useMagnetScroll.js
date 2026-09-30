@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-// Tracks a sticky toolbar placed right after `sentinelRef`:
+// Tracks a sticky toolbar placed right after `sentinelRef` (pinned `pinTop`
+// px below the top of the scroll area):
 // - stuck:  the toolbar has reached the top of the scroll area and is pinned.
 // - reveal: while stuck, the user is scrolling up, so the content hidden above
 //           (the featured profiles) should slide back in; scrolling down hides
@@ -9,7 +10,7 @@ import { useEffect, useState } from 'react';
 // the window.
 const DIRECTION_THRESHOLD = 6; // px per frame before a direction change counts
 
-export function useMagnetScroll(sentinelRef) {
+export function useMagnetScroll(sentinelRef, pinTop = 0) {
   const [state, setState] = useState({ stuck: false, reveal: false });
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export function useMagnetScroll(sentinelRef) {
       const st = scrollTop();
       const delta = st - last;
       last = st;
-      const stuck = sentinel.getBoundingClientRect().top - areaTop() <= 0;
+      const stuck = sentinel.getBoundingClientRect().top - areaTop() <= pinTop;
       setState(prev => {
         let reveal = prev.reveal;
         if (!stuck) reveal = false;
@@ -45,7 +46,7 @@ export function useMagnetScroll(sentinelRef) {
       scroller.removeEventListener('scroll', onScroll);
       cancelAnimationFrame(raf);
     };
-  }, [sentinelRef]);
+  }, [sentinelRef, pinTop]);
 
   return state;
 }

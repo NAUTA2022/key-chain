@@ -19,7 +19,7 @@ const PAGE = 12;
 const RAIL_FADE = 72;
 // Springy "magnet" motion for the sticky toolbar and the profiles sliding in.
 const MAGNET = { type: 'spring', stiffness: 520, damping: 24, mass: 0.8 };
-const TOOLBAR_H = 62; // search input (42) + toolbar padding (20)
+const PIN_TOP = 12; // desktop: where search + filters pin, aligned
 
 const NO_FILTERS = { cat: 'Todos', country: 'Todos', author: 'Todos', media: 'Todos', following: 'Todos', sort: 'recent' };
 const hasFilters = (f) => Object.keys(NO_FILTERS).some(k => f[k] !== NO_FILTERS[k]);
@@ -28,9 +28,12 @@ const hasFilters = (f) => Object.keys(NO_FILTERS).some(k => f[k] !== NO_FILTERS[
 // Same look as Tokenizaciones' FilterBar. On desktop they live expanded in the
 // Feed's right column (FeedFilterSidebar); on tablet/mobile it's a search row
 // with a collapsible "Filtros" panel (FeedFilterBar).
-function SearchInput({ search, setSearch }) {
+// `floating`: pinned over the posts (desktop), so the input itself gets an
+// opaque glass background instead of a full-width bar behind it.
+function SearchInput({ search, setSearch, floating }) {
   return (
-    <div style={{ flex: 1, position: 'relative' }}>
+    <div style={{ flex: 1, position: 'relative', borderRadius: 12, transition: 'box-shadow 0.2s ease',
+      ...(floating && { background: 'var(--gl-panel-strong)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', boxShadow: 'var(--sh-lg)' }) }}>
       <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--ter)', pointerEvents: 'none', display: 'flex' }}>
         {Icons.search}
       </span>
@@ -158,7 +161,7 @@ export default function GlobalFeed({ nav }) {
   const sentinelRef = useRef(null);
   const stripRef = useRef(null);
   const stripDrag = useDragScroll();
-  const { stuck, reveal } = useMagnetScroll(sentinelRef);
+  const { stuck, reveal } = useMagnetScroll(sentinelRef, isDesktop ? PIN_TOP : 0);
   const [stripH, setStripH] = useState(120);
   const snap = useAnimationControls();
   const pagePad = isMobile ? 14 : 32; // matches .g-page padding
@@ -168,7 +171,7 @@ export default function GlobalFeed({ nav }) {
     const ro = new ResizeObserver(() => setStripH(el.offsetHeight));
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [isDesktop]);
   // The "pull" when the toolbar reaches the top: a quick overshoot that
   // settles into place, like it got snapped by a magnet.
   useEffect(() => {
@@ -236,48 +239,65 @@ export default function GlobalFeed({ nav }) {
         ))}
       </div>
 
-      {/* Sticky toolbar with a "magnet" feel: it snaps into place when it
-          reaches the top and stays pinned. Scrolling up while pinned slides
-          the featured profiles (as story circles) back in above it; scrolling
-          down tucks them away. Everything moves with transforms so the posts
-          underneath never jump. */}
+      {/* Magnet behaviour: the search (and filters) snap to the top when
+          they reach it and stay pinned; scrolling up while pinned slides the
+          featured profiles (as story circles) back in, scrolling down tucks
+          them away. Everything moves with transforms so posts never jump. */}
       <div ref={sentinelRef} />
-      <div style={{ position: 'sticky', top: 0, zIndex: 30, margin: `0 -${pagePad}px ${isDesktop ? 20 : 4}px` }}>
-        <motion.div animate={{ y: reveal ? stripH : 0 }} transition={MAGNET} style={{ position: 'relative' }}>
-          <div ref={stripRef} aria-hidden={!reveal}
-            style={{ position: 'absolute', left: 0, right: 0, bottom: '100%', padding: `12px ${pagePad}px 10px`, background: 'var(--bg)',
-              borderBottom: '1px solid var(--border-l)', visibility: stuck ? 'visible' : 'hidden' }}>
-            <div className="no-scrollbar" {...stripDrag} style={{ display: 'flex', gap: 12, overflowX: 'auto', cursor: 'grab' }}>
-              {profiles.map(p => <ProfileStory key={p.name} profile={p} onOpen={() => openProfile(p.name)} />)}
-            </div>
-          </div>
-          <motion.div animate={snap}
-            style={{ padding: `10px ${pagePad}px`, background: stuck ? 'var(--bg)' : 'transparent', transition: 'background 0.2s ease, box-shadow 0.2s ease',
-              boxShadow: stuck ? '0 10px 24px -12px rgba(0,0,0,0.45)' : 'none' }}>
-            {isDesktop ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 24 }}>
-                <SearchInput search={search} setSearch={filterProps.setSearch} />
-              </div>
-            ) : (
-              <FeedFilterBar {...filterProps} compact={stuck} />
-            )}
-          </motion.div>
-        </motion.div>
-      </div>
-
       {isDesktop ? (
         // Desktop: posts span the first two of three columns, one big square
-        // post per row; the third column holds the filters, expanded and
-        // pinned under the toolbar (moving with it when profiles slide in).
+        // post per row; the third column holds the filters. Search and
+        // filters are pinned independently at the same height (no full-width
+        // bar behind them); the profiles come back as their own floating card.
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 24, alignItems: 'start' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>{postList}</div>
-          <motion.div animate={{ y: reveal ? stripH : 0 }} transition={MAGNET} style={{ position: 'sticky', top: TOOLBAR_H + 16 }}>
-            <FeedFilterSidebar {...filterProps} />
+          <div style={{ gridColumn: '1 / -1', position: 'sticky', top: 0, height: 0, marginBottom: -24, zIndex: 40 }}>
+            <motion.div ref={stripRef} aria-hidden={!reveal} initial={false}
+              animate={{ y: reveal ? PIN_TOP : -(stripH + 24), opacity: reveal ? 1 : 0 }} transition={MAGNET}
+              style={{ position: 'absolute', left: 0, right: 0, top: 0, padding: '10px 16px', borderRadius: 18,
+                background: 'var(--gl-panel-strong)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid var(--gl-bd)', boxShadow: 'var(--sh-lg)', pointerEvents: reveal ? 'auto' : 'none' }}>
+              <div className="no-scrollbar" {...stripDrag} style={{ display: 'flex', gap: 12, overflowX: 'auto', cursor: 'grab' }}>
+                {profiles.map(p => <ProfileStory key={p.name} profile={p} onOpen={() => openProfile(p.name)} />)}
+              </div>
+            </motion.div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <motion.div animate={{ y: reveal ? stripH + 12 : 0 }} transition={MAGNET} style={{ position: 'sticky', top: PIN_TOP, zIndex: 30 }}>
+              <motion.div animate={snap}>
+                <SearchInput search={search} setSearch={filterProps.setSearch} floating={stuck} />
+              </motion.div>
+            </motion.div>
+            {postList}
+          </div>
+          <motion.div animate={{ y: reveal ? stripH + 12 : 0 }} transition={MAGNET} style={{ position: 'sticky', top: PIN_TOP }}>
+            <motion.div animate={snap}>
+              <FeedFilterSidebar {...filterProps} />
+            </motion.div>
           </motion.div>
         </div>
       ) : (
-        // Tablet & mobile: one full-width column of square posts.
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>{postList}</div>
+        <>
+          {/* Tablet & mobile: a pinned bar with search + "Filtros"; the
+              profiles strip rides above it when scrolling up. */}
+          <div style={{ position: 'sticky', top: 0, zIndex: 30, margin: `0 -${pagePad}px 4px` }}>
+            <motion.div animate={{ y: reveal ? stripH : 0 }} transition={MAGNET} style={{ position: 'relative' }}>
+              <div ref={stripRef} aria-hidden={!reveal}
+                style={{ position: 'absolute', left: 0, right: 0, bottom: '100%', padding: `12px ${pagePad}px 10px`, background: 'var(--bg)',
+                  borderBottom: '1px solid var(--border-l)', visibility: stuck ? 'visible' : 'hidden' }}>
+                <div className="no-scrollbar" {...stripDrag} style={{ display: 'flex', gap: 12, overflowX: 'auto', cursor: 'grab' }}>
+                  {profiles.map(p => <ProfileStory key={p.name} profile={p} onOpen={() => openProfile(p.name)} />)}
+                </div>
+              </div>
+              <motion.div animate={snap}
+                style={{ padding: `10px ${pagePad}px`, background: stuck ? 'var(--bg)' : 'transparent', transition: 'background 0.2s ease, box-shadow 0.2s ease',
+                  boxShadow: stuck ? '0 10px 24px -12px rgba(0,0,0,0.45)' : 'none' }}>
+                <FeedFilterBar {...filterProps} compact={stuck} />
+              </motion.div>
+            </motion.div>
+          </div>
+          {/* One full-width column of square posts */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>{postList}</div>
+        </>
       )}
     </div>
   );
