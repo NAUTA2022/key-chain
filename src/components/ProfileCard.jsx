@@ -38,7 +38,9 @@ export default function ProfileCard({ profile, following, onFollow, onOpen }) {
       onKeyDown={e => { if (e.key === 'Enter') onOpen(); }}
       style={{
         width: 272, flexShrink: 0, borderRadius: 22, overflow: 'hidden', cursor: 'pointer',
-        background: 'var(--surface)', scrollSnapAlign: 'start',
+        // Solid (surface tint over the page background): the same card also
+        // floats over the posts in the Feed, where nothing may show through.
+        background: 'linear-gradient(var(--surface), var(--surface)), var(--bg)', scrollSnapAlign: 'start',
         border: '1.5px solid var(--border-l)',
       }}>
       {/* Cover */}
