@@ -1,4 +1,4 @@
-import { CompanyAvatar } from './ui';
+import { CompanyAvatar, HEX_CLIP } from './ui';
 import { fmtCount } from '../lib/projectFeed';
 
 export function VerifiedBadge({ size = 16 }) {
@@ -16,8 +16,9 @@ export function ProfileStory({ profile, onOpen }) {
   return (
     <button onClick={onOpen} aria-label={`Ver perfil de ${profile.name}`}
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: 76, flexShrink: 0, background: 'none', border: 'none', padding: 0, cursor: 'pointer', scrollSnapAlign: 'start' }}>
-      <span style={{ padding: 2.5, borderRadius: '50%', background: 'conic-gradient(from 200deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #3b82f6)', display: 'flex' }}>
-        <span style={{ padding: 2.5, borderRadius: '50%', background: 'var(--bg)', display: 'flex' }}>
+      {/* Companies are hexagons, so the story ring is one too */}
+      <span style={{ padding: 3, clipPath: HEX_CLIP, background: 'conic-gradient(from 200deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #3b82f6)', display: 'flex' }}>
+        <span style={{ padding: 3, clipPath: HEX_CLIP, background: 'var(--bg)', display: 'flex' }}>
           <CompanyAvatar company={profile.name} size={60} />
         </span>
       </span>
@@ -47,7 +48,7 @@ export default function ProfileCard({ profile, following, onFollow, onOpen }) {
       <div style={{ position: 'relative', height: 118 }}>
         <img src={profile.cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'grayscale(0.35) brightness(0.7)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%)' }} />
-        <div style={{ position: 'absolute', left: 16, bottom: -34, borderRadius: '50%', padding: 4, background: 'var(--surface)' }}>
+        <div style={{ position: 'absolute', left: 16, bottom: -34, clipPath: HEX_CLIP, padding: 5, background: 'var(--surface)' }}>
           <CompanyAvatar company={profile.name} size={68} />
         </div>
       </div>

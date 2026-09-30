@@ -312,6 +312,9 @@ function hashStr(s = '') {
   return h;
 }
 
+// Companies are hexagons everywhere (people — users, sellers — are circles).
+export const HEX_CLIP = 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)';
+
 // KEYCHAIN itself (asset.issuer === 'keychain') isn't just another company —
 // it gets its own logo mark instead of a lettered avatar. Solid black (not
 // the silver/black gradient used elsewhere) so the light-colored logo image
@@ -322,7 +325,7 @@ export function CompanyAvatar({ company, size = 28, style = {} }) {
   const bg = isKeychain ? '#000' : COMPANY_COLORS[hashStr(company) % COMPANY_COLORS.length];
   return (
     <div style={{
-      width: size, height: size, borderRadius: '50%', background: bg, color: '#fff',
+      width: size, height: size, clipPath: HEX_CLIP, background: bg, color: '#fff',
       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
       fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: size * 0.42, ...style,
     }}>

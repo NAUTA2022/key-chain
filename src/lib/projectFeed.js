@@ -172,34 +172,41 @@ const PROFILE_BIO = {
   LogiCorp:   'Centros logísticos y de distribución last-mile pre-alquilados.',
 };
 
+// Projects shown on an issuer's profile: its real ones, plus the QA fixture
+// the signed-in user owns (isMine) so "my company" has a profile to open.
+const profileAssets = (name) => RWA_ASSETS.filter(a => issuerNameOf(a) === name && (a.cat !== 'QA' || a.isMine));
+
+function buildProfile(name, liveAssets, allAssets) {
+  const investors = liveAssets.reduce((s, a) => s + Math.round((a.totalTokens * a.sold) / 100 / 24), 0);
+  const first = liveAssets[0] || allAssets[0];
+  return {
+    name,
+    handle: name.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    cover: (first.images || [first.img])[0],
+    bio: PROFILE_BIO[name] || `Emisor de ${allAssets.length} proyectos tokenizados en KEYCHAIN.`,
+    verified: name === 'KEYCHAIN' || allAssets.some(a => a.issuer === 'verified' || a.issuer === 'keychain'),
+    projects: liveAssets.length,
+    followers: investors * 7,
+    liveAssets,
+    // Every project this issuer has, including ones still raising.
+    allAssets,
+  };
+}
+
+// One profile per issuer with a live feed, most followed first.
 export function featuredProfiles() {
-  const byName = new Map();
-  RWA_ASSETS.filter(a => isFeedLive(a) && a.cat !== 'QA').forEach(a => {
-    const name = issuerNameOf(a);
-    const p = byName.get(name) || { name, assets: [], investors: 0 };
-    p.assets.push(a);
-    p.investors += Math.round((a.totalTokens * a.sold) / 100 / 24);
-    byName.set(name, p);
-  });
-  return [...byName.values()]
-    .map(p => ({
-      name: p.name,
-      handle: p.name.toLowerCase().replace(/[^a-z0-9]/g, ''),
-      cover: (p.assets[0].images || [p.assets[0].img])[0],
-      bio: PROFILE_BIO[p.name] || `Emisor de ${p.assets.length} proyectos tokenizados en KEYCHAIN.`,
-      verified: p.name === 'KEYCHAIN' || p.assets.some(a => a.issuer === 'verified' || a.issuer === 'keychain'),
-      projects: p.assets.length,
-      followers: p.investors * 7,
-      liveAssets: p.assets,
-      // Every project this issuer has, including ones still raising.
-      allAssets: RWA_ASSETS.filter(a => a.cat !== 'QA' && issuerNameOf(a) === p.name),
-    }))
+  const names = [...new Set(RWA_ASSETS.filter(a => isFeedLive(a) && a.cat !== 'QA').map(issuerNameOf))];
+  return names
+    .map(name => buildProfile(name, RWA_ASSETS.filter(a => isFeedLive(a) && a.cat !== 'QA' && issuerNameOf(a) === name), profileAssets(name)))
     .sort((x, y) => y.followers - x.followers);
 }
 
 export const fmtCount = (n) => (n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, '')}K` : String(n));
 
-export const profileByName =(name) => featuredProfiles().find(p => p.name === name) || null;
+export function profileByName(name) {
+  const all = profileAssets(name);
+  return all.length ? buildProfile(name, all.filter(isFeedLive), all) : null;
+}
 
 // ─── Following ────────────────────────────────────────────────────────────────
 // Shared so "Seguir" stays in sync between the Feed and the company profile.

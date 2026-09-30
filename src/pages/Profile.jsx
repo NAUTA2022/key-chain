@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PCard, PBtn, PTag, PAvatar, Icons } from '../components/ui';
+import { PCard, PBtn, PTag, Icons } from '../components/ui';
+import IdentityAvatar, { IdentitySwitch } from '../components/IdentityAvatar';
+import CompanyProfile from './CompanyProfile';
+import { ME, MY_COMPANY } from '../lib/me';
 
 const TABS = [
   ['kyc',  'KYC / Identidad'],
@@ -44,15 +47,27 @@ const activityColor = { pos: '#22c55e', invest: '#8247E5', kyc: '#3b82f6' };
 const activityDot   = { pos: '↑', invest: '⬡', kyc: '✓' };
 
 export default function Profile({ nav }) {
+  // Personal / Empresa: users who run a company can flip between their own
+  // profile and their company's (same page, no navigation).
+  const [identity, setIdentity] = useState('personal');
   const [tab,   setTab]   = useState('kyc');
   const [twofa, setTwofa] = useState({ totp: true, passkey: false, sms: false });
   const [priv,  setPriv]  = useState([true, false, true, true]);
+
+  if (identity === 'company' && MY_COMPANY) {
+    return <CompanyProfile nav={nav} name={MY_COMPANY} embedded onPersonal={() => setIdentity('personal')} />;
+  }
 
   return (
     <div style={{ padding: '0 0 60px', maxWidth: 1100, margin: '0 auto' }}>
 
       {/* ── Hero banner ─────────────────────────────────────────── */}
       <div style={{ position: 'relative', height: 220, overflow: 'hidden', borderRadius: '0 0 32px 32px' }}>
+        {MY_COMPANY && (
+          <div style={{ position: 'absolute', top: 16, right: 20, zIndex: 2 }}>
+            <IdentitySwitch value="personal" company={MY_COMPANY} onChange={() => setIdentity('company')} />
+          </div>
+        )}
         {/* Base gradient */}
         <div style={{
           position: 'absolute', inset: 0,
@@ -117,16 +132,14 @@ export default function Profile({ nav }) {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 280, damping: 22 }}
           >
-            <PAvatar
-              name="M"
-              size={84}
-              gradient="linear-gradient(135deg, #8247E5, #3b82f6)"
-            />
+            {/* Big round photo; my company's hexagon as a badge (tap to switch) */}
+            <IdentityAvatar mode="personal" company={MY_COMPANY} size={84} ring="var(--bg)"
+              onSwap={() => MY_COMPANY && setIdentity('company')} />
           </motion.div>
 
           <div style={{ flex: 1, paddingBottom: 4 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <div style={{ fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 26, color: 'var(--text)', letterSpacing: '-0.03em' }}>Maximiliano Rodríguez</div>
+              <div style={{ fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 26, color: 'var(--text)', letterSpacing: '-0.03em' }}>{ME.name}</div>
               <PTag label="KYC ✓" color="green" />
               <PTag label="Nivel 4" color="purple" />
             </div>
