@@ -111,8 +111,8 @@ function seedPosts(a) {
     { id: `${a.id}-3`, ts: at(0, 3), milestone: true,
       text: withVideo ? `${hito} ${videoText}` : hito,
       media: withVideo
-        ? [{ id: `${a.id}-v`, type: 'video', url: video }, ...carousel(2, 1)]
-        : carousel(3 + (a.id % 3), 1),
+        ? [{ id: `${a.id}-v`, type: 'video', url: video }, ...carousel(2)]
+        : carousel(3 + (a.id % 3)),
       likes: 12 + (a.id % 17) },
     { id: `${a.id}-4`, ts: at(4, 11), milestone: true,
       text: a.sold >= 100 ? '¡Ronda cerrada! El proyecto se financió al 100%.' : `El proyecto alcanzó el ${a.sold}% de financiación.`,
