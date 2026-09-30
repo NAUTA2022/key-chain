@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { PBtn, PProgress, CompanyAvatar, Icons, HEX_CLIP } from '../components/ui';
+import { PBtn, PProgress, Icons } from '../components/ui';
 import { fmtUSD } from '../data';
 import FeedBrowser from '../components/FeedBrowser';
 import { VerifiedBadge } from '../components/ProfileCard';
 import { profileByName, useFollowing, useAssetsPosts, fmtCount } from '../lib/projectFeed';
 import { useMobile } from '../hooks/useMobile';
 import IdentityAvatar, { IdentitySwitch } from '../components/IdentityAvatar';
-import { MY_COMPANY } from '../lib/me';
+import { MY_COMPANY, ME } from '../lib/me';
 
 // Company (issuer) profile — opened from the Feed's featured profiles or any
 // issuer name on a post. Cover, avatar, Seguir, bio and counts on top; then
@@ -22,12 +22,14 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
   const profile = profileByName(name);
   const [followed, toggleFollow] = useFollowing();
   const [tab, setTab] = useState('posts');
+  // Other companies: 'company' or 'owner' (the founder's personal profile).
+  const [view, setView] = useState('company');
   const posts = useAssetsPosts(profile?.liveAssets || []);
   // Routes that need routeData (a project, another profile) can't be
   // re-entered without it, so those fall back to the Feed.
   const back = () => nav(fromRoute && !['empresa', 'detalle'].includes(fromRoute) ? fromRoute : 'feed');
   const isMine = !!MY_COMPANY && name === MY_COMPANY;
-  const toPersonal = () => (onPersonal ? onPersonal() : nav('perfil'));
+  const toPersonal = () => (isMine ? (onPersonal ? onPersonal() : nav('perfil')) : setView('owner'));
 
   if (!profile) {
     return (
@@ -35,6 +37,11 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
         No encontramos este perfil. <PBtn variant="secondary" small onClick={back}>Volver</PBtn>
       </div>
     );
+  }
+
+  const owner = isMine ? ME : profile.owner;
+  if (view === 'owner') {
+    return <OwnerProfile nav={nav} profile={profile} owner={owner} isMobile={isMobile} onBack={back} onCompany={() => setView('company')} />;
   }
 
   const following = followed.includes(profile.name);
@@ -51,7 +58,7 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
             {Icons.back} Volver
           </button>
         ) : <span />}
-        {isMine && <IdentitySwitch value="company" company={profile.name} onChange={toPersonal} />}
+        <IdentitySwitch value="company" company={profile.name} onChange={toPersonal} personalLabel={isMine ? 'Personal' : owner.name} />
       </div>
 
       {/* Header */}
@@ -60,17 +67,11 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
         <div style={{ position: 'relative', height: isMobile ? 150 : 230 }}>
           <img src={profile.cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'grayscale(0.3) brightness(0.72)' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%)' }} />
-          {isMine ? (
-            // My company: big hexagon with my round photo as a badge (tap it
-            // to switch to my personal profile).
-            <div style={{ position: 'absolute', left: isMobile ? 16 : 28, bottom: -avatar / 2 }}>
-              <IdentityAvatar mode="company" company={profile.name} size={avatar} onSwap={toPersonal} />
-            </div>
-          ) : (
-            <div style={{ position: 'absolute', left: isMobile ? 16 : 28, bottom: -avatar / 2, clipPath: HEX_CLIP, padding: 5, background: 'var(--surface)' }}>
-              <CompanyAvatar company={profile.name} size={avatar} />
-            </div>
-          )}
+          {/* Big company hexagon with its owner's round photo as a badge
+              (tap it to switch to the owner's personal profile). */}
+          <div style={{ position: 'absolute', left: isMobile ? 16 : 28, bottom: -avatar / 2 }}>
+            <IdentityAvatar mode="company" company={profile.name} size={avatar} onSwap={toPersonal} user={owner} />
+          </div>
         </div>
 
         <div style={{ padding: isMobile ? '12px 16px 18px' : '14px 28px 24px' }}>
@@ -119,9 +120,15 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
           toolbar; the company header above is the magnet zone. */}
       {tab === 'posts' && <FeedBrowser items={posts} nav={nav} />}
 
-      {tab === 'projects' && (
+      {tab === 'projects' && <ProjectsGrid nav={nav} assets={profile.allAssets} isMobile={isMobile} />}
+    </div>
+  );
+}
+
+function ProjectsGrid({ nav, assets, isMobile }) {
+  return (
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
-          {profile.allAssets.map(a => (
+          {assets.map(a => (
             <button key={a.id} onClick={() => nav('detalle', a)}
               style={{ textAlign: 'left', padding: 0, cursor: 'pointer', background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 18, overflow: 'hidden', color: 'inherit' }}>
               <img src={a.img} alt="" style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block' }} />
@@ -138,7 +145,48 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
             </button>
           ))}
         </div>
-      )}
+  );
+}
+
+// The company owner's personal profile (a regular user: round photo, with
+// the company hexagon as the badge that switches back).
+function OwnerProfile({ nav, profile, owner, isMobile, onBack, onCompany }) {
+  const avatar = isMobile ? 84 : 112;
+  return (
+    <div className="g-page" style={{ padding: isMobile ? '16px 16px 40px' : '24px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, minHeight: 28 }}>
+        <button onClick={onBack}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 13 }}>
+          {Icons.back} Volver
+        </button>
+        <IdentitySwitch value="personal" company={profile.name} personalLabel={owner.name} onChange={onCompany} />
+      </div>
+
+      <motion.div key="owner" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+        style={{ background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 24, overflow: 'hidden', marginBottom: 20 }}>
+        <div style={{ position: 'relative', height: isMobile ? 150 : 230, background: owner.gradient }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.35) 100%)' }} />
+          <div style={{ position: 'absolute', left: isMobile ? 16 : 28, bottom: -avatar / 2 }}>
+            <IdentityAvatar mode="personal" company={profile.name} size={avatar} onSwap={onCompany} user={owner} />
+          </div>
+        </div>
+        <div style={{ padding: isMobile ? '12px 16px 18px' : '14px 28px 24px' }}>
+          <div style={{ minHeight: avatar / 2 - 6 }} />
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 22 : 26, color: 'var(--text)', letterSpacing: '-0.02em', marginTop: 10 }}>{owner.name}</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--ter)', marginBottom: 12 }}>@{owner.handle}</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', lineHeight: 1.55, marginBottom: 16 }}>
+            {owner.bio || `Fundador de ${profile.name}.`}{' '}
+            <button onClick={onCompany} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', fontWeight: 700, color: 'var(--accent-text)' }}>Ver {profile.name} →</button>
+          </div>
+          <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', fontFamily: 'var(--font-b)', fontSize: 14 }}>
+            <span><b style={{ color: 'var(--text)' }}>1</b> <span style={{ color: 'var(--ter)' }}>Empresa</span></span>
+            <span><b style={{ color: 'var(--text)' }}>{profile.allAssets.length}</b> <span style={{ color: 'var(--ter)' }}>Proyectos</span></span>
+          </div>
+        </div>
+      </motion.div>
+
+      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 12 }}>Proyectos que lidera</div>
+      <ProjectsGrid nav={nav} assets={profile.allAssets} isMobile={isMobile} />
     </div>
   );
 }

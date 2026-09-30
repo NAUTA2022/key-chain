@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PCard, PBtn, PTag, PProgress, PImg, PDiv, PDonut, PArea, PScanLink, Icons, CompanyTag } from '../components/ui';
+import { PCard, PBtn, PTag, PProgress, PImg, PDiv, PDonut, PArea, PScanLink, Icons, CompanyTag, CompanyAvatar } from '../components/ui';
 import { fmtUSD, fmtUSD2, MY_HOLDINGS } from '../data';
 import { addPendingPayment } from '../lib/keypayInbox';
 import { DEV_MODE } from '../lib/devSession';
@@ -153,9 +153,7 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
       <PCard style={{ padding:'18px 20px', marginBottom:18 }}>
         <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:12 }}>Panel del emisor · Publicar como {issuerName}</div>
         <div style={{ display:'flex', gap:12 }}>
-          <div style={{ width:36, height:36, borderRadius:'50%', background:'var(--accent-bg)', color:'var(--accent-text)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-h)', fontWeight:700, fontSize:14, flexShrink:0 }}>
-            {issuerName.slice(0,1)}
-          </div>
+          <CompanyAvatar company={issuerName} size={36} />
           <div style={{ flex:1, minWidth:0 }}>
             <textarea value={text} onChange={e => setText(e.target.value)} rows={3}
               placeholder="Escribí una actualización para tus inversores..."
@@ -227,9 +225,7 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
               borderRadius:16, padding:'16px 18px', transition:'background 0.4s ease, border-color 0.4s ease',
             }}>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-              <div style={{ width:36, height:36, borderRadius:'50%', background:'var(--accent-bg)', color:'var(--accent-text)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-h)', fontWeight:700, fontSize:14, flexShrink:0 }}>
-                {issuerName.slice(0,1)}
-              </div>
+              <CompanyAvatar company={issuerName} size={36} />
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:13.5, color:'var(--text)' }}>{issuerName}</div>
                 <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>{post.date}</div>

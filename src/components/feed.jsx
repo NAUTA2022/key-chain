@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { PBtn } from './ui';
+import { PBtn, CompanyAvatar } from './ui';
 
 // Shared pieces of a feed post, used by a project's Feed tab
 // (pages/ProductDetail) and by the global Feed (pages/GlobalFeed).
@@ -81,7 +81,8 @@ export function PostComments({ comments, onAdd, issuerName, isOwner }) {
     onAdd(draft.trim());
     setDraft('');
   };
-  const avatar = (label, isIssuer) => (
+  // The company answers with its hexagon; everyone else is a round user.
+  const avatar = (label, isIssuer) => isIssuer ? <CompanyAvatar company={label} size={28} /> : (
     <div style={{ width:28, height:28, borderRadius:'50%', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-h)', fontWeight:700, fontSize:12,
       background: isIssuer ? 'var(--accent-bg)' : 'var(--surface2)', color: isIssuer ? 'var(--accent-text)' : 'var(--sec)' }}>
       {label.slice(0,1).toUpperCase()}

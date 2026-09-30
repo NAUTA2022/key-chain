@@ -172,6 +172,38 @@ const PROFILE_BIO = {
   LogiCorp:   'Centros logísticos y de distribución last-mile pre-alquilados.',
 };
 
+// Owner (founder) behind each company: the personal account the company
+// profile can switch to. Demo data until issuers have real accounts.
+const PROFILE_OWNER = {
+  KEYCHAIN:   'Andrés Quinteros',
+  AutoMax:    'Lucía Fernández',
+  CarRent:    'Martín Salvatierra',
+  AgroToken:  'Joaquín Pereyra',
+  VitivinARG: 'Valentina Ocampo',
+  DroneAgro:  'Tomás Giménez',
+  SkyOps:     'Camila Rossi',
+  PropChain:  'Javier Morales',
+  EuroRent:   'Elena García',
+  HomeChain:  'Sofía Benítez',
+  LogiCorp:   'Diego Herrera',
+};
+const OWNER_GRADIENTS = [
+  'linear-gradient(135deg, #f97316, #ec4899)', 'linear-gradient(135deg, #10b981, #3b82f6)',
+  'linear-gradient(135deg, #f59e0b, #ef4444)', 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+  'linear-gradient(135deg, #84cc16, #0ea5e9)', 'linear-gradient(135deg, #e11d48, #7c3aed)',
+];
+function ownerOf(company) {
+  const name = PROFILE_OWNER[company] || `Equipo ${company}`;
+  const hash = [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+  return {
+    name,
+    initial: name.slice(0, 1).toUpperCase(),
+    handle: name.toLowerCase().normalize('NFD').replace(/[^a-z]/g, ''),
+    gradient: OWNER_GRADIENTS[hash % OWNER_GRADIENTS.length],
+    bio: `Fundador y CEO de ${company}.`,
+  };
+}
+
 // Projects shown on an issuer's profile: its real ones, plus the QA fixture
 // the signed-in user owns (isMine) so "my company" has a profile to open.
 const profileAssets = (name) => RWA_ASSETS.filter(a => issuerNameOf(a) === name && (a.cat !== 'QA' || a.isMine));
@@ -187,6 +219,7 @@ function buildProfile(name, liveAssets, allAssets) {
     verified: name === 'KEYCHAIN' || allAssets.some(a => a.issuer === 'verified' || a.issuer === 'keychain'),
     projects: liveAssets.length,
     followers: investors * 7,
+    owner: ownerOf(name),
     liveAssets,
     // Every project this issuer has, including ones still raising.
     allAssets,

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { SquareMedia, PostComments } from './feed';
-import { Icons } from './ui';
+import { Icons, CompanyAvatar } from './ui';
 import { setProjectPosts, issuerNameOf, postMedia } from '../lib/projectFeed';
 
 // One post as shown in the global Feed and on a company profile, laid out
-// like Instagram: project header (issuer name opens the company profile),
+// like Instagram: company header (hexagon + name open its profile; the
+// project name opens the project),
 // square media, likes/comments/"Ver proyecto", then the caption.
 export default function FeedPostCard({ post, asset, nav }) {
   const [open, setOpen] = useState(false);
@@ -25,14 +26,18 @@ export default function FeedPostCard({ post, asset, nav }) {
   return (
     <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 16, padding: '16px 18px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <img src={asset.img} alt="" style={{ width: 38, height: 38, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
+        {/* Posts are always the company's: its hexagon + name lead, the
+            project is the secondary line. */}
+        <button onClick={() => nav('empresa', issuer)} aria-label={`Ver perfil de ${issuer}`} style={{ ...linkStyle, display: 'flex', flexShrink: 0 }}>
+          <CompanyAvatar company={issuer} size={38} />
+        </button>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <button onClick={() => nav('detalle', asset)}
+          <button onClick={() => nav('empresa', issuer)}
             style={{ ...linkStyle, textAlign: 'left', maxWidth: '100%', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
-            {asset.name}
+            {issuer}
           </button>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)' }}>
-            <button onClick={() => nav('empresa', issuer)} style={{ ...linkStyle, fontWeight: 600, color: 'var(--sec)' }}>{issuer}</button>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <button onClick={() => nav('detalle', asset)} style={{ ...linkStyle, fontWeight: 600, color: 'var(--sec)' }}>{asset.name}</button>
             {' · '}{asset.cat} · {post.date}
           </div>
         </div>
