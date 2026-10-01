@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, useSpring, useTransform } from 'framer-motion';
 import { fmtUSD } from '../data';
 
 // "Nivel y logros" as a set of widget tiles (weather-app style): level
@@ -92,21 +93,61 @@ function LevelStairs({ d }) {
 }
 
 // ─── Invested amount (humidity-style wave) ────────────────────────────────────
+// The water keeps level like a real liquid: on phones it follows the
+// gyroscope (left-right tilt rotates the surface the other way, front-back
+// tilt sloshes the level a little); with a mouse it tilts towards the
+// pointer. iOS only exposes the gyroscope after a tap, so the tile asks once.
+function useLiquidTilt() {
+  const angle = useSpring(0, { stiffness: 60, damping: 9, mass: 0.8 });
+  const slosh = useSpring(0, { stiffness: 50, damping: 8 });
+  const [needsTap, setNeedsTap] = useState(
+    () => typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function',
+  );
+  useEffect(() => {
+    const onTilt = (e) => {
+      if (e.gamma == null) return;
+      angle.set(-clamp(e.gamma, -28, 28));
+      slosh.set(clamp(((e.beta ?? 45) - 45) / 4, -8, 8));
+    };
+    window.addEventListener('deviceorientation', onTilt);
+    return () => window.removeEventListener('deviceorientation', onTilt);
+  }, [angle, slosh]);
+  const enable = async () => {
+    if (!needsTap) return;
+    try { await DeviceOrientationEvent.requestPermission(); } catch { /* denied: stays still */ }
+    setNeedsTap(false);
+  };
+  const onPointerMove = (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const r = e.currentTarget.getBoundingClientRect();
+    angle.set(((e.clientX - r.left) / r.width - 0.5) * -16);
+  };
+  const onPointerLeave = () => angle.set(0);
+  return { angle, slosh, needsTap, enable, onPointerMove, onPointerLeave };
+}
+
 function WaveFill({ pct, label, sub }) {
   const h = 22 + pct * 0.5; // % of tile filled
   const wave = 'M0 10 Q 25 0 50 10 T 100 10 T 150 10 T 200 10 V 40 H 0 Z';
+  const tilt = useLiquidTilt();
+  const level = useTransform(tilt.slosh, v => `${h + v}%`);
   return (
     <>
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: `${h}%`, zIndex: 0 }}>
-        <motion.svg viewBox="0 0 200 40" preserveAspectRatio="none" animate={{ x: ['0%', '-50%'] }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-          style={{ position: 'absolute', top: -16, left: 0, width: '200%', height: 22 }}>
-          <path d={wave} fill="#14c8b4" />
-        </motion.svg>
-        <div style={{ position: 'absolute', inset: 0, top: 4, background: 'linear-gradient(180deg, #14c8b4, #0fb3a1)' }} />
+      <div onClick={tilt.enable} onPointerMove={tilt.onPointerMove} onPointerLeave={tilt.onPointerLeave}
+        style={{ position: 'absolute', inset: 0, zIndex: 1, cursor: tilt.needsTap ? 'pointer' : 'default' }}>
+        {/* Wider than the tile so the corners stay full while it rotates */}
+        <motion.div style={{ position: 'absolute', left: '-100%', right: '-100%', bottom: '-30%', height: level, rotate: tilt.angle, transformOrigin: '50% 100%', paddingBottom: '30%', boxSizing: 'content-box' }}>
+          <motion.svg viewBox="0 0 200 40" preserveAspectRatio="none" animate={{ x: ['0%', '-50%'] }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+            style={{ position: 'absolute', top: -16, left: 0, width: '200%', height: 22 }}>
+            <path d={wave} fill="#14c8b4" />
+          </motion.svg>
+          <div style={{ position: 'absolute', inset: 0, top: 4, background: 'linear-gradient(180deg, #14c8b4, #0fb3a1)' }} />
+        </motion.div>
       </div>
-      <div style={{ marginTop: 'auto', position: 'relative', zIndex: 2 }}>
+      <div style={{ marginTop: 'auto', position: 'relative', zIndex: 2, pointerEvents: 'none' }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 26, color: '#fff', letterSpacing: '-0.02em', textShadow: '0 1px 2px rgba(0,0,0,0.12)' }}>{label}</div>
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'rgba(255,255,255,0.9)' }}>{sub}</div>
+        {tilt.needsTap && <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Tocá para mover el agua con el teléfono</div>}
       </div>
     </>
   );
