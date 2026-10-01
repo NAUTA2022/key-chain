@@ -2,8 +2,8 @@ import { motion } from 'framer-motion';
 import { fmtUSD } from '../data';
 
 // "Nivel y logros" as a set of widget tiles (weather-app style): level
-// progress line, invested-amount wave, reputation gauge, return scale,
-// diversification compass and seniority arc, then every achievement with its
+// staircase, invested-amount wave, reputation gauge, return scale,
+// diversification compass and seniority timeline, then every achievement with its
 // progress. `d` = { level, invested, ret, rep, months, since, cats: [[cat, value]], yieldEarned, holdings }.
 
 const LEVELS = [
@@ -52,43 +52,52 @@ const I = {
   trophy: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0z"/><path d="M17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/></svg>,
 };
 
-// ─── Level progress (temperature-style line) ──────────────────────────────────
-function LevelLine({ d }) {
+// ─── Level progress (staircase) ───────────────────────────────────────────────
+// One step per level, each higher than the last. Reached steps are filled,
+// the next one fills with the progress towards it, and a marker sits on the
+// current step.
+function LevelStairs({ d }) {
   const idx = d.level - 1;
   const next = LEVELS[Math.min(idx + 1, 4)];
-  const frac = d.level >= 5 ? 0 : clamp((d.invested - LEVELS[idx].min) / (next.min - LEVELS[idx].min));
-  const X = (i) => 10 + i * 20;                // % across — centred over each label column
-  const Y = (i) => 86 - i * 17;                // % down the plot (higher level = higher)
-  const cx = X(idx + frac), cy = Y(idx + frac);
-  const pts = LEVELS.map((_, i) => `${X(i)},${Y(i)}`);
+  const frac = d.level >= 5 ? 1 : clamp((d.invested - LEVELS[idx].min) / (next.min - LEVELS[idx].min));
+  const STEP_H = [22, 38, 54, 70, 86];
   return (
-    <>
-      <div style={{ position: 'relative', height: 92, margin: '0 -18px' }}>
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-          <defs>
-            <linearGradient id="lvl-line" x1="0" x2="1"><stop offset="0" stopColor="#8247E5" /><stop offset="1" stopColor="#3b82f6" /></linearGradient>
-          </defs>
-          {LEVELS.map((_, i) => (
-            <line key={i} x1={X(i)} x2={X(i)} y1={Y(i)} y2="100" stroke="var(--border)" strokeWidth="0.4" strokeDasharray="1.5 1.5" vectorEffect="non-scaling-stroke" />
-          ))}
-          <line x1="0" x2="100" y1="99.5" y2="99.5" stroke="var(--border)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-          <polyline points={pts.join(' ')} fill="none" stroke="var(--border)" strokeWidth="2" strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
-          <polyline points={[...pts.slice(0, idx + 1), `${cx},${cy}`].join(' ')} fill="none" stroke="url(#lvl-line)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-        </svg>
-        <Knob color="#a78bfa" style={{ left: `${cx}%`, top: `${cy}%` }} />
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', margin: '8px -18px 0', padding: '0 0' }}>
-        {LEVELS.map(l => {
-          const on = l.n === d.level;
-          return (
-            <div key={l.n} style={{ textAlign: 'center', fontFamily: 'var(--font-b)' }}>
-              <div style={{ fontSize: 11.5, color: on ? 'var(--text)' : 'var(--ter)', fontWeight: on ? 700 : 500 }}>N{l.n} · {l.name}</div>
-              <div style={{ fontSize: 13, color: on ? 'var(--text)' : 'var(--sec)', fontWeight: on ? 800 : 600, marginTop: 2 }}>{fmtK(l.min)}</div>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4, alignItems: 'end', marginTop: 'auto' }}>
+      {LEVELS.map((l, i) => {
+        const reached = i <= idx, isNext = i === idx + 1, on = i === idx;
+        return (
+          <div key={l.n} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+            <div style={{ height: 30, position: 'relative' }}>
+              {on && (
+                <motion.div initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
+                  style={{ position: 'absolute', left: '50%', bottom: 4, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #8247E5, #3b82f6)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>Estás acá</span>
+                  <span style={{ width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid #5b5ff0' }} />
+                </motion.div>
+              )}
             </div>
-          );
-        })}
-      </div>
-    </>
+            <div style={{
+              height: STEP_H[i], borderRadius: '10px 10px 4px 4px', position: 'relative', overflow: 'hidden',
+              background: reached ? 'linear-gradient(180deg, #8b5cf6, #3b82f6)' : 'var(--surface2)',
+              boxShadow: on ? '0 6px 18px rgba(99,102,241,0.35)' : 'none',
+              border: reached ? 'none' : '1px dashed var(--border)',
+            }}>
+              {isNext && (
+                <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: `${frac * 100}%`, background: 'linear-gradient(180deg, rgba(139,92,246,0.45), rgba(59,130,246,0.45))' }} />
+              )}
+              {isNext && (
+                <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>{Math.round(frac * 100)}%</span>
+              )}
+            </div>
+            <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', marginTop: 8 }}>
+              <div style={{ fontSize: 11.5, color: on ? 'var(--text)' : 'var(--ter)', fontWeight: 700 }}>N{l.n}</div>
+              <div style={{ fontSize: 11, color: on ? 'var(--text)' : 'var(--ter)', fontWeight: on ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.name}</div>
+              <div style={{ fontSize: 13, color: reached ? 'var(--text)' : 'var(--sec)', fontWeight: on ? 800 : 600, marginTop: 2 }}>{fmtK(l.min)}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -194,34 +203,69 @@ function Compass({ cats }) {
   );
 }
 
-// ─── Seniority (sunrise-style arc) ────────────────────────────────────────────
-function SeniorityArc({ months, since }) {
-  const goal = months >= 24 ? 36 : 24;
-  const t = clamp(months / goal);
-  // Sine arc across the tile: y = 70 - 46*sin(pi*x)
-  const path = (from, to) => Array.from({ length: 41 }, (_, i) => {
-    const x = from + ((to - from) * i) / 40;
-    return `${i ? 'L' : 'M'} ${x * 100} ${70 - 46 * Math.sin(Math.PI * x)}`;
-  }).join(' ');
+// ─── Seniority (timeline) ─────────────────────────────────────────────────────
+// From the sign-up date through the seniority badges (6 months, 1, 2 and 3
+// years); the line fills up to today.
+const MONTHS_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const addMonths = (label, n) => {
+  const [m, y] = String(label).split(' ');
+  const i = MONTHS_ES.indexOf(m);
+  if (i < 0 || !y) return '';
+  const t = Number(y) * 12 + i + n;
+  return `${MONTHS_ES[t % 12]} ${Math.floor(t / 12)}`;
+};
+function SeniorityTimeline({ months, since }) {
+  const stops = [
+    { m: 0, label: 'Alta' },
+    { m: 6, label: '6 meses' },
+    { m: 12, label: '1 año' },
+    { m: 24, label: '2 años' },
+    { m: 36, label: '3 años' },
+  ];
+  // Evenly spaced stops; today is placed between the two around it.
+  const pos = (mm) => {
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (mm <= stops[i + 1].m) return (i + (mm - stops[i].m) / (stops[i + 1].m - stops[i].m)) / (stops.length - 1);
+    }
+    return 1;
+  };
+  const now = pos(months);
+  const nextStop = stops.find(st => st.m > months);
   return (
-    <>
-      <div style={{ position: 'relative', height: 92, margin: '0 -18px' }}>
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-          <defs>
-            <linearGradient id="sen-arc" x1="0" x2="1"><stop offset="0" stopColor="#f59e0b" /><stop offset="1" stopColor="#f97316" /></linearGradient>
-          </defs>
-          <line x1="0" x2="100" y1="70" y2="70" stroke="var(--border)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-          <path d={path(0, 1)} fill="none" stroke="var(--border)" strokeWidth="3" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          <path d={path(0, t)} fill="none" stroke="url(#sen-arc)" strokeWidth="5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        </svg>
-        <Knob color="#fbbf24" size={22} style={{ left: `${t * 100}%`, top: `${70 - 46 * Math.sin(Math.PI * t)}%` }} />
+    <div style={{ marginTop: 'auto' }}>
+      <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 18 }}>
+        <b style={{ color: 'var(--text)', fontSize: 22, fontFamily: 'var(--font-h)' }}>{months}</b> meses en KEYCHAIN
+        {nextStop && <span style={{ color: 'var(--ter)' }}> · próxima insignia: {nextStop.label} en {nextStop.m - months} {nextStop.m - months === 1 ? 'mes' : 'meses'}</span>}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontFamily: 'var(--font-b)', fontSize: 13 }}>
-        <span style={{ color: 'var(--sec)' }}>↑ <b style={{ color: 'var(--text)' }}>{since}</b> · alta</span>
-        <span style={{ color: 'var(--ter)' }}><b style={{ color: 'var(--text)' }}>{months}</b> de {goal} meses</span>
-        <span style={{ color: 'var(--sec)' }}><b style={{ color: 'var(--text)' }}>{goal / 12} años</b> · insignia ↓</span>
+      <div style={{ position: 'relative', height: 26, margin: '0 22px' }}>
+        <div style={{ position: 'absolute', left: 0, right: 0, top: 11, height: 4, borderRadius: 99, background: 'var(--surface2)' }} />
+        <motion.div initial={{ width: 0 }} animate={{ width: `${now * 100}%` }} transition={{ duration: 0.8, ease: 'easeOut' }}
+          style={{ position: 'absolute', left: 0, top: 11, height: 4, borderRadius: 99, background: 'linear-gradient(90deg, #f59e0b, #f97316)' }} />
+        {stops.map((st, i) => {
+          const done = months >= st.m;
+          return (
+            <div key={st.m} style={{
+              position: 'absolute', left: `${(i / (stops.length - 1)) * 100}%`, top: 13, transform: 'translate(-50%, -50%)',
+              width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: done ? 'linear-gradient(135deg, #f59e0b, #f97316)' : 'var(--surface)', border: done ? 'none' : '2px solid var(--border)',
+              color: '#fff', fontSize: 10, fontWeight: 800, zIndex: 2,
+            }}>{done ? '✓' : ''}</div>
+          );
+        })}
+        <Knob color="#fbbf24" size={16} style={{ left: `${now * 100}%`, top: 13 }} />
       </div>
-    </>
+      <div style={{ position: 'relative', height: 34, margin: '8px 22px 0' }}>
+        {stops.map((st, i) => {
+          const done = months >= st.m;
+          return (
+            <div key={st.m} style={{ position: 'absolute', left: `${(i / (stops.length - 1)) * 100}%`, transform: 'translateX(-50%)', textAlign: 'center', fontFamily: 'var(--font-b)', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: done ? 'var(--text)' : 'var(--ter)' }}>{st.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--ter)' }}>{i === 0 ? since : addMonths(since, st.m)}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -277,7 +321,7 @@ export default function LevelWidgets({ d, isMobile }) {
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: 14 }}>
         <Tile icon={I.level} color="#8247E5" title={`Nivel ${d.level} · ${LEVELS[d.level - 1].name}`} span={2}>
-          <LevelLine d={d} />
+          <LevelStairs d={d} />
         </Tile>
         <Tile icon={I.wave} color="#14b8a6" title="Invertido">
           <WaveFill pct={pctNext} label={fmtUSD(d.invested)} sub={d.level >= 5 ? 'Nivel máximo' : `${fmtUSD(toNext)} para N${d.level + 1}`} />
@@ -292,7 +336,7 @@ export default function LevelWidgets({ d, isMobile }) {
           <Compass cats={d.cats} />
         </Tile>
         <Tile icon={I.sun} color="#f59e0b" title="Antigüedad" span={2}>
-          <SeniorityArc months={d.months} since={d.since} />
+          <SeniorityTimeline months={d.months} since={d.since} />
         </Tile>
       </div>
 
