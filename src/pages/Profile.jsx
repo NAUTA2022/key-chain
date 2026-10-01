@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PCard, PBtn, PTag, Icons } from '../components/ui';
 import { IdentitySwitch } from '../components/IdentityAvatar';
 import IdentityAvatar from '../components/IdentityAvatar';
+import LevelWidgets from '../components/LevelWidgets';
 import { AuroraCover } from '../components/ProfileHero';
 import CompanyProfile from './CompanyProfile';
 import { ME, MY_COMPANY } from '../lib/me';
@@ -105,6 +106,17 @@ export default function Profile({ nav, person, company: personCompany, onCompany
     ...(isMe ? [['actividad', 'Actividad'], ['cuenta', 'Cuenta y seguridad']] : []),
   ];
   const levelCard = <LevelCard lv={level} hint={levelHint} stats={levelStats} />;
+  const cats = Object.entries(holdings.reduce((m, h) => ({ ...m, [h.asset.cat]: (m[h.asset.cat] || 0) + h.current }), {})).sort((x, y) => y[1] - x[1]);
+  const firstSince = holdings.map(h => h.since).sort((x, y) => monthsSince(y) - monthsSince(x))[0];
+  const levelData = {
+    level, holdings: holdings.length, cats,
+    invested: isMe ? 40120 : pf.invested,
+    ret: isMe ? 15.6 : pf.ret,
+    yieldEarned: isMe ? 4599 : pf.yieldEarned,
+    rep: isMe ? 4.8 : (user.rep ?? 4.8),
+    months: isMe ? 16 : Math.max(1, monthsSince(firstSince)),
+    since: isMe ? 'Mar 2025' : firstSince || '—',
+  };
   const achCard = <AchievementsCard achievements={achievements} />;
   const counts = [
     [String(holdings.length), 'Inversiones', () => setSection('inversiones')],
@@ -213,12 +225,7 @@ export default function Profile({ nav, person, company: personCompany, onCompany
         </div>
       )}
 
-      {section === 'logros' && (
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) minmax(0,1fr)', gap: 20, alignItems: 'start' }}>
-          {levelCard}
-          {achCard}
-        </div>
-      )}
+      {section === 'logros' && <LevelWidgets isMobile={isMobile} d={levelData} />}
 
       {section === 'actividad' && isMe && <ActivityCard />}
 
@@ -230,6 +237,14 @@ export default function Profile({ nav, person, company: personCompany, onCompany
       )}
     </div>
   );
+}
+
+// Months from a "Mar 2025"-style date to the demo's today (Jun 2026).
+const MONTH_IDX = { Ene: 0, Feb: 1, Mar: 2, Abr: 3, May: 4, Jun: 5, Jul: 6, Ago: 7, Sep: 8, Oct: 9, Nov: 10, Dic: 11 };
+function monthsSince(label) {
+  const [m, y] = String(label || '').split(' ');
+  if (!(m in MONTH_IDX) || !y) return 0;
+  return (2026 - Number(y)) * 12 + (5 - MONTH_IDX[m]);
 }
 
 // Compact level system for the profile header: badge, 5-step track and
