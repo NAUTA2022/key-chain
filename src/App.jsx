@@ -261,7 +261,7 @@ function KeychainApp() {
   const account = useSessionAccount();
   const navigate = useNavigate();
   const [view, setView]           = useState('landing');
-  const [theme, setTheme]         = useState('dark');
+  const [theme, setTheme]         = useState('light');
   const [palette, setPalette]     = useState('mono');
   const [font, setFont]           = useState('moderna');
   const [rubro, setRubro]         = useState('Todos');
