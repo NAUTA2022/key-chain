@@ -5,7 +5,7 @@ import FeedBrowser from '../components/FeedBrowser';
 import { VerifiedBadge } from '../components/ProfileCard';
 import { profileByName, useFollowing, useAssetsPosts, fmtCount } from '../lib/projectFeed';
 import { useMobile } from '../hooks/useMobile';
-import IdentityAvatar, { IdentitySwitch } from '../components/IdentityAvatar';
+import IdentityAvatar from '../components/IdentityAvatar';
 import Profile from './Profile';
 import { CompanySummary, CompanyAnalytics, CompanyTrust, CompanyReviews } from '../components/CompanySections';
 import { seedReviews } from '../lib/companyStats';
@@ -70,15 +70,16 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
 
   return (
     <div className="g-page" style={{ padding: isMobile ? '16px 16px 40px' : '24px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, minHeight: embedded && !isMine ? 0 : 28 }}>
-        {!embedded ? (
+      {/* Switching to the owner's personal profile is done from the round
+          photo on the hexagon's corner. */}
+      {!embedded && (
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14, minHeight: 28 }}>
           <button onClick={back}
             style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 13 }}>
             {Icons.back} Volver
           </button>
-        ) : <span />}
-        <IdentitySwitch value="company" company={profile.name} onChange={toPersonal} personalLabel={isMine ? 'Personal' : owner.name} />
-      </div>
+        </div>
+      )}
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}

@@ -49,27 +49,3 @@ export default function IdentityAvatar({ mode, company, size, onSwap, ring = 'va
     </div>
   );
 }
-
-// Personal / Empresa switch for the signed-in user's own profiles.
-export function IdentitySwitch({ value, onChange, company, personalLabel = 'Personal' }) {
-  const opt = (id, label, icon) => {
-    const on = value === id;
-    return (
-      <button key={id} onClick={() => !on && onChange(id)} aria-pressed={on}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 7, padding: '7px 14px', borderRadius: 999, border: 'none', cursor: on ? 'default' : 'pointer',
-          background: on ? 'var(--text)' : 'transparent', color: on ? 'var(--bg)' : 'var(--sec)',
-          fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 12.5, transition: 'background 0.2s ease, color 0.2s ease',
-        }}>
-        {icon}{label}
-      </button>
-    );
-  };
-  return (
-    <div role="group" aria-label="Cambiar de perfil"
-      style={{ display: 'inline-flex', gap: 2, padding: 3, borderRadius: 999, background: 'var(--gl-panel-strong)', border: '1px solid var(--gl-bd)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-      {opt('personal', personalLabel, <span style={{ width: 12, height: 12, borderRadius: '50%', border: '1.6px solid currentColor' }} />)}
-      {opt('company', company || 'Empresa', <span style={{ width: 12, height: 12, clipPath: HEX_CLIP, background: 'currentColor' }} />)}
-    </div>
-  );
-}

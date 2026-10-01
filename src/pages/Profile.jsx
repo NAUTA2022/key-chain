@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useMobile } from '../hooks/useMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PCard, PBtn, PTag, Icons } from '../components/ui';
-import { IdentitySwitch } from '../components/IdentityAvatar';
 import IdentityAvatar from '../components/IdentityAvatar';
 import LevelWidgets from '../components/LevelWidgets';
 import { AuroraCover } from '../components/ProfileHero';
@@ -126,15 +125,15 @@ export default function Profile({ nav, person, company: personCompany, onCompany
 
   return (
     <div className="g-page" style={{ padding: isMobile ? '16px 16px 40px' : '24px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, minHeight: onBack || company ? 28 : 0 }}>
-        {onBack ? (
+      {/* Switching to the company is done from the hexagon on the photo's corner. */}
+      {onBack && (
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14, minHeight: 28 }}>
           <button onClick={onBack}
             style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 13 }}>
             {Icons.back} Volver
           </button>
-        ) : <span />}
-        {company && <IdentitySwitch value="personal" company={company} personalLabel={isMe ? 'Personal' : user.name} onChange={toCompany} />}
-      </div>
+        </div>
+      )}
 
       {/* Header — same card as the company profile, round photo instead of
           the hexagon (the company's hexagon is its badge) */}
