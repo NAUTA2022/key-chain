@@ -47,10 +47,17 @@ const STAT_COLS = [
 const activityColor = { pos: '#22c55e', invest: '#8247E5', kyc: '#3b82f6' };
 const activityDot   = { pos: '↑', invest: '⬡', kyc: '✓' };
 
-export default function Profile({ nav }) {
+// `person` / `company` / `onCompany`: show this same page for another user
+// (a company's owner) instead of me; the switch then goes back to their
+// company through `onCompany`.
+export default function Profile({ nav, person, company: personCompany, onCompany }) {
   // Personal / Empresa: users who run a company can flip between their own
   // profile and their company's (same page, no navigation).
   const [identity, setIdentity] = useState('personal');
+  const isMe = !person;
+  const user = person || ME;
+  const company = isMe ? MY_COMPANY : personCompany;
+  const toCompany = () => { if (!company) return; if (isMe) setIdentity('company'); else onCompany?.(); };
   const [tab,   setTab]   = useState('kyc');
   const [twofa, setTwofa] = useState({ totp: true, passkey: false, sms: false });
   const [priv,  setPriv]  = useState([true, false, true, true]);
@@ -63,13 +70,13 @@ export default function Profile({ nav }) {
     <div style={{ padding: '0 0 60px', maxWidth: 1100, margin: '0 auto' }}>
 
       <ProfileHero
-        user={ME}
-        company={MY_COMPANY}
-        onSwap={() => MY_COMPANY && setIdentity('company')}
-        switchSlot={MY_COMPANY && <IdentitySwitch value="personal" company={MY_COMPANY} onChange={() => setIdentity('company')} />}
+        user={user}
+        company={company}
+        onSwap={toCompany}
+        switchSlot={company && <IdentitySwitch value="personal" company={company} personalLabel={isMe ? 'Personal' : user.name} onChange={toCompany} />}
         tags={[['KYC ✓', 'green'], ['Nivel 4', 'purple']]}
-        subtitle="0x4a9fE2b8…d82c · max.rodriguez@gmail.com · Miembro desde Mar 2025"
-        action={<PBtn variant="secondary" small style={{ marginBottom: 6 }}>Editar perfil</PBtn>}
+        subtitle={isMe ? '0x4a9fE2b8…d82c · max.rodriguez@gmail.com · Miembro desde Mar 2025' : `@${user.handle} · ${user.bio || `Fundador de ${company}.`}`}
+        action={isMe && <PBtn variant="secondary" small style={{ marginBottom: 6 }}>Editar perfil</PBtn>}
       />
 
       <div style={{ padding: '0 32px', position: 'relative' }}>

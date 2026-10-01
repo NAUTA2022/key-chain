@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { PBtn, PCard, PProgress, Icons } from '../components/ui';
+import { PBtn, PProgress, Icons } from '../components/ui';
 import { fmtUSD } from '../data';
 import FeedBrowser from '../components/FeedBrowser';
 import { VerifiedBadge } from '../components/ProfileCard';
 import { profileByName, useFollowing, useAssetsPosts, fmtCount } from '../lib/projectFeed';
 import { useMobile } from '../hooks/useMobile';
 import IdentityAvatar, { IdentitySwitch } from '../components/IdentityAvatar';
-import ProfileHero from '../components/ProfileHero';
+import Profile from './Profile';
 import { MY_COMPANY, ME } from '../lib/me';
 
 // Company (issuer) profile — opened from the Feed's featured profiles or any
@@ -42,7 +42,8 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
 
   const owner = isMine ? ME : profile.owner;
   if (view === 'owner') {
-    return <OwnerProfile nav={nav} profile={profile} owner={owner} isMobile={isMobile} onBack={back} onCompany={() => setView('company')} />;
+    // Exactly the same page as the sidebar's Perfil, with the owner's data.
+    return <Profile nav={nav} person={owner} company={profile.name} onCompany={() => setView('company')} />;
   }
 
   const following = followed.includes(profile.name);
@@ -146,53 +147,5 @@ function ProjectsGrid({ nav, assets, isMobile }) {
             </button>
           ))}
         </div>
-  );
-}
-
-// The company owner's personal profile: same layout as my own Perfil (aurora
-// banner, round photo with the company hexagon as its badge, name + tags,
-// KPI cards), minus the private parts (KYC, documents, security…).
-function OwnerProfile({ nav, profile, owner, isMobile, onBack, onCompany }) {
-  const stats = [
-    ['1', 'Empresas'],
-    [String(profile.allAssets.length), 'Proyectos'],
-    [String(profile.liveAssets.length), 'En operación'],
-    [fmtCount(profile.followers), 'Seguidores de la empresa'],
-  ];
-  return (
-    <div style={{ padding: '0 0 60px', maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ padding: isMobile ? '12px 16px 10px' : '16px 32px 12px' }}>
-        <button onClick={onBack}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 13 }}>
-          {Icons.back} Volver
-        </button>
-      </div>
-
-      <ProfileHero
-        user={owner}
-        company={profile.name}
-        onSwap={onCompany}
-        switchSlot={<IdentitySwitch value="personal" company={profile.name} personalLabel={owner.name} onChange={onCompany} />}
-        tags={[['KYC ✓', 'green'], ['Emisor', 'purple']]}
-        subtitle={<>@{owner.handle} · {owner.bio || `Fundador de ${profile.name}.`}</>}
-        action={<PBtn variant="secondary" small style={{ marginBottom: 6 }} onClick={onCompany}>Ver {profile.name}</PBtn>}
-      />
-
-      <div style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginTop: 22 }}>
-          {stats.map(([val, lbl], i) => (
-            <motion.div key={lbl} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
-              <PCard style={{ padding: '16px 20px' }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 5 }}>{lbl}</div>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 22, color: 'var(--text)', letterSpacing: '-0.03em' }}>{val}</div>
-              </PCard>
-            </motion.div>
-          ))}
-        </div>
-
-        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', margin: '26px 0 12px' }}>Proyectos que lidera</div>
-        <ProjectsGrid nav={nav} assets={profile.allAssets} isMobile={isMobile} />
-      </div>
-    </div>
   );
 }
