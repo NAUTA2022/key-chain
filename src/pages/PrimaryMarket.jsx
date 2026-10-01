@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PCard, PBtn, PSection, PTag, PChip, PStat, PProgress, PImg, Icons, CompanyTag } from '../components/ui';
+import { PCard, PBtn, PSection, PTag, PChip, PStat, PImg, Icons, CompanyTag } from '../components/ui';
 import { RWA_ASSETS, RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD, fmtUSD2 } from '../data';
+import AssetCard from '../components/AssetCard';
 
 // TEMP DEV FILTER — lets a developer jump straight to any of the 7 QA fixture
 // states (see devNote on each asset in data/index.js) without hunting through
@@ -88,118 +89,6 @@ function FilterGroup({ label, value, onChange, options, labels }) {
   );
 }
 
-// ─── Asset card ───────────────────────────────────────────────────────────────
-// PStat hardcodes its own label/value colors (var(--ter)/var(--text)), which
-// flip dark in light theme — unreadable over a photo scrim that's always
-// dark regardless of the app's theme. This is the same stat shape with
-// colors fixed to white so it stays legible either way.
-function OverlayStat({ label, value, align = 'flex-start' }) {
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:3, alignItems:align }}>
-      <div style={{ fontSize:11, fontFamily:'var(--font-b)', color:'rgba(255,255,255,0.65)', letterSpacing:'0.05em', textTransform:'uppercase' }}>{label}</div>
-      <div style={{ fontSize:18, fontFamily:'var(--font-h)', fontWeight:700, color:'#fff', letterSpacing:'-0.02em' }}>{value}</div>
-    </div>
-  );
-}
-
-// KEYCHAIN's own tokenizations get a distinct full-bleed photo treatment
-// (name/stats readable directly over the image, dark scrim at the bottom)
-// instead of just a glowing border — makes "this one is ours" obvious at a
-// glance rather than something you notice only up close.
-function KeychainAssetCard({ a, left, nav }) {
-  return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
-      <PCard onClick={() => nav('detalle', a)} style={{ height:340, position:'relative' }}>
-        <PImg src={a.img} height="100%" style={{ position:'absolute', inset:0 }}>
-          <div style={{ position:'absolute', top:14, left:14 }}>
-            {/* This card only renders for issuer === 'keychain' — it's a
-                KEYCHAIN tokenization, not AutoMax/AgroToken/etc.'s own
-                listing, even though one of those companies operates it
-                day-to-day. */}
-            <CompanyTag company="KEYCHAIN" cat={a.cat} variant="overlay" />
-          </div>
-          <div style={{ position:'absolute', top:14, right:14 }}>
-            <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
-          </div>
-
-          <div style={{
-            position:'absolute', left:0, right:0, bottom:0, height:'66%',
-            background:'linear-gradient(to top, rgba(6,8,14,0.92) 0%, rgba(6,8,14,0.65) 48%, transparent 100%)',
-            display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:'18px 18px 16px',
-          }}>
-            <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18, color:'#fff', letterSpacing:'-0.02em' }}>{a.name}</div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'rgba(255,255,255,0.7)' }}>
-              {Icons.location}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12 }}>{a.location}</span>
-            </div>
-
-            <div style={{ display:'flex', justifyContent:'space-between', marginTop:14 }}>
-              <OverlayStat label="Token" value={fmtUSD(a.tokenPrice)} />
-              <OverlayStat label="APY est." value={`${a.apy}%`} />
-              <OverlayStat label="Disponibles" value={left.toLocaleString()} align="flex-end" />
-            </div>
-
-            <div style={{ marginTop:10 }}>
-              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'rgba(255,255,255,0.65)' }}>Financiado</span>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, fontWeight:700, color:'#fff' }}>{a.sold}%</span>
-              </div>
-              <PProgress value={a.sold} style={{ background:'rgba(255,255,255,0.22)' }} color="#fff" />
-            </div>
-          </div>
-        </PImg>
-      </PCard>
-    </motion.div>
-  );
-}
-
-function AssetCard({ asset: a, nav }) {
-  const left = a.totalTokens - Math.round(a.totalTokens * a.sold / 100);
-  if (a.issuer === 'keychain') return <KeychainAssetCard a={a} left={left} nav={nav} />;
-
-  return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
-      <PCard onClick={() => nav('detalle', a)} style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative' }}>
-        <PImg src={a.img} height={168} className="market-card-img">
-          <div style={{ position:'absolute', top:12, left:12, display:'flex', gap:6, flexWrap:'wrap' }}>
-            <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
-          </div>
-        </PImg>
-
-        <div style={{ padding:'15px 17px 17px', display:'flex', flexDirection:'column', gap:12, flex:1 }}>
-          <div>
-            <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)', letterSpacing:'-0.02em' }}>{a.name}</div>
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'var(--ter)' }}>
-              {Icons.location}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)' }}>{a.location}</span>
-            </div>
-            {a.company && (
-              <CompanyTag company={a.company} cat={a.cat} size="sm" style={{ marginTop:8 }} />
-            )}
-          </div>
-
-          <div style={{ display:'flex', justifyContent:'space-between' }}>
-            <PStat label="Token" value={fmtUSD(a.tokenPrice)} />
-            <PStat label="APY est." value={`${a.apy}%`} accent />
-            <PStat label="Disponibles" value={left.toLocaleString()} style={{ alignItems:'flex-end' }} />
-          </div>
-
-          <div>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)' }}>Financiado</span>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, fontWeight:700, color:'var(--accent-text)' }}>{a.sold}%</span>
-            </div>
-            <PProgress value={a.sold} />
-          </div>
-        </div>
-      </PCard>
-    </motion.div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
   const [search, setSearch] = useState('');
   const [cat, setCat]       = useState('Todos');

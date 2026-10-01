@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { PBtn, PProgress, Icons } from '../components/ui';
-import { fmtUSD } from '../data';
+import { PBtn, Icons } from '../components/ui';
 import FeedBrowser from '../components/FeedBrowser';
 import { VerifiedBadge } from '../components/ProfileCard';
 import { profileByName, useFollowing, useAssetsPosts, fmtCount } from '../lib/projectFeed';
@@ -10,7 +9,7 @@ import IdentityAvatar, { IdentitySwitch } from '../components/IdentityAvatar';
 import Profile from './Profile';
 import { CompanySummary, CompanyAnalytics, CompanyTrust, CompanyReviews } from '../components/CompanySections';
 import { seedReviews } from '../lib/companyStats';
-import { ProjectCode } from '../components/FeedPostCard';
+import AssetCard from '../components/AssetCard';
 import FollowListModal from '../components/FollowList';
 import { companyFollowers } from '../lib/people';
 import { MY_COMPANY, ME } from '../lib/me';
@@ -150,7 +149,7 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
         <CompanySummary {...sectionProps} owner={owner} onOwner={toPersonal} onTab={setTab} />
       )}
 
-      {tab === 'proyectos' && <ProjectsGrid nav={nav} assets={profile.allAssets} isMobile={isMobile} />}
+      {tab === 'proyectos' && <ProjectsGrid nav={nav} assets={profile.allAssets} />}
 
       {/* Milestones of all its projects, with the same browser as the Feed
           (search, filters, magnet toolbar); each post carries the project
@@ -168,28 +167,11 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
   );
 }
 
-function ProjectsGrid({ nav, assets, isMobile }) {
+// Same cards as the marketplace, with each project's identifier.
+function ProjectsGrid({ nav, assets }) {
   return (
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
-          {assets.map(a => (
-            <button key={a.id} onClick={() => nav('detalle', a)}
-              style={{ textAlign: 'left', padding: 0, cursor: 'pointer', background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 18, overflow: 'hidden', color: 'inherit' }}>
-              <img src={a.img} alt="" style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block' }} />
-              <div style={{ padding: '14px 16px 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                  <ProjectCode asset={a} />
-                  <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14.5, color: 'var(--text)' }}>{a.name}</span>
-                </div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginBottom: 12 }}>{a.cat} · {a.location} · {a.stage}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-b)', fontSize: 12.5, marginBottom: 8 }}>
-                  <span style={{ color: 'var(--sec)' }}>Token <b style={{ color: 'var(--text)' }}>{fmtUSD(a.tokenPrice)}</b></span>
-                  <span style={{ color: 'var(--sec)' }}>APY <b style={{ color: 'var(--pos)' }}>{a.apy}%</b></span>
-                  <span style={{ color: 'var(--sec)' }}>{a.sold}% financiado</span>
-                </div>
-                <PProgress value={a.sold} />
-              </div>
-            </button>
-          ))}
-        </div>
+    <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+      {assets.map(a => <AssetCard key={a.id} asset={a} nav={nav} showCode />)}
+    </div>
   );
 }

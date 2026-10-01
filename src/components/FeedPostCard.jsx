@@ -77,13 +77,14 @@ export default function FeedPostCard({ post, asset, nav }) {
 }
 
 // Project identifier chip ("EDF-021"); used on posts, reviews and analytics.
-export function ProjectCode({ asset, onClick }) {
+export function ProjectCode({ asset, onClick, overlay }) {
   const Tag = onClick ? 'button' : 'span';
   return (
     <Tag onClick={onClick} title={asset.name}
       style={{
-        display: 'inline-block', padding: '1px 6px', borderRadius: 6, border: '1px solid var(--border-l)', background: 'var(--surface2)',
-        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 10, fontWeight: 700, letterSpacing: '0.03em', color: 'var(--sec)',
+        display: 'inline-block', padding: '1px 6px', borderRadius: 6, flexShrink: 0,
+        border: overlay ? '1px solid rgba(255,255,255,0.3)' : '1px solid var(--border-l)', background: overlay ? 'rgba(255,255,255,0.14)' : 'var(--surface2)',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 10, fontWeight: 700, letterSpacing: '0.03em', color: overlay ? '#fff' : 'var(--sec)',
         cursor: onClick ? 'pointer' : 'default', verticalAlign: 'middle', lineHeight: 1.5,
       }}>
       {projectCode(asset)}

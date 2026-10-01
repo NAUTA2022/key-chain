@@ -11,7 +11,7 @@ import { holdingsOf, portfolioStats, personSocial } from '../lib/people';
 import { useFollowing, useFollowingPeople, fmtCount } from '../lib/projectFeed';
 import FollowListModal, { FollowButton } from '../components/FollowList';
 import { fmtUSD } from '../data';
-import { ProjectCode } from '../components/FeedPostCard';
+import AssetCard from '../components/AssetCard';
 
 const TABS = [
   ['kyc',  'KYC / Identidad'],
@@ -192,7 +192,7 @@ export default function Profile({ nav, person, company: personCompany, onCompany
           <KpiRow kpis={kpis} isMobile={isMobile} />
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) 340px', gap: 20 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
-              <InvestmentsCard holdings={holdings} stats={pf} isMe={isMe} nav={nav} limit={4} onMore={() => setSection('inversiones')} />
+              <InvestmentsGrid holdings={holdings} stats={pf} isMe={isMe} nav={nav} limit={3} onMore={() => setSection('inversiones')} />
               {levelCard}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
@@ -204,8 +204,8 @@ export default function Profile({ nav, person, company: personCompany, onCompany
       )}
 
       {section === 'inversiones' && (
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) 340px', gap: 20, alignItems: 'start' }}>
-          <InvestmentsCard holdings={holdings} stats={pf} isMe={isMe} nav={nav} />
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) 300px', gap: 20, alignItems: 'start' }}>
+          <InvestmentsGrid holdings={holdings} stats={pf} isMe={isMe} nav={nav} />
           <CategoryBreakdown holdings={holdings} />
         </div>
       )}
@@ -609,55 +609,27 @@ function AccountTabs({ tab, setTab, twofa, setTwofa, priv, setPriv }) {
 }
 
 
-// Portfolio list: every project the person holds tokens in, with its
-// identifier, tokens, current value vs invested and yield collected.
-function InvestmentsCard({ holdings, stats, isMe, nav, limit, onMore }) {
+// Portfolio: the same project cards as the marketplace, each with the
+// person's position (tokens, current value, return) underneath.
+function InvestmentsGrid({ holdings, stats, isMe, nav, limit, onMore }) {
   const shown = limit ? holdings.slice(0, limit) : holdings;
   return (
-    <PCard style={{ padding: '22px 24px' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{isMe ? 'Mis inversiones' : 'Inversiones'} <span style={{ color: 'var(--ter)', fontWeight: 600 }}>({holdings.length})</span></div>
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>Valor actual <b style={{ color: 'var(--text)' }}>{fmtUSD(stats.current)}</b></div>
       </div>
       {holdings.length === 0 && (
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>Todavía no tiene inversiones.</div>
       )}
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {shown.map((h, i) => {
-          const a = h.asset;
-          const diff = h.invested ? ((h.current - h.invested) / h.invested) * 100 : 0;
-          return (
-            <button key={h.assetId} onClick={() => nav('detalle', a)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', textAlign: 'left', width: '100%',
-                background: 'none', border: 'none', cursor: 'pointer', color: 'inherit',
-                borderBottom: i < shown.length - 1 ? '1px solid var(--border-l)' : 'none',
-              }}>
-              <img src={a.img} alt="" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                  <ProjectCode asset={a} />
-                  <span style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
-                </div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginTop: 3 }}>
-                  {h.tokens} tokens · {a.cat} · desde {h.since}
-                </div>
-              </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{fmtUSD(h.current)}</div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, marginTop: 2, color: diff >= 0 ? 'var(--pos)' : 'var(--neg)' }}>
-                  {diff >= 0 ? '+' : ''}{diff.toFixed(1)}%{h.yieldEarned ? <span style={{ color: 'var(--ter)' }}> · yield {fmtUSD(h.yieldEarned)}</span> : null}
-                </div>
-              </div>
-            </button>
-          );
-        })}
+      <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18 }}>
+        {shown.map(h => <AssetCard key={h.assetId} asset={h.asset} nav={nav} showCode holding={h} />)}
       </div>
       {onMore && holdings.length > shown.length && (
-        <button onClick={onMore} style={{ marginTop: 10, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>
+        <button onClick={onMore} style={{ marginTop: 12, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>
           Ver las {holdings.length} inversiones →
         </button>
       )}
-    </PCard>
+    </div>
   );
 }
