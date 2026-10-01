@@ -105,7 +105,8 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
         // leads to their company).
         if (!routeData) return <Profile nav={nav} />;
         const person = personByName(routeData);
-        return <Profile key={routeData} nav={nav} person={person} company={person.company} onCompany={() => nav('empresa', person.company)} />;
+        const onBack = () => nav(prevRoute && !['empresa', 'detalle', 'usuario'].includes(prevRoute) ? prevRoute : 'feed');
+        return <Profile key={routeData} nav={nav} person={person} company={person.company} onCompany={() => nav('empresa', person.company)} onBack={onBack} />;
       }
       case 'ayuda':        return <HelpCenter nav={nav} />;
       case 'admin':        return <Admin nav={nav} />;

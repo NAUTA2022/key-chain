@@ -52,7 +52,7 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
   const owner = isMine ? ME : profile.owner;
   if (view === 'owner') {
     // Exactly the same page as the sidebar's Perfil, with the owner's data.
-    return <Profile nav={nav} person={owner} company={profile.name} onCompany={() => setView('company')} />;
+    return <Profile nav={nav} person={owner} company={profile.name} onCompany={() => setView('company')} onBack={embedded ? undefined : back} />;
   }
 
   const following = followed.includes(profile.name);

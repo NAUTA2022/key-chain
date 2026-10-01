@@ -1,21 +1,11 @@
 import { motion } from 'framer-motion';
-import { PTag } from './ui';
-import IdentityAvatar from './IdentityAvatar';
 
-// The personal-profile header (aurora banner, round photo overlapping it,
-// name + tags, subtitle), shared by my own Perfil and by the profile of any
-// company's owner so every user profile looks the same.
-// `user` = { name, initial, gradient }; `company` adds its hexagon as the
-// photo's badge (tap → `onSwap`); `switchSlot` sits on the banner's top right
-// and `action` at the end of the name row; `extra` goes under the subtitle.
-export default function ProfileHero({ user, company, onSwap, switchSlot, tags = [], subtitle, action, extra }) {
+// The personal-profile cover: dark aurora gradient with soft animated blobs,
+// a dot grid and two diagonal highlights. Fills its (relative) parent — it's
+// the cover of the profile card, like a company's cover photo.
+export function AuroraCover() {
   return (
-    <>
-      {/* ── Hero banner ─────────────────────────────────────────── */}
-      <div style={{ position: 'relative', height: 220, overflow: 'hidden', borderRadius: '0 0 32px 32px' }}>
-        {switchSlot && (
-          <div style={{ position: 'absolute', top: 16, right: 20, zIndex: 2 }}>{switchSlot}</div>
-        )}
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
         {/* Base gradient */}
         <div style={{
           position: 'absolute', inset: 0,
@@ -69,35 +59,6 @@ export default function ProfileHero({ user, company, onSwap, switchSlot, tags = 
           position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
           background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.25))',
         }} />
-      </div>
-
-      {/* ── Avatar + name ───────────────────────────────────────── */}
-      <div style={{ padding: '0 32px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 22, marginTop: -44, flexWrap: 'wrap' }}>
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-          >
-            {/* Big round photo; the company's hexagon as a badge (tap to switch) */}
-            <IdentityAvatar mode="personal" company={company} size={84} ring="var(--bg)" user={user} onSwap={onSwap} />
-          </motion.div>
-
-          <div style={{ flex: 1, paddingBottom: 4, minWidth: 200 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <div style={{ fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 26, color: 'var(--text)', letterSpacing: '-0.03em' }}>{user.name}</div>
-              {tags.map(([label, color]) => <PTag key={label} label={label} color={color} />)}
-            </div>
-            {subtitle && (
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 4 }}>{subtitle}</div>
-            )}
-          </div>
-          {action}
-        </div>
-        {/* Below the row (not inside it) so the name keeps its place next to
-            the photo; indented to line up with the name. */}
-        {extra && <div style={{ paddingLeft: 116 }}>{extra}</div>}
-      </div>
-    </>
+    </div>
   );
 }
