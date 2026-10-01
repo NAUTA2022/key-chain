@@ -5,6 +5,11 @@ import { IdentitySwitch } from '../components/IdentityAvatar';
 import ProfileHero from '../components/ProfileHero';
 import CompanyProfile from './CompanyProfile';
 import { ME, MY_COMPANY } from '../lib/me';
+import { holdingsOf, portfolioStats, personSocial } from '../lib/people';
+import { useFollowing, useFollowingPeople } from '../lib/projectFeed';
+import FollowListModal, { FollowButton, SocialCounts } from '../components/FollowList';
+import { fmtUSD } from '../data';
+import { ProjectCode } from '../components/FeedPostCard';
 
 const TABS = [
   ['kyc',  'KYC / Identidad'],
@@ -48,8 +53,9 @@ const activityColor = { pos: '#22c55e', invest: '#8247E5', kyc: '#3b82f6' };
 const activityDot   = { pos: '↑', invest: '⬡', kyc: '✓' };
 
 // `person` / `company` / `onCompany`: show this same page for another user
-// (a company's owner) instead of me; the switch then goes back to their
-// company through `onCompany`.
+// instead of me — a company's owner (the switch goes back to their company
+// through `onCompany`) or a common investor without a company. Other people
+// only show public data: investments, level and achievements.
 export default function Profile({ nav, person, company: personCompany, onCompany }) {
   // Personal / Empresa: users who run a company can flip between their own
   // profile and their company's (same page, no navigation).
@@ -58,6 +64,20 @@ export default function Profile({ nav, person, company: personCompany, onCompany
   const user = person || ME;
   const company = isMe ? MY_COMPANY : personCompany;
   const toCompany = () => { if (!company) return; if (isMe) setIdentity('company'); else onCompany?.(); };
+  const holdings = holdingsOf(isMe ? ME : person);
+  const [myCompanies] = useFollowing();
+  const [myPeople] = useFollowingPeople();
+  const [listTab, setListTab] = useState(null);
+  const social = personSocial(user.name, { iFollow: myPeople.includes(user.name), myPeople, myCompanies });
+  const pf = portfolioStats(holdings);
+  const level = pf.invested >= 50000 ? 5 : pf.invested >= 25000 ? 4 : pf.invested >= 10000 ? 3 : pf.invested >= 3000 ? 2 : 1;
+  const kpis = isMe ? STAT_COLS : [
+    [fmtUSD(pf.current), 'Portafolio RWA'],
+    [`${pf.ret >= 0 ? '+' : ''}${pf.ret.toFixed(1)}%`, 'Rendimiento total'],
+    [fmtUSD(pf.yieldEarned), 'Yield cobrado'],
+    [String(pf.count), 'Inversiones'],
+  ];
+  const achievements = isMe ? ACHIEVEMENTS : ACHIEVEMENTS.map((a, i) => (i === 3 ? { ...a, done: pf.invested >= 50000 } : a));
   const [tab,   setTab]   = useState('kyc');
   const [twofa, setTwofa] = useState({ totp: true, passkey: false, sms: false });
   const [priv,  setPriv]  = useState([true, false, true, true]);
@@ -74,16 +94,29 @@ export default function Profile({ nav, person, company: personCompany, onCompany
         company={company}
         onSwap={toCompany}
         switchSlot={company && <IdentitySwitch value="personal" company={company} personalLabel={isMe ? 'Personal' : user.name} onChange={toCompany} />}
-        tags={[['KYC ✓', 'green'], ['Nivel 4', 'purple']]}
-        subtitle={isMe ? '0x4a9fE2b8…d82c · max.rodriguez@gmail.com · Miembro desde Mar 2025' : `@${user.handle} · ${user.bio || `Fundador de ${company}.`}`}
-        action={isMe && <PBtn variant="secondary" small style={{ marginBottom: 6 }}>Editar perfil</PBtn>}
+        tags={[['KYC ✓', 'green'], [`Nivel ${isMe ? 4 : level}`, 'purple']]}
+        subtitle={isMe ? '0x4a9fE2b8…d82c · max.rodriguez@gmail.com · Miembro desde Mar 2025' : `@${user.handle} · ${user.bio || (company ? `Fundador de ${company}.` : 'Inversor en KEYCHAIN.')}`}
+        action={isMe
+          ? <PBtn variant="secondary" small style={{ marginBottom: 6 }}>Editar perfil</PBtn>
+          : <div style={{ marginBottom: 6 }}><FollowButton kind="person" name={user.name} /></div>}
+        extra={<SocialCounts followers={social.followersCount} following={social.followingCount} onOpen={setListTab} style={{ marginTop: 8 }} />}
       />
+      {listTab && (
+        <FollowListModal title={user.name} initialTab={listTab} nav={nav} onClose={() => setListTab(null)}
+          tabs={[
+            { id: 'followers', label: `Seguidores (${social.followersCount})`, items: social.followers.map(name => ({ kind: 'person', name })), more: social.followersCount - social.followers.length },
+            { id: 'following', label: `Seguidos (${social.followingCount})`, items: [
+              ...social.followingCompanies.map(name => ({ kind: 'company', name })),
+              ...social.followingPeople.map(name => ({ kind: 'person', name })),
+            ] },
+          ]} />
+      )}
 
       <div style={{ padding: '0 32px', position: 'relative' }}>
 
         {/* ── KPI row ──────────────────────────────────────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginTop: 22 }}>
-          {STAT_COLS.map(([val, lbl], i) => (
+          {kpis.map(([val, lbl], i) => (
             <motion.div key={lbl} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
               <PCard style={{ padding: '16px 20px' }}>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 5 }}>{lbl}</div>
@@ -99,7 +132,11 @@ export default function Profile({ nav, person, company: personCompany, onCompany
           {/* Left column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
-            {/* Activity feed */}
+            {/* Investments (public: anyone's profile shows them) */}
+            <InvestmentsCard holdings={holdings} stats={pf} isMe={isMe} nav={nav} />
+
+            {/* Activity feed — private, only on my own profile */}
+            {isMe && (
             <PCard className="dual-glow" style={{ padding: '22px 24px' }}>
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>Actividad reciente</div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -137,6 +174,7 @@ export default function Profile({ nav, person, company: personCompany, onCompany
                 ))}
               </div>
             </PCard>
+            )}
 
             {/* Level progress */}
             <div className="anim-border-slow" style={{ borderRadius: 18, padding: '1.5px' }}>
@@ -144,30 +182,32 @@ export default function Profile({ nav, person, company: personCompany, onCompany
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                 <div>
                   <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Nivel de inversor</div>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginTop: 3 }}>$9,880 para Nivel 5</div>
+                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginTop: 3 }}>{isMe ? '$9,880 para Nivel 5' : level >= 5 ? 'Nivel máximo' : `Nivel ${level} de 5`}</div>
                 </div>
                 <div style={{
                   width: 48, height: 48, borderRadius: '50%',
                   background: 'linear-gradient(135deg, #8247E5, #3b82f6)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 18, color: '#fff',
-                }}>4</div>
+                }}>{isMe ? 4 : level}</div>
               </div>
               {/* Track */}
               <div style={{ display: 'flex', gap: 0, alignItems: 'center', marginBottom: 10 }}>
-                {[1,2,3,4,5].map(n => (
+                {[1,2,3,4,5].map(n => { const lv = isMe ? 4 : level; return (
                   <div key={n} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: n === 5 ? 'flex-end' : n === 1 ? 'flex-start' : 'center', gap: 6 }}>
                     <div style={{
                       height: 6, width: '100%',
-                      background: n <= 4 ? 'linear-gradient(90deg, #8247E5, #3b82f6)' : 'var(--surface2)',
+                      background: n <= lv ? 'linear-gradient(90deg, #8247E5, #3b82f6)' : 'var(--surface2)',
                       borderRadius: n === 1 ? '99px 0 0 99px' : n === 5 ? '0 99px 99px 0' : 0,
                     }} />
-                    <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: n <= 4 ? 'var(--accent-text)' : 'var(--ter)', fontWeight: n === 4 ? 700 : 400 }}>N{n}</div>
+                    <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: n <= lv ? 'var(--accent-text)' : 'var(--ter)', fontWeight: n === lv ? 700 : 400 }}>N{n}</div>
                   </div>
-                ))}
+                ); })}
               </div>
               <div style={{ display: 'flex', gap: 20, marginTop: 14 }}>
-                {[['$40,120', 'invertido total'], ['16 meses', 'antigüedad'], ['4.8★', 'reputación']].map(([v, l]) => (
+                {(isMe ? [['$40,120', 'invertido total'], ['16 meses', 'antigüedad'], ['4.8★', 'reputación']]
+                  : [[fmtUSD(pf.invested), 'invertido total'], [holdings[0]?.since ? `desde ${holdings[0].since}` : '—', 'antigüedad'], [`${(user.rep ?? 4.8).toFixed(1)}★`, 'reputación']]
+                ).map(([v, l]) => (
                   <div key={l}>
                     <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{v}</div>
                     <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginTop: 2 }}>{l}</div>
@@ -186,7 +226,7 @@ export default function Profile({ nav, person, company: personCompany, onCompany
             <PCard style={{ padding: '22px 22px', border: 'none', borderRadius: 17 }}>
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 16 }}>Logros</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {ACHIEVEMENTS.map((ach, i) => (
+                {achievements.map((ach, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -207,7 +247,8 @@ export default function Profile({ nav, person, company: personCompany, onCompany
             </PCard>
             </div>{/* /anim-border */}
 
-            {/* Quick links */}
+            {/* Quick links + referral — mine only */}
+            {isMe && (<>
             <PCard style={{ padding: '18px 20px' }}>
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 14 }}>Accesos rápidos</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -254,11 +295,13 @@ export default function Profile({ nav, person, company: personCompany, onCompany
                 }}>Copiar</button>
               </div>
             </div>
+            </>)}
 
           </div>
         </div>
 
-        {/* ── Detail tabs ─────────────────────────────────────────── */}
+        {/* ── Detail tabs (private: mine only) ────────────────────── */}
+        {isMe && (
         <div style={{ marginTop: 28 }}>
           <div style={{ display: 'flex', gap: 3, background: 'var(--surface2)', borderRadius: 14, padding: 4, width: 'fit-content', marginBottom: 20 }}>
             {TABS.map(([id, label]) => (
@@ -427,7 +470,55 @@ export default function Profile({ nav, person, company: personCompany, onCompany
 
           </AnimatePresence>
         </div>
+        )}
       </div>
     </div>
+  );
+}
+
+// Portfolio list: every project the person holds tokens in, with its
+// identifier, tokens, current value vs invested and yield collected.
+function InvestmentsCard({ holdings, stats, isMe, nav }) {
+  return (
+    <PCard style={{ padding: '22px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{isMe ? 'Mis inversiones' : 'Inversiones'} <span style={{ color: 'var(--ter)', fontWeight: 600 }}>({holdings.length})</span></div>
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>Valor actual <b style={{ color: 'var(--text)' }}>{fmtUSD(stats.current)}</b></div>
+      </div>
+      {holdings.length === 0 && (
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>Todavía no tiene inversiones.</div>
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {holdings.map((h, i) => {
+          const a = h.asset;
+          const diff = h.invested ? ((h.current - h.invested) / h.invested) * 100 : 0;
+          return (
+            <button key={h.assetId} onClick={() => nav('detalle', a)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', textAlign: 'left', width: '100%',
+                background: 'none', border: 'none', cursor: 'pointer', color: 'inherit',
+                borderBottom: i < holdings.length - 1 ? '1px solid var(--border-l)' : 'none',
+              }}>
+              <img src={a.img} alt="" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                  <ProjectCode asset={a} />
+                  <span style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
+                </div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginTop: 3 }}>
+                  {h.tokens} tokens · {a.cat} · desde {h.since}
+                </div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{fmtUSD(h.current)}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, marginTop: 2, color: diff >= 0 ? 'var(--pos)' : 'var(--neg)' }}>
+                  {diff >= 0 ? '+' : ''}{diff.toFixed(1)}%{h.yieldEarned ? <span style={{ color: 'var(--ter)' }}> · yield {fmtUSD(h.yieldEarned)}</span> : null}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </PCard>
   );
 }

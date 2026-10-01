@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { SquareMedia, PostComments } from './feed';
 import { Icons, CompanyAvatar } from './ui';
-import { setProjectPosts, issuerNameOf, postMedia } from '../lib/projectFeed';
+import { setProjectPosts, issuerNameOf, postMedia, projectCode } from '../lib/projectFeed';
 
 // One post as shown in the global Feed and on a company profile, laid out
 // like Instagram: company header (hexagon + name open its profile; the
@@ -37,6 +37,7 @@ export default function FeedPostCard({ post, asset, nav }) {
             {issuer}
           </button>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <ProjectCode asset={asset} onClick={() => nav('detalle', asset)} />{' '}
             <button onClick={() => nav('detalle', asset)} style={{ ...linkStyle, fontWeight: 600, color: 'var(--sec)' }}>{asset.name}</button>
             {' · '}{asset.cat} · {post.date}
           </div>
@@ -72,5 +73,20 @@ export default function FeedPostCard({ post, asset, nav }) {
         <PostComments comments={post.comments || []} onAdd={addComment} issuerName={issuer} isOwner={!!asset.isMine} />
       )}
     </div>
+  );
+}
+
+// Project identifier chip ("EDF-021"); used on posts, reviews and analytics.
+export function ProjectCode({ asset, onClick }) {
+  const Tag = onClick ? 'button' : 'span';
+  return (
+    <Tag onClick={onClick} title={asset.name}
+      style={{
+        display: 'inline-block', padding: '1px 6px', borderRadius: 6, border: '1px solid var(--border-l)', background: 'var(--surface2)',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 10, fontWeight: 700, letterSpacing: '0.03em', color: 'var(--sec)',
+        cursor: onClick ? 'pointer' : 'default', verticalAlign: 'middle', lineHeight: 1.5,
+      }}>
+      {projectCode(asset)}
+    </Tag>
   );
 }

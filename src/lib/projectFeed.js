@@ -253,6 +253,23 @@ export function useFollowing() {
   return [followed, toggle];
 }
 
+// People I follow (by name) — separate from companies so names never clash.
+let followedPeople = [];
+export function useFollowingPeople() {
+  useVersion();
+  const toggle = (name) => {
+    followedPeople = followedPeople.includes(name) ? followedPeople.filter(x => x !== name) : [...followedPeople, name];
+    emit();
+  };
+  return [followedPeople, toggle];
+}
+
+// The company a person owns, if any (owners are users too).
+export function ownerCompanyOf(personName) {
+  const names = [...new Set(RWA_ASSETS.map(issuerNameOf).filter(Boolean))];
+  return names.find(n => PROFILE_OWNER[n] === personName) || null;
+}
+
 // Every post (milestones and regular updates) from the given projects, newest first.
 export function useAssetsPosts(assets) {
   useVersion();
@@ -268,3 +285,9 @@ export function useGlobalMilestones() {
     .flatMap(a => postsOf(a).filter(p => p.milestone).map(post => ({ post, asset: a })))
     .sort((x, y) => (y.post.ts ?? 0) - (x.post.ts ?? 0));
 }
+
+// ─── Project identifier ───────────────────────────────────────────────────────
+// Short code shown next to a project wherever it's referenced from a company
+// (posts, reviews, analytics), e.g. "EDF-021".
+const CAT_PREFIX = { Autos: 'AUT', Campos: 'CAM', Drones: 'DRN', Inmuebles: 'INM', Edificios: 'EDF', QA: 'QA' };
+export const projectCode = (a) => `${CAT_PREFIX[a.cat] || 'PRY'}-${String(a.id).padStart(3, '0')}`;

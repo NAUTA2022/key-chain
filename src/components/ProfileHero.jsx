@@ -7,8 +7,8 @@ import IdentityAvatar from './IdentityAvatar';
 // company's owner so every user profile looks the same.
 // `user` = { name, initial, gradient }; `company` adds its hexagon as the
 // photo's badge (tap → `onSwap`); `switchSlot` sits on the banner's top right
-// and `action` at the end of the name row.
-export default function ProfileHero({ user, company, onSwap, switchSlot, tags = [], subtitle, action }) {
+// and `action` at the end of the name row; `extra` goes under the subtitle.
+export default function ProfileHero({ user, company, onSwap, switchSlot, tags = [], subtitle, action, extra }) {
   return (
     <>
       {/* ── Hero banner ─────────────────────────────────────────── */}
@@ -94,6 +94,9 @@ export default function ProfileHero({ user, company, onSwap, switchSlot, tags = 
           </div>
           {action}
         </div>
+        {/* Below the row (not inside it) so the name keeps its place next to
+            the photo; indented to line up with the name. */}
+        {extra && <div style={{ paddingLeft: 116 }}>{extra}</div>}
       </div>
     </>
   );

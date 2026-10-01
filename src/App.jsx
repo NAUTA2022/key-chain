@@ -24,6 +24,7 @@ import Holdings from './pages/Holdings';
 import Academy from './pages/Academy';
 import Article from './pages/Article';
 import Profile from './pages/Profile';
+import { personByName } from './lib/people';
 import HelpCenter from './pages/HelpCenter';
 import Admin from './pages/Admin';
 import Config from './pages/Config';
@@ -99,6 +100,13 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
       case 'academia':     return <Academy nav={nav} />;
       case 'articulo':     return <Article nav={nav} post={routeData} />;
       case 'perfil':       return <Profile nav={nav} />;
+      case 'usuario': {
+        // Any user: a common investor, or a company owner (then the switch
+        // leads to their company).
+        if (!routeData) return <Profile nav={nav} />;
+        const person = personByName(routeData);
+        return <Profile key={routeData} nav={nav} person={person} company={person.company} onCompany={() => nav('empresa', person.company)} />;
+      }
       case 'ayuda':        return <HelpCenter nav={nav} />;
       case 'admin':        return <Admin nav={nav} />;
       case 'config':       return <Config nav={nav} />;

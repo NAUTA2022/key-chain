@@ -147,7 +147,8 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }) {
             <motion.div key={l.id} initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:idx*0.06 }}>
               <PCard style={{ padding:'18px 20px' }}>
                 {/* Seller */}
-                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
+                <div onClick={() => nav('usuario', l.seller)} role="button" title={`Ver perfil de ${l.seller}`}
+                  style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14, cursor:'pointer' }}>
                   <PAvatar name={l.seller} size={32} />
                   <div style={{ flex:1 }}>
                     <div style={{ fontFamily:'var(--font-b)', fontWeight:600, fontSize:13, color:'var(--text)' }}>{l.seller}</div>
