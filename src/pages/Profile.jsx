@@ -152,12 +152,15 @@ export default function Profile({ nav, person, company: personCompany, onCompany
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', lineHeight: 1.55, maxWidth: 680, marginBottom: 16 }}>
             {isMe ? 'Inversor en activos reales tokenizados.' : company ? `Fundador y CEO de ${company}.` : user.bio}
           </div>
-          <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', fontFamily: 'var(--font-b)', fontSize: 14 }}>
-            {counts.map(([v, l, onClick]) => (
-              <button key={l} onClick={onClick} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
-                <b style={{ color: 'var(--text)' }}>{v}</b> <span style={{ color: 'var(--ter)' }}>{l}</span>
-              </button>
-            ))}
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 18, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', fontFamily: 'var(--font-b)', fontSize: 14 }}>
+              {counts.map(([v, l, onClick]) => (
+                <button key={l} onClick={onClick} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
+                  <b style={{ color: 'var(--text)' }}>{v}</b> <span style={{ color: 'var(--ter)' }}>{l}</span>
+                </button>
+              ))}
+            </div>
+            <LevelMini lv={level} hint={levelHint} onOpen={() => setSection('logros')} full={isMobile} />
           </div>
         </div>
       </motion.div>
@@ -226,6 +229,34 @@ export default function Profile({ nav, person, company: personCompany, onCompany
         </>
       )}
     </div>
+  );
+}
+
+// Compact level system for the profile header: badge, 5-step track and
+// what's left for the next level. Opens the "Nivel y logros" tab.
+function LevelMini({ lv, hint, onOpen, full }) {
+  return (
+    <button onClick={onOpen} title="Ver nivel y logros"
+      style={{ display: 'flex', alignItems: 'center', gap: 12, width: full ? '100%' : 340, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+      <div style={{
+        width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #8247E5, #3b82f6)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 16, color: '#fff',
+      }}>{lv}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6, fontFamily: 'var(--font-b)' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Nivel de inversor</span>
+          <span style={{ fontSize: 11.5, color: 'var(--ter)' }}>{hint}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 3 }}>
+          {[1, 2, 3, 4, 5].map(n => (
+            <div key={n} style={{ flex: 1 }}>
+              <div style={{ height: 6, borderRadius: 99, background: n <= lv ? 'linear-gradient(90deg, #8247E5, #3b82f6)' : 'var(--surface2)' }} />
+              <div style={{ marginTop: 4, fontFamily: 'var(--font-b)', fontSize: 10, textAlign: 'center', color: n <= lv ? 'var(--accent-text)' : 'var(--ter)', fontWeight: n === lv ? 700 : 400 }}>N{n}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </button>
   );
 }
 
