@@ -54,8 +54,7 @@ const I = {
 
 // ─── Level progress (staircase) ───────────────────────────────────────────────
 // One step per level, each higher than the last. Reached steps are filled,
-// the next one fills with the progress towards it, and a marker sits on the
-// current step.
+// the next one fills with the progress towards it; the current one glows.
 function LevelStairs({ d }) {
   const idx = d.level - 1;
   const next = LEVELS[Math.min(idx + 1, 4)];
@@ -67,15 +66,6 @@ function LevelStairs({ d }) {
         const reached = i <= idx, isNext = i === idx + 1, on = i === idx;
         return (
           <div key={l.n} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
-            <div style={{ height: 30, position: 'relative' }}>
-              {on && (
-                <motion.div initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
-                  style={{ position: 'absolute', left: '50%', bottom: 4, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #8247E5, #3b82f6)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>Estás acá</span>
-                  <span style={{ width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid #5b5ff0' }} />
-                </motion.div>
-              )}
-            </div>
             <div style={{
               height: STEP_H[i], borderRadius: '10px 10px 4px 4px', position: 'relative', overflow: 'hidden',
               background: reached ? 'linear-gradient(180deg, #8b5cf6, #3b82f6)' : 'var(--surface2)',
