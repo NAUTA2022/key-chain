@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PCard, PBtn, PTag, Icons } from '../components/ui';
-import IdentityAvatar, { IdentitySwitch } from '../components/IdentityAvatar';
+import { IdentitySwitch } from '../components/IdentityAvatar';
+import ProfileHero from '../components/ProfileHero';
 import CompanyProfile from './CompanyProfile';
 import { ME, MY_COMPANY } from '../lib/me';
 
@@ -61,94 +62,17 @@ export default function Profile({ nav }) {
   return (
     <div style={{ padding: '0 0 60px', maxWidth: 1100, margin: '0 auto' }}>
 
-      {/* ── Hero banner ─────────────────────────────────────────── */}
-      <div style={{ position: 'relative', height: 220, overflow: 'hidden', borderRadius: '0 0 32px 32px' }}>
-        {MY_COMPANY && (
-          <div style={{ position: 'absolute', top: 16, right: 20, zIndex: 2 }}>
-            <IdentitySwitch value="personal" company={MY_COMPANY} onChange={() => setIdentity('company')} />
-          </div>
-        )}
-        {/* Base gradient */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(125deg, #0a0e1a 0%, #0d1535 30%, #141060 55%, #1a0a2e 80%, #0a1628 100%)',
-        }} />
+      <ProfileHero
+        user={ME}
+        company={MY_COMPANY}
+        onSwap={() => MY_COMPANY && setIdentity('company')}
+        switchSlot={MY_COMPANY && <IdentitySwitch value="personal" company={MY_COMPANY} onChange={() => setIdentity('company')} />}
+        tags={[['KYC ✓', 'green'], ['Nivel 4', 'purple']]}
+        subtitle="0x4a9fE2b8…d82c · max.rodriguez@gmail.com · Miembro desde Mar 2025"
+        action={<PBtn variant="secondary" small style={{ marginBottom: 6 }}>Editar perfil</PBtn>}
+      />
 
-        {/* Noise texture overlay */}
-        <div style={{
-          position: 'absolute', inset: 0, opacity: 0.04,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-        }} />
-
-        {/* Large aurora blobs */}
-        <motion.div
-          animate={{ scale: [1, 1.08, 1], opacity: [0.55, 0.75, 0.55] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', top: -80, right: -60, width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(130,71,229,0.55) 0%, transparent 70%)', filter: 'blur(40px)' }}
-        />
-        <motion.div
-          animate={{ scale: [1, 1.12, 1], opacity: [0.4, 0.6, 0.4] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-          style={{ position: 'absolute', bottom: -60, left: -40, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.50) 0%, transparent 70%)', filter: 'blur(45px)' }}
-        />
-        <motion.div
-          animate={{ x: [-10, 10, -10], opacity: [0.25, 0.40, 0.25] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-          style={{ position: 'absolute', top: 30, left: '38%', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,200,246,0.35) 0%, transparent 70%)', filter: 'blur(35px)' }}
-        />
-
-        {/* Dot grid overlay */}
-        <div style={{
-          position: 'absolute', inset: 0, opacity: 0.12,
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-        }} />
-
-        {/* Diagonal highlight line */}
-        <div style={{
-          position: 'absolute', top: 0, left: '25%', width: 1, height: '160%',
-          background: 'linear-gradient(180deg, transparent, rgba(255,255,255,0.08), transparent)',
-          transform: 'rotate(-20deg)', transformOrigin: 'top center',
-        }} />
-        <div style={{
-          position: 'absolute', top: 0, left: '60%', width: 1, height: '160%',
-          background: 'linear-gradient(180deg, transparent, rgba(255,255,255,0.05), transparent)',
-          transform: 'rotate(-20deg)', transformOrigin: 'top center',
-        }} />
-
-        {/* Bottom fade to page bg */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
-          background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.25))',
-        }} />
-      </div>
-
-      {/* ── Avatar + name ───────────────────────────────────────── */}
       <div style={{ padding: '0 32px', position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 22, marginTop: -44 }}>
-          {/* Avatar with vinyl ring */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-          >
-            {/* Big round photo; my company's hexagon as a badge (tap to switch) */}
-            <IdentityAvatar mode="personal" company={MY_COMPANY} size={84} ring="var(--bg)"
-              onSwap={() => MY_COMPANY && setIdentity('company')} />
-          </motion.div>
-
-          <div style={{ flex: 1, paddingBottom: 4 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <div style={{ fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 26, color: 'var(--text)', letterSpacing: '-0.03em' }}>{ME.name}</div>
-              <PTag label="KYC ✓" color="green" />
-              <PTag label="Nivel 4" color="purple" />
-            </div>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 4 }}>
-              0x4a9fE2b8…d82c · max.rodriguez@gmail.com · Miembro desde Mar 2025
-            </div>
-          </div>
-          <PBtn variant="secondary" small style={{ marginBottom: 6 }}>Editar perfil</PBtn>
-        </div>
 
         {/* ── KPI row ──────────────────────────────────────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginTop: 22 }}>

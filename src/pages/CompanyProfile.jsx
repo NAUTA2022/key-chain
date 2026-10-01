@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { PBtn, PProgress, Icons } from '../components/ui';
+import { PBtn, PCard, PProgress, Icons } from '../components/ui';
 import { fmtUSD } from '../data';
 import FeedBrowser from '../components/FeedBrowser';
 import { VerifiedBadge } from '../components/ProfileCard';
 import { profileByName, useFollowing, useAssetsPosts, fmtCount } from '../lib/projectFeed';
 import { useMobile } from '../hooks/useMobile';
 import IdentityAvatar, { IdentitySwitch } from '../components/IdentityAvatar';
+import ProfileHero from '../components/ProfileHero';
 import { MY_COMPANY, ME } from '../lib/me';
 
 // Company (issuer) profile — opened from the Feed's featured profiles or any
@@ -148,45 +149,50 @@ function ProjectsGrid({ nav, assets, isMobile }) {
   );
 }
 
-// The company owner's personal profile (a regular user: round photo, with
-// the company hexagon as the badge that switches back).
+// The company owner's personal profile: same layout as my own Perfil (aurora
+// banner, round photo with the company hexagon as its badge, name + tags,
+// KPI cards), minus the private parts (KYC, documents, security…).
 function OwnerProfile({ nav, profile, owner, isMobile, onBack, onCompany }) {
-  const avatar = isMobile ? 84 : 112;
+  const stats = [
+    ['1', 'Empresas'],
+    [String(profile.allAssets.length), 'Proyectos'],
+    [String(profile.liveAssets.length), 'En operación'],
+    [fmtCount(profile.followers), 'Seguidores de la empresa'],
+  ];
   return (
-    <div className="g-page" style={{ padding: isMobile ? '16px 16px 40px' : '24px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, minHeight: 28 }}>
+    <div style={{ padding: '0 0 60px', maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ padding: isMobile ? '12px 16px 10px' : '16px 32px 12px' }}>
         <button onClick={onBack}
           style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 13 }}>
           {Icons.back} Volver
         </button>
-        <IdentitySwitch value="personal" company={profile.name} personalLabel={owner.name} onChange={onCompany} />
       </div>
 
-      <motion.div key="owner" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-        style={{ background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 24, overflow: 'hidden', marginBottom: 20 }}>
-        <div style={{ position: 'relative', height: isMobile ? 150 : 230, background: owner.gradient }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.35) 100%)' }} />
-          <div style={{ position: 'absolute', left: isMobile ? 16 : 28, bottom: -avatar / 2 }}>
-            <IdentityAvatar mode="personal" company={profile.name} size={avatar} onSwap={onCompany} user={owner} />
-          </div>
-        </div>
-        <div style={{ padding: isMobile ? '12px 16px 18px' : '14px 28px 24px' }}>
-          <div style={{ minHeight: avatar / 2 - 6 }} />
-          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 22 : 26, color: 'var(--text)', letterSpacing: '-0.02em', marginTop: 10 }}>{owner.name}</div>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--ter)', marginBottom: 12 }}>@{owner.handle}</div>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', lineHeight: 1.55, marginBottom: 16 }}>
-            {owner.bio || `Fundador de ${profile.name}.`}{' '}
-            <button onClick={onCompany} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', fontWeight: 700, color: 'var(--accent-text)' }}>Ver {profile.name} →</button>
-          </div>
-          <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', fontFamily: 'var(--font-b)', fontSize: 14 }}>
-            <span><b style={{ color: 'var(--text)' }}>1</b> <span style={{ color: 'var(--ter)' }}>Empresa</span></span>
-            <span><b style={{ color: 'var(--text)' }}>{profile.allAssets.length}</b> <span style={{ color: 'var(--ter)' }}>Proyectos</span></span>
-          </div>
-        </div>
-      </motion.div>
+      <ProfileHero
+        user={owner}
+        company={profile.name}
+        onSwap={onCompany}
+        switchSlot={<IdentitySwitch value="personal" company={profile.name} personalLabel={owner.name} onChange={onCompany} />}
+        tags={[['KYC ✓', 'green'], ['Emisor', 'purple']]}
+        subtitle={<>@{owner.handle} · {owner.bio || `Fundador de ${profile.name}.`}</>}
+        action={<PBtn variant="secondary" small style={{ marginBottom: 6 }} onClick={onCompany}>Ver {profile.name}</PBtn>}
+      />
 
-      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 12 }}>Proyectos que lidera</div>
-      <ProjectsGrid nav={nav} assets={profile.allAssets} isMobile={isMobile} />
+      <div style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginTop: 22 }}>
+          {stats.map(([val, lbl], i) => (
+            <motion.div key={lbl} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
+              <PCard style={{ padding: '16px 20px' }}>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 5 }}>{lbl}</div>
+                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 22, color: 'var(--text)', letterSpacing: '-0.03em' }}>{val}</div>
+              </PCard>
+            </motion.div>
+          ))}
+        </div>
+
+        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', margin: '26px 0 12px' }}>Proyectos que lidera</div>
+        <ProjectsGrid nav={nav} assets={profile.allAssets} isMobile={isMobile} />
+      </div>
     </div>
   );
 }
