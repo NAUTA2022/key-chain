@@ -2,8 +2,9 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useActiveAccount, useWalletBalance } from 'thirdweb/react';
 import { polygon } from 'thirdweb/chains';
-import { PCard, PBtn, PTag, PProgress, PArea, Icons } from '../components/ui';
+import { PCard, PBtn, PArea, Icons } from '../components/ui';
 import { MY_HOLDINGS, RWA_ASSETS, fmtUSD2 } from '../data';
+import AssetCard from '../components/AssetCard';
 import { client } from '../lib/client';
 import KeyPay from './KeyPay';
 
@@ -319,61 +320,13 @@ export default function Holdings({ nav }) {
 
         {tab === 'inversiones' && (
           <motion.div key="inv" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {MY_HOLDINGS.map((h, idx) => {
+            {/* Same cards as the marketplace, with my position in each */}
+            <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+              {MY_HOLDINGS.map(h => {
                 const a = RWA_ASSETS.find(x => x.id === h.assetId);
-                const pnlPct = ((h.current / h.invested - 1) * 100).toFixed(1);
-                const isPos = h.current >= h.invested;
-                return (
-                  <motion.div key={idx} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.07 }}>
-                    <div style={{
-                      background: 'var(--gl-bg)',
-                      border: '1px solid var(--gl-icon)',
-                      borderRadius: 18, padding: '20px 22px',
-                      backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                      boxShadow: 'inset 0 1px 0 var(--gl-div)',
-                    }}>
-                      <div style={{ display: 'flex', gap: 18 }}>
-                        <img src={a.img} alt="" style={{ width: 96, height: 68, borderRadius: 12, objectFit: 'cover', flexShrink: 0, opacity: 0.9 }} />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                              <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{a.name}</div>
-                              <div style={{ display: 'flex', gap: 6, marginTop: 5 }}>
-                                <PTag label={a.cat} color="neutral" />
-                                <PTag label={a.stage} color={a.stage === 'Operativo' ? 'green' : 'neutral'} />
-                                <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>desde {h.since}</span>
-                              </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: 8 }}>
-                              <PBtn variant="secondary" small onClick={() => nav('detalle', a)}>Ver proyecto</PBtn>
-                              <PBtn variant="ghost" small>Vender</PBtn>
-                            </div>
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginTop: 16 }}>
-                            {[
-                              ['Tokens', h.tokens.toLocaleString()],
-                              ['Valor actual', fmtUSD2(h.current)],
-                              ['P&L', `${isPos ? '+' : ''}${pnlPct}%`],
-                              ['Yield cobrado', fmtUSD2(h.yieldEarned)],
-                            ].map(([k, v]) => (
-                              <div key={k}>
-                                <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>{k}</div>
-                                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: k === 'P&L' ? (isPos ? 'var(--pos)' : 'var(--neg)') : 'var(--text)' }}>{v}</div>
-                              </div>
-                            ))}
-                          </div>
-                          <div style={{ marginTop: 14 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                              <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Financiamiento del proyecto</span>
-                              <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 600, color: 'var(--sec)' }}>{a.sold}%</span>
-                            </div>
-                            <PProgress value={a.sold} style={{ height: 4 }} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+                return a && (
+                  <AssetCard key={h.assetId} asset={a} nav={nav} showCode holding={h}
+                    actions={<PBtn variant="ghost" small>Vender</PBtn>} />
                 );
               })}
             </div>

@@ -7,7 +7,7 @@ import { fmtUSD } from '../data';
 // listed — company profile projects, a person's investments — so they all
 // look the same. `showCode` adds the project identifier next to the name;
 // `holding` ({ tokens, current, invested, yieldEarned }) adds a strip with
-// that person's position in the project.
+// that person's position in the project, plus optional `actions` buttons.
 
 // ─── Asset card ───────────────────────────────────────────────────────────────
 // PStat hardcodes its own label/value colors (var(--ter)/var(--text)), which
@@ -27,7 +27,7 @@ function OverlayStat({ label, value, align = 'flex-start' }) {
 // (name/stats readable directly over the image, dark scrim at the bottom)
 // instead of just a glowing border — makes "this one is ours" obvious at a
 // glance rather than something you notice only up close.
-function KeychainAssetCard({ a, left, nav, showCode, holding }) {
+function KeychainAssetCard({ a, left, nav, showCode, holding, actions }) {
   return (
     <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
       <PCard onClick={() => nav('detalle', a)} style={{ height:340, position:'relative' }}>
@@ -73,14 +73,14 @@ function KeychainAssetCard({ a, left, nav, showCode, holding }) {
           </div>
         </PImg>
       </PCard>
-      {holding && <HoldingStrip holding={holding} />}
+      {holding && <HoldingStrip holding={holding} actions={actions} />}
     </motion.div>
   );
 }
 
-export default function AssetCard({ asset: a, nav, showCode, holding }) {
+export default function AssetCard({ asset: a, nav, showCode, holding, actions }) {
   const left = a.totalTokens - Math.round(a.totalTokens * a.sold / 100);
-  if (a.issuer === 'keychain') return <KeychainAssetCard a={a} left={left} nav={nav} showCode={showCode} holding={holding} />;
+  if (a.issuer === 'keychain') return <KeychainAssetCard a={a} left={left} nav={nav} showCode={showCode} holding={holding} actions={actions} />;
 
   return (
     <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
@@ -122,7 +122,7 @@ export default function AssetCard({ asset: a, nav, showCode, holding }) {
             <PProgress value={a.sold} />
           </div>
         </div>
-        {holding && <HoldingStrip holding={holding} inside />}
+        {holding && <HoldingStrip holding={holding} actions={actions} inside />}
       </PCard>
     </motion.div>
   );
@@ -130,7 +130,7 @@ export default function AssetCard({ asset: a, nav, showCode, holding }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-function HoldingStrip({ holding: h, inside }) {
+function HoldingStrip({ holding: h, inside, actions }) {
   const diff = h.invested ? ((h.current - h.invested) / h.invested) * 100 : 0;
   return (
     <div style={{
@@ -143,6 +143,7 @@ function HoldingStrip({ holding: h, inside }) {
       <span><b style={{ color:'var(--text)' }}>{h.tokens}</b> tokens</span>
       <span>Valor <b style={{ color:'var(--text)' }}>{fmtUSD(h.current)}</b></span>
       <span style={{ fontWeight:700, color: diff >= 0 ? 'var(--pos)' : 'var(--neg)' }}>{diff >= 0 ? '+' : ''}{diff.toFixed(1)}%</span>
+      {actions && <span onClick={e => e.stopPropagation()} style={{ display:'flex', gap:6 }}>{actions}</span>}
     </div>
   );
 }

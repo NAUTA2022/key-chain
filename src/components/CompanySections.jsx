@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PCard, PBtn } from './ui';
 import { ProjectCode } from './FeedPostCard';
+import AssetCard from './AssetCard';
 import { VerifiedBadge } from './ProfileCard';
 import { fmtUSD } from '../data';
 import { fmtCount } from '../lib/projectFeed';
@@ -200,24 +201,16 @@ export function CompanySummary({ profile, posts, reviews, owner, nav, isMobile, 
             <PBtn variant="secondary" small style={{ marginTop: 14 }} onClick={() => onTab('confianza')}>Ver rentabilidad y confianza</PBtn>
           </PCard>
 
-          <PCard style={{ padding: '20px 22px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <H>Proyectos</H>
-              <button onClick={() => onTab('proyectos')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>Ver todos →</button>
-            </div>
-            {m.assets.slice(0, 4).map(a => (
-              <button key={a.id} onClick={() => nav('detalle', a)}
-                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: '7px 0', color: 'inherit' }}>
-                <img src={a.img} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover' }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 2 }}><ProjectCode asset={a} /><span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{a.stage}</span></div>
-                </div>
-                <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 700, color: 'var(--pos)' }}>{a.apy}%</span>
-              </button>
-            ))}
-          </PCard>
         </div>
+      </div>
+
+      {/* Projects — same cards as the marketplace */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '24px 0 12px' }}>
+        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Proyectos <span style={{ color: 'var(--ter)', fontWeight: 600 }}>({m.assets.length})</span></div>
+        <button onClick={() => onTab('proyectos')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>Ver todos →</button>
+      </div>
+      <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+        {m.assets.slice(0, 3).map(a => <AssetCard key={a.id} asset={a} nav={nav} showCode />)}
       </div>
     </div>
   );
