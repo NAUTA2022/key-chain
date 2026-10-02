@@ -833,7 +833,7 @@ export default function Dashboard({ nav }) {
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0, justifyContent: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-              <PDonut segments={allocView === 'rwa' ? allocRWA : allocTotal} size={130} label={`$${(allocView === 'rwa' ? holdTotal : grandTotal).toLocaleString()}`} sub={allocView === 'rwa' ? 'en RWA' : 'total'} />
+              <PDonut segments={allocView === 'rwa' ? allocRWA : allocTotal} size={130} label={`$${Math.round(allocView === 'rwa' ? holdTotal : grandTotal).toLocaleString()}`} sub={allocView === 'rwa' ? 'en RWA' : 'total'} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {(allocView === 'rwa' ? allocRWA : allocTotal).map((seg, i) => (

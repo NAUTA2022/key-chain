@@ -379,23 +379,34 @@ export function PArea({ data, color, height = 80, id }) {
 }
 
 export function PDonut({ segments, size = 120, label, sub, thickness = 13 }) {
-  const r = 36, cx = 50, cy = 50, circ = 2 * Math.PI * r;
-  let off = 0;
-  const paths = segments.map((s, i) => {
-    const dash = (s.value / 100) * circ;
-    const el = (
-      <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={thickness}
-        strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={-off}
-        style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }}
-      />
-    );
-    off += dash; return el;
+  // Each segment is its own arc path (not overlapping dashed circles, which
+  // left anti-aliasing slivers where the last segment met the first).
+  // Values are normalised so rounded percentages never overrun the ring.
+  const r = 36, cx = 50, cy = 50;
+  const total = segments.reduce((t, s) => t + Math.max(0, s.value), 0) || 1;
+  const live = segments.filter(s => s.value > 0);
+  const gap = live.length > 1 ? 0.012 : 0; // fraction of the ring between segments
+  const pt = f => {
+    const a = f * 2 * Math.PI - Math.PI / 2;
+    return `${(cx + r * Math.cos(a)).toFixed(3)} ${(cy + r * Math.sin(a)).toFixed(3)}`;
+  };
+  const starts = live.map((_, i) => live.slice(0, i).reduce((t, s) => t + s.value / total, 0));
+  const paths = live.map((s, i) => {
+    const frac = s.value / total;
+    const a0 = starts[i] + gap / 2, a1 = starts[i] + frac - gap / 2;
+    if (frac >= 0.999) return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={thickness} />;
+    if (a1 <= a0) return null;
+    const large = a1 - a0 > 0.5 ? 1 : 0;
+    return <path key={i} d={`M ${pt(a0)} A ${r} ${r} 0 ${large} 1 ${pt(a1)}`} fill="none" stroke={s.color} strokeWidth={thickness} />;
   });
+  // Shrink long labels so they stay inside the hole.
+  const hole = size * (2 * (r - thickness / 2)) / 100;
+  const labelSize = label ? Math.min(size * 0.15, (hole * 0.9) / (String(label).length * 0.6)) : 0;
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} viewBox="0 0 100 100">{paths}</svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {label && <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: size * 0.15, color: 'var(--text)', letterSpacing: '-0.02em' }}>{label}</div>}
+        {label && <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: labelSize, color: 'var(--text)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>{label}</div>}
         {sub && <div style={{ fontFamily: 'var(--font-b)', fontSize: size * 0.075, color: 'var(--ter)' }}>{sub}</div>}
       </div>
     </div>
