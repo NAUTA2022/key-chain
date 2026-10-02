@@ -777,3 +777,6 @@ body {
   .g-roadmap { padding: 18px 16px !important; }
   .g-dash-main > *, .g-dash-bot > * { min-width: 0; }
 }
+
+/* Mobile bottom bar: icon-only, larger glyphs */
+.mnav-ico svg, .mnav-ico img { width: 26px !important; height: 26px !important; }

@@ -52,11 +52,12 @@ export default function MobileNavBar({ nav, route, role }) {
         return (
           <motion.button
             key={t.id}
+            aria-label={t.label} title={t.label}
             onClick={() => nav(t.id)}
             whileTap={{ scale: 0.82 }}
             style={{
               flex: 1, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 3,
+              alignItems: 'center', justifyContent: 'center',
               border: 'none', background: 'transparent', cursor: 'pointer',
               color: active ? 'var(--accent)' : 'var(--ter)', padding: 0,
               position: 'relative',
@@ -73,8 +74,7 @@ export default function MobileNavBar({ nav, route, role }) {
                 }}
               />
             )}
-            <span style={{ display: 'flex', color: 'inherit' }}>{t.icon}</span>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, fontWeight: active ? 700 : 400 }}>{t.label}</span>
+            <span className="mnav-ico" style={{ display: 'flex', color: 'inherit' }}>{t.icon}</span>
           </motion.button>
         );
       })}
