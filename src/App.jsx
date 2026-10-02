@@ -327,7 +327,8 @@ function KeychainApp() {
     return () => window.removeEventListener('mousemove', move);
   }, []);
 
-  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
+  // The landing is always dark, whatever theme the app itself is set to.
+  useEffect(() => { document.documentElement.setAttribute('data-theme', view === 'landing' ? 'dark' : theme); }, [theme, view]);
   useEffect(() => { document.documentElement.setAttribute('data-palette', palette); }, [palette]);
   useEffect(() => {
     const f = FONTS[font] || FONTS.moderna;
