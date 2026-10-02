@@ -125,13 +125,13 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
       </motion.div>
 
       {/* Tabs */}
-      <div className="no-scrollbar" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border-l)', marginBottom: 18, overflowX: 'auto' }}>
+      <div className="no-scrollbar" style={{ display: 'flex', gap: 4, boxShadow: 'inset 0 -1px 0 var(--border-l)', marginBottom: 18, overflowX: 'auto', overflowY: 'hidden' }}>
         {tabs.map(([id, label]) => (
           <button key={id} onClick={() => setTab(id)}
             style={{
               padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 13.5,
               fontWeight: tab === id ? 700 : 500, color: tab === id ? 'var(--text)' : 'var(--ter)',
-              borderBottom: `2px solid ${tab === id ? 'var(--text)' : 'transparent'}`, marginBottom: -1, whiteSpace: 'nowrap', flexShrink: 0,
+              borderBottom: `2px solid ${tab === id ? 'var(--text)' : 'transparent'}`, whiteSpace: 'nowrap', flexShrink: 0,
             }}>
             {label}
           </button>

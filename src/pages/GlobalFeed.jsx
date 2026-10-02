@@ -39,7 +39,7 @@ export default function GlobalFeed({ nav }) {
   const railMask = `linear-gradient(to right, ${railEdges.left ? 'transparent' : '#000'} 0, #000 ${RAIL_FADE}px, #000 calc(100% - ${RAIL_FADE}px), ${railEdges.right ? 'transparent' : '#000'} 100%)`;
   const rail = (
     <div className="no-scrollbar" onScroll={onRailScroll} {...railDrag}
-      style={{ display: 'flex', gap: isMobile ? 12 : 14, overflowX: 'auto', scrollSnapType: 'x mandatory', maskImage: railMask, WebkitMaskImage: railMask, cursor: 'grab' }}>
+      style={{ display: 'flex', gap: isMobile ? 12 : 14, overflowX: 'auto', overflowY: 'hidden', scrollSnapType: 'x mandatory', maskImage: railMask, WebkitMaskImage: railMask, cursor: 'grab' }}>
       {profiles.map(p => (isMobile
         ? <ProfileStory key={p.name} profile={p} onOpen={() => openProfile(p.name)} />
         : <ProfileCard key={p.name} profile={p}

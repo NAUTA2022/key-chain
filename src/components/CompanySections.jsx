@@ -338,7 +338,7 @@ export function CompanyTrust({ profile, posts, reviews, nav, isMobile }) {
 
       <PCard style={{ padding: '20px 22px' }}>
         <H sub="Rendimiento de cada proyecto de la empresa">Rentabilidad por proyecto</H>
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-b)', fontSize: 13, minWidth: 620 }}>
             <thead>
               <tr style={{ color: 'var(--ter)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left' }}>

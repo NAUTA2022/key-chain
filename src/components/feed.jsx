@@ -44,7 +44,7 @@ export function SquareMedia({ media }) {
       <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: '#000' }}>
         <div ref={ref} className="no-scrollbar"
           onScroll={e => setIndex(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
-          style={{ display: 'flex', aspectRatio: '1 / 1', overflowX: many ? 'auto' : 'hidden', scrollSnapType: 'x mandatory' }}>
+          style={{ display: 'flex', aspectRatio: '1 / 1', overflowX: many ? 'auto' : 'hidden', overflowY: 'hidden', scrollSnapType: 'x mandatory' }}>
           {media.map(m => (
             <div key={m.id} style={{ flex: '0 0 100%', height: '100%', scrollSnapAlign: 'start' }}>
               {m.type === 'video'

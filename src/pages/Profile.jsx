@@ -188,13 +188,13 @@ export default function Profile({ nav, person, company: personCompany, onCompany
       )}
 
       {/* Tabs */}
-      <div className="no-scrollbar" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border-l)', marginBottom: 18, overflowX: 'auto' }}>
+      <div className="no-scrollbar" style={{ display: 'flex', gap: 4, boxShadow: 'inset 0 -1px 0 var(--border-l)', marginBottom: 18, overflowX: 'auto', overflowY: 'hidden' }}>
         {sections.map(([id, label]) => (
           <button key={id} onClick={() => setSection(id)}
             style={{
               padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 13.5,
               fontWeight: section === id ? 700 : 500, color: section === id ? 'var(--text)' : 'var(--ter)',
-              borderBottom: `2px solid ${section === id ? 'var(--text)' : 'transparent'}`, marginBottom: -1, whiteSpace: 'nowrap', flexShrink: 0,
+              borderBottom: `2px solid ${section === id ? 'var(--text)' : 'transparent'}`, whiteSpace: 'nowrap', flexShrink: 0,
             }}>
             {label}
           </button>
