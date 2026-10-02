@@ -242,7 +242,7 @@ function RoadmapKYCN() {
       </div>
 
       {/* Horizontal timeline */}
-      <div className="no-scrollbar" style={{ overflowX: 'auto', margin: '0 -4px', padding: '0 4px' }}>
+      <div className="no-scrollbar" style={{ overflowX: 'auto', overflowY: 'hidden', margin: '-16px -16px', padding: '16px 16px' }}>
       <div style={{ position: 'relative', paddingBottom: 4, minWidth: ROADMAP.length * 84 }}>
         {/* Track line */}
         <div style={{ position: 'absolute', top: 18, left: '4%', right: '4%', height: 3, background: 'var(--gl-bg3)', borderRadius: 2, zIndex: 0 }}>
