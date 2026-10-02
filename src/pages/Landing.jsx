@@ -20,7 +20,7 @@ import ScrollVelocity from '../components/reactbits/ScrollVelocity';
 import ScrollReveal from '../components/reactbits/ScrollReveal';
 import SpotlightCard from '../components/reactbits/SpotlightCard';
 import MagicBento from '../components/reactbits/MagicBento';
-import CardSwap, { Card } from '../components/reactbits/CardSwap';
+import StepShowcase from '../components/landing/StepShowcase';
 import CircularGallery from '../components/reactbits/CircularGallery';
 import ClickSpark from '../components/reactbits/ClickSpark';
 import LogoLoop from '../components/reactbits/LogoLoop';
@@ -212,6 +212,13 @@ export default function Landing({ onEnter, onDevEnter }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [activeStep, setActiveStep] = useState(0);
+  const [stepsPaused, setStepsPaused] = useState(false);
+  const STEP_MS = 5200;
+  useEffect(() => {
+    if (stepsPaused) return undefined;
+    const id = setTimeout(() => setActiveStep(s => (s + 1) % HOW.length), STEP_MS);
+    return () => clearTimeout(id);
+  }, [activeStep, stepsPaused]);
   useEffect(() => {
     const h = () => { setIsMobile(window.innerWidth < 768); if (window.innerWidth > 767) setMenuOpen(false); };
     window.addEventListener('resize', h);
@@ -253,6 +260,7 @@ export default function Landing({ onEnter, onDevEnter }) {
   }, [isMobile, mouseX, mouseY]);
 
   const gallery = RWA_ASSETS.filter(a => a.img && !a.name.startsWith('[QA]')).slice(0, 10).map(a => ({ image: a.img, text: a.name }));
+  const showcaseAssets = RWA_ASSETS.filter(a => a.img && !a.name.startsWith('[QA]')).slice(0, 3);
   const factPct = Math.round((FACT_TOKEN.raised / FACT_TOKEN.goal) * 100);
 
   const coin = (c, i, side) => {
@@ -464,18 +472,19 @@ export default function Landing({ onEnter, onDevEnter }) {
           </div>
         </section>
 
-        {/* ─── CÓMO FUNCIONA (steps + Card Swap) ──────────────── */}
+        {/* ─── CÓMO FUNCIONA (steps drive a live showcase) ───── */}
         <section id="como" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 48px 110px', position: 'relative', zIndex: 2, scrollMarginTop: 80 }} className="land-section">
-          <div className="land-how" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 40, alignItems: 'center' }}>
+          <div className="land-how" onMouseEnter={() => setStepsPaused(true)} onMouseLeave={() => setStepsPaused(false)}
+            style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 48, alignItems: 'center' }}>
             <div>
               <SectionHead kicker="Cómo funciona" title="Empezá en 4 pasos" align="left" sub="Del registro a tu primera renta en USDC, sin papeleo ni bancos." />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {HOW.map((h, i) => {
                   const on = activeStep === i;
                   return (
-                    <motion.button key={h.n} onMouseEnter={() => { sHover(); setActiveStep(i); }} onClick={() => setActiveStep(i)}
+                    <motion.button key={h.n} onMouseEnter={sHover} onClick={() => { setActiveStep(i); sWhoosh(); }}
                       initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                      style={{ display: 'flex', alignItems: 'flex-start', gap: 14, textAlign: 'left', padding: '14px 16px', borderRadius: 16, cursor: 'pointer',
+                      style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-start', gap: 14, textAlign: 'left', padding: '14px 16px', borderRadius: 16, cursor: 'pointer',
                         border: `1px solid ${on ? `${h.tint}66` : 'rgba(255,255,255,0.07)'}`, background: on ? `${h.tint}14` : 'rgba(255,255,255,0.02)', transition: 'all 0.25s' }}>
                       <span style={{ width: 40, height: 40, borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 13,
                         color: on ? '#fff' : 'rgba(255,255,255,0.7)', background: on ? h.tint : 'rgba(255,255,255,0.06)', boxShadow: on ? `0 0 24px ${h.tint}88` : 'none', transition: 'all 0.25s' }}>{h.n}</span>
@@ -483,28 +492,18 @@ export default function Landing({ onEnter, onDevEnter }) {
                         <span style={{ display: 'block', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: '#fff', marginBottom: 4 }}>{h.t}</span>
                         <span style={{ display: 'block', fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.55 }}>{h.d}</span>
                       </span>
+                      {on && (
+                        <motion.span key={`${activeStep}-${stepsPaused}`} initial={{ width: stepsPaused ? '100%' : '0%' }} animate={{ width: '100%' }}
+                          transition={{ duration: stepsPaused ? 0 : STEP_MS / 1000, ease: 'linear' }}
+                          style={{ position: 'absolute', left: 0, bottom: 0, height: 2, background: h.tint, boxShadow: `0 0 8px ${h.tint}` }} />
+                      )}
                     </motion.button>
                   );
                 })}
               </div>
             </div>
-            <div className="land-swap-wrap" style={{ position: 'relative', height: 480 }}>
-              <CardSwap width={isMobile ? 300 : 420} height={isMobile ? 240 : 320} cardDistance={50} verticalDistance={60} delay={3800} pauseOnHover skewAmount={5}>
-                {HOW.map(h => (
-                  <Card key={h.n} customClass="land-swap-card" style={{ background: `radial-gradient(120% 120% at 0% 0%, ${h.tint}33, #0a0c14 60%)`, borderColor: `${h.tint}55` }}>
-                    <div style={{ padding: 22, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxSizing: 'border-box' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', color: h.tint }}>PASO {h.n}</span>
-                        <span style={{ width: 42, height: 42, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `${h.tint}22`, color: h.tint, border: `1px solid ${h.tint}55` }}>{h.icon}</span>
-                      </div>
-                      <div>
-                        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 22 : 28, color: '#fff', letterSpacing: '-0.03em', marginBottom: 8 }}>{h.t}</div>
-                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.55 }}>{h.d}</div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </CardSwap>
+            <div className="land-showcase">
+              <StepShowcase step={activeStep} steps={HOW} assets={showcaseAssets} />
             </div>
           </div>
         </section>

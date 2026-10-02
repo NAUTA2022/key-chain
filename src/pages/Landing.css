@@ -168,3 +168,9 @@
   background: rgba(127,178,255,0.10); border: 1px solid rgba(127,178,255,0.3); }
 .land-pill-green { color: #86efac; background: rgba(74,222,128,0.10); border-color: rgba(74,222,128,0.3); }
 .land-pill-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* Bento: thin (1px) lit border in the landing blue, soft outer glow */
+.land-bento .magic-bento-card--border-glow::after { padding: 1px;
+  background: radial-gradient(var(--glow-radius) circle at var(--glow-x) var(--glow-y),
+    rgba(150, 190, 255, calc(var(--glow-intensity) * 1)) 0%, rgba(167, 139, 250, calc(var(--glow-intensity) * 0.55)) 35%, transparent 65%); }
+.land-bento .magic-bento-card--border-glow:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 22px rgba(110,150,255,0.12); }
