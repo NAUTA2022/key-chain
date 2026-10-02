@@ -28,12 +28,6 @@ import ParticleWord from '../components/landing/ParticleWord';
 import { AuditVisual, VaultVisual, YieldVisual, P2PVisual, VoteVisual, KycVisual } from '../components/landing/BentoVisuals';
 import './Landing.css';
 
-const STATS = [
-  { to: 28.4,  pre: '$', suf: 'M', l: 'Capital invertido' },
-  { to: 148,   pre: '',  suf: '',  l: 'Proyectos activos' },
-  { to: 12840, pre: '',  suf: '',  l: 'Inversores', sep: ',' },
-  { to: 9.8,   pre: '',  suf: '%', l: 'APY promedio' },
-];
 
 const HOW = [
   { n: '01', t: 'Verificá tu identidad', d: 'Completá el KYC en menos de 5 minutos. Solo DNI y selfie.', icon: Icons.shield, tint: '#4d8dff' },
@@ -388,17 +382,7 @@ export default function Landing({ onEnter, onDevEnter }) {
             </div>
           </motion.div>
 
-          {/* Stats */}
-          <div className="land-hero-stats" style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(4, minmax(0, 200px))', justifyContent: 'center', gap: isMobile ? 10 : 16, padding: '34px 0 50px', position: 'relative', zIndex: 1 }}>
-            {STATS.map(s => (
-              <motion.div key={s.l} className="land-stat" whileHover={{ y: -4 }} onHoverStart={sHover}>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 26 : 32, letterSpacing: '-0.03em', color: '#fff' }}>
-                  {s.pre}<CountUp to={s.to} duration={2.2} separator={s.sep || ''} />{s.suf}
-                </div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>{s.l}</div>
-              </motion.div>
-            ))}
-          </div>
+          <div style={{ height: 48 }} />
         </section>
 
         {/* ─── Built on ───────────────────────────────────────── */}
