@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PCard, PBtn, PSection, PTag, PChip, PStat, PImg, Icons, CompanyTag } from '../components/ui';
 import { RWA_ASSETS, RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD, fmtUSD2 } from '../data';
 import AssetCard from '../components/AssetCard';
+import { useMobile } from '../hooks/useMobile';
 
 // TEMP DEV FILTER — lets a developer jump straight to any of the 7 QA fixture
 // states (see devNote on each asset in data/index.js) without hunting through
@@ -173,6 +174,8 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
   };
 
   const featured = heroItems[heroIndex] || heroItems[0];
+  const isMobile = useMobile();
+  const heroH = isMobile ? 440 : 296;
 
   const heroCounter = heroItems.length > 1 && (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:8 }}>
@@ -205,7 +208,7 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
       <PSection
         title="Mercado Primario"
         sub="Proyectos tokenizados en el ecosistema KEYCHAIN. Invertí desde la emisión."
-        action={heroCounter}
+        action={isMobile ? null : heroCounter}
       />
 
       {/* Hero carousel — rotates through heroItems, see state/effects above.
@@ -213,7 +216,7 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
           clipped only by this viewport's overflow:hidden — not by any outer
           page margin — so the outgoing/incoming cards fully cross the frame. */}
       {featured && (
-        <div style={{ position:'relative', overflow:'hidden', height:296, marginBottom:28, borderRadius:20 }}>
+        <div style={{ position:'relative', overflow:'hidden', height:heroH, marginBottom: isMobile ? 14 : 28, borderRadius:20 }}>
           <AnimatePresence initial={false} custom={heroDir}>
             <motion.div key={featured.id}
               custom={heroDir}
@@ -229,6 +232,30 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
               onDrag={handleDrag}
               onDragEnd={handleDragEnd}
             >
+              {isMobile ? (
+              <PCard onClick={handleHeroClick} style={{ height:heroH, position:'relative', cursor:'grab', touchAction:'pan-y' }}>
+                <PImg src={featured.img} height="100%" style={{ position:'absolute', inset:0 }}>
+                  <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.88) 100%)' }} />
+                  <div style={{ position:'absolute', top:14, left:14, right:14, display:'flex', justifyContent:'space-between', gap:8 }}>
+                    <PTag label="Destacado" color="dark" />
+                    <PTag label={featured.stage} color="green" />
+                  </div>
+                  <div style={{ position:'absolute', left:18, right:18, bottom:18, color:'#fff' }}>
+                    <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:24, letterSpacing:'-0.03em', lineHeight:1.15, marginBottom:6 }}>{featured.name}</div>
+                    <div style={{ fontFamily:'var(--font-b)', fontSize:13, color:'rgba(255,255,255,0.75)', marginBottom:14, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden', lineHeight:1.45 }}>{featured.desc}</div>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(3, minmax(0,1fr))', gap:8, marginBottom:14 }}>
+                      {[['Token', fmtUSD(featured.tokenPrice)], ['APY est.', `${featured.apy}%`], ['Financiado', `${featured.sold}%`]].map(([l, v]) => (
+                        <div key={l}>
+                          <div style={{ fontFamily:'var(--font-b)', fontSize:10.5, textTransform:'uppercase', letterSpacing:'0.07em', color:'rgba(255,255,255,0.65)' }}>{l}</div>
+                          <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18 }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <PBtn variant="accent" style={{ width:'100%', justifyContent:'center', background:'#fff', color:'#0b0b0f' }} onClick={e => { e.stopPropagation(); nav('detalle', featured); }}>Ver proyecto</PBtn>
+                  </div>
+                </PImg>
+              </PCard>
+              ) : (
               <PCard onClick={handleHeroClick}
                 style={{ display:'flex', height:296, cursor:'grab', flexWrap:'wrap', touchAction:'pan-y',
                   ...(featured.issuer==='keychain' && { boxShadow:'var(--sh-lg)', background:'var(--surface)' }) }}>
@@ -259,8 +286,20 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
                   </div>
                 </div>
               </PCard>
+              )}
             </motion.div>
           </AnimatePresence>
+        </div>
+      )}
+      {isMobile && featured && heroCounter && (
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:22 }}>
+          <div style={{ display:'flex', gap:6 }}>
+            {heroItems.map((item, i) => (
+              <button key={item.id} onClick={() => goToHero(i)} aria-label={item.name}
+                style={{ width: i === heroIndex ? 20 : 7, height:7, borderRadius:999, border:'none', padding:0, cursor:'pointer',
+                  background: i === heroIndex ? 'var(--accent)' : 'var(--border)', transition:'width 0.25s ease, background 0.25s ease' }} />
+            ))}
+          </div>
         </div>
       )}
 
