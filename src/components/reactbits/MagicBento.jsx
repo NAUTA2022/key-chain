@@ -529,6 +529,7 @@ const MagicBento = ({
                   <div className="magic-bento-card__label">{card.label}</div>
                   {card.icon && <div className="magic-bento-card__icon">{card.icon}</div>}
                 </div>
+                {card.visual && <div className="magic-bento-card__visual">{card.visual}</div>}
                 <div className="magic-bento-card__content">
                   <h2 className="magic-bento-card__title">{card.title}</h2>
                   <p className="magic-bento-card__description">{card.description}</p>

@@ -62,3 +62,65 @@
   .land-spot.card-spotlight { padding: 22px; }
   .land-hero-section { padding: 18px 18px 0 !important; }
 }
+
+/* LogoLoop: no list bullets */
+.logoloop__list { list-style: none; margin: 0; padding: 0; }
+.logoloop__item { list-style: none; }
+
+/* Hero — particle morph word */
+.land-morph { display: flex; flex-direction: column; align-items: center; }
+.land-morph-label { font-family: var(--font-b); font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(160,190,255,0.7); font-weight: 700; }
+.land-morph-tail { font-family: var(--font-b); font-size: 17px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+/* Stat tiles */
+.land-stat { text-align: center; padding: 16px 12px; border-radius: 18px; background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); position: relative; overflow: hidden; }
+.land-stat::after { content: ''; position: absolute; left: 20%; right: 20%; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(127,178,255,0.8), transparent); }
+
+/* KPI tiles inside the RWA / FACT cards */
+.land-kpi { padding: 12px 14px; border-radius: 14px; position: relative; overflow: hidden;
+  background: linear-gradient(160deg, rgba(127,178,255,0.08), rgba(255,255,255,0.02) 60%);
+  border: 1px solid rgba(127,178,255,0.16); transition: border-color .25s, transform .25s; }
+.land-kpi:hover { border-color: rgba(127,178,255,0.45); transform: translateY(-2px); }
+
+/* Bento visuals */
+.land-bento .magic-bento-card__visual { flex: 1; display: flex; flex-direction: column; justify-content: center; margin: 14px 0; min-height: 0; position: relative; z-index: 1; }
+.land-bento .magic-bento-card__content { position: relative; z-index: 1; }
+.land-bento .magic-bento-card { aspect-ratio: auto; min-height: 250px; }
+.land-swap-wrap { overflow: hidden; border-radius: 24px; }
+
+/* ── Strategy simulator, restyled to match the landing ── */
+.sim-main { position: relative; }
+.sim-main::before { content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px; z-index: 2;
+  background: linear-gradient(90deg, transparent, rgba(127,178,255,0.9), rgba(192,132,252,0.9), transparent); }
+.sim-main::after { content: ''; position: absolute; top: -120px; left: 50%; width: 520px; height: 240px; transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(110,140,255,0.18), transparent 70%); pointer-events: none; }
+
+.sim-card { position: relative; isolation: isolate; }
+.sim-card > *:not(.sim-check) { position: relative; z-index: 1; }
+.sim-card .sim-check { z-index: 2; box-shadow: 0 0 16px var(--c); }
+/* cursor spotlight */
+.sim-card::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .3s;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--c) 22%, transparent), transparent 70%); }
+.sim-card:hover::after { opacity: 1; }
+/* selected: rotating gradient border (animated angle via @property) */
+@property --sim-ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+.sim-card.sel {
+  border-color: transparent !important;
+  background:
+    linear-gradient(color-mix(in srgb, var(--c) 7%, #0b0e17), color-mix(in srgb, var(--c) 7%, #0b0e17)) padding-box,
+    conic-gradient(from var(--sim-ang), transparent 0 35%, var(--c) 50%, transparent 65% 85%, color-mix(in srgb, var(--c) 60%, #fff) 100%) border-box !important;
+  animation: sim-spin 3.2s linear infinite;
+  box-shadow: 0 14px 44px color-mix(in srgb, var(--c) 22%, transparent) !important;
+}
+@keyframes sim-spin { to { --sim-ang: 360deg; } }
+
+/* range sliders */
+.sim-range { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 999px; outline: none;
+  background: linear-gradient(90deg, var(--c) 0 var(--pct), rgba(255,255,255,0.08) var(--pct) 100%); }
+.sim-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fff;
+  border: 3px solid var(--c); box-shadow: 0 0 14px var(--c); cursor: grab; transition: transform .15s; }
+.sim-range::-webkit-slider-thumb:active { transform: scale(1.2); cursor: grabbing; }
+.sim-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--c); box-shadow: 0 0 14px var(--c); }

@@ -15,7 +15,6 @@ import BlurText from '../components/reactbits/BlurText';
 import ShinyText from '../components/reactbits/ShinyText';
 import GradientText from '../components/reactbits/GradientText';
 import CountUp from '../components/reactbits/CountUp';
-import RotatingText from '../components/reactbits/RotatingText';
 import DecryptedText from '../components/reactbits/DecryptedText';
 import ScrollVelocity from '../components/reactbits/ScrollVelocity';
 import ScrollReveal from '../components/reactbits/ScrollReveal';
@@ -27,6 +26,8 @@ import ClickSpark from '../components/reactbits/ClickSpark';
 import Magnet from '../components/reactbits/Magnet';
 import StarBorder from '../components/reactbits/StarBorder';
 import LogoLoop from '../components/reactbits/LogoLoop';
+import ParticleWord from '../components/landing/ParticleWord';
+import { AuditVisual, VaultVisual, YieldVisual, P2PVisual, VoteVisual, KycVisual } from '../components/landing/BentoVisuals';
 import './Landing.css';
 
 const STATS = [
@@ -44,12 +45,12 @@ const HOW = [
 ];
 
 const BENTO = [
-  { color: '#0b0f1c', label: 'Seguridad',     title: 'Contratos auditados',     description: 'ERC-20 auditados por CertiK antes de cada emisión en Polygon.', icon: Icons.shield },
-  { color: '#0b0f1c', label: 'Custodia',      title: 'Custodia institucional',  description: 'Activos físicos con custodia profesional y póliza de seguro.', icon: Icons.wallet },
-  { color: '#0d1226', label: 'Rendimiento',   title: 'Rendimientos en USDC',    description: 'Distribuciones on-chain mensuales directo a tu wallet. Sin bancos ni intermediarios, todo verificable en Polygon.', icon: Icons.swap },
-  { color: '#0d1226', label: 'Liquidez',      title: 'Mercado secundario P2P',  description: 'Vendé tus tokens cuando quieras a otros inversores, comparando precio pedido contra valor real.', icon: Icons.token },
-  { color: '#0b0f1c', label: 'Gobernanza',    title: 'Votá con FACT',           description: 'Los holders deciden qué proyectos se tokenizan.', icon: Icons.primary },
-  { color: '#0b0f1c', label: 'Onboarding',    title: 'KYC en 5 minutos',        description: 'DNI y selfie. Empezás a invertir el mismo día.', icon: Icons.shield },
+  { color: '#0b0f1c', label: 'Seguridad',     title: 'Contratos auditados',     description: 'ERC-20 auditados por CertiK antes de cada emisión en Polygon.', icon: Icons.shield, visual: <AuditVisual /> },
+  { color: '#0b0f1c', label: 'Custodia',      title: 'Custodia institucional',  description: 'Activos físicos con custodia profesional y póliza de seguro.', icon: Icons.wallet, visual: <VaultVisual /> },
+  { color: '#0d1226', label: 'Rendimiento',   title: 'Rendimientos en USDC',    description: 'Distribuciones on-chain mensuales directo a tu wallet. Sin bancos ni intermediarios, todo verificable en Polygon.', icon: Icons.swap, visual: <YieldVisual /> },
+  { color: '#0d1226', label: 'Liquidez',      title: 'Mercado secundario P2P',  description: 'Vendé tus tokens cuando quieras a otros inversores, comparando precio pedido contra valor real.', icon: Icons.token, visual: <P2PVisual /> },
+  { color: '#0b0f1c', label: 'Gobernanza',    title: 'Votá con FACT',           description: 'Los holders deciden qué proyectos se tokenizan.', icon: Icons.primary, visual: <VoteVisual /> },
+  { color: '#0b0f1c', label: 'Onboarding',    title: 'KYC en 5 minutos',        description: 'DNI y selfie. Empezás a invertir el mismo día.', icon: Icons.shield, visual: <KycVisual /> },
 ];
 
 const COINS = {
@@ -78,6 +79,9 @@ const CHAIN_LOGOS = [
   ),
   title,
 }));
+
+const MORPH_WORDS = ['autos', 'campos', 'drones', 'inmuebles', 'edificios'];
+const MORPH_COLORS = ['#7fb2ff', '#93a8ff', '#a78bfa', '#c4a7ff', '#f0abfc'];
 
 const NAV_LINKS = [['Proyectos', 'proyectos'], ['Cómo funciona', 'como'], ['Beneficios', 'beneficios'], ['Token FACT', 'fact']];
 
@@ -134,6 +138,56 @@ function PrimaryCta({ children, onClick, big }) {
         </span>
       </StarBorder>
     </Magnet>
+  );
+}
+
+// RWA card header: three project photos fanned out; they spread on hover.
+function FannedPhotos({ assets }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div onMouseEnter={() => { setHover(true); sHover(); }} onMouseLeave={() => setHover(false)}
+      style={{ position: 'relative', height: 150, marginBottom: 22, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      {assets.map((a, i) => {
+        const k = i - 1;
+        return (
+          <motion.div key={a.id} animate={{ x: k * (hover ? 120 : 80), rotate: k * (hover ? 10 : 7), y: Math.abs(k) * (hover ? 14 : 8), scale: k === 0 ? 1.04 : 0.94 }}
+            transition={{ type: 'spring', damping: 18, stiffness: 200 }}
+            style={{ position: 'absolute', width: 150, height: 120, borderRadius: 16, overflow: 'hidden', zIndex: k === 0 ? 2 : 1,
+              border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 18px 40px rgba(0,0,0,0.55)' }}>
+            <img src={a.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.75))' }} />
+            <div style={{ position: 'absolute', left: 8, right: 8, bottom: 7, fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
+            <div style={{ position: 'absolute', top: 7, right: 7, padding: '2px 7px', borderRadius: 999, background: 'rgba(74,222,128,0.9)', color: '#052e14', fontSize: 10, fontWeight: 800, fontFamily: 'var(--font-b)' }}>{a.apy}%</div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+// FACT card header: ICO progress as a glowing ring around the token.
+function IcoRing({ pct }) {
+  const R = 58, C = 2 * Math.PI * R;
+  return (
+    <div style={{ height: 150, marginBottom: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22 }}>
+      <div style={{ position: 'relative', width: 140, height: 140 }}>
+        <svg width="140" height="140" viewBox="0 0 140 140" style={{ transform: 'rotate(-90deg)' }}>
+          <defs>
+            <linearGradient id="icoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#7fb2ff" /><stop offset="100%" stopColor="#c084fc" /></linearGradient>
+          </defs>
+          <circle cx="70" cy="70" r={R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="10" />
+          <motion.circle cx="70" cy="70" r={R} fill="none" stroke="url(#icoGrad)" strokeWidth="10" strokeLinecap="round"
+            strokeDasharray={C} initial={{ strokeDashoffset: C }} whileInView={{ strokeDashoffset: C * (1 - pct / 100) }} viewport={{ once: true }}
+            transition={{ duration: 1.8, ease: 'easeOut' }} style={{ filter: 'drop-shadow(0 0 8px rgba(160,140,255,0.7))' }} />
+        </svg>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, color: '#fff' }}><CountUp to={pct} duration={1.8} />%</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Recaudado</div>
+        </div>
+      </div>
+      <motion.img src="/3d.png" alt="" animate={{ y: [0, -8, 0], rotate: [0, 6, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ width: 74, height: 74, objectFit: 'contain', filter: 'drop-shadow(0 0 22px rgba(90,140,255,0.7))' }} />
+    </div>
   );
 }
 
@@ -320,15 +374,10 @@ export default function Landing({ onEnter, onDevEnter }) {
           </div>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-            className="land-hero-sub"
-            style={{ fontFamily: 'var(--font-b)', fontSize: 18, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, maxWidth: 620, margin: '0 auto 34px', position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 8 }}>
-            <span className="land-rotate-row"><span>Invertí en</span>
-            <RotatingText texts={['autos', 'campos', 'drones', 'inmuebles', 'edificios']}
-              mainClassName="land-rotate" staggerFrom="last" staggerDuration={0.025} rotationInterval={2200}
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '-120%' }}
-              splitLevelClassName="land-rotate-split" transition={{ type: 'spring', damping: 30, stiffness: 400 }} />
-            <span>tokenizados</span></span>
-            <span>desde $38 y con rentas mensuales en USDC.</span>
+            className="land-hero-sub land-morph" style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto 30px' }}>
+            <div className="land-morph-label">Invertí en</div>
+            <ParticleWord words={MORPH_WORDS} colors={MORPH_COLORS} fontSize={isMobile ? 50 : 76} gap={isMobile ? 2.4 : 3} interval={2900} />
+            <div className="land-morph-tail">tokenizados, desde $38 y con rentas mensuales en USDC.</div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
@@ -356,14 +405,14 @@ export default function Landing({ onEnter, onDevEnter }) {
           </motion.div>
 
           {/* Stats */}
-          <div className="land-hero-stats" style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(4, auto)', justifyContent: 'center', gap: isMobile ? '22px 12px' : 64, padding: '40px 0 56px', position: 'relative', zIndex: 1 }}>
+          <div className="land-hero-stats" style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(4, minmax(0, 200px))', justifyContent: 'center', gap: isMobile ? 10 : 16, padding: '34px 0 50px', position: 'relative', zIndex: 1 }}>
             {STATS.map(s => (
-              <div key={s.l} style={{ textAlign: 'center' }}>
+              <motion.div key={s.l} className="land-stat" whileHover={{ y: -4 }} onHoverStart={sHover}>
                 <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 26 : 32, letterSpacing: '-0.03em', color: '#fff' }}>
                   {s.pre}<CountUp to={s.to} duration={2.2} separator={s.sep || ''} />{s.suf}
                 </div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'rgba(255,255,255,0.38)', marginTop: 4 }}>{s.l}</div>
-              </div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>{s.l}</div>
+              </motion.div>
             ))}
           </div>
         </section>
@@ -389,7 +438,7 @@ export default function Landing({ onEnter, onDevEnter }) {
                 text: 'Invertí en fracciones de autos, campos, drones, inmuebles y edificios tokenizados en Polygon. Cada token representa participación proporcional del activo.',
                 kpis: [['Desde', '$38 USD'], ['APY promedio', '9.8%'], ['Distribución', 'Mensual USDC'], ['Proyectos activos', '148']],
                 bullets: ['Rendimientos mensuales on-chain', 'Liquidez en mercado secundario P2P', 'Contratos auditados · Seguro incluido', 'Sin bancos ni intermediarios'],
-                cta: 'Explorar proyectos →', primary: false,
+                cta: 'Explorar proyectos →', primary: false, visual: 'photos',
               },
               {
                 tag: (
@@ -403,12 +452,13 @@ export default function Landing({ onEnter, onDevEnter }) {
                 progress: true,
                 kpis: [['Precio ICO', `$${FACT_TOKEN.price}`], ['Staking APY', '9–14%'], ['TGE', '15% inmediato'], ['Vesting', '12 meses']],
                 bullets: ['50% de descuento en fees de plataforma', 'Gobernanza DAO · Votás los proyectos', 'Staking con APY 9–14% anual', 'Acceso anticipado a proyectos nuevos'],
-                cta: 'Participar en la ICO →', primary: true,
+                cta: 'Participar en la ICO →', primary: true, visual: 'ring',
               },
             ].map((c, idx) => (
               <motion.div key={idx} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.12 }}
                 onMouseEnter={sHover} style={{ display: 'flex' }}>
                 <SpotlightCard spotlightColor={c.spot} className="land-spot">
+                  {c.visual === 'photos' ? <FannedPhotos assets={RWA_ASSETS.filter(a => a.img && !a.name.startsWith('[QA]')).slice(0, 3)} /> : <IcoRing pct={factPct} />}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12 }}>
                     <div>
                       <div style={{ marginBottom: 12 }}>{c.tag}</div>
@@ -418,21 +468,14 @@ export default function Landing({ onEnter, onDevEnter }) {
                   </div>
                   <p style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'rgba(255,255,255,0.48)', lineHeight: 1.65, margin: '0 0 22px' }}>{c.text}</p>
                   {c.progress && (
-                    <div style={{ marginBottom: 22 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>Recaudado</span>
-                        <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13, color: 'rgba(255,255,255,0.9)' }}>${(FACT_TOKEN.raised / 1e6).toFixed(2)}M / ${(FACT_TOKEN.goal / 1e6).toFixed(1)}M</span>
-                      </div>
-                      <div style={{ height: 6, background: 'rgba(255,255,255,0.07)', borderRadius: 999, overflow: 'hidden' }}>
-                        <motion.div initial={{ width: 0 }} whileInView={{ width: `${factPct}%` }} viewport={{ once: true }} transition={{ duration: 1.6, ease: 'easeOut' }}
-                          style={{ height: '100%', background: 'linear-gradient(90deg, #6aa2ff, #b59bff)', borderRadius: 999, boxShadow: '0 0 12px rgba(150,140,255,0.6)' }} />
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(255,255,255,0.35)', marginTop: 6 }}>{factPct}% completado · {FACT_TOKEN.holders.toLocaleString()} holders</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 18, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'rgba(255,255,255,0.45)' }}>
+                      <span>${(FACT_TOKEN.raised / 1e6).toFixed(2)}M de ${(FACT_TOKEN.goal / 1e6).toFixed(1)}M</span>
+                      <span>{FACT_TOKEN.holders.toLocaleString()} holders</span>
                     </div>
                   )}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 22 }}>
                     {c.kpis.map(([l, v]) => (
-                      <div key={l} style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <div key={l} className="land-kpi">
                         <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>{l}</div>
                         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: '#fff' }}>{v}</div>
                       </div>
@@ -529,7 +572,10 @@ export default function Landing({ onEnter, onDevEnter }) {
 
         {/* ─── SIMULADOR ──────────────────────────────────────── */}
         <div style={{ position: 'relative', zIndex: 2 }}>
-          <StrategySimulator />
+          <StrategySimulator head={
+            <SectionHead kicker="Para emprendedores · B2B" title="Simulá la tokenización de tu proyecto"
+              sub="Elegí el modelo, configurá los parámetros de tu empresa y mirá cuánto podés levantar en tu ronda." />
+          } />
         </div>
 
         {/* ─── CTA ────────────────────────────────────────────── */}
