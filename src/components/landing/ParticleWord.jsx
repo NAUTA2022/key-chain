@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 // re-forms as the next word. The cursor/finger pushes particles away.
 // Each word is rasterised off-screen and sampled into target points; the
 // same particle pool flies between the targets of consecutive words.
+const EDGE_MASK = 'linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent), linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent)';
+
 export default function ParticleWord({
   words,
   interval = 2800,
@@ -25,6 +27,10 @@ export default function ParticleWord({
     const ctx = canvas.getContext('2d');
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    // The canvas is taller than the word (BLEED above and below) and its
+    // edges are masked out, so bursting particles fade away instead of being
+    // clipped by a hard rectangle.
+    const BLEED = Math.round(fontSize * 0.9);
     let W = 0, H = 0, raf = 0, timer = 0, alive = true;
     let targets = [];       // per word: [{x, y}]
     let particles = [];
@@ -74,11 +80,12 @@ export default function ParticleWord({
 
     const setup = () => {
       const rect = wrap.getBoundingClientRect();
+      const cssH = (height || fontSize * 1.35) + BLEED * 2;
       W = Math.max(1, Math.round(rect.width * dpr));
-      H = Math.max(1, Math.round((height || fontSize * 1.35) * dpr));
+      H = Math.max(1, Math.round(cssH * dpr));
       canvas.width = W; canvas.height = H;
       canvas.style.width = `${rect.width}px`;
-      canvas.style.height = `${height || fontSize * 1.35}px`;
+      canvas.style.height = `${cssH}px`;
       ctx.font = font;
       targets = words.map(sample);
       const count = Math.min(2600, Math.max(...targets.map(t => t.length), 1));
@@ -94,9 +101,9 @@ export default function ParticleWord({
       phaseStart = performance.now();
       particles.forEach(p => {
         const ang = Math.random() * Math.PI * 2;
-        const sp = (1.5 + Math.random() * 5) * dpr;
+        const sp = (1.2 + Math.random() * 4) * dpr;
         p.vx = Math.cos(ang) * sp;
-        p.vy = Math.sin(ang) * sp - 1.5 * dpr;
+        p.vy = Math.sin(ang) * sp * 0.7;
       });
       onMorph?.();
       setTimeout(() => {
@@ -122,9 +129,9 @@ export default function ParticleWord({
       for (const p of particles) {
         if (phase === 'burst') {
           p.x += p.vx * dtF; p.y += p.vy * dtF;
-          const damp = Math.exp(-dtS * 3.2);
-          p.vx *= damp; p.vy = p.vy * damp + 0.06 * dpr * dtF;
-          p.a += (0.4 - p.a) * fade;
+          const damp = Math.exp(-dtS * 3.6);
+          p.vx *= damp; p.vy = p.vy * damp + 0.02 * dpr * dtF;
+          p.a += (0.45 - p.a) * fade;
         } else {
           const k = Math.min(1, (now - phaseStart) / 900);
           const follow = 1 - Math.exp(-dtS * (3 + 9 * k * k));
@@ -183,8 +190,11 @@ export default function ParticleWord({
   }, [words, interval, fontSize, fontWeight, colors, gap, height, onMorph]);
 
   return (
-    <div ref={wrapRef} className={className} style={{ width: '100%', position: 'relative' }} aria-live="polite">
-      <canvas ref={canvasRef} style={{ display: 'block', touchAction: 'pan-y' }} aria-hidden="true" />
+    <div ref={wrapRef} className={className} style={{ width: '100%', position: 'relative', margin: `${-Math.round(fontSize * 0.9)}px 0`, pointerEvents: 'none' }} aria-live="polite">
+      <canvas ref={canvasRef} aria-hidden="true" style={{
+        display: 'block', touchAction: 'pan-y', pointerEvents: 'auto',
+        WebkitMaskImage: EDGE_MASK, maskImage: EDGE_MASK, WebkitMaskComposite: 'source-in', maskComposite: 'intersect',
+      }} />
       <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>{words.join(', ')}</span>
     </div>
   );
