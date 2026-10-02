@@ -30,7 +30,7 @@ function OverlayStat({ label, value, align = 'flex-start' }) {
 function KeychainAssetCard({ a, left, nav, showCode, holding, actions }) {
   return (
     <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
-      <PCard onClick={() => nav('detalle', a)} style={{ height:340, position:'relative' }}>
+      <PCard className="market-card-full" onClick={() => nav('detalle', a)} style={{ height:340, position:'relative' }}>
         <PImg src={a.img} height="100%" style={{ position:'absolute', inset:0 }}>
           <div style={{ position:'absolute', top:14, left:14 }}>
             {/* This card only renders for issuer === 'keychain' — it's a

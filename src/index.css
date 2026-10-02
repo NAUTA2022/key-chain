@@ -785,4 +785,7 @@ body {
    overflowed the screen and squeezed the stats). */
 @media (max-width: 560px) {
   .g-market-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; }
+  /* One card per row: give them more height so they don't look squashed */
+  .market-card-full { height: 460px !important; }
+  .market-card-img  { height: 250px !important; }
 }
