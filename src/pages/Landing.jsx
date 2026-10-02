@@ -38,7 +38,7 @@ const STATS = [
 const HOW = [
   { n: '01', t: 'Verificá tu identidad', d: 'Completá el KYC en menos de 5 minutos. Solo DNI y selfie.', icon: Icons.shield, tint: '#4d8dff' },
   { n: '02', t: 'Elegí tu activo',       d: 'Explorá drones, campos, autos premium, edificios tokenizados.', icon: Icons.primary, tint: '#9b7bff' },
-  { n: '03', t: 'Invertí en tokens',     d: 'Comprá fracciones desde tu wallet. Desde $38 USD.', icon: Icons.token, tint: '#f5a623' },
+  { n: '03', t: 'Invertí en tokens',     d: 'Comprá fracciones desde tu wallet. Desde $1 USD.', icon: Icons.token, tint: '#f5a623' },
   { n: '04', t: 'Cobrá rendimientos',    d: 'Distribuciones mensuales en USDC directo a tu wallet.', icon: Icons.receive || Icons.wallet, tint: '#4ade80' },
 ];
 
@@ -53,16 +53,16 @@ const BENTO = [
 
 const COINS = {
   left: [
-    { id: 'ETH',  color: '#627EEA', bg: 'rgba(98,126,234,0.12)',  x: -230, y: 110, mx: -122, my: 55,  size: 64, msize: 50, dur: 3.2, mz: 4, mop: 1.0,  src: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg' },
-    { id: 'BTC',  color: '#F7931A', bg: 'rgba(247,147,26,0.10)',  x: -390, y: 60,  mx: -152, my: 195, size: 44, msize: 28, dur: 2.8, mz: 1, mop: 0.45, src: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/btc.svg' },
-    { id: 'USDT', color: '#26A17B', bg: 'rgba(38,161,123,0.10)',  x: -310, y: 205, mx: -90,  my: 268, size: 52, msize: 40, dur: 3.6, mz: 3, mop: 0.85, src: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/usdt.svg' },
-    { id: 'SOL',  color: '#9945FF', bg: 'rgba(153,69,255,0.10)',  x: -165, y: 200, mx: -148, my: 310, size: 36, msize: 22, dur: 2.5, mz: 1, mop: 0.35, src: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+    { id: 'ETH',  color: '#627EEA', bg: 'rgba(98,126,234,0.12)',  x: -230, y: 110, mx: -122, my: 55,  size: 64, msize: 50, dur: 3.2, mz: 4, mop: 1.0,  src: '/crypto/eth.svg' },
+    { id: 'BTC',  color: '#F7931A', bg: 'rgba(247,147,26,0.10)',  x: -390, y: 60,  mx: -152, my: 195, size: 44, msize: 28, dur: 2.8, mz: 1, mop: 0.45, src: '/crypto/btc.svg' },
+    { id: 'USDT', color: '#26A17B', bg: 'rgba(38,161,123,0.10)',  x: -310, y: 205, mx: -90,  my: 268, size: 52, msize: 40, dur: 3.6, mz: 3, mop: 0.85, src: '/crypto/usdt.svg' },
+    { id: 'SOL',  color: '#9945FF', bg: 'rgba(153,69,255,0.10)',  x: -165, y: 200, mx: -148, my: 310, size: 36, msize: 22, dur: 2.5, mz: 1, mop: 0.35, src: '/crypto/sol.svg' },
   ],
   right: [
-    { id: 'POL',  color: '#8247E5', bg: 'rgba(130,71,229,0.12)', x: 230,  y: 110, mx: 122, my: 55,  size: 58, msize: 46, dur: 3.0, mz: 4, mop: 1.0,  src: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/matic.svg' },
-    { id: 'USDC', color: '#2775CA', bg: 'rgba(39,117,202,0.10)', x: 390,  y: 55,  mx: 150, my: 195, size: 40, msize: 26, dur: 2.6, mz: 1, mop: 0.40, src: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/usdc.svg' },
-    { id: 'BNB',  color: '#F3BA2F', bg: 'rgba(243,186,47,0.10)', x: 310,  y: 205, mx: 90,  my: 268, size: 70, msize: 42, dur: 3.4, mz: 3, mop: 0.90, src: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/bnb.svg' },
-    { id: 'SOL2', color: '#9945FF', bg: 'rgba(153,69,255,0.10)', x: 165,  y: 200, mx: 148, my: 310, size: 32, msize: 20, dur: 2.9, mz: 1, mop: 0.35, src: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+    { id: 'POL',  color: '#8247E5', bg: 'rgba(130,71,229,0.12)', x: 230,  y: 110, mx: 122, my: 55,  size: 58, msize: 46, dur: 3.0, mz: 4, mop: 1.0,  src: '/crypto/matic.svg' },
+    { id: 'USDC', color: '#2775CA', bg: 'rgba(39,117,202,0.10)', x: 390,  y: 55,  mx: 150, my: 195, size: 40, msize: 26, dur: 2.6, mz: 1, mop: 0.40, src: '/crypto/usdc.svg' },
+    { id: 'BNB',  color: '#F3BA2F', bg: 'rgba(243,186,47,0.10)', x: 310,  y: 205, mx: 90,  my: 268, size: 70, msize: 42, dur: 3.4, mz: 3, mop: 0.90, src: '/crypto/bnb.svg' },
+    { id: 'SOL2', color: '#9945FF', bg: 'rgba(153,69,255,0.10)', x: 165,  y: 200, mx: 148, my: 310, size: 32, msize: 20, dur: 2.9, mz: 1, mop: 0.35, src: '/crypto/sol.svg' },
   ],
 };
 
@@ -71,7 +71,7 @@ const CHAIN_LOGOS = [
 ].map(([title, s]) => ({
   node: (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 15 }}>
-      <img src={`https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/${s}.svg`} alt="" style={{ width: 26, height: 26 }} />
+      <img src={`/crypto/${s}.svg`} alt="" style={{ width: 26, height: 26 }} />
       {title}
     </span>
   ),
@@ -369,14 +369,9 @@ export default function Landing({ onEnter, onDevEnter }) {
             className="land-hero-sub land-morph" style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto 30px' }}>
             <div className="land-morph-label">Invertí en</div>
             <ParticleWord words={MORPH_WORDS} colors={MORPH_COLORS} fontSize={isMobile ? 50 : 76} gap={isMobile ? 2.4 : 3} interval={2900} />
-            <div className="land-morph-tail">tokenizados, desde $38 y con rentas mensuales en USDC.</div>
+            <div className="land-morph-tail">tokenizados, desde $1 y con rentas mensuales en USDC.</div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
-            className="land-hero-ctas" style={{ display: 'flex', gap: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 10, position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
-            <LBtn onClick={onEnter} chime icon={BOLT} size="lg">Empezar ahora</LBtn>
-            <LBtn variant="ghost" size="lg" onClick={() => scrollToId('proyectos')}>Ver proyectos</LBtn>
-          </motion.div>
 
           {/* Visual: oven with floating coins */}
           <motion.div initial={{ opacity: 0, y: 36 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.8 }}
@@ -425,7 +420,7 @@ export default function Landing({ onEnter, onDevEnter }) {
               {
                 tag: <PTag label="Proyectos RWA" color="neutral" />, title: <>Activos del<br />mundo real</>, icon: Icons.primary, spot: 'rgba(110,160,255,0.28)',
                 text: 'Invertí en fracciones de autos, campos, drones, inmuebles y edificios tokenizados en Polygon. Cada token representa participación proporcional del activo.',
-                kpis: [['Desde', '$38 USD'], ['APY promedio', '9.8%'], ['Distribución', 'Mensual USDC'], ['Proyectos activos', '148']],
+                kpis: [['Desde', '$1 USD'], ['APY promedio', '9.8%'], ['Distribución', 'Mensual USDC'], ['Proyectos activos', '148']],
                 bullets: ['Rendimientos mensuales on-chain', 'Liquidez en mercado secundario P2P', 'Contratos auditados · Seguro incluido', 'Sin bancos ni intermediarios'],
                 cta: 'Explorar proyectos →', primary: false, visual: 'photos',
               },

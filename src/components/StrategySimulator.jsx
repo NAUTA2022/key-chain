@@ -101,7 +101,7 @@ const STRATEGIES = [
         help: 'El retorno porcentual anual que los holders recibirán. Calculalo en base al ingreso real del activo (alquiler, producción, etc.).' },
       { id: 'duration',   label: 'Plazo del proyecto',            unit: 'meses',  type: 'range',  min: 6,     max: 60,       step: 3,     default: 24,
         help: 'Período durante el cual los tokens generan rendimientos. Al vencimiento los inversores pueden revender o renovar su participación.' },
-      { id: 'minticket',  label: 'Ticket mínimo por inversor',    unit: 'USD',    type: 'range',  min: 38,    max: 5000,     step: 50,    default: 500,
+      { id: 'minticket',  label: 'Ticket mínimo por inversor',    unit: 'USD',    type: 'range',  min: 1,     max: 5000,     step: 1,     default: 500,
         help: 'Inversión mínima por persona. Un ticket bajo amplía la base de inversores; uno alto atrae perfiles más institucionales.' },
       { id: 'platform',   label: 'Fee de la plataforma',          unit: '%',      type: 'range',  min: 1,     max: 5,        step: 0.5,   default: 2.5,
         help: 'Comisión de Factoract por tokenización, custodia del activo y distribución de rendimientos on-chain.' },
