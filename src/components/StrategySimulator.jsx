@@ -471,7 +471,7 @@ export default function StrategySimulator({ head }) {
           {/* ── STEP 0: Elegir modelo ── */}
           {step === 0 && (
             <motion.div key="s0" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              style={{ padding: '40px 40px 28px' }}>
+              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
               <div style={{ marginBottom: 28 }}>
                 <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'rgba(255,255,255,0.88)', marginBottom: 6 }}>¿Qué modelo de tokenización usás?</div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.34)', lineHeight: 1.55 }}>Cada modelo tiene ventajas distintas según el tipo de proyecto, activo y nivel de confianza que querés transmitir a tus inversores.</div>
@@ -534,7 +534,7 @@ export default function StrategySimulator({ head }) {
           {/* ── STEP 1: Parámetros ── */}
           {step === 1 && strategy && (
             <motion.div key="s1" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              style={{ padding: '40px 40px 28px' }}>
+              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 28 }}>
                 <div style={{ width: 46, height: 46, borderRadius: 13, background: `${strategy.color}14`, border: `1px solid ${strategy.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: strategy.color, flexShrink: 0 }}>
                   {strategy.icon}
@@ -557,7 +557,7 @@ export default function StrategySimulator({ head }) {
           {/* ── STEP 2: Proyección ── */}
           {step === 2 && strategy && proj && (
             <motion.div key="s2" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              style={{ padding: '40px 40px 28px' }}>
+              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
 
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 22 }}>
                 <div style={{ width: 46, height: 46, borderRadius: 13, background: `${strategy.color}14`, border: `1px solid ${strategy.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: strategy.color, flexShrink: 0 }}>
@@ -651,7 +651,7 @@ export default function StrategySimulator({ head }) {
         </AnimatePresence>
 
         {/* Footer */}
-        <div style={{ padding: '16px 40px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.16)' }}>
+        <div className="sim-foot" style={{ padding: '16px 40px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.16)' }}>
           <button onClick={() => step > 0 && setStep(s => s - 1)} disabled={step === 0}
             style={{ padding: '9px 20px', borderRadius: 10, border: '1.5px solid rgba(255,255,255,0.09)', background: 'transparent', cursor: step === 0 ? 'default' : 'pointer', color: step === 0 ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.50)', fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, transition: 'all 0.15s' }}>
             ← Atrás
