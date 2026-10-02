@@ -23,8 +23,6 @@ import MagicBento from '../components/reactbits/MagicBento';
 import CardSwap, { Card } from '../components/reactbits/CardSwap';
 import CircularGallery from '../components/reactbits/CircularGallery';
 import ClickSpark from '../components/reactbits/ClickSpark';
-import Magnet from '../components/reactbits/Magnet';
-import StarBorder from '../components/reactbits/StarBorder';
 import LogoLoop from '../components/reactbits/LogoLoop';
 import ParticleWord from '../components/landing/ParticleWord';
 import { AuditVisual, VaultVisual, YieldVisual, P2PVisual, VoteVisual, KycVisual } from '../components/landing/BentoVisuals';
@@ -125,21 +123,20 @@ function SectionHead({ kicker, title, sub, align = 'center' }) {
   );
 }
 
-function PrimaryCta({ children, onClick, big }) {
+// One button style for the whole landing: same pill, same motion.
+// primary = white with a light sweep; ghost = glass with a gradient rim.
+function LBtn({ children, onClick, variant = 'primary', size = 'md', block, chime, icon, className = '' }) {
   return (
-    <Magnet padding={60} magnetStrength={4}>
-      <StarBorder as="button" color="#7fb2ff" speed="4s" thickness={2}
-        onMouseEnter={sHover} onClick={() => { sChime(); onClick?.(); }}
-        className="land-star-btn"
-        style={{ cursor: 'pointer', borderRadius: 999 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-b)', fontWeight: 800, fontSize: big ? 17 : 15, padding: big ? '4px 18px' : '2px 10px' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
-          {children}
-        </span>
-      </StarBorder>
-    </Magnet>
+    <button onMouseEnter={sHover} onClick={() => { if (chime) sChime(); onClick?.(); }}
+      className={`lbtn lbtn-${variant} lbtn-${size}${block ? ' lbtn-block' : ''} ${className}`}>
+      {icon}
+      <span>{children}</span>
+      {variant === 'primary' && <span className="lbtn-arrow" aria-hidden="true">→</span>}
+    </button>
   );
 }
+
+const BOLT = <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>;
 
 // RWA card header: three project photos fanned out; they spread on hover.
 function FannedPhotos({ assets }) {
@@ -258,7 +255,6 @@ export default function Landing({ onEnter, onDevEnter }) {
     mouseY.set((e.clientY / window.innerHeight) * 2 - 1);
   }, [isMobile, mouseX, mouseY]);
 
-  const enter = () => { sChime(); onEnter(); };
   const gallery = RWA_ASSETS.filter(a => a.img && !a.name.startsWith('[QA]')).slice(0, 10).map(a => ({ image: a.img, text: a.name }));
   const factPct = Math.round((FACT_TOKEN.raised / FACT_TOKEN.goal) * 100);
 
@@ -309,10 +305,7 @@ export default function Landing({ onEnter, onDevEnter }) {
               {DEV_MODE && onDevEnter && (
                 <button onClick={onDevEnter} title="Entrar sin wallet (solo desarrollo)" style={DEV_BTN}>Entrar dev</button>
               )}
-              <button onClick={enter} onMouseEnter={sHover}
-                style={{ padding: '6px 16px', fontSize: 13, fontFamily: 'var(--font-b)', fontWeight: 700, borderRadius: 10, cursor: 'pointer', height: 36, background: 'rgba(255,255,255,0.94)', color: '#060606', border: 'none', boxShadow: 'inset 0 1px 0 #fff, 0 4px 14px rgba(0,0,0,0.40)' }}>
-                Iniciar sesión
-              </button>
+              <LBtn size="sm" onClick={onEnter}>Iniciar sesión</LBtn>
             </div>
             <button className="land-hamburger" aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMenuOpen(o => !o)}
               style={{ display: 'none', width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.10)', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.8)', flexShrink: 0, position: 'relative' }}>
@@ -337,10 +330,9 @@ export default function Landing({ onEnter, onDevEnter }) {
                   {l}
                 </motion.button>
               ))}
-              <button onClick={() => { setMenuOpen(false); enter(); }}
-                style={{ marginTop: 18, padding: '14px 20px', fontSize: 15, fontFamily: 'var(--font-b)', fontWeight: 700, borderRadius: 14, cursor: 'pointer', width: '100%', background: 'rgba(255,255,255,0.94)', color: '#060606', border: 'none' }}>
-                Iniciar sesión
-              </button>
+              <div style={{ marginTop: 18 }}>
+                <LBtn block size="lg" chime onClick={() => { setMenuOpen(false); onEnter(); }}>Iniciar sesión</LBtn>
+              </div>
               {DEV_MODE && onDevEnter && (
                 <button onClick={() => { setMenuOpen(false); onDevEnter(); }}
                   style={{ ...DEV_BTN, marginTop: 10, width: '100%', height: 'auto', padding: '12px 20px', fontSize: 15, borderRadius: 14 }}>Entrar dev</button>
@@ -382,11 +374,8 @@ export default function Landing({ onEnter, onDevEnter }) {
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
             className="land-hero-ctas" style={{ display: 'flex', gap: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 10, position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
-            <PrimaryCta onClick={onEnter}>Empezar ahora</PrimaryCta>
-            <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} onMouseEnter={sHover} onClick={() => scrollToId('proyectos')}
-              style={{ padding: '13px 24px', borderRadius: 999, cursor: 'pointer', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 15, color: 'rgba(255,255,255,0.85)', ...LG, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.13)' }}>
-              Ver proyectos ↓
-            </motion.button>
+            <LBtn onClick={onEnter} chime icon={BOLT} size="lg">Empezar ahora</LBtn>
+            <LBtn variant="ghost" size="lg" onClick={() => scrollToId('proyectos')}>Ver proyectos</LBtn>
           </motion.div>
 
           {/* Visual: oven with floating coins */}
@@ -489,11 +478,7 @@ export default function Landing({ onEnter, onDevEnter }) {
                       </div>
                     ))}
                   </div>
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onMouseEnter={sHover} onClick={c.primary ? enter : () => scrollToId('proyectos')}
-                    style={{ width: '100%', padding: 14, borderRadius: 12, fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, cursor: 'pointer',
-                      ...(c.primary ? { background: 'rgba(255,255,255,0.94)', color: '#060606', border: 'none' } : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.13)' }) }}>
-                    {c.cta}
-                  </motion.button>
+                  <LBtn block variant={c.primary ? 'primary' : 'ghost'} chime={c.primary} onClick={c.primary ? onEnter : () => scrollToId('proyectos')}>{c.cta.replace(' →', '')}</LBtn>
                 </SpotlightCard>
               </motion.div>
             ))}
@@ -563,10 +548,7 @@ export default function Landing({ onEnter, onDevEnter }) {
             <CircularGallery items={gallery} bend={isMobile ? 1.5 : 2.6} textColor="#ffffff" borderRadius={0.06} scrollSpeed={2} scrollEase={0.05} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
-            <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} onMouseEnter={sHover} onClick={enter}
-              style={{ padding: '12px 24px', borderRadius: 999, cursor: 'pointer', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.85)', ...LG, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.13)' }}>
-              Ver los {RWA_ASSETS.length} proyectos →
-            </motion.button>
+            <LBtn variant="ghost" onClick={onEnter}>Ver los {RWA_ASSETS.length} proyectos</LBtn>
           </div>
         </section>
 
@@ -589,7 +571,7 @@ export default function Landing({ onEnter, onDevEnter }) {
               Uníte a miles de inversores que ya generan rendimientos reales en USDC, con plena transparencia on-chain.
             </p>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <PrimaryCta onClick={onEnter} big>Comenzar ahora</PrimaryCta>
+              <LBtn onClick={onEnter} chime icon={BOLT} size="xl">Comenzar ahora</LBtn>
             </div>
             <div style={{ marginTop: 40, display: 'flex', gap: 28, justifyContent: 'center', flexWrap: 'wrap' }}>
               {['Regulado', 'Contratos auditados CertiK', 'Custodia institucional', 'KYC verificado'].map(t => (
