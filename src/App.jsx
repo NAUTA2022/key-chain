@@ -7,6 +7,7 @@ import { playMouseMove } from './lib/sound';
 
 import Landing from './pages/Landing';
 import KeyPayLogin from './pages/KeyPayLogin';
+import MenuToggle from './components/layout/MenuToggle';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
 import MobileNavBar from './components/layout/MobileNavBar';
@@ -137,7 +138,7 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
         <Topbar
           theme={theme} setTheme={setTheme}
           prefs={prefs} setPrefs={setPrefs}
-          nav={nav} route={route} isMobile onMenuOpen={() => setDrawerOpen(true)}
+          nav={nav} route={route} isMobile
         />
         <main ref={mainRef} style={{ flex: 1, overflowY: route === 'ecosistema' ? 'hidden' : 'auto', paddingBottom: route === 'ecosistema' ? 0 : 64, ...(route === 'ecosistema' && { display: 'flex', flexDirection: 'column' }) }}>
           {pageContent}
@@ -149,6 +150,7 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
           drawerMode drawerOpen={drawerOpen} onClose={() => setDrawerOpen(false)}
           onLogout={onLogout}
         />
+        <MenuToggle open={drawerOpen} onToggle={() => setDrawerOpen(o => !o)} />
       </div>
     );
   }

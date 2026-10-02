@@ -311,9 +311,13 @@ export default function Topbar({ theme, setTheme, nav, route, prefs, setPrefs, s
         borderBottom: '1px solid var(--gl-bd)', position: 'sticky', top: 0, zIndex: 50,
       }}>
         {/* Hamburger */}
-        <button onClick={onMenuOpen} style={{ width: 36, height: 36, borderRadius: 10, border: '1.5px solid var(--border-l)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sec)', flexShrink: 0 }}>
-          {HAMBURGER_ICON}
-        </button>
+        {/* Hamburger: placeholder — the real button (MenuToggle) is rendered by
+            the shell above the drawer so it can morph into the close X. */}
+        {onMenuOpen ? (
+          <button onClick={onMenuOpen} style={{ width: 36, height: 36, borderRadius: 10, border: '1.5px solid var(--border-l)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sec)', flexShrink: 0 }}>
+            {HAMBURGER_ICON}
+          </button>
+        ) : <div style={{ width: 36, height: 36, flexShrink: 0 }} />}
 
         {/* Logo centered — link a inicio */}
         <button onClick={() => nav('feed')} style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>

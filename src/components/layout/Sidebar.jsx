@@ -1,3 +1,4 @@
+import { DRAWER_W } from './MenuToggle';
 import { useState, useRef, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -309,28 +310,27 @@ function SidebarDrawer({ route, nav, role, onClose, onLogout }) {
         key="drawer-backdrop"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose}
-        style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 0, zIndex: 300, background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(2px)' }}
+        style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(2px)' }}
       />
       <motion.div
         key="drawer-panel"
-        initial={{ x: -290 }} animate={{ x: 0 }} exit={{ x: -290 }}
+        initial={{ x: -DRAWER_W - 20 }} animate={{ x: 0 }} exit={{ x: -DRAWER_W - 20 }}
         transition={{ type: 'spring', damping: 32, stiffness: 400 }}
         style={{
-          position: 'fixed', top: 56, left: 0, height: 'calc(100vh - 56px)', width: 272,
+          position: 'fixed', top: 0, left: 0, height: '100vh', width: DRAWER_W,
           zIndex: 301, display: 'flex', flexDirection: 'column',
           background: 'var(--gl-panel)',
           backdropFilter: 'blur(12px) saturate(160%) brightness(1.02)',
           WebkitBackdropFilter: 'blur(12px) saturate(160%) brightness(1.02)',
           borderRight: '1px solid var(--gl-bd)',
-          padding: '18px 14px 16px', boxSizing: 'border-box', overflowY: 'auto',
+          padding: '0 14px 16px', boxSizing: 'border-box', overflowY: 'auto',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px', marginBottom: 20 }}>
+        {/* Header row lines up with the topbar; the menu button (MenuToggle)
+            sits at its right edge as the close X. */}
+        <div style={{ display: 'flex', alignItems: 'center', height: 56, padding: '0 2px', marginBottom: 14, flexShrink: 0 }}>
           <button onClick={() => handleNav('feed')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <PLogo size={14} />
-          </button>
-          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid var(--border-l)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ter)' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
           </button>
         </div>
 
