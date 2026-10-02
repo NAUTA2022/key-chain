@@ -215,11 +215,11 @@ export default function Holdings({ nav }) {
   };
 
   const tabSwitch = (
-    <div style={{ display: 'flex', gap: 2, flex: isMobile ? 1 : undefined, background: 'var(--gl-prd-i)', border: '1px solid var(--gl-icon)', borderRadius: 12, padding: 4 }}>
+    <div style={{ display: 'flex', gap: 2, flex: isMobile ? 1 : undefined, height: isMobile ? 46 : undefined, boxSizing: 'border-box', background: 'var(--gl-prd-i)', border: '1px solid var(--gl-icon)', borderRadius: 12, padding: 4 }}>
       {[['wallet','Wallet'], ['inversiones','Inversiones']].map(([id, label]) => (
         <button key={id} onClick={() => setTab(id)} style={{
           flex: isMobile ? 1 : undefined,
-          padding: isMobile ? '8px 10px' : '7px 18px', borderRadius: 9, border: 'none', cursor: 'pointer',
+          padding: isMobile ? '0 10px' : '7px 18px', borderRadius: 9, border: 'none', cursor: 'pointer',
           background: tab === id ? 'var(--gl-bg3)' : 'transparent',
           color: tab === id ? 'var(--text)' : 'var(--ter)',
           fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: tab === id ? 600 : 500,
@@ -233,7 +233,7 @@ export default function Holdings({ nav }) {
   // Key Pay: just a key icon on phones, full label on desktop
   const keyPayBtn = isMobile ? (
     <button onClick={() => setKeyPayOpen(true)} aria-label="Abrir en Key Pay" title="Abrir en Key Pay"
-      style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 12, border: 'none', cursor: 'pointer', background: 'var(--accent)', color: 'var(--accent-fg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      style={{ width: 46, height: 46, flexShrink: 0, padding: 0, borderRadius: 12, border: 'none', cursor: 'pointer', background: 'var(--accent)', color: 'var(--accent-fg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="7.5" cy="15.5" r="4.5" /><path d="M10.7 12.3L20 3M16 7l3 3M14 9l2 2" />
       </svg>
@@ -347,7 +347,7 @@ export default function Holdings({ nav }) {
         // Phones: balance card first, then Wallet / Inversiones + Key Pay key
         <>
           <ParallaxWalletCard account={account} setTab={setTab} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 8, marginBottom: 16 }}>
             {tabSwitch}
             {keyPayBtn}
           </div>
