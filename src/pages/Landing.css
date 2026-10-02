@@ -1,0 +1,64 @@
+/* Landing — styling for the React Bits pieces used on the page */
+
+.land-h2 { font-family: var(--font-h); font-weight: 800; font-size: clamp(30px, 4.4vw, 46px); color: rgba(255,255,255,0.96);
+  letter-spacing: -0.04em; line-height: 1.08; margin: 0; justify-content: center; }
+[style*="text-align: left"] > .land-h2 { justify-content: flex-start; }
+.land-h1-line { justify-content: center; margin: 0; }
+.land-h1-grad { font: inherit; letter-spacing: inherit; background: none; backdrop-filter: none; overflow: visible; border-radius: 0; cursor: default; }
+.land-h1-grad .text-content { padding-bottom: 0.08em; }
+
+.land-shiny { font-family: var(--font-b); font-size: 12.5px; font-weight: 600; }
+
+.land-hero-sub .land-rotate-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: nowrap; width: 100%; }
+.land-rotate { display: inline-flex; padding: 2px 12px; border-radius: 10px; overflow: hidden; justify-content: center;
+  background: linear-gradient(135deg, #3b6fff, #8b5cf6); color: #fff; font-weight: 800; box-shadow: 0 8px 30px rgba(80,110,255,0.45); }
+.land-rotate-split { overflow: hidden; padding-bottom: 2px; }
+
+.land-star-btn .inner-content { background: linear-gradient(180deg, #ffffff, #e6ecff) !important; color: #05060a !important;
+  border: none !important; border-radius: 999px !important; padding: 12px 22px !important; }
+.land-star-btn { border-radius: 999px !important; }
+
+.land-navlink-txt { color: rgba(255,255,255,0.55); transition: color 0.2s; }
+.land-navlink:hover .land-navlink-txt { color: #fff; }
+.land-navlink-enc { color: #8fb8ff; }
+
+.land-velocity-text { font-family: var(--font-h); font-weight: 800; letter-spacing: -0.03em; padding-right: 0.4em;
+  color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.22); }
+.land-velocity .parallax:nth-child(2) .land-velocity-text { color: rgba(255,255,255,0.9); -webkit-text-stroke: 0; }
+.land-velocity .scroller { font-size: clamp(2.4rem, 7vw, 5.5rem); line-height: 1.1; }
+
+.land-spot.card-spotlight { width: 100%; display: flex; flex-direction: column; padding: 32px; border-radius: 22px;
+  background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 24px 70px rgba(0,0,0,0.6); }
+
+.land-bento .card-grid { max-width: 100%; margin: 0 auto; padding: 0; gap: 14px; font-size: 16px; }
+.land-bento .magic-bento-card { border-color: rgba(255,255,255,0.08); min-height: 190px; color: #fff; }
+.land-bento .magic-bento-card__label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8fb8ff; font-weight: 700; }
+.land-bento .magic-bento-card__header { display: flex; justify-content: space-between; align-items: center; }
+.land-bento .magic-bento-card__icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: rgba(110,160,255,0.12); color: #9cc3ff; border: 1px solid rgba(110,160,255,0.3); }
+.land-bento .magic-bento-card__title { font-family: var(--font-h); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; margin: 0 0 6px; }
+.land-bento .magic-bento-card__description { font-family: var(--font-b); font-size: 14px; line-height: 1.55; color: rgba(255,255,255,0.55); opacity: 1; }
+
+.land-swap-wrap .land-swap-card { border-radius: 20px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+.land-swap-wrap .card-swap-container { transform: translate(0%, 8%); }
+
+.land-reveal { margin: 0 0 8px; }
+.land-reveal-text { font-family: var(--font-h); font-weight: 800; letter-spacing: -0.04em; line-height: 1.12 !important;
+  font-size: clamp(34px, 5.6vw, 60px) !important; color: #fff; margin: 0; }
+
+.land-trust { font-family: var(--font-b); font-size: 12.5px; color: rgba(255,255,255,0.45); font-weight: 500; }
+.land-trust-enc { color: #8fb8ff; }
+.land-footlink { color: rgba(255,255,255,0.32); transition: color 0.2s; }
+.land-footlink:hover { color: rgba(255,255,255,0.85); }
+
+@media (max-width: 767px) {
+  .land-how { grid-template-columns: minmax(0,1fr) !important; gap: 8px !important; }
+  .land-swap-wrap { display: none; }
+  .land-bento .magic-bento-card { aspect-ratio: auto; min-height: 0; gap: 26px; }
+  .land-bento .card-grid { width: 100%; }
+  .land-section-pad { padding: 0 16px !important; }
+  .land-spot.card-spotlight { padding: 22px; }
+  .land-hero-section { padding: 18px 18px 0 !important; }
+}
