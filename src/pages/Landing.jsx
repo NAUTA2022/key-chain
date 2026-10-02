@@ -20,7 +20,7 @@ import ScrollVelocity from '../components/reactbits/ScrollVelocity';
 import ScrollReveal from '../components/reactbits/ScrollReveal';
 import SpotlightCard from '../components/reactbits/SpotlightCard';
 import MagicBento from '../components/reactbits/MagicBento';
-import StepShowcase from '../components/landing/StepShowcase';
+import PhoneShowcase from '../components/landing/PhoneShowcase';
 import CircularGallery from '../components/reactbits/CircularGallery';
 import ClickSpark from '../components/reactbits/ClickSpark';
 import LogoLoop from '../components/reactbits/LogoLoop';
@@ -474,37 +474,32 @@ export default function Landing({ onEnter, onDevEnter }) {
 
         {/* ─── CÓMO FUNCIONA (steps drive a live showcase) ───── */}
         <section id="como" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 48px 110px', position: 'relative', zIndex: 2, scrollMarginTop: 80 }} className="land-section">
-          <div className="land-how" onMouseEnter={() => setStepsPaused(true)} onMouseLeave={() => setStepsPaused(false)}
-            style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 48, alignItems: 'center' }}>
-            <div>
-              <SectionHead kicker="Cómo funciona" title="Empezá en 4 pasos" align="left" sub="Del registro a tu primera renta en USDC, sin papeleo ni bancos." />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {HOW.map((h, i) => {
-                  const on = activeStep === i;
-                  return (
-                    <motion.button key={h.n} onMouseEnter={sHover} onClick={() => { setActiveStep(i); sWhoosh(); }}
-                      initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                      style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-start', gap: 14, textAlign: 'left', padding: '14px 16px', borderRadius: 16, cursor: 'pointer',
-                        border: `1px solid ${on ? `${h.tint}66` : 'rgba(255,255,255,0.07)'}`, background: on ? `${h.tint}14` : 'rgba(255,255,255,0.02)', transition: 'all 0.25s' }}>
-                      <span style={{ width: 40, height: 40, borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 13,
-                        color: on ? '#fff' : 'rgba(255,255,255,0.7)', background: on ? h.tint : 'rgba(255,255,255,0.06)', boxShadow: on ? `0 0 24px ${h.tint}88` : 'none', transition: 'all 0.25s' }}>{h.n}</span>
-                      <span>
-                        <span style={{ display: 'block', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: '#fff', marginBottom: 4 }}>{h.t}</span>
-                        <span style={{ display: 'block', fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.55 }}>{h.d}</span>
+          <SectionHead kicker="Cómo funciona" title="Empezá en 4 pasos" sub="Del registro a tu primera renta en USDC, todo desde el celular." />
+          <div className="land-how" onMouseEnter={() => setStepsPaused(true)} onMouseLeave={() => setStepsPaused(false)}>
+            <ol className="how-list">
+              {HOW.map((h, i) => {
+                const on = activeStep === i;
+                return (
+                  <li key={h.n}>
+                    <button className={`how-step${on ? ' on' : ''}`} onMouseEnter={sHover} onClick={() => { setActiveStep(i); sWhoosh(); }}>
+                      <span className="how-num">{h.n}</span>
+                      <span className="how-body">
+                        <span className="how-title">{h.t}</span>
+                        <span className="how-desc">{h.d}</span>
+                        <span className="how-track">
+                          {on && (
+                            <motion.span key={`${activeStep}-${stepsPaused}`} className="how-fill"
+                              initial={{ width: stepsPaused ? '100%' : '0%' }} animate={{ width: '100%' }}
+                              transition={{ duration: stepsPaused ? 0 : STEP_MS / 1000, ease: 'linear' }} />
+                          )}
+                        </span>
                       </span>
-                      {on && (
-                        <motion.span key={`${activeStep}-${stepsPaused}`} initial={{ width: stepsPaused ? '100%' : '0%' }} animate={{ width: '100%' }}
-                          transition={{ duration: stepsPaused ? 0 : STEP_MS / 1000, ease: 'linear' }}
-                          style={{ position: 'absolute', left: 0, bottom: 0, height: 2, background: h.tint, boxShadow: `0 0 8px ${h.tint}` }} />
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="land-showcase">
-              <StepShowcase step={activeStep} steps={HOW} assets={showcaseAssets} />
-            </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+            <PhoneShowcase step={activeStep} asset={showcaseAssets[0]} next={showcaseAssets[1]} />
           </div>
         </section>
 

@@ -174,3 +174,35 @@
   background: radial-gradient(var(--glow-radius) circle at var(--glow-x) var(--glow-y),
     rgba(150, 190, 255, calc(var(--glow-intensity) * 1)) 0%, rgba(167, 139, 250, calc(var(--glow-intensity) * 0.55)) 35%, transparent 65%); }
 .land-bento .magic-bento-card--border-glow:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 22px rgba(110,150,255,0.12); }
+
+/* ── Cómo funciona: steps + phone ── */
+.land-how { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 72px; align-items: center; max-width: 980px; margin: 0 auto; }
+.how-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.how-list li { border-top: 1px solid rgba(255,255,255,0.07); }
+.how-list li:last-child { border-bottom: 1px solid rgba(255,255,255,0.07); }
+.how-step { width: 100%; display: flex; gap: 20px; align-items: flex-start; text-align: left; background: none; border: none; cursor: pointer; padding: 22px 4px; color: inherit; }
+.how-num { font-family: var(--font-h); font-weight: 700; font-size: 14px; color: rgba(255,255,255,0.28); padding-top: 3px; min-width: 22px; transition: color .25s; font-variant-numeric: tabular-nums; }
+.how-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.how-title { font-family: var(--font-h); font-weight: 700; font-size: 19px; letter-spacing: -0.015em; color: rgba(255,255,255,0.45); transition: color .25s; }
+.how-desc { font-family: var(--font-b); font-size: 14px; line-height: 1.55; color: rgba(255,255,255,0.45); max-height: 0; opacity: 0; overflow: hidden; transition: max-height .35s ease, opacity .3s ease, margin .3s; }
+.how-track { display: block; height: 1px; background: transparent; margin-top: 0; position: relative; overflow: hidden; transition: margin .3s, background .3s; }
+.how-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; }
+.how-step:hover .how-title { color: rgba(255,255,255,0.75); }
+.how-step.on .how-num { color: #fff; }
+.how-step.on .how-title { color: #fff; }
+.how-step.on .how-desc { max-height: 80px; opacity: 1; margin-top: 6px; }
+.how-step.on .how-track { margin-top: 16px; background: rgba(255,255,255,0.12); }
+
+.phone-wrap { display: flex; justify-content: center; }
+.phone { width: 300px; height: 620px; border-radius: 52px; padding: 11px; box-sizing: border-box; position: relative;
+  background: linear-gradient(145deg, #2c2f36, #0e0f12 45%, #1d1f24);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.10), inset 0 0 0 1.5px rgba(255,255,255,0.06), 0 40px 90px rgba(0,0,0,0.65), 0 0 120px rgba(80,110,220,0.18); }
+.phone-screen { position: relative; width: 100%; height: 100%; border-radius: 42px; overflow: hidden; background: #0b0d13; display: flex; flex-direction: column; }
+.phone-island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 92px; height: 26px; border-radius: 999px; background: #000; z-index: 5; }
+.phone-home { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.55); z-index: 5; }
+.phone-card .market-card-full { height: 300px !important; }
+
+@media (max-width: 900px) {
+  .land-how { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .phone { transform: scale(0.92); transform-origin: top center; margin-bottom: -50px; }
+}
