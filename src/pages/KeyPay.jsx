@@ -1,3 +1,4 @@
+import { TRANSACTIONS } from '../lib/walletActivity';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { LuHouse, LuActivity, LuSettings, LuLayoutGrid } from 'react-icons/lu';
@@ -607,15 +608,6 @@ function KListRow({ thumb, thumbNode, title, subtitle, trailing, trailingSub, on
 const WALLETS = [
   { id:'usdc', name:'USDC', kind:'Cripto', balance:12480.32, symbol:'$', color:'#2775CA', history:[10800,11100,10950,11600,11900,12100,12480] },
   { id:'kycn', name:'Token KYCN', kind:'Ecosistema', balance:3260, symbol:'', color:ACCENT, history:[2800,2900,2950,3040,3110,3190,3260] },
-];
-
-const TRANSACTIONS = [
-  { id:1, type:'in',  label:'Distribución de renta — Campo Agrícola Pergamino', amount:412.00,  date:'01 Jul 2026', wallet:'usdc', status:'Completado' },
-  { id:2, type:'out', label:'Liberación de escrow P2P Fiat — recibido por Pavlo', amount:-1200.00, date:'29 Jun 2026', wallet:'usdc', status:'Completado' },
-  { id:3, type:'in',  label:'Distribución de renta — Flota Tesla Model 3',      amount:186.50,  date:'28 Jun 2026', wallet:'usdc', status:'Completado' },
-  { id:4, type:'out', label:'Compra de tokens — Edificio Corporativo Palermo',  amount:-2500.00, date:'25 Jun 2026', wallet:'usdc', status:'Completado' },
-  { id:5, type:'in',  label:'Liberación de escrow — Contenedor 40ft #118',      amount:940.00,  date:'22 Jun 2026', wallet:'usdc', status:'Completado' },
-  { id:6, type:'out', label:'Transferencia a @sofia_g',                        amount:-150.00, date:'20 Jun 2026', wallet:'kycn', status:'Completado' },
 ];
 
 const ESCROWS = [

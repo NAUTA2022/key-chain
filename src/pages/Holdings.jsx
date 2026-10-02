@@ -8,6 +8,7 @@ import AssetCard from '../components/AssetCard';
 import { client } from '../lib/client';
 import KeyPay from './KeyPay';
 import { useMobile } from '../hooks/useMobile';
+import { TRANSACTIONS } from '../lib/walletActivity';
 
 const POLYGON_TOKENS = [
   { sym: 'POL',  name: 'Polygon',      address: null,                                           abbr: 'PL' },
@@ -208,131 +209,193 @@ export default function Holdings({ nav }) {
   const yieldTotal    = MY_HOLDINGS.reduce((s, h) => s + h.yieldEarned, 0);
   const pnl           = ((holdTotal / investedTotal - 1) * 100).toFixed(1);
 
+  const glass = {
+    background: 'var(--gl-bg)', border: '1px solid var(--gl-icon)', borderRadius: 18,
+    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: 'inset 0 1px 0 var(--gl-div)',
+  };
+
+  const tabSwitch = (
+    <div style={{ display: 'flex', gap: 2, flex: isMobile ? 1 : undefined, background: 'var(--gl-prd-i)', border: '1px solid var(--gl-icon)', borderRadius: 12, padding: 4 }}>
+      {[['wallet','Wallet'], ['inversiones','Inversiones']].map(([id, label]) => (
+        <button key={id} onClick={() => setTab(id)} style={{
+          flex: isMobile ? 1 : undefined,
+          padding: isMobile ? '8px 10px' : '7px 18px', borderRadius: 9, border: 'none', cursor: 'pointer',
+          background: tab === id ? 'var(--gl-bg3)' : 'transparent',
+          color: tab === id ? 'var(--text)' : 'var(--ter)',
+          fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: tab === id ? 600 : 500,
+          boxShadow: tab === id ? 'inset 0 1px 0 rgba(255,255,255,0.08)' : 'none',
+          transition: 'all 0.18s',
+        }}>{label}</button>
+      ))}
+    </div>
+  );
+
+  // Key Pay: just a key icon on phones, full label on desktop
+  const keyPayBtn = isMobile ? (
+    <button onClick={() => setKeyPayOpen(true)} aria-label="Abrir en Key Pay" title="Abrir en Key Pay"
+      style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 12, border: 'none', cursor: 'pointer', background: 'var(--accent)', color: 'var(--accent-fg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="7.5" cy="15.5" r="4.5" /><path d="M10.7 12.3L20 3M16 7l3 3M14 9l2 2" />
+      </svg>
+    </button>
+  ) : (
+    <PBtn variant="accent" small onClick={() => setKeyPayOpen(true)} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>Abrir en Key Pay</PBtn>
+  );
+
+  const kpis = (
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))', gap: isMobile ? 10 : 12, marginBottom: isMobile ? 16 : 26 }}>
+      {[
+        { k: 'Portafolio RWA', v: fmtUSD2(holdTotal),              s: `${MY_HOLDINGS.length} proyectos` },
+        { k: 'Invertido',      v: fmtUSD2(investedTotal),           s: 'capital inicial'                 },
+        { k: 'P&L',           v: `+${pnl}%`,                       s: fmtUSD2(holdTotal - investedTotal)},
+        { k: 'Yield cobrado',  v: fmtUSD2(yieldTotal),              s: 'desde Mar 2025'                  },
+      ].map(({ k, v, s }, idx) => (
+        <motion.div key={k} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.06 }}
+          style={{ ...glass, padding: isMobile ? '14px 14px' : '18px 20px', minWidth: 0 }}>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7 }}>{k}</div>
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 17 : 20, color: 'var(--text)', letterSpacing: '-0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 3 }}>{s}</div>
+        </motion.div>
+      ))}
+    </div>
+  );
+
+  const tokens = (
+    <div style={{ ...glass, padding: '18px 20px' }}>
+      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--sec)', marginBottom: 2 }}>Activos en wallet</div>
+      <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginBottom: 12 }}>Tokens en Polygon</div>
+      {!account && (
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '12px 0', textAlign: 'center' }}>
+          Conectá tu wallet para ver balances reales
+        </div>
+      )}
+      {POLYGON_TOKENS.map((t, i) => (
+        <TokenRow
+          key={t.sym} account={account}
+          sym={t.sym} name={t.name} address={t.address} abbr={t.abbr}
+          isLast={i === POLYGON_TOKENS.length - 1}
+        />
+      ))}
+    </div>
+  );
+
+  const evolution = (
+    <div style={{ ...glass, padding: isMobile ? '18px 16px' : '24px 26px', minWidth: 0 }}>
+      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 3 }}>Evolución del portafolio RWA</div>
+      <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 20 }}>Últimos 12 meses</div>
+      <PArea data={[28000,29200,30100,29800,31400,32600,33100,34800,35600,36900,38400,holdTotal]} height={isMobile ? 160 : 200} id="holdings" />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px 20px' : 28, marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--gl-div)' }}>
+        {[
+          ['RWA',             fmtUSD2(holdTotal)],
+          ['Invertido',       fmtUSD2(investedTotal)],
+          ['Ganancia',        fmtUSD2(holdTotal - investedTotal)],
+        ].map(([k, v]) => (
+          <div key={k}>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{k}</div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 16 : 18, color: 'var(--text)', letterSpacing: '-0.03em' }}>{v}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const movements = (
+    <div style={{ ...glass, padding: '18px 20px', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
+        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Movimientos</div>
+        <button onClick={() => setKeyPayOpen(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 600, color: 'var(--accent-text)' }}>Ver en Key Pay →</button>
+      </div>
+      {TRANSACTIONS.map((t, i) => {
+        const name = t.label.split(' — ')[1];
+        const asset = name && RWA_ASSETS.find(x => x.name === name);
+        const inbound = t.type === 'in';
+        return (
+          <div key={t.id} onClick={asset ? () => nav('detalle', asset) : undefined}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: i < TRANSACTIONS.length - 1 ? '1px solid var(--gl-div)' : 'none', cursor: asset ? 'pointer' : 'default' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700,
+              background: inbound ? 'rgba(34,197,94,0.12)' : 'var(--gl-prd-i)', color: inbound ? 'var(--pos)' : 'var(--sec)' }}>{inbound ? '↓' : '↑'}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.label}</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginTop: 2 }}>{t.date} · {t.status}</div>
+            </div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13.5, color: inbound ? 'var(--pos)' : 'var(--text)', flexShrink: 0 }}>
+              {inbound ? '+' : '−'}{fmtUSD2(Math.abs(t.amount))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const investments = (
+    // Same cards as the marketplace, with my position in each
+    <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+      {MY_HOLDINGS.map(h => {
+        const a = RWA_ASSETS.find(x => x.id === h.assetId);
+        return a && (
+          <AssetCard key={h.assetId} asset={a} nav={nav} showCode holding={h}
+            actions={<PBtn variant="ghost" small>Vender</PBtn>} />
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 1200, margin: '0 auto' }}>
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'flex-start', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 14 : 12, marginBottom: isMobile ? 20 : 28 }}>
-        <div>
-          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 24, letterSpacing: '-0.04em', color: 'var(--text)' }}>Mis Pertenencias</div>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 4 }}>Wallet y portafolio de inversiones</div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 12 }}>
-          {/* Tab switcher */}
-          <div style={{ display: 'flex', gap: 2, flex: isMobile ? 1 : undefined, background: 'var(--gl-prd-i)', border: '1px solid var(--gl-icon)', borderRadius: 12, padding: 4 }}>
-            {[['wallet','Wallet'], ['inversiones','Inversiones']].map(([id, label]) => (
-              <button key={id} onClick={() => setTab(id)} style={{
-                flex: isMobile ? 1 : undefined,
-                padding: isMobile ? '7px 10px' : '7px 18px', borderRadius: 9, border: 'none', cursor: 'pointer',
-                background: tab === id ? 'var(--gl-bg3)' : 'transparent',
-                color: tab === id ? 'var(--text)' : 'var(--ter)',
-                fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: tab === id ? 600 : 500,
-                boxShadow: tab === id ? 'inset 0 1px 0 rgba(255,255,255,0.08)' : 'none',
-                transition: 'all 0.18s',
-              }}>{label}</button>
-            ))}
+      {isMobile ? (
+        // Phones: balance card first, then Wallet / Inversiones + Key Pay key
+        <>
+          <ParallaxWalletCard account={account} setTab={setTab} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            {tabSwitch}
+            {keyPayBtn}
           </div>
-          <PBtn variant="accent" small onClick={() => setKeyPayOpen(true)} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{isMobile ? 'Key Pay' : 'Abrir en Key Pay'}</PBtn>
-        </div>
-      </div>
-
-      {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))', gap: isMobile ? 10 : 12, marginBottom: isMobile ? 18 : 26 }}>
-        {[
-          { k: 'Portafolio RWA', v: fmtUSD2(holdTotal),              s: `${MY_HOLDINGS.length} proyectos` },
-          { k: 'Invertido',      v: fmtUSD2(investedTotal),           s: 'capital inicial'                 },
-          { k: 'P&L',           v: `+${pnl}%`,                       s: fmtUSD2(holdTotal - investedTotal)},
-          { k: 'Yield cobrado',  v: fmtUSD2(yieldTotal),              s: 'desde Mar 2025'                  },
-        ].map(({ k, v, s }, idx) => (
-          <motion.div key={k} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.06 }}
-            style={{
-              background: 'var(--gl-bg)',
-              border: '1px solid var(--gl-icon)',
-              borderRadius: 18, padding: isMobile ? '14px 14px' : '18px 20px', minWidth: 0,
-              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: 'inset 0 1px 0 var(--gl-div)',
-            }}
-          >
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7 }}>{k}</div>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 17 : 20, color: 'var(--text)', letterSpacing: '-0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</div>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 3 }}>{s}</div>
-          </motion.div>
-        ))}
-      </div>
+        </>
+      ) : (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 28 }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 24, letterSpacing: '-0.04em', color: 'var(--text)' }}>Mis Pertenencias</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 4 }}>Wallet y portafolio de inversiones</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {tabSwitch}
+              {keyPayBtn}
+            </div>
+          </div>
+          {kpis}
+        </>
+      )}
 
       <AnimatePresence mode="wait">
         {tab === 'wallet' && (
           <motion.div key="wallet" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 16 }} transition={{ duration: 0.2 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : '340px minmax(0, 1fr)', gap: 18 }}>
-              {/* Left column */}
-              <div>
-                <ParallaxWalletCard account={account} setTab={setTab} />
-
-                {/* Token balances */}
-                <div style={{
-                  background: 'var(--gl-bg)',
-                  border: '1px solid var(--gl-icon)',
-                  borderRadius: 18, padding: '18px 20px',
-                  backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                  boxShadow: 'inset 0 1px 0 var(--gl-div)',
-                }}>
-                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--sec)', marginBottom: 2 }}>Activos en wallet</div>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginBottom: 12 }}>Tokens en Polygon</div>
-                  {!account && (
-                    <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '12px 0', textAlign: 'center' }}>
-                      Conectá tu wallet para ver balances reales
-                    </div>
-                  )}
-                  {POLYGON_TOKENS.map((t, i) => (
-                    <TokenRow
-                      key={t.sym} account={account}
-                      sym={t.sym} name={t.name} address={t.address} abbr={t.abbr}
-                      isLast={i === POLYGON_TOKENS.length - 1}
-                    />
-                  ))}
+            {isMobile ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ marginBottom: -16 }}>{kpis}</div>
+                {tokens}
+                {evolution}
+                {movements}
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: '340px minmax(0, 1fr)', gap: 18, alignItems: 'start' }}>
+                <div>
+                  <ParallaxWalletCard account={account} setTab={setTab} />
+                  {tokens}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
+                  {evolution}
+                  {movements}
                 </div>
               </div>
-
-              {/* Portfolio evolution */}
-              <div style={{
-                background: 'var(--gl-bg)',
-                border: '1px solid var(--gl-icon)',
-                borderRadius: 18, padding: isMobile ? '18px 16px' : '24px 26px', minWidth: 0,
-                backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                boxShadow: 'inset 0 1px 0 var(--gl-div)',
-              }}>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 3 }}>Evolución del portafolio RWA</div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 20 }}>Últimos 12 meses</div>
-                <PArea data={[28000,29200,30100,29800,31400,32600,33100,34800,35600,36900,38400,holdTotal]} height={200} id="holdings" />
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px 20px' : 28, marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--gl-div)' }}>
-                  {[
-                    ['RWA',             fmtUSD2(holdTotal)],
-                    ['Invertido',       fmtUSD2(investedTotal)],
-                    ['Ganancia',        fmtUSD2(holdTotal - investedTotal)],
-                  ].map(([k, v]) => (
-                    <div key={k}>
-                      <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{k}</div>
-                      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 16 : 18, color: 'var(--text)', letterSpacing: '-0.03em' }}>{v}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            )}
           </motion.div>
         )}
 
         {tab === 'inversiones' && (
           <motion.div key="inv" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
-            {/* Same cards as the marketplace, with my position in each */}
-            <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-              {MY_HOLDINGS.map(h => {
-                const a = RWA_ASSETS.find(x => x.id === h.assetId);
-                return a && (
-                  <AssetCard key={h.assetId} asset={a} nav={nav} showCode holding={h}
-                    actions={<PBtn variant="ghost" small>Vender</PBtn>} />
-                );
-              })}
-            </div>
+            {investments}
           </motion.div>
         )}
 
