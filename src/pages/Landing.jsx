@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { PLogo, PTag, Icons } from '../components/ui';
+import { PLogo, Icons } from '../components/ui';
 import StrategySimulator from '../components/StrategySimulator';
 import { RWA_ASSETS, FACT_TOKEN } from '../data';
 import { DEV_MODE } from '../lib/devSession';
@@ -60,12 +60,13 @@ const COINS = {
   ],
 };
 
+// Blockchain networks the platform runs on
 const CHAIN_LOGOS = [
-  ['Polygon', 'matic'], ['USDC', 'usdc'], ['Ethereum', 'eth'], ['Tether', 'usdt'], ['Bitcoin', 'btc'], ['BNB', 'bnb'], ['Chainlink', 'link'], ['Aave', 'aave'],
-].map(([title, s]) => ({
+  ['Polygon', '/crypto/matic.svg'], ['BNB Smart Chain (BSC)', '/crypto/bnb.svg'], ['Celo', '/crypto/celo.png'],
+].map(([title, src]) => ({
   node: (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 15 }}>
-      <img src={`/crypto/${s}.svg`} alt="" style={{ width: 26, height: 26 }} />
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, color: 'rgba(255,255,255,0.62)', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 17 }}>
+      <img src={src} alt="" style={{ width: 30, height: 30, borderRadius: '50%' }} />
       {title}
     </span>
   ),
@@ -160,9 +161,9 @@ function FannedPhotos({ assets }) {
 function IcoRing({ pct }) {
   const R = 58, C = 2 * Math.PI * R;
   return (
-    <div style={{ height: 150, marginBottom: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22 }}>
-      <div style={{ position: 'relative', width: 140, height: 140 }}>
-        <svg width="140" height="140" viewBox="0 0 140 140" style={{ transform: 'rotate(-90deg)' }}>
+    <div style={{ height: 150, marginBottom: 22, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+      <div style={{ position: 'relative', width: 124, height: 124 }}>
+        <svg width="124" height="124" viewBox="0 0 140 140" style={{ transform: 'rotate(-90deg)' }}>
           <defs>
             <linearGradient id="icoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#7fb2ff" /><stop offset="100%" stopColor="#c084fc" /></linearGradient>
           </defs>
@@ -176,8 +177,10 @@ function IcoRing({ pct }) {
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Recaudado</div>
         </div>
       </div>
-      <motion.img src="/3d.png" alt="" animate={{ y: [0, -8, 0], rotate: [0, 6, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ width: 74, height: 74, objectFit: 'contain', filter: 'drop-shadow(0 0 22px rgba(90,140,255,0.7))' }} />
+      <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+        ${(FACT_TOKEN.raised / 1e6).toFixed(2)}M de ${(FACT_TOKEN.goal / 1e6).toFixed(1)}M · {FACT_TOKEN.holders.toLocaleString()} holders
+      </div>
+
     </div>
   );
 }
@@ -387,8 +390,8 @@ export default function Landing({ onEnter, onDevEnter }) {
 
         {/* ─── Built on ───────────────────────────────────────── */}
         <section style={{ position: 'relative', zIndex: 2, padding: '8px 0 40px' }}>
-          <div style={{ ...KICKER, textAlign: 'center', color: 'rgba(255,255,255,0.32)' }}>Construido sobre</div>
-          <LogoLoop logos={CHAIN_LOGOS} speed={60} direction="left" logoHeight={28} gap={56} pauseOnHover scaleOnHover fadeOut fadeOutColor="#07080c" ariaLabel="Redes y tokens" />
+          <div style={{ ...KICKER, textAlign: 'center', color: 'rgba(255,255,255,0.32)' }}>Redes blockchain compatibles</div>
+          <LogoLoop logos={CHAIN_LOGOS} speed={60} direction="left" logoHeight={28} gap={96} pauseOnHover scaleOnHover fadeOut fadeOutColor="#07080c" ariaLabel="Redes blockchain" />
         </section>
 
         {/* ─── Velocity band ──────────────────────────────────── */}
@@ -402,22 +405,16 @@ export default function Landing({ onEnter, onDevEnter }) {
           <div className="land-invest-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
             {[
               {
-                tag: <PTag label="Proyectos RWA" color="neutral" />, title: <>Activos del<br />mundo real</>, icon: Icons.primary, spot: 'rgba(110,160,255,0.28)',
+                tag: <span className="land-pill"><span className="land-pill-dot" style={{ background: '#7fb2ff', boxShadow: '0 0 8px rgba(127,178,255,0.8)' }} />Proyectos RWA · Abiertos</span>, title: <>Activos del<br />mundo real</>, icon: Icons.primary, spot: 'rgba(110,160,255,0.28)',
                 text: 'Invertí en fracciones de autos, campos, drones, inmuebles y edificios tokenizados en Polygon. Cada token representa participación proporcional del activo.',
                 kpis: [['Desde', '$1 USD'], ['APY promedio', '9.8%'], ['Distribución', 'Mensual USDC'], ['Proyectos activos', '148']],
                 bullets: ['Rendimientos mensuales on-chain', 'Liquidez en mercado secundario P2P', 'Contratos auditados · Seguro incluido', 'Sin bancos ni intermediarios'],
                 cta: 'Explorar proyectos →', primary: false, visual: 'photos',
               },
               {
-                tag: (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, background: 'rgba(74,222,128,0.10)', border: '1px solid rgba(74,222,128,0.3)' }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px rgba(74,222,128,0.8)' }} />
-                    <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: '#86efac', fontWeight: 700 }}>ICO activa · Ronda pública</span>
-                  </span>
-                ),
+                tag: <span className="land-pill land-pill-green"><span className="land-pill-dot" style={{ background: '#4ade80', boxShadow: '0 0 8px rgba(74,222,128,0.8)' }} />ICO activa · Ronda pública</span>,
                 title: <>Token FACT<br />— la empresa</>, icon: Icons.token, spot: 'rgba(181,155,255,0.28)',
                 text: 'FACT es el token de utilidad de la plataforma. Al invertir en la ICO participás del crecimiento: descuentos en fees, gobernanza DAO y staking.',
-                progress: true,
                 kpis: [['Precio ICO', `$${FACT_TOKEN.price}`], ['Staking APY', '9–14%'], ['TGE', '15% inmediato'], ['Vesting', '12 meses']],
                 bullets: ['50% de descuento en fees de plataforma', 'Gobernanza DAO · Votás los proyectos', 'Staking con APY 9–14% anual', 'Acceso anticipado a proyectos nuevos'],
                 cta: 'Participar en la ICO →', primary: true, visual: 'ring',
@@ -434,13 +431,7 @@ export default function Landing({ onEnter, onDevEnter }) {
                     </div>
                     <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.75)', flexShrink: 0, border: '1px solid rgba(255,255,255,0.10)' }}>{c.icon}</div>
                   </div>
-                  <p style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'rgba(255,255,255,0.48)', lineHeight: 1.65, margin: '0 0 22px' }}>{c.text}</p>
-                  {c.progress && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 18, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'rgba(255,255,255,0.45)' }}>
-                      <span>${(FACT_TOKEN.raised / 1e6).toFixed(2)}M de ${(FACT_TOKEN.goal / 1e6).toFixed(1)}M</span>
-                      <span>{FACT_TOKEN.holders.toLocaleString()} holders</span>
-                    </div>
-                  )}
+                  <p style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'rgba(255,255,255,0.48)', lineHeight: 1.65, margin: '0 0 22px', minHeight: '4.95em' }}>{c.text}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 22 }}>
                     {c.kpis.map(([l, v]) => (
                       <div key={l} className="land-kpi">
