@@ -73,6 +73,13 @@ const CHAIN_LOGOS = [
   title,
 }));
 
+// Built once: the WebGL gallery rebuilds whenever its `items` prop changes
+// identity, so these must not be recreated on every render.
+const REAL_ASSETS = RWA_ASSETS.filter(a => a.img && !a.name.startsWith('[QA]'));
+const GALLERY_ITEMS = REAL_ASSETS.slice(0, 10).map(a => ({ image: a.img, text: a.name }));
+const showcaseAssets = REAL_ASSETS.slice(0, 3);
+
+const PARTICLE_COLORS = ['#ffffff', '#8fb8ff', '#b59bff'];
 const MORPH_WORDS = ['autos', 'campos', 'drones', 'inmuebles', 'edificios'];
 const MORPH_COLORS = ['#7fb2ff', '#93a8ff', '#a78bfa', '#c4a7ff', '#f0abfc'];
 
@@ -259,8 +266,6 @@ export default function Landing({ onEnter, onDevEnter }) {
     mouseY.set((e.clientY / window.innerHeight) * 2 - 1);
   }, [isMobile, mouseX, mouseY]);
 
-  const gallery = RWA_ASSETS.filter(a => a.img && !a.name.startsWith('[QA]')).slice(0, 10).map(a => ({ image: a.img, text: a.name }));
-  const showcaseAssets = RWA_ASSETS.filter(a => a.img && !a.name.startsWith('[QA]')).slice(0, 3);
   const factPct = Math.round((FACT_TOKEN.raised / FACT_TOKEN.goal) * 100);
 
   const coin = (c, i, side) => {
@@ -284,7 +289,7 @@ export default function Landing({ onEnter, onDevEnter }) {
 
         {/* Page-wide particle field */}
         <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.7 }}>
-          <Particles particleCount={isMobile ? 90 : 180} particleSpread={12} speed={0.06} particleColors={['#ffffff', '#8fb8ff', '#b59bff']}
+          <Particles particleCount={isMobile ? 90 : 180} particleSpread={12} speed={0.06} particleColors={PARTICLE_COLORS}
             alphaParticles particleBaseSize={70} sizeRandomness={1} moveParticlesOnHover={!isMobile} particleHoverFactor={0.6} disableRotation={false} />
         </div>
 
@@ -431,7 +436,7 @@ export default function Landing({ onEnter, onDevEnter }) {
               <motion.div key={idx} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.12 }}
                 onMouseEnter={sHover} style={{ display: 'flex' }}>
                 <SpotlightCard spotlightColor={c.spot} className="land-spot">
-                  {c.visual === 'photos' ? <FannedPhotos assets={RWA_ASSETS.filter(a => a.img && !a.name.startsWith('[QA]')).slice(0, 3)} /> : <IcoRing pct={factPct} />}
+                  {c.visual === 'photos' ? <FannedPhotos assets={showcaseAssets} /> : <IcoRing pct={factPct} />}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12 }}>
                     <div>
                       <div style={{ marginBottom: 12 }}>{c.tag}</div>
@@ -506,10 +511,10 @@ export default function Landing({ onEnter, onDevEnter }) {
         {/* ─── PROYECTOS (Circular Gallery) ───────────────────── */}
         <section id="proyectos" style={{ position: 'relative', zIndex: 2, padding: '40px 0 60px', scrollMarginTop: 80 }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px' }} className="land-section-pad">
-            <SectionHead kicker="Proyectos destacados" title="Activos disponibles hoy" sub="Arrastrá o scrolleá la galería para recorrer los proyectos." />
+            <SectionHead kicker="Proyectos destacados" title="Activos disponibles hoy" sub="Arrastrá la galería para recorrer los proyectos." />
           </div>
           <div style={{ height: isMobile ? 380 : 560, position: 'relative' }} onPointerDown={sHover}>
-            <CircularGallery items={gallery} bend={isMobile ? 1.5 : 2.6} textColor="#ffffff" borderRadius={0.06} scrollSpeed={2} scrollEase={0.05} />
+            <CircularGallery items={GALLERY_ITEMS} bend={isMobile ? 1.5 : 2.6} textColor="#ffffff" borderRadius={0.06} scrollSpeed={2} scrollEase={0.05} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
             <LBtn variant="ghost" onClick={onEnter}>Ver los {RWA_ASSETS.length} proyectos</LBtn>

@@ -471,22 +471,35 @@ class App {
     });
   }
   onTouchDown(e) {
+    // local tweak: only drags that start on the gallery move it
+    if (!this.container.contains(e.target)) return;
     this.isDown = true;
+    this.startY = e.touches ? e.touches[0].clientY : e.clientY;
+    this.axis = null;
     this.scroll.position = this.scroll.current;
     this.start = e.touches ? e.touches[0].clientX : e.clientX;
   }
   onTouchMove(e) {
     if (!this.isDown) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    // a mostly-vertical swipe is a page scroll: leave the gallery alone
+    if (!this.axis && (Math.abs(x - this.start) > 6 || Math.abs(y - this.startY) > 6)) {
+      this.axis = Math.abs(x - this.start) > Math.abs(y - this.startY) ? 'x' : 'y';
+    }
+    if (this.axis !== 'x') return;
     const distance = (this.start - x) * (this.scrollSpeed * 0.025);
     this.scroll.target = this.scroll.position + distance;
   }
   onTouchUp() {
+    if (!this.isDown) return;
     this.isDown = false;
     this.onCheck();
   }
   onWheel(e) {
-    const delta = e.deltaY || e.wheelDelta || e.detail;
+    // local tweak: vertical wheel scrolls the page, not the gallery
+    if (Math.abs(e.deltaX || 0) <= Math.abs(e.deltaY || 0)) return;
+    const delta = e.deltaX;
     this.scroll.target += (delta > 0 ? this.scrollSpeed : -this.scrollSpeed) * 0.2;
     this.onCheckDebounce();
   }
@@ -523,10 +536,11 @@ class App {
     this.scroll.target = this.scroll.target < 0 ? -item : item;
   }
   onResize() {
-    this.screen = {
-      width: this.container.clientWidth,
-      height: this.container.clientHeight
-    };
+    const w = this.container.clientWidth, h = this.container.clientHeight;
+    // local tweak: setSize clears the canvas, so skip no-op resizes (mobile
+    // URL bar show/hide fires window resize while scrolling → flicker)
+    if (this.screen && this.screen.width === w && this.screen.height === h) return;
+    this.screen = { width: w, height: h };
     this.renderer.setSize(this.screen.width, this.screen.height);
     this.camera.perspective({
       aspect: this.screen.width / this.screen.height
@@ -540,6 +554,7 @@ class App {
     }
   }
   update() {
+    if (!this.visible) { this.raf = window.requestAnimationFrame(this.update.bind(this)); return; }
     this.scroll.current = lerp(this.scroll.current, this.scroll.target, this.scroll.ease);
     const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
     if (this.medias) {
@@ -557,9 +572,13 @@ class App {
     this.boundOnTouchUp = this.onTouchUp.bind(this);
     this.boundOnKeyDown = this.onKeyDown.bind(this);
 
+    this.visible = true;
+    this.io = new IntersectionObserver(([en]) => { this.visible = en.isIntersecting; }, { rootMargin: '100px' });
+    this.io.observe(this.container);
+    this.ro = new ResizeObserver(() => this.onResize());
+    this.ro.observe(this.container);
     window.addEventListener('resize', this.boundOnResize);
-    window.addEventListener('mousewheel', this.boundOnWheel);
-    window.addEventListener('wheel', this.boundOnWheel);
+    this.container.addEventListener('wheel', this.boundOnWheel, { passive: true });
     window.addEventListener('mousedown', this.boundOnTouchDown);
     window.addEventListener('mousemove', this.boundOnTouchMove);
     window.addEventListener('mouseup', this.boundOnTouchUp);
@@ -572,8 +591,9 @@ class App {
   destroy() {
     window.cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.boundOnResize);
-    window.removeEventListener('mousewheel', this.boundOnWheel);
-    window.removeEventListener('wheel', this.boundOnWheel);
+    this.io?.disconnect();
+    this.ro?.disconnect();
+    this.container?.removeEventListener('wheel', this.boundOnWheel);
     window.removeEventListener('mousedown', this.boundOnTouchDown);
     window.removeEventListener('mousemove', this.boundOnTouchMove);
     window.removeEventListener('mouseup', this.boundOnTouchUp);
