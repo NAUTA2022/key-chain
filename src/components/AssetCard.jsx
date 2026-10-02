@@ -29,7 +29,7 @@ function OverlayStat({ label, value, align = 'flex-start' }) {
 // glance rather than something you notice only up close.
 function KeychainAssetCard({ a, left, nav, showCode, holding, actions }) {
   return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
+    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
       <PCard className="market-card-full" onClick={() => nav('detalle', a)} style={{ height:340, position:'relative' }}>
         <PImg src={a.img} height="100%" style={{ position:'absolute', inset:0 }}>
           <div style={{ position:'absolute', top:14, left:14 }}>
@@ -83,7 +83,7 @@ export default function AssetCard({ asset: a, nav, showCode, holding, actions })
   if (a.issuer === 'keychain') return <KeychainAssetCard a={a} left={left} nav={nav} showCode={showCode} holding={holding} actions={actions} />;
 
   return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
+    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
       <PCard onClick={() => nav('detalle', a)} style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative' }}>
         <PImg src={a.img} height={168} className="market-card-img">
           <div style={{ position:'absolute', top:12, left:12, display:'flex', gap:6, flexWrap:'wrap' }}>
