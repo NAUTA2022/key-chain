@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PCard, PBtn, PTag, PProgress, PImg, PDiv, PDonut, PArea, PScanLink, Icons, CompanyTag } from '../components/ui';
+import { PCard, PBtn, PTag, PProgress, PImg, PDiv, PDonut, PArea, PScanLink, Icons, CompanyTag, CompanyAvatar } from '../components/ui';
 import { fmtUSD, fmtUSD2, MY_HOLDINGS } from '../data';
 import { addPendingPayment } from '../lib/keypayInbox';
+import { DEV_MODE } from '../lib/devSession';
+import { useProjectPosts, isFeedLive, issuerNameOf, postMedia } from '../lib/projectFeed';
+import { PostMedia, PostComments } from '../components/feed';
 
 // ─── Media carousel ───────────────────────────────────────────────────────────
 function MediaCarousel({ images = [] }) {
@@ -76,23 +79,71 @@ function MediaCarousel({ images = [] }) {
 // Only shown once a project is live (Operativo), fully funded, or flagged
 // early (feedEnabled) — before that there's nothing operational to post
 // about yet. Posts flagged as "hito" also surface in the Actualizaciones
-// timeline; clicking one there jumps back here and briefly highlights it.
+// timeline and in the global Feed; clicking one there jumps back here and
+// briefly highlights it.
 // The composer itself only renders for the project's actual owner (isMine) —
-// everyone else just reads the feed, same as any investor would.
+// everyone else just reads the feed, same as any investor would. The owner
+// can attach photos and videos (up to MAX_FEED_MEDIA per post).
+const MAX_FEED_MEDIA = 10;
+
 function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
   const [text, setText] = useState('');
   const [milestone, setMilestone] = useState(false);
   const [img, setImg] = useState(null);
-  const issuerName = a.issuer === 'keychain' ? 'KEYCHAIN' : (a.company || '');
+  const [uploads, setUploads] = useState([]); // [{ id, type: 'image'|'video', url, name }]
+  const [uploadError, setUploadError] = useState('');
+  const fileRef = useRef(null);
+  const issuerName = issuerNameOf(a);
+  const canPublish = text.trim() || img || uploads.length > 0;
+
+  // No backend yet: files stay in the browser as object URLs, so uploaded
+  // media lives until the page reloads. Swap this for a real upload (and
+  // store the returned URLs on the post) once the feed is persisted.
+  const addFiles = (fileList) => {
+    const files = [...fileList];
+    const valid = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    const room = MAX_FEED_MEDIA - uploads.length;
+    const accepted = valid.slice(0, Math.max(room, 0));
+    setUploadError(
+      valid.length < files.length ? 'Solo se pueden subir fotos o videos.'
+      : accepted.length < valid.length ? `Máximo ${MAX_FEED_MEDIA} archivos por publicación.`
+      : ''
+    );
+    setUploads(u => [...u, ...accepted.map(f => ({
+      id: `${f.name}-${f.lastModified}-${Math.random()}`,
+      type: f.type.startsWith('video/') ? 'video' : 'image',
+      url: URL.createObjectURL(f),
+      name: f.name,
+    }))]);
+  };
+
+  const removeUpload = (id) => setUploads(u => {
+    const gone = u.find(m => m.id === id);
+    if (gone) URL.revokeObjectURL(gone.url);
+    return u.filter(m => m.id !== id);
+  });
 
   const publish = () => {
-    if (!text.trim()) return;
-    setPosts(p => [{ id: Date.now(), date: 'Ahora', text: text.trim(), milestone, img, likes: 0, liked: false }, ...p]);
-    setText(''); setMilestone(false); setImg(null);
+    if (!canPublish) return;
+    const media = [...(img ? [{ id: img, type: 'image', url: img }] : []), ...uploads];
+    setPosts(p => [{ id: Date.now(), ts: Date.now(), date: 'Ahora', text: text.trim(), milestone, media, likes: 0, liked: false, comments: [] }, ...p]);
+    setText(''); setMilestone(false); setImg(null); setUploads([]); setUploadError('');
   };
 
   const toggleLike = (id) => setPosts(p => p.map(post => post.id === id
     ? { ...post, liked: !post.liked, likes: post.likes + (post.liked ? -1 : 1) }
+    : post));
+
+  // Anyone who can see the feed can comment; the owner's replies are tagged
+  // as the issuer. Like posts, comments live in page state until there's a
+  // backend to persist them.
+  const [openComments, setOpenComments] = useState([]);
+  const toggleComments = (id) => setOpenComments(o => o.includes(id) ? o.filter(x => x !== id) : [...o, id]);
+  const addComment = (postId, text) => setPosts(p => p.map(post => post.id === postId
+    ? { ...post, comments: [...(post.comments || []), {
+        id: Date.now(), date: 'Ahora', text,
+        author: a.isMine ? issuerName : 'Vos', isIssuer: !!a.isMine,
+      }] }
     : post));
 
   return (
@@ -102,9 +153,7 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
       <PCard style={{ padding:'18px 20px', marginBottom:18 }}>
         <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:12 }}>Panel del emisor · Publicar como {issuerName}</div>
         <div style={{ display:'flex', gap:12 }}>
-          <div style={{ width:36, height:36, borderRadius:'50%', background:'var(--accent-bg)', color:'var(--accent-text)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-h)', fontWeight:700, fontSize:14, flexShrink:0 }}>
-            {issuerName.slice(0,1)}
-          </div>
+          <CompanyAvatar company={issuerName} size={36} />
           <div style={{ flex:1, minWidth:0 }}>
             <textarea value={text} onChange={e => setText(e.target.value)} rows={3}
               placeholder="Escribí una actualización para tus inversores..."
@@ -119,12 +168,41 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
                 ))}
               </div>
             )}
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:12 }}>
-              <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>
-                <input type="checkbox" checked={milestone} onChange={e => setMilestone(e.target.checked)} />
-                Marcar como hito
-              </label>
-              <PBtn variant="accent" small disabled={!text.trim()} onClick={publish} style={{ opacity: text.trim() ? 1 : 0.5 }}>Publicar</PBtn>
+            {uploads.length > 0 && (
+              <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginTop:10 }}>
+                {uploads.map(m => (
+                  <div key={m.id} style={{ position:'relative', width:78, height:60, borderRadius:10, overflow:'hidden', background:'var(--surface2)', flexShrink:0 }}>
+                    {m.type === 'video'
+                      ? <video src={m.url} muted playsInline preload="metadata" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                      : <img src={m.url} alt={m.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />}
+                    {m.type === 'video' && (
+                      <span style={{ position:'absolute', left:5, bottom:4, padding:'1px 5px', borderRadius:5, background:'rgba(0,0,0,0.65)', color:'#fff', fontFamily:'var(--font-b)', fontSize:9.5, fontWeight:700 }}>▶ Video</span>
+                    )}
+                    <button onClick={() => removeUpload(m.id)} aria-label={`Quitar ${m.name}`}
+                      style={{ position:'absolute', top:4, right:4, width:18, height:18, borderRadius:6, border:'none', background:'rgba(0,0,0,0.65)', color:'#fff', cursor:'pointer', fontSize:10, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', padding:0 }}>
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {uploadError && (
+              <div style={{ marginTop:8, fontFamily:'var(--font-b)', fontSize:12, color:'var(--neg)' }}>{uploadError}</div>
+            )}
+            <input ref={fileRef} type="file" accept="image/*,video/*" multiple hidden
+              onChange={e => { addFiles(e.target.files); e.target.value = ''; }} />
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginTop:12, flexWrap:'wrap' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
+                <button onClick={() => fileRef.current?.click()} disabled={uploads.length >= MAX_FEED_MEDIA}
+                  style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:10, border:'1px solid var(--border-l)', background:'var(--surface2)', color:'var(--text)', fontFamily:'var(--font-b)', fontSize:12.5, fontWeight:600, cursor: uploads.length >= MAX_FEED_MEDIA ? 'not-allowed' : 'pointer', opacity: uploads.length >= MAX_FEED_MEDIA ? 0.5 : 1 }}>
+                  {Icons.plus} Fotos / videos
+                </button>
+                <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>
+                  <input type="checkbox" checked={milestone} onChange={e => setMilestone(e.target.checked)} />
+                  Marcar como hito
+                </label>
+              </div>
+              <PBtn variant="accent" small disabled={!canPublish} onClick={publish} style={{ opacity: canPublish ? 1 : 0.5 }}>Publicar</PBtn>
             </div>
           </div>
         </div>
@@ -147,9 +225,7 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
               borderRadius:16, padding:'16px 18px', transition:'background 0.4s ease, border-color 0.4s ease',
             }}>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-              <div style={{ width:36, height:36, borderRadius:'50%', background:'var(--accent-bg)', color:'var(--accent-text)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-h)', fontWeight:700, fontSize:14, flexShrink:0 }}>
-                {issuerName.slice(0,1)}
-              </div>
+              <CompanyAvatar company={issuerName} size={36} />
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:13.5, color:'var(--text)' }}>{issuerName}</div>
                 <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>{post.date}</div>
@@ -160,16 +236,21 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
                 </span>
               )}
             </div>
-            <div style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--text)', lineHeight:1.55, marginBottom: post.img ? 12 : 10 }}>{post.text}</div>
-            {post.img && <img src={post.img} alt="" style={{ width:'100%', maxHeight:280, objectFit:'cover', borderRadius:12, marginBottom:10, display:'block' }} />}
+            {post.text && <div style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--text)', lineHeight:1.55, marginBottom: postMedia(post).length ? 12 : 10 }}>{post.text}</div>}
+            <PostMedia media={postMedia(post)} />
             <div style={{ display:'flex', alignItems:'center', gap:18, paddingTop:8, borderTop:'1px solid var(--border-l)' }}>
               <button onClick={() => toggleLike(post.id)} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: post.liked ? 'var(--neg)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
                 {post.liked ? '♥' : '♡'} {post.likes}
               </button>
-              <div style={{ display:'flex', alignItems:'center', gap:6, color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:12.5 }}>
-                💬 Comentarios
-              </div>
+              <button onClick={() => toggleComments(post.id)} aria-expanded={openComments.includes(post.id)}
+                style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: openComments.includes(post.id) ? 'var(--text)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
+                {Icons.comment} {post.comments?.length ? `${post.comments.length} ${post.comments.length === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
+              </button>
             </div>
+            {openComments.includes(post.id) && (
+              <PostComments comments={post.comments || []} onAdd={text => addComment(post.id, text)}
+                issuerName={issuerName} isOwner={!!a.isMine} />
+            )}
           </div>
         ))}
       </div>
@@ -177,16 +258,39 @@ function ProjectFeed({ a, posts, setPosts, highlightId, registerPostRef }) {
   );
 }
 
+// ─── Dev state banner ─────────────────────────────────────────────────────────
+// Developer-only (DEV_MODE): spells out which state a project is in and what
+// the page should show because of it, so every asset — not just the [QA]
+// fixtures — is self-explanatory while testing. Fixtures add their `devNote`
+// on top as the specific thing to verify.
+const ISSUER_LABEL = { keychain: 'KEYCHAIN', verified: 'Verificado', community: 'Comunidad' };
+
+function projectState(a, { isLive, holding }) {
+  const funding = a.sold <= 0 ? 'Nuevo · sin financiamiento'
+    : a.sold >= 100 ? 'Financiado 100%'
+    : a.stage === 'Operativo' ? `${a.sold}% de tokens vendidos`
+    : `En financiamiento · ${a.sold}%`;
+  const feedWhy = a.stage === 'Operativo' ? 'stage="Operativo"'
+    : a.sold >= 100 ? 'sold>=100'
+    : a.feedEnabled ? 'feedEnabled=true'
+    : 'sold<100 y feedEnabled=false';
+  return [
+    ['Etapa', `${a.stage} — ${funding}`],
+    ['Feed y Actualizaciones', `${isLive ? 'Visibles' : 'Ocultos'} (${feedWhy})`],
+    ['Publicar en el Feed', a.isMine ? 'Sí — es mi proyecto (isMine)' : 'No — solo lectura'],
+    ['Mi inversión', holding ? `Sí — ${holding.tokens} tokens${isLive ? ', con "Ver avances"' : ', sin "Ver avances"'}` : 'No'],
+    ['Emisor', ISSUER_LABEL[a.issuer] || a.issuer || '—'],
+  ];
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ProductDetail({ nav, asset: a, fromRoute }) {
-  const [tab, setTab]       = useState('resumen');
+  // Coming from the global Feed? Open straight on this project's Feed tab,
+  // scrolled to the post that was clicked.
+  const [tab, setTab]       = useState(a.focusPostId ? 'feed' : 'resumen');
   const [tokens, setTokens] = useState(10);
   const left = a.totalTokens - Math.round(a.totalTokens * a.sold / 100);
-  // Feed exists once the project is running, fully funded, OR was explicitly
-  // flagged early (feedEnabled) — some projects start building/buying the
-  // underlying asset before their raise closes and want to post progress
-  // during that window too.
-  const isLive = a.stage === 'Operativo' || a.sold >= 100 || a.feedEnabled === true;
+  const isLive = isFeedLive(a);
   const tabs = [
     ['resumen','Resumen'],
     ...(isLive ? [['feed','Feed']] : []),
@@ -198,20 +302,15 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
   // only default to Mercado Primario when we don't know the origin.
   const backRoute = fromRoute || 'primario';
 
-  // Feed posts live here (not inside ProjectFeed) so the Actualizaciones tab
-  // can read the same milestone-flagged posts and jump back to them.
-  const [posts, setPosts] = useState([
-    { id: 1, date: '10 Jun 2026', text: 'Se distribuyeron $38,400 USDC entre 412 holders.', milestone: true, img: null, likes: 31, liked: false },
-    { id: 2, date: '28 May 2026', text: 'Auditoría operativa sin observaciones.', milestone: true, img: null, likes: 15, liked: false },
-    { id: 3, date: '15 May 2026', text: `El proyecto alcanzó el ${a.sold}% de financiación.`, milestone: true, img: null, likes: 24, liked: false },
-    { id: 4, date: '02 May 2026', text: 'Se firmó contrato de operación por 24 meses adicionales.', milestone: false, img: null, likes: 8, liked: false },
-  ]);
+  // Posts live in the shared feed store (lib/projectFeed) so the
+  // Actualizaciones tab and the global Feed read the same milestone posts.
+  const [posts, setPosts] = useProjectPosts(a);
   const [highlightId, setHighlightId] = useState(null);
-  const [scrollToId, setScrollToId] = useState(null);
+  const [scrollToId, setScrollToId] = useState(a.focusPostId ?? null);
   const postRefs = useRef({});
   const registerPostRef = (id, el) => { postRefs.current[id] = el; };
 
-  // QA-only state banner — see `devNote` on the asset fixtures in data/index.js.
+  // Dev-only state banner (see projectState above).
   const [devNoteOpen, setDevNoteOpen] = useState(true);
 
   const goToPost = (id) => { setTab('feed'); setScrollToId(id); };
@@ -234,7 +333,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
   return (
     <div style={{ padding:'24px 32px 40px', maxWidth:1200, margin:'0 auto' }}>
       {/* Back */}
-      <button onClick={() => nav(backRoute)}
+      <button onClick={() => (backRoute === 'empresa' ? nav('empresa', issuerNameOf(a)) : nav(backRoute))}
         style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color:'var(--sec)', fontFamily:'var(--font-b)', fontSize:13.5, marginBottom:18, padding:0 }}>
         {Icons.back} Volver al mercado
       </button>
@@ -363,19 +462,28 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
 
         {/* ── Right column (buy panel) — starts at same top as image ── */}
         <div style={{ position:'sticky', top:62 }}>
-          {/* QA fixture banner — this whole block (and the `devNote` field on
-              the asset) exists only to make test-state assets self-explanatory
-              while reviewing. DEVELOPERS: delete this block and every
-              `devNote` in data/index.js before shipping to production. */}
-          {a.devNote && devNoteOpen && (
+          {/* Dev-only state banner — hidden in production builds (DEV_MODE). */}
+          {DEV_MODE && devNoteOpen && (
             <div style={{ position:'relative', marginBottom:14, padding:'14px 38px 14px 16px', borderRadius:14, background:'rgba(245,158,11,0.12)', border:'1.5px dashed rgba(245,158,11,0.55)' }}>
               <button onClick={() => setDevNoteOpen(false)} aria-label="Cerrar aviso"
                 style={{ position:'absolute', top:10, right:10, width:22, height:22, borderRadius:7, border:'none', background:'rgba(245,158,11,0.18)', color:'#f59e0b', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, lineHeight:1 }}>
                 ✕
               </button>
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:11, color:'#f59e0b', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:6 }}>⚠ Aviso para desarrolladores (QA)</div>
-              <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--text)', lineHeight:1.5, marginBottom:8 }}>{a.devNote}</div>
-              <div style={{ fontFamily:'var(--font-b)', fontSize:10.5, color:'var(--ter)', fontStyle:'italic' }}>Este bloque es solo para pruebas — bórrenlo (y el campo "devNote" del activo) antes de subir a producción.</div>
+              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:11, color:'#f59e0b', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>⚠ Aviso para desarrolladores · Estado del proyecto</div>
+              <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', columnGap:10, rowGap:4, marginBottom: a.devNote ? 10 : 0 }}>
+                {projectState(a, { isLive, holding }).map(([k, v]) => (
+                  <div key={k} style={{ display:'contents' }}>
+                    <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'var(--ter)', whiteSpace:'nowrap' }}>{k}</span>
+                    <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--text)', fontWeight:600, lineHeight:1.45 }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+              {a.devNote && (
+                <div style={{ paddingTop:10, borderTop:'1px dashed rgba(245,158,11,0.35)' }}>
+                  <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:10.5, color:'#f59e0b', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:4 }}>Qué verificar (QA)</div>
+                  <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--text)', lineHeight:1.5 }}>{a.devNote}</div>
+                </div>
+              )}
             </div>
           )}
 

@@ -62,7 +62,7 @@ export default function TokenUtility({ nav }) {
           {/* Rounds table */}
           <PCard style={{ padding: '20px 24px', marginBottom: 20 }}>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 16 }}>Calendario de rondas</div>
-            <div style={{ overflowX: 'auto' }}>
+            <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>

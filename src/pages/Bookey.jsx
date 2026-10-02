@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useActiveAccount, useActiveWallet, useDisconnect, ConnectButton } from 'thirdweb/react';
+import { ConnectButton } from 'thirdweb/react';
+import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
 import { polygon } from 'thirdweb/chains';
 import { client } from '../lib/client';
 import KeyPayLogin from './KeyPayLogin';
@@ -1611,8 +1612,7 @@ function BookeyNavbar({ nav, searched, query, onEditSearch }) {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
-  const wallet = useActiveWallet();
-  const { disconnect } = useDisconnect();
+  const disconnect = useSessionDisconnect();
 
   useEffect(() => {
     const fn = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
@@ -1702,7 +1702,7 @@ function BookeyNavbar({ nav, searched, query, onEditSearch }) {
                   Centro de ayuda
                 </button>
                 <div style={{ height:1, background:'var(--border-l)', margin:'6px 12px' }} />
-                <button onClick={() => { setMenuOpen(false); if (wallet) disconnect(wallet); }}
+                <button onClick={() => { setMenuOpen(false); disconnect(); }}
                   style={{ width:'100%', display:'flex', alignItems:'center', gap:12, padding:'11px 16px', background:'none', border:'none', cursor:'pointer', color:'#c0392b', fontFamily:'var(--font-b)', fontSize:13.5, fontWeight:500, textAlign:'left' }}>
                   <span style={{ display:'flex' }}>{BIcons.logout}</span>
                   Cerrar sesión
@@ -1739,7 +1739,7 @@ function BookeyNavbar({ nav, searched, query, onEditSearch }) {
 // anywhere else in the app: if a session is already active, the gate is
 // skipped entirely and Bookey opens straight into the marketplace.
 export default function Bookey() {
-  const account = useActiveAccount();
+  const account = useSessionAccount();
   const routerNavigate = useNavigate();
   const [page, setPage] = useState('home'); // 'home' | 'detail' | 'profile' | 'favorites' | 'help'
   const [selected, setSelected] = useState(null);

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useActiveAccount, useDisconnect } from 'thirdweb/react';
+import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
 import KeyPayLogin from './KeyPayLogin';
 import { RWA_ASSETS, RWA_COMPANIES } from '../data';
 import { useMobile } from '../hooks/useMobile';
@@ -1115,8 +1115,8 @@ function DesktopNav({ tab, setTab, role, onSearch }) {
 // KEYCHAIN's own tokenized-asset operators (pulling real job context like
 // "Property Manager for a tokenized building") or run an independent listing.
 export default function KeyJobs() {
-  const account = useActiveAccount();
-  const { disconnect } = useDisconnect();
+  const account = useSessionAccount();
+  const disconnect = useSessionDisconnect();
   const routerNavigate = useNavigate();
   const isMobile = useMobile(DESKTOP_BP);
   const [role, setRole] = useState(null); // null | 'candidate' | 'company'

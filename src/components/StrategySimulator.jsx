@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { sHover, sWhoosh } from '../lib/landingSound';
 
 /* ── Strategy Icons ── */
 const ICO_ICON = (
@@ -100,7 +101,7 @@ const STRATEGIES = [
         help: 'El retorno porcentual anual que los holders recibirán. Calculalo en base al ingreso real del activo (alquiler, producción, etc.).' },
       { id: 'duration',   label: 'Plazo del proyecto',            unit: 'meses',  type: 'range',  min: 6,     max: 60,       step: 3,     default: 24,
         help: 'Período durante el cual los tokens generan rendimientos. Al vencimiento los inversores pueden revender o renovar su participación.' },
-      { id: 'minticket',  label: 'Ticket mínimo por inversor',    unit: 'USD',    type: 'range',  min: 38,    max: 5000,     step: 50,    default: 500,
+      { id: 'minticket',  label: 'Ticket mínimo por inversor',    unit: 'USD',    type: 'range',  min: 1,     max: 5000,     step: 1,     default: 500,
         help: 'Inversión mínima por persona. Un ticket bajo amplía la base de inversores; uno alto atrae perfiles más institucionales.' },
       { id: 'platform',   label: 'Fee de la plataforma',          unit: '%',      type: 'range',  min: 1,     max: 5,        step: 0.5,   default: 2.5,
         help: 'Comisión de Factoract por tokenización, custodia del activo y distribución de rendimientos on-chain.' },
@@ -360,7 +361,7 @@ function ParamField({ p, value, onChange, color }) {
         <div style={{ paddingTop: 2 }}>
           <input type="range" min={p.min} max={p.max} step={p.step} value={value}
             onChange={e => onChange(Number(e.target.value))}
-            style={{ width: '100%', accentColor: color, cursor: 'pointer' }}
+            className="sim-range" style={{ width: '100%', accentColor: color, cursor: 'pointer', '--c': color, '--pct': `${((value - p.min) / (p.max - p.min)) * 100}%` }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
             <span style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.18)' }}>{p.min} {p.unit}</span>
@@ -384,7 +385,8 @@ const STEPS = [
   { label: 'Proyección', desc: 'Mirá los resultados' },
 ];
 
-export default function StrategySimulator() {
+// `head` replaces the default title block (the landing passes its animated one).
+export default function StrategySimulator({ head }) {
   const [step, setStep]             = useState(0);
   const [selectedId, setSelectedId] = useState(null);
   const [params, setParams]         = useState({});
@@ -401,8 +403,14 @@ export default function StrategySimulator() {
   const setP  = (id, val) => setParams(p => ({ ...p, [id]: val }));
   const reset = () => { setStep(0); setSelectedId(null); setParams({}); };
   const goNext = () => {
+    sWhoosh();
     if (step === 0 && strategy) { initParams(strategy); setStep(1); }
     else if (step === 1) setStep(2);
+  };
+  const spot = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
   };
   const canNext = step === 0 ? !!selectedId : step === 1;
 
@@ -410,18 +418,13 @@ export default function StrategySimulator() {
     <section style={{ maxWidth: 1160, margin: '0 auto', padding: '88px 48px' }} className="land-section">
 
       {/* Header */}
+      {head || (
       <div style={{ textAlign: 'center', marginBottom: 56 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 20, padding: '5px 14px', marginBottom: 20 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }}/>
-          <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(255,255,255,0.48)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Para emprendedores · B2B</span>
-        </div>
         <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 40, color: 'rgba(255,255,255,0.93)', margin: 0, lineHeight: 1.15 }}>
           Simulá la tokenización<br/>de tu proyecto
         </h2>
-        <p style={{ fontFamily: 'var(--font-b)', fontSize: 16, color: 'rgba(255,255,255,0.36)', marginTop: 16, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
-          Elegí el modelo, configurá los parámetros de tu empresa y mirá cuánto podés levantar en tu ronda de tokenización.
-        </p>
       </div>
+      )}
 
       {/* Stepper */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 36 }}>
@@ -431,6 +434,7 @@ export default function StrategySimulator() {
               style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: i < step ? 'pointer' : 'default' }}>
               <div style={{
                 width: 30, height: 30, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: i === step ? `0 0 18px ${strategy?.color || '#7fb2ff'}88` : 'none',
                 fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 12, flexShrink: 0,
                 background: i === step ? (strategy?.color || '#fff') : i < step ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
                 color: i === step ? '#050505' : i < step ? 'rgba(255,255,255,0.70)' : 'rgba(255,255,255,0.20)',
@@ -443,14 +447,17 @@ export default function StrategySimulator() {
               </div>
             </div>
             {i < STEPS.length - 1 && (
-              <div style={{ width: 44, height: 1, background: i < step ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.07)', margin: '0 16px' }}/>
+              <div style={{ width: 54, height: 2, borderRadius: 2, background: 'rgba(255,255,255,0.07)', margin: '0 16px', overflow: 'hidden' }}>
+                <motion.div initial={false} animate={{ width: i < step ? '100%' : '0%' }} transition={{ duration: 0.5 }}
+                  style={{ height: '100%', background: `linear-gradient(90deg, #7fb2ff, ${strategy?.color || '#a78bfa'})`, boxShadow: '0 0 10px rgba(127,178,255,0.8)' }} />
+              </div>
             )}
           </div>
         ))}
       </div>
 
       {/* Main card */}
-      <div style={{
+      <div className="sim-main" style={{
         background: 'rgba(255,255,255,0.030)',
         backdropFilter: 'blur(52px) saturate(180%)',
         WebkitBackdropFilter: 'blur(52px) saturate(180%)',
@@ -464,7 +471,7 @@ export default function StrategySimulator() {
           {/* ── STEP 0: Elegir modelo ── */}
           {step === 0 && (
             <motion.div key="s0" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              style={{ padding: '40px 40px 28px' }}>
+              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
               <div style={{ marginBottom: 28 }}>
                 <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'rgba(255,255,255,0.88)', marginBottom: 6 }}>¿Qué modelo de tokenización usás?</div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.34)', lineHeight: 1.55 }}>Cada modelo tiene ventajas distintas según el tipo de proyecto, activo y nivel de confianza que querés transmitir a tus inversores.</div>
@@ -473,15 +480,19 @@ export default function StrategySimulator() {
                 {STRATEGIES.map(s => {
                   const sel = selectedId === s.id;
                   return (
-                    <button key={s.id} onClick={() => setSelectedId(sel ? null : s.id)} style={{
+                    <motion.button key={s.id} onClick={() => setSelectedId(sel ? null : s.id)}
+                      onMouseMove={spot} onMouseEnter={sHover} whileHover={{ y: -4 }} whileTap={{ scale: 0.985 }}
+                      className={`sim-card${sel ? ' sel' : ''}`}
+                      style={{
+                      '--c': s.color,
                       background: sel ? `${s.color}0e` : 'rgba(255,255,255,0.022)',
-                      border: `1.5px solid ${sel ? s.color : 'rgba(255,255,255,0.07)'}`,
+                      border: `1.5px solid ${sel ? 'transparent' : 'rgba(255,255,255,0.07)'}`, overflow: 'hidden',
                       borderRadius: 18, padding: '22px 22px 18px', cursor: 'pointer', textAlign: 'left',
                       transition: 'all 0.18s', position: 'relative',
                       boxShadow: sel ? `0 0 0 1px ${s.color}22, 0 8px 32px ${s.color}14` : 'none',
                     }}>
                       {sel && (
-                        <div style={{ position: 'absolute', top: 16, right: 16, width: 22, height: 22, borderRadius: '50%', background: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#050505' }}>
+                        <div className="sim-check" style={{ position: 'absolute', top: 16, right: 16, width: 22, height: 22, borderRadius: '50%', background: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#050505' }}>
                           {CHECK_ICON}
                         </div>
                       )}
@@ -513,7 +524,7 @@ export default function StrategySimulator() {
                           <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.52)', marginTop: 3 }}>{s.duration}</div>
                         </div>
                       </div>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -523,7 +534,7 @@ export default function StrategySimulator() {
           {/* ── STEP 1: Parámetros ── */}
           {step === 1 && strategy && (
             <motion.div key="s1" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              style={{ padding: '40px 40px 28px' }}>
+              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 28 }}>
                 <div style={{ width: 46, height: 46, borderRadius: 13, background: `${strategy.color}14`, border: `1px solid ${strategy.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: strategy.color, flexShrink: 0 }}>
                   {strategy.icon}
@@ -546,7 +557,7 @@ export default function StrategySimulator() {
           {/* ── STEP 2: Proyección ── */}
           {step === 2 && strategy && proj && (
             <motion.div key="s2" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              style={{ padding: '40px 40px 28px' }}>
+              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
 
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 22 }}>
                 <div style={{ width: 46, height: 46, borderRadius: 13, background: `${strategy.color}14`, border: `1px solid ${strategy.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: strategy.color, flexShrink: 0 }}>
@@ -640,7 +651,7 @@ export default function StrategySimulator() {
         </AnimatePresence>
 
         {/* Footer */}
-        <div style={{ padding: '16px 40px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.16)' }}>
+        <div className="sim-foot" style={{ padding: '16px 40px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.16)' }}>
           <button onClick={() => step > 0 && setStep(s => s - 1)} disabled={step === 0}
             style={{ padding: '9px 20px', borderRadius: 10, border: '1.5px solid rgba(255,255,255,0.09)', background: 'transparent', cursor: step === 0 ? 'default' : 'pointer', color: step === 0 ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.50)', fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, transition: 'all 0.15s' }}>
             ← Atrás
@@ -658,6 +669,7 @@ export default function StrategySimulator() {
               background: canNext ? (strategy?.color || 'rgba(255,255,255,0.88)') : 'rgba(255,255,255,0.06)',
               cursor: canNext ? 'pointer' : 'default',
               color: canNext ? '#050505' : 'rgba(255,255,255,0.18)',
+              boxShadow: canNext ? `0 0 26px ${strategy?.color || '#ffffff'}66` : 'none',
               fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 700, transition: 'all 0.18s',
             }}>
               {step === 0 ? 'Configurar proyecto →' : 'Ver proyección →'}

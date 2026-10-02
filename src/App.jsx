@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import { ThirdwebProvider, useActiveAccount } from 'thirdweb/react';
+import { ThirdwebProvider } from 'thirdweb/react';
+import { useSessionAccount, startDevSession, endDevSession } from './lib/devSession';
 import { AnimatePresence, motion } from 'framer-motion';
 import { playMouseMove } from './lib/sound';
 
 import Landing from './pages/Landing';
 import KeyPayLogin from './pages/KeyPayLogin';
+import MenuToggle from './components/layout/MenuToggle';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
 import MobileNavBar from './components/layout/MobileNavBar';
@@ -15,12 +17,15 @@ import Dashboard from './pages/Dashboard';
 import PrimaryMarket from './pages/PrimaryMarket';
 import SecondaryMarket from './pages/SecondaryMarket';
 import ProductDetail from './pages/ProductDetail';
+import GlobalFeed from './pages/GlobalFeed';
+import CompanyProfile from './pages/CompanyProfile';
 import Checkout from './pages/Checkout';
 import TokenUtility from './pages/TokenUtility';
 import Holdings from './pages/Holdings';
 import Academy from './pages/Academy';
 import Article from './pages/Article';
 import Profile from './pages/Profile';
+import { personByName } from './lib/people';
 import HelpCenter from './pages/HelpCenter';
 import Admin from './pages/Admin';
 import Config from './pages/Config';
@@ -82,6 +87,8 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
 
   const page = () => {
     switch (route) {
+      case 'feed':         return <GlobalFeed nav={nav} />;
+      case 'empresa':      return <CompanyProfile key={routeData} nav={nav} name={routeData} fromRoute={prevRoute} />;
       case 'dashboard':    return <Dashboard nav={nav} />;
       case 'primario':     return <PrimaryMarket nav={nav} rubro={prefs.rubro} />;
       case 'secundario':   return <SecondaryMarket nav={nav} />;
@@ -94,6 +101,14 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
       case 'academia':     return <Academy nav={nav} />;
       case 'articulo':     return <Article nav={nav} post={routeData} />;
       case 'perfil':       return <Profile nav={nav} />;
+      case 'usuario': {
+        // Any user: a common investor, or a company owner (then the switch
+        // leads to their company).
+        if (!routeData) return <Profile nav={nav} />;
+        const person = personByName(routeData);
+        const onBack = () => nav(prevRoute && !['empresa', 'detalle', 'usuario'].includes(prevRoute) ? prevRoute : 'feed');
+        return <Profile key={routeData} nav={nav} person={person} company={person.company} onCompany={() => nav('empresa', person.company)} onBack={onBack} />;
+      }
       case 'ayuda':        return <HelpCenter nav={nav} />;
       case 'admin':        return <Admin nav={nav} />;
       case 'config':       return <Config nav={nav} />;
@@ -123,7 +138,7 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
         <Topbar
           theme={theme} setTheme={setTheme}
           prefs={prefs} setPrefs={setPrefs}
-          nav={nav} route={route} isMobile onMenuOpen={() => setDrawerOpen(true)}
+          nav={nav} route={route} isMobile
         />
         <main ref={mainRef} style={{ flex: 1, overflowY: route === 'ecosistema' ? 'hidden' : 'auto', paddingBottom: route === 'ecosistema' ? 0 : 64, ...(route === 'ecosistema' && { display: 'flex', flexDirection: 'column' }) }}>
           {pageContent}
@@ -135,6 +150,7 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
           drawerMode drawerOpen={drawerOpen} onClose={() => setDrawerOpen(false)}
           onLogout={onLogout}
         />
+        <MenuToggle open={drawerOpen} onToggle={() => setDrawerOpen(o => !o)} />
       </div>
     );
   }
@@ -253,21 +269,21 @@ const PLATFORM_PATHS = {
 };
 
 function KeychainApp() {
-  const account = useActiveAccount();
+  const account = useSessionAccount();
   const navigate = useNavigate();
   const [view, setView]           = useState('landing');
-  const [theme, setTheme]         = useState('dark');
+  const [theme, setTheme]         = useState('light');
   const [palette, setPalette]     = useState('mono');
   const [font, setFont]           = useState('moderna');
   const [rubro, setRubro]         = useState('Todos');
   const [role, setRole]           = useState('investor');
   const [collapsed, setCollapsed] = useState(false);
-  const [route, setRoute]         = useState('dashboard');
+  const [route, setRoute]         = useState('feed');
   const [routeData, setRouteData] = useState(null);
   // Tracks the route we just came from, so pages like ProductDetail can send
   // "volver" back to wherever the user actually arrived from (Mercado
   // Primario vs. Secundario vs. Dashboard) instead of a single hardcoded tab.
-  const prevRouteRef = useRef('dashboard');
+  const prevRouteRef = useRef('feed');
 
   const [adminAuthOpen, setAdminAuthOpen] = useState(false);
   const [adminEmail, setAdminEmail]       = useState('');
@@ -311,7 +327,8 @@ function KeychainApp() {
     return () => window.removeEventListener('mousemove', move);
   }, []);
 
-  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
+  // The landing is always dark, whatever theme the app itself is set to.
+  useEffect(() => { document.documentElement.setAttribute('data-theme', view === 'landing' ? 'dark' : theme); }, [theme, view]);
   useEffect(() => { document.documentElement.setAttribute('data-palette', palette); }, [palette]);
   useEffect(() => {
     const f = FONTS[font] || FONTS.moderna;
@@ -341,7 +358,7 @@ function KeychainApp() {
 
   return (
     <>
-      {view === 'landing' && <Landing onEnter={() => setView('login')} />}
+      {view === 'landing' && <Landing onEnter={() => setView('login')} onDevEnter={startDevSession} />}
       {view === 'login' && (
         <KeyPayLogin onSuccess={() => setView('app')} onBack={() => setView('landing')} />
       )}
@@ -352,7 +369,7 @@ function KeychainApp() {
           prefs={prefs} setPrefs={setPrefs}
           role={role}
           collapsed={collapsed} setCollapsed={setCollapsed}
-          onLogout={() => { setView('landing'); setRoute('dashboard'); }}
+          onLogout={() => { endDevSession(); setView('landing'); setRoute('feed'); }}
         />
       )}
 

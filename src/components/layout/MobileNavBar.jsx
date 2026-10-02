@@ -19,11 +19,11 @@ const ProfileIcon = (
 );
 
 const INVESTOR_TABS = [
-  { id: 'dashboard',    label: 'Inicio',  icon: Icons.dash  },
-  { id: 'primario',     label: 'Tokens',  icon: HexIcon     },
-  { id: 'pertenencias', label: 'Wallet',  icon: Icons.wallet},
-  { id: 'token',        label: 'KYCN',    icon: KYCNIcon    },
-  { id: 'perfil',       label: 'Perfil',  icon: ProfileIcon },
+  { id: 'feed',         label: 'Feed',      icon: Icons.feed  },
+  { id: 'dashboard',    label: 'Dashboard', icon: Icons.dash  },
+  { id: 'primario',     label: 'Tokens',    icon: HexIcon     },
+  { id: 'pertenencias', label: 'Wallet',    icon: Icons.wallet},
+  { id: 'perfil',       label: 'Perfil',    icon: ProfileIcon },
 ];
 
 const ADMIN_TABS = [
@@ -52,11 +52,12 @@ export default function MobileNavBar({ nav, route, role }) {
         return (
           <motion.button
             key={t.id}
+            aria-label={t.label} title={t.label}
             onClick={() => nav(t.id)}
             whileTap={{ scale: 0.82 }}
             style={{
               flex: 1, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 3,
+              alignItems: 'center', justifyContent: 'center',
               border: 'none', background: 'transparent', cursor: 'pointer',
               color: active ? 'var(--accent)' : 'var(--ter)', padding: 0,
               position: 'relative',
@@ -65,14 +66,15 @@ export default function MobileNavBar({ nav, route, role }) {
             {active && (
               <motion.div
                 layoutId="mobile-tab-indicator"
+                // Centered with auto margins, not translateX(-50%): the
+                // layoutId animation drives `transform` itself and would drop it.
                 style={{
-                  position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+                  position: 'absolute', top: 0, left: 0, right: 0, margin: '0 auto',
                   width: 28, height: 2, borderRadius: 99, background: 'var(--accent)',
                 }}
               />
             )}
-            <span style={{ display: 'flex', color: 'inherit' }}>{t.icon}</span>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, fontWeight: active ? 700 : 400 }}>{t.label}</span>
+            <span className="mnav-ico" style={{ display: 'flex', color: 'inherit' }}>{t.icon}</span>
           </motion.button>
         );
       })}

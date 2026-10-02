@@ -43,6 +43,7 @@
   --gl-nav:    rgba(0,0,0,0.44);
   --gl-nav-a:  rgba(0,0,0,0.88);
   --gl-panel:  rgba(255,255,255,0.82);
+  --gl-panel-strong: rgba(255,255,255,0.95);
 }
 
 [data-theme="dark"] {
@@ -86,6 +87,7 @@
   --gl-nav:    rgba(255,255,255,0.42);
   --gl-nav-a:  rgba(255,255,255,0.92);
   --gl-panel:  rgba(18,18,18,0.82);
+  --gl-panel-strong: rgba(18,18,18,0.95);
 }
 
 [data-palette="verde"] { --accent: oklch(0.72 0.20 145); --accent-bg: oklch(0.94 0.065 145); --accent-text: oklch(0.38 0.13 145); }
@@ -131,7 +133,12 @@ body {
 
 @keyframes border-spin     { to { --ba: 360deg; } }
 @keyframes neon-travel     { to { --na: 360deg; } }
-@keyframes nav-bar-travel  { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+/* Seamless loop for the navbar glow line (background-size: 220%): with a
+   220% tile, background-position % moves it by -1.2 × width per 100%, so
+   183.333% → 0% slides it exactly one tile (2.2 × width) and the last frame
+   matches the first. The old 200% → -200% slid 2.18 tiles, so every third
+   pass got cut off when the loop restarted. */
+@keyframes nav-bar-travel  { 0% { background-position: 183.333% 0; } 100% { background-position: 0% 0; } }
 
 /* ── Liquid glass nav icon ───────────────────────────────── */
 .nav-icon-glass {
@@ -526,7 +533,7 @@ body {
     transparent 100%
   );
   background-size: 220% 100%;
-  animation: nav-bar-travel 3.2s linear infinite;
+  animation: nav-bar-travel 1.4667s linear infinite; /* same speed as before: one pass per loop */
   z-index: 10;
 }
 [data-theme="light"] .navbar-glow::after {
@@ -542,7 +549,7 @@ body {
     transparent 100%
   );
   background-size: 220% 100%;
-  animation: nav-bar-travel 3.2s linear infinite;
+  animation: nav-bar-travel 1.4667s linear infinite; /* same speed as before: one pass per loop */
 }
 
 /* ── Topbar icon button overrides (same glass effect, slightly larger) ── */
@@ -652,6 +659,16 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
+/* Feed posts (global Feed, company profile): square-media cards in a grid —
+   3 columns on desktop, 2 on tablet, 1 on phones. */
+.feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 16px; align-items: start; }
+.feed-grid > * { min-width: 0; } /* let the media carousel shrink to its column */
+@media (max-width: 720px) { .feed-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Horizontal rails (e.g. Feed's featured profiles) that scroll without a bar */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* ── Responsive helpers ───────────────────────────────────────────── */
 @media (max-width: 767px) {
   /* Page padding */
@@ -719,7 +736,7 @@ body {
 
   /* ── Market grids: 2 cards per row ─── */
   .g-market-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
   }
 
@@ -754,4 +771,21 @@ body {
   .sec-life { display: none !important; }
   .sec-actions { flex-direction: column !important; }
   .sec-actions button:last-child { display: none !important; }
+}
+
+@media (max-width: 767px) {
+  .g-roadmap { padding: 18px 16px !important; }
+  .g-dash-main > *, .g-dash-bot > * { min-width: 0; }
+}
+
+/* Mobile bottom bar: icon-only, larger glyphs */
+.mnav-ico svg, .mnav-ico img { width: 26px !important; height: 26px !important; }
+
+/* Phones: the full-bleed project card needs the whole width (two per row
+   overflowed the screen and squeezed the stats). */
+@media (max-width: 560px) {
+  .g-market-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; }
+  /* One card per row: give them more height so they don't look squashed */
+  .market-card-full { height: 460px !important; }
+  .market-card-img  { height: 250px !important; }
 }
