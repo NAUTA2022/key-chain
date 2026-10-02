@@ -206,7 +206,7 @@ export default function Profile({ nav, person, company: personCompany, onCompany
           <KpiRow kpis={kpis} isMobile={isMobile} />
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) 340px', gap: 20 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
-              <InvestmentsGrid holdings={holdings} stats={pf} isMe={isMe} nav={nav} limit={3} onMore={() => setSection('inversiones')} />
+              <InvestmentsGrid holdings={holdings} isMe={isMe} nav={nav} limit={3} onMore={() => setSection('inversiones')} />
               {levelCard}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
@@ -219,7 +219,7 @@ export default function Profile({ nav, person, company: personCompany, onCompany
 
       {section === 'inversiones' && (
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) 300px', gap: 20, alignItems: 'start' }}>
-          <InvestmentsGrid holdings={holdings} stats={pf} isMe={isMe} nav={nav} />
+          <InvestmentsGrid holdings={holdings} isMe={isMe} nav={nav} />
           <CategoryBreakdown holdings={holdings} />
         </div>
       )}
@@ -654,21 +654,20 @@ function AccountTabs({ tab, setTab, twofa, setTwofa, priv, setPriv }) {
 }
 
 
-// Portfolio: the same project cards as the marketplace, each with the
-// person's position (tokens, current value, return) underneath.
-function InvestmentsGrid({ holdings, stats, isMe, nav, limit, onMore }) {
+// Portfolio: exactly the marketplace project cards. The person's position
+// (tokens, value, return) is private and never shown on the profile.
+function InvestmentsGrid({ holdings, isMe, nav, limit, onMore }) {
   const shown = limit ? holdings.slice(0, limit) : holdings;
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{isMe ? 'Mis inversiones' : 'Inversiones'} <span style={{ color: 'var(--ter)', fontWeight: 600 }}>({holdings.length})</span></div>
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>Valor actual <b style={{ color: 'var(--text)' }}>{fmtUSD(stats.current)}</b></div>
       </div>
       {holdings.length === 0 && (
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>Todavía no tiene inversiones.</div>
       )}
       <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18 }}>
-        {shown.map(h => <AssetCard key={h.assetId} asset={h.asset} nav={nav} showCode holding={h} />)}
+        {shown.map(h => <AssetCard key={h.assetId} asset={h.asset} nav={nav} />)}
       </div>
       {onMore && holdings.length > shown.length && (
         <button onClick={onMore} style={{ marginTop: 12, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>

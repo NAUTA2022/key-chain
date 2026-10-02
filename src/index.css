@@ -736,7 +736,7 @@ body {
 
   /* ── Market grids: 2 cards per row ─── */
   .g-market-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
   }
 
@@ -780,3 +780,9 @@ body {
 
 /* Mobile bottom bar: icon-only, larger glyphs */
 .mnav-ico svg, .mnav-ico img { width: 26px !important; height: 26px !important; }
+
+/* Phones: the full-bleed project card needs the whole width (two per row
+   overflowed the screen and squeezed the stats). */
+@media (max-width: 560px) {
+  .g-market-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; }
+}
