@@ -163,14 +163,14 @@ function IcoRing({ pct }) {
   return (
     <div style={{ height: 150, marginBottom: 22, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
       <div style={{ position: 'relative', width: 124, height: 124 }}>
-        <svg width="124" height="124" viewBox="0 0 140 140" style={{ transform: 'rotate(-90deg)' }}>
+        <svg width="124" height="124" viewBox="0 0 140 140" style={{ transform: 'rotate(-90deg)', overflow: 'visible' }}>
           <defs>
             <linearGradient id="icoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#7fb2ff" /><stop offset="100%" stopColor="#c084fc" /></linearGradient>
           </defs>
           <circle cx="70" cy="70" r={R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="10" />
           <motion.circle cx="70" cy="70" r={R} fill="none" stroke="url(#icoGrad)" strokeWidth="10" strokeLinecap="round"
             strokeDasharray={C} initial={{ strokeDashoffset: C }} whileInView={{ strokeDashoffset: C * (1 - pct / 100) }} viewport={{ once: true }}
-            transition={{ duration: 1.8, ease: 'easeOut' }} style={{ filter: 'drop-shadow(0 0 8px rgba(160,140,255,0.7))' }} />
+            transition={{ duration: 1.8, ease: 'easeOut' }} style={{ filter: 'drop-shadow(0 0 8px rgba(160,140,255,0.7)) drop-shadow(0 0 18px rgba(127,150,255,0.45))' }} />
         </svg>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, color: '#fff' }}><CountUp to={pct} duration={1.8} />%</div>
