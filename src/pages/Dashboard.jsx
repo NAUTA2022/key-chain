@@ -222,9 +222,9 @@ function RoadmapKYCN() {
   const pct = (doneCount / ROADMAP.length) * 100;
 
   return (
-    <div className="glow-card glass-card" style={{ padding: '24px 28px', borderRadius: 20, marginBottom: 16 }}>
+    <div className="glow-card glass-card g-roadmap" style={{ padding: '24px 28px', borderRadius: 20, marginBottom: 16 }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Roadmap KYCN</div>
           <div style={{ padding: '3px 10px', borderRadius: 6, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)' }}>
@@ -242,7 +242,8 @@ function RoadmapKYCN() {
       </div>
 
       {/* Horizontal timeline */}
-      <div style={{ position: 'relative', paddingBottom: 4 }}>
+      <div className="no-scrollbar" style={{ overflowX: 'auto', margin: '0 -4px', padding: '0 4px' }}>
+      <div style={{ position: 'relative', paddingBottom: 4, minWidth: ROADMAP.length * 84 }}>
         {/* Track line */}
         <div style={{ position: 'absolute', top: 18, left: '4%', right: '4%', height: 3, background: 'var(--gl-bg3)', borderRadius: 2, zIndex: 0 }}>
           <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1.4, ease: 'easeOut', delay: 0.3 }}
@@ -288,6 +289,7 @@ function RoadmapKYCN() {
           })}
         </div>
       </div>
+      </div>
 
       {/* Expanded panel */}
       <AnimatePresence>
@@ -309,9 +311,9 @@ function RoadmapKYCN() {
                   padding: '20px 24px', borderRadius: 16,
                   background: 'rgba(255,255,255,0.03)',
                   border: `1px solid ${accentColor}40`,
-                  display: 'grid', gridTemplateColumns: '1fr auto', gap: 24, alignItems: 'start',
+                  display: 'flex', flexWrap: 'wrap', gap: 20, alignItems: 'flex-start', justifyContent: 'space-between',
                 }}>
-                  <div>
+                  <div style={{ flex: '1 1 240px', minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                       <div style={{ padding: '3px 10px', borderRadius: 6, background: `${accentColor}20`, border: `1px solid ${accentColor}40` }}>
                         <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: r.done ? 'var(--pos)' : isCurrent ? '#3078ff' : 'var(--ter)' }}>{r.q} · {r.done ? 'Completado' : isCurrent ? 'En curso' : 'Pendiente'}</span>
@@ -552,8 +554,10 @@ export default function Dashboard({ nav }) {
     },
   ], [holdTotal, cashTotal, yieldTotal, investedTotal]);
 
-  // Countdown to Jul 1 2026
-  const targetDate = useMemo(() => new Date('2026-07-01T00:00:00').getTime(), []);
+  // Countdown to the next monthly distribution (1st of next month)
+  const targetDate = useMemo(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime(); }, []);
+  const targetLabel = new Date(targetDate).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '');
+  const todayLabel = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
   const countdown = useCountdown(targetDate);
 
   // Animated counter for big number
@@ -572,8 +576,8 @@ export default function Dashboard({ nav }) {
     <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
-        <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 22 }}>
+        <div style={{ minWidth: 0, flex: '1 1 220px' }}>
           <motion.div
             initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
             style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 24, color: 'var(--text)', letterSpacing: '-0.02em' }}
@@ -581,14 +585,14 @@ export default function Dashboard({ nav }) {
             Hola, Max 👋
           </motion.div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 3 }}>
-            Resumen de tu posición al 13 de junio de 2026.
+            Resumen de tu posición al {todayLabel}.
           </div>
         </div>
         <motion.button
           whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
           onClick={() => setAdvisorOpen(true)}
           style={{
-            padding: '11px 22px', borderRadius: 14, border: 'none', cursor: 'pointer',
+            padding: '11px 22px', borderRadius: 14, border: 'none', cursor: 'pointer', flexShrink: 0,
             background: 'var(--accent)', color: 'var(--accent-fg)',
             fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 13.5,
             boxShadow: '0 0 20px rgba(48,120,255,0.35)',
@@ -641,11 +645,11 @@ export default function Dashboard({ nav }) {
       </div>
 
       {/* Fila 2: Portafolio total + Próxima distribución */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 270px', gap: 16, marginBottom: 16 }}>
+      <div className="g-dash-main" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 270px', gap: 16, marginBottom: 16 }}>
 
         {/* Portafolio total — with chart */}
         <div className="glow-card glass-card" style={{ padding: '20px 22px', borderRadius: 20, marginBottom: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 6 }}>
             <div>
               <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600, marginBottom: 4 }}>Portafolio total</div>
               <div className="glow-text" style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 30, letterSpacing: '-0.04em' }}>
@@ -675,7 +679,7 @@ export default function Dashboard({ nav }) {
         {/* Próxima distribución — live countdown */}
         <div className="glow-card glass-card" style={{ padding: '20px 18px', display: 'flex', flexDirection: 'column', borderRadius: 20 }}>
           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 2 }}>Próxima distribución</div>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginBottom: 14 }}>01 Jul 2026</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginBottom: 14 }}>{targetLabel}</div>
 
           {/* Countdown grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 14 }}>
@@ -727,7 +731,7 @@ export default function Dashboard({ nav }) {
       </div>
 
       {/* Fila 3: Mis inversiones + Diversificación + Academia */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
+      <div className="g-dash-bot" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 16 }}>
 
         {/* Mis inversiones */}
         <div className="glow-card glass-card" style={{ padding: '20px 22px', borderRadius: 20 }}>

@@ -772,3 +772,8 @@ body {
   .sec-actions { flex-direction: column !important; }
   .sec-actions button:last-child { display: none !important; }
 }
+
+@media (max-width: 767px) {
+  .g-roadmap { padding: 18px 16px !important; }
+  .g-dash-main > *, .g-dash-bot > * { min-width: 0; }
+}
