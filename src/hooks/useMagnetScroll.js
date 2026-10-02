@@ -14,12 +14,12 @@ import { useEffect, useState } from 'react';
 // the window.
 const SETTLE_MS = 140; // no scroll events for this long = the user let go
 
-export function useMagnetScroll(sentinelRef, pinTop = 0) {
+export function useMagnetScroll(sentinelRef, pinTop = 0, enabled = true) {
   const [stuck, setStuck] = useState(false);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) return undefined;
+    if (!sentinel || !enabled) { setStuck(false); return undefined; }
     const scroller = sentinel.closest('main') || window;
     const scrollTop = () => (scroller === window ? window.scrollY : scroller.scrollTop);
     const areaTop = () => (scroller === window ? 0 : scroller.getBoundingClientRect().top);
@@ -56,7 +56,7 @@ export function useMagnetScroll(sentinelRef, pinTop = 0) {
       cancelAnimationFrame(raf);
       clearTimeout(settle);
     };
-  }, [sentinelRef, pinTop]);
+  }, [sentinelRef, pinTop, enabled]);
 
   return { stuck };
 }

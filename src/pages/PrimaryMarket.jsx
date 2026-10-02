@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { PCard, PBtn, PSection, PTag, PChip, PStat, PImg, Icons, CompanyTag } from '../components/ui';
 import { RWA_ASSETS, RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD, fmtUSD2 } from '../data';
 import AssetCard from '../components/AssetCard';
 import { useMobile } from '../hooks/useMobile';
+import { useMagnetScroll } from '../hooks/useMagnetScroll';
 
 // TEMP DEV FILTER — lets a developer jump straight to any of the 7 QA fixture
 // states (see devNote on each asset in data/index.js) without hunting through
@@ -20,14 +21,14 @@ const QA_STATES = [
 ];
 
 // ─── Search + filter bar ──────────────────────────────────────────────────────
-function FilterBar({ search, setSearch, cat, setCat, country, setCountry, company, setCompany, issuer, setIssuer, qaState, setQaState }) {
+function FilterBar({ search, setSearch, cat, setCat, country, setCountry, company, setCompany, issuer, setIssuer, qaState, setQaState, pinned }) {
   const [open, setOpen] = useState(false);
   const hasFilters = cat !== 'Todos' || country !== 'Todos' || company !== 'Todos' || issuer !== 'Todos' || qaState !== 'Todos';
 
   return (
-    <div style={{ marginBottom: 22 }}>
+    <div style={{ marginBottom: pinned ? 0 : 22 }}>
       {/* Search row */}
-      <div style={{ display:'flex', gap:10, marginBottom:10 }}>
+      <div style={{ display:'flex', gap:10, marginBottom: pinned && !open ? 0 : 10 }}>
         <div style={{ flex:1, position:'relative' }}>
           <span style={{ position:'absolute', left:13, top:'50%', transform:'translateY(-50%)', color:'var(--ter)', pointerEvents:'none', display:'flex' }}>
             {Icons.search || <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
@@ -56,7 +57,7 @@ function FilterBar({ search, setSearch, cat, setCat, country, setCountry, compan
         {open && (
           <motion.div initial={{ height:0, opacity:0 }} animate={{ height:'auto', opacity:1 }} exit={{ height:0, opacity:0 }}
             style={{ overflow:'hidden' }}>
-            <div style={{ padding:'16px 18px', background:'var(--surface)', border:'1.5px solid var(--border)', borderRadius:14, display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:16 }}>
+            <div style={{ padding:'16px 18px', background:'var(--surface)', border:'1.5px solid var(--border)', borderRadius:14, maxHeight: pinned ? '55vh' : undefined, overflowY: pinned ? 'auto' : undefined, display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:16 }}>
               <FilterGroup label="Categoría" value={cat} onChange={setCat} options={RWA_CATS} />
               <FilterGroup label="País" value={country} onChange={setCountry} options={RWA_COUNTRIES} />
               <FilterGroup label="Empresa" value={company} onChange={setCompany} options={RWA_COMPANIES} />
@@ -175,6 +176,14 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
 
   const featured = heroItems[heroIndex] || heroItems[0];
   const isMobile = useMobile();
+  // Mobile "magnet" toolbar, same as the Feed: search + Filtros pin at the
+  // top with a snap; scrolling back up glides out of it to the featured hero.
+  const sentinelRef = useRef(null);
+  const { stuck } = useMagnetScroll(sentinelRef, 0, isMobile);
+  const snap = useAnimationControls();
+  useEffect(() => {
+    if (stuck) snap.start({ y: [-14, 4, 0], scale: [0.985, 1.006, 1], transition: { duration: 0.45, ease: [0.34, 1.56, 0.64, 1] } });
+  }, [stuck, snap]);
   const heroH = isMobile ? 440 : 296;
 
   const heroCounter = heroItems.length > 1 && (
@@ -310,9 +319,26 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
           <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>Filtrado desde Personalización.</span>
         </div>
       ) : (
-        <FilterBar search={search} setSearch={setSearch} cat={cat} setCat={setCat}
-          country={country} setCountry={setCountry} company={company} setCompany={setCompany}
-          issuer={issuer} setIssuer={setIssuer} qaState={qaState} setQaState={setQaState} />
+        <>
+          <div ref={sentinelRef} />
+          {(() => {
+            const bar = (
+              <FilterBar search={search} setSearch={setSearch} cat={cat} setCat={setCat}
+                country={country} setCountry={setCountry} company={company} setCompany={setCompany}
+                issuer={issuer} setIssuer={setIssuer} qaState={qaState} setQaState={setQaState} pinned={isMobile} />
+            );
+            if (!isMobile) return bar;
+            return (
+              <div style={{ position:'sticky', top:0, zIndex:30, margin:'0 -14px 12px' }}>
+                <motion.div animate={snap}
+                  style={{ padding:'10px 14px', background: stuck ? 'var(--bg)' : 'transparent', transition:'background 0.2s ease, box-shadow 0.2s ease',
+                    boxShadow: stuck ? '0 10px 24px -12px rgba(0,0,0,0.45)' : 'none' }}>
+                  {bar}
+                </motion.div>
+              </div>
+            );
+          })()}
+        </>
       )}
 
       {/* Results count */}
