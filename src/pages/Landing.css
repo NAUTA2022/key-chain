@@ -208,3 +208,23 @@
   .land-how { grid-template-columns: minmax(0, 1fr); gap: 36px; }
   .phone { transform: scale(0.92); transform-origin: top center; margin-bottom: -50px; }
 }
+
+/* ── Hero sound/music power button ── */
+.land-power { display: inline-flex; align-items: center; gap: 12px; padding: 6px 20px 6px 6px; border-radius: 999px; cursor: pointer;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); font-family: var(--font-b); font-size: 14px; font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10); transition: border-color .3s, background .3s, box-shadow .3s; }
+.land-power:hover { border-color: rgba(127,178,255,0.45); }
+.land-power-btn { position: relative; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: #fff; color: #07080c; flex-shrink: 0; }
+.land-power-btn::before, .land-power-btn::after { content: ''; position: absolute; inset: -1px; border-radius: 50%;
+  border: 1px solid rgba(127,178,255,0.7); animation: land-power-ring 2.4s cubic-bezier(.2,.7,.3,1) infinite; pointer-events: none; }
+.land-power-btn::after { animation-delay: 1.2s; }
+@keyframes land-power-ring { from { transform: scale(1); opacity: .9; } to { transform: scale(1.9); opacity: 0; } }
+.land-power.on { background: rgba(127,178,255,0.10); border-color: rgba(127,178,255,0.45); box-shadow: 0 0 30px rgba(127,178,255,0.25), inset 0 1px 0 rgba(255,255,255,0.12); }
+.land-power.on .land-power-btn { background: linear-gradient(135deg, #7fb2ff, #a78bfa); color: #fff; box-shadow: 0 0 22px rgba(127,178,255,0.7); }
+.land-power.on .land-power-btn::before, .land-power.on .land-power-btn::after { display: none; }
+.land-eq { display: flex; align-items: flex-end; gap: 2.5px; height: 14px; }
+.land-eq i { width: 3px; height: 100%; border-radius: 2px; background: currentColor; transform-origin: bottom; animation: land-eq .9s ease-in-out infinite alternate; }
+@keyframes land-eq { 0% { transform: scaleY(.25); } 50% { transform: scaleY(1); } 100% { transform: scaleY(.45); } }
+@media (prefers-reduced-motion: reduce) { .land-eq i, .land-power-btn::before, .land-power-btn::after { animation: none; } }

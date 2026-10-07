@@ -5,8 +5,8 @@ import StrategySimulator from '../components/StrategySimulator';
 import { RWA_ASSETS, FACT_TOKEN } from '../data';
 import { DEV_MODE } from '../lib/devSession';
 import {
-  unlockSound, isMuted, setMuted, onMuteChange, isAmbientOn, startAmbient, stopAmbient,
-  sHover, sClick, sChime, sWhoosh,
+  unlockSound, isMuted, setMuted, onMuteChange, startAmbient, stopAmbient,
+  sHover, sClick, sChime, sWhoosh, sPower, sPowerOff,
 } from '../lib/landingSound';
 // React Bits (https://reactbits.dev) — see components/reactbits/README.md
 import LightRays from '../components/reactbits/LightRays';
@@ -192,31 +192,65 @@ function IcoRing({ pct }) {
   );
 }
 
-function SoundToggle() {
-  const [muted, setM] = useState(isMuted());
-  const [amb, setAmb] = useState(isAmbientOn());
-  useEffect(() => onMuteChange(m => { setM(m); if (m) setAmb(false); }), []);
-  const btn = { width: 36, height: 36, borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.75)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 };
+// Hero play button: turns the page's sounds + ambient music on, with a
+// shockwave that sweeps the whole page; clicking again turns it all off.
+function SoundPower({ onPulse }) {
+  const [on, setOn] = useState(!isMuted());
+  useEffect(() => onMuteChange(m => setOn(!m)), []);
+  const toggle = (e) => {
+    e.stopPropagation(); // no click-spark pop on top of the power sound
+    unlockSound();
+    if (on) {
+      sPowerOff();
+      stopAmbient();
+      setTimeout(() => setMuted(true), 260);
+      setOn(false);
+      return;
+    }
+    setMuted(false);
+    sPower();
+    startAmbient();
+    const r = e.currentTarget.getBoundingClientRect();
+    onPulse({ x: r.left + r.width / 2, y: r.top + r.height / 2, id: Date.now() });
+  };
   return (
-    <div style={{ display: 'flex', gap: 6 }}>
-      <button aria-label={muted ? 'Activar sonidos' : 'Silenciar'} title={muted ? 'Activar sonidos' : 'Silenciar'} style={btn}
-        onClick={() => { unlockSound(); setMuted(!muted); if (muted) setTimeout(sClick, 30); }}>
-        {muted
-          ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M23 9l-6 6M17 9l6 6" /></svg>
-          : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.5 8.5a5 5 0 010 7M19 5a10 10 0 010 14" /></svg>}
-      </button>
-      <button aria-label={amb ? 'Apagar música ambiente' : 'Música ambiente'} title={amb ? 'Apagar música ambiente' : 'Música ambiente'}
-        style={{ ...btn, color: amb ? '#7fb2ff' : btn.color, borderColor: amb ? 'rgba(127,178,255,0.5)' : btn.border.split(' ').pop(), opacity: muted ? 0.4 : 1 }}
-        disabled={muted}
-        onClick={() => { unlockSound(); if (amb) { stopAmbient(); setAmb(false); } else { startAmbient(); setAmb(true); } }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
-      </button>
+    <motion.button className={`land-power${on ? ' on' : ''}`} onClick={toggle} onMouseEnter={sHover}
+      whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.94 }}
+      aria-pressed={on} aria-label={on ? 'Apagar sonido y música' : 'Activar sonido y música'}>
+      <span className="land-power-btn">
+        {on ? (
+          <span className="land-eq" aria-hidden="true">{[0, 1, 2, 3].map(i => <i key={i} style={{ animationDelay: `${i * 0.13}s` }} />)}</span>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ marginLeft: 2 }}><path d="M7 4.5v15a1 1 0 001.52.85l12-7.5a1 1 0 000-1.7l-12-7.5A1 1 0 007 4.5z" /></svg>
+        )}
+      </span>
+      <span className="land-power-txt">{on ? 'Sonido activado' : 'Activar experiencia'}</span>
+    </motion.button>
+  );
+}
+
+// Full-page shockwave fired from the play button.
+function PowerPulse({ pulse }) {
+  if (!pulse) return null;
+  const R = Math.hypot(Math.max(pulse.x, window.innerWidth - pulse.x), Math.max(pulse.y, window.innerHeight - pulse.y)) * 2.2;
+  const ring = (delay, width, color) => (
+    <motion.span initial={{ scale: 0, opacity: 1 }} animate={{ scale: 1, opacity: 0 }} transition={{ duration: 1.5, delay, ease: [0.16, 1, 0.3, 1] }}
+      style={{ position: 'absolute', left: pulse.x - R / 2, top: pulse.y - R / 2, width: R, height: R, borderRadius: '50%', border: `${width}px solid ${color}`, boxShadow: `0 0 40px ${color}, inset 0 0 40px ${color}` }} />
+  );
+  return (
+    <div key={pulse.id} aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 80, pointerEvents: 'none', overflow: 'hidden' }}>
+      <motion.span initial={{ opacity: 0.55 }} animate={{ opacity: 0 }} transition={{ duration: 1.1, ease: 'easeOut' }}
+        style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at ${pulse.x}px ${pulse.y}px, rgba(127,178,255,0.45), rgba(167,139,250,0.18) 35%, transparent 70%)` }} />
+      {ring(0, 2, 'rgba(127,178,255,0.75)')}
+      {ring(0.14, 1, 'rgba(181,155,255,0.55)')}
+      {ring(0.3, 1, 'rgba(255,255,255,0.25)')}
     </div>
   );
 }
 
 export default function Landing({ onEnter, onDevEnter }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [pulse, setPulse] = useState(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [activeStep, setActiveStep] = useState(0);
   const [stepsPaused, setStepsPaused] = useState(false);
@@ -310,7 +344,6 @@ export default function Landing({ onEnter, onDevEnter }) {
             ))}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <SoundToggle />
             <div className="land-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {DEV_MODE && onDevEnter && (
                 <button onClick={onDevEnter} title="Entrar sin wallet (solo desarrollo)" style={DEV_BTN}>Entrar dev</button>
@@ -380,6 +413,11 @@ export default function Landing({ onEnter, onDevEnter }) {
             <div className="land-morph-label">Invertí en</div>
             <ParticleWord words={MORPH_WORDS} colors={MORPH_COLORS} fontSize={isMobile ? 50 : 76} gap={isMobile ? 2.4 : 3} interval={2900} />
             <div className="land-morph-tail">tokenizados, desde $1 y con rentas mensuales en USDC.</div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }} className="land-hero-power"
+            style={{ position: 'relative', zIndex: 3, display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+            <SoundPower onPulse={setPulse} />
           </motion.div>
 
 
@@ -561,6 +599,7 @@ export default function Landing({ onEnter, onDevEnter }) {
           </div>
         </footer>
       </div>
+      <PowerPulse pulse={pulse} />
     </ClickSpark>
   );
 }

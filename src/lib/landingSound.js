@@ -2,12 +2,12 @@
 // soft ticks on hover, a glassy pop on click, a whoosh when a section comes
 // into view, a rising chime on the main CTAs and an optional ambient pad.
 // Browsers only allow audio after a user gesture, so nothing plays until the
-// first click/tap/key; the speaker toggle in the nav mutes it all (persisted).
+// first click/tap/key. Everything starts silent: the play button in the hero
+// turns sounds + music on (and off again).
 
-const KEY = 'kc_landing_sound';
 let ctx = null;
 let master = null;
-let muted = (() => { try { return localStorage.getItem(KEY) === 'off'; } catch { return false; } })();
+let muted = true;
 let unlocked = false;
 let pad = null;
 const listeners = new Set();
@@ -44,7 +44,6 @@ export function onMuteChange(fn) { listeners.add(fn); return () => listeners.del
 
 export function setMuted(m) {
   muted = m;
-  try { localStorage.setItem(KEY, m ? 'off' : 'on'); } catch { /* storage unavailable */ }
   if (master && ctx) master.gain.setTargetAtTime(m ? 0 : 0.9, ctx.currentTime, 0.05);
   if (m) stopAmbient();
   listeners.forEach(fn => fn(m));
@@ -161,3 +160,71 @@ export function stopAmbient() {
 }
 
 export const isAmbientOn = () => !!pad;
+
+// Synthetic room: decaying stereo noise used as a convolution impulse.
+let verbBuf = null;
+function impulse(a, secs = 2.6, decay = 3.2) {
+  if (verbBuf) return verbBuf;
+  const len = Math.floor(a.sampleRate * secs);
+  verbBuf = a.createBuffer(2, len, a.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = verbBuf.getChannelData(c);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+  }
+  return verbBuf;
+}
+
+// "Power on": a punchy click + sub thump, sent through a long reverb and a
+// filtered feedback delay so it echoes away into the background.
+export function sPower() {
+  const a = ready();
+  if (!a) return;
+  const t = a.currentTime + 0.01;
+  const bus = a.createGain();
+  bus.gain.value = 1;
+
+  // click transient (very short high-passed noise)
+  const nb = a.createBuffer(1, Math.floor(a.sampleRate * 0.03), a.sampleRate);
+  const nd = nb.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / nd.length, 4);
+  const click = a.createBufferSource(); click.buffer = nb;
+  const hp = a.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1800;
+  const cg = a.createGain(); cg.gain.value = 0.5;
+  click.connect(hp); hp.connect(cg); cg.connect(bus);
+
+  // sub thump
+  const sub = a.createOscillator(); sub.type = 'sine';
+  sub.frequency.setValueAtTime(140, t); sub.frequency.exponentialRampToValueAtTime(42, t + 0.35);
+  const sg = a.createGain();
+  sg.gain.setValueAtTime(0.0001, t); sg.gain.exponentialRampToValueAtTime(0.5, t + 0.006); sg.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+  sub.connect(sg); sg.connect(bus);
+
+  // bright "charge" ping
+  const ping = a.createOscillator(); ping.type = 'triangle';
+  ping.frequency.setValueAtTime(880, t); ping.frequency.exponentialRampToValueAtTime(1760, t + 0.12);
+  const pg = a.createGain();
+  pg.gain.setValueAtTime(0.0001, t); pg.gain.exponentialRampToValueAtTime(0.09, t + 0.01); pg.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+  ping.connect(pg); pg.connect(bus);
+
+  // dry
+  const dry = a.createGain(); dry.gain.value = 0.8;
+  bus.connect(dry); dry.connect(master);
+  // reverb
+  const verb = a.createConvolver(); verb.buffer = impulse(a);
+  const wet = a.createGain(); wet.gain.value = 0.55;
+  bus.connect(verb); verb.connect(wet); wet.connect(master);
+  // feedback delay, darker on every repeat
+  const delay = a.createDelay(1); delay.delayTime.value = 0.27;
+  const fb = a.createGain(); fb.gain.value = 0.48;
+  const dlp = a.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 2400;
+  const dOut = a.createGain(); dOut.gain.value = 0.42;
+  bus.connect(delay); delay.connect(dlp); dlp.connect(fb); fb.connect(delay); dlp.connect(dOut); dOut.connect(verb); dOut.connect(master);
+
+  click.start(t); sub.start(t); sub.stop(t + 0.5); ping.start(t); ping.stop(t + 0.55);
+  setTimeout(() => { fb.gain.value = 0; [bus, dry, verb, wet, delay, dlp, dOut].forEach(n => n.disconnect()); }, 5000);
+}
+
+// Soft descending blip played just before everything goes quiet.
+export function sPowerOff() {
+  tone({ freq: 900, slideTo: 260, type: 'triangle', dur: 0.22, vol: 0.06 });
+}
