@@ -202,7 +202,7 @@
 .phone-screen { position: relative; width: 100%; height: 100%; border-radius: 42px; overflow: hidden; background: #0b0d13; display: flex; flex-direction: column; }
 .phone-island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 92px; height: 26px; border-radius: 999px; background: #000; z-index: 5; }
 .phone-home { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.55); z-index: 5; }
-.phone-card .market-card-full { height: 300px !important; }
+.phone-card .market-card { height: 300px !important; }
 
 @media (max-width: 900px) {
   .land-how { grid-template-columns: minmax(0, 1fr); gap: 36px; }

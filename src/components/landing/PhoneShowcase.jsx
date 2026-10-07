@@ -127,7 +127,7 @@ function BuyScreen({ asset }) {
           </div>
         ))}
         <div style={{ marginTop: 14, height: 48, borderRadius: 14, background: '#fff', color: '#05060a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
-          Pagar con Key Pay
+          Pagar con saldo KEYCHAIN
         </div>
       </motion.div>
     </div>

@@ -744,6 +744,7 @@ body {
 
   /* Asset card image — shorter on mobile */
   .market-card-img { height: 108px !important; }
+  .market-card { height: 300px !important; }
 
   /* Asset card body — tighter padding */
   .market-card-body {
@@ -780,6 +781,10 @@ body {
   .g-dash-main > *, .g-dash-bot > * { min-width: 0; }
 }
 
+/* Project cards: KEYCHAIN (full-bleed photo) and company cards share one
+   fixed size so grids line up regardless of the mix. */
+.market-card { height: 376px; }
+
 /* Mobile bottom bar: icon-only, larger glyphs */
 .mnav-ico svg, .mnav-ico img { width: 26px !important; height: 26px !important; }
 
@@ -788,6 +793,6 @@ body {
 @media (max-width: 560px) {
   .g-market-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; }
   /* One card per row: give them more height so they don't look squashed */
-  .market-card-full { height: 460px !important; }
+  .market-card { height: 460px !important; }
   .market-card-img  { height: 250px !important; }
 }

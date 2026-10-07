@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PCard, PBtn, PTag, PProgress, PImg, PDiv, PDonut, PArea, PScanLink, Icons, CompanyTag, CompanyAvatar } from '../components/ui';
 import { fmtUSD, fmtUSD2, MY_HOLDINGS } from '../data';
-import { addPendingPayment } from '../lib/keypayInbox';
+import { goCheckout } from '../lib/checkout';
 import { DEV_MODE } from '../lib/devSession';
 import { useProjectPosts, isFeedLive, issuerNameOf, postMedia } from '../lib/projectFeed';
 import { PostMedia, PostComments } from '../components/feed';
@@ -571,8 +571,11 @@ export default function ProductDetail({ nav, asset: a, fromRoute }) {
             </div>
 
             <PBtn variant="accent" style={{ width:'100%', padding:'14px', fontSize:15, marginBottom:10 }} onClick={() => {
-              const id = addPendingPayment({ name: `Tokenización — ${a.name}`, qty: tokens, unit: a.tokenPrice, fee: tokens*a.tokenPrice*0.005, source: 'Tokenizaciones' });
-              nav('keypay', { screen: 'cart', focusId: id });
+              goCheckout(nav, {
+                title: holding ? 'Compra de tokens' : 'Inversión', source: 'Tokenizaciones', fee: tokens*a.tokenPrice*0.005,
+                items: [{ name: a.name, img: a.img, qty: tokens, unit: a.tokenPrice, meta: `${a.apy}% APY · ${a.cat}` }],
+                back: { route: 'detalle', data: a }, done: { route: 'pertenencias', label: 'Ver en Mis Pertenencias' },
+              });
             }}>
               {holding ? 'Comprar más' : 'Invertir'} · {fmtUSD2(tokens*a.tokenPrice*1.005)}
             </PBtn>

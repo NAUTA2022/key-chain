@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
-import KeyPayLogin from './KeyPayLogin';
+import Login from './Login';
 import { RWA_ASSETS, RWA_COMPANIES } from '../data';
 import { useMobile } from '../hooks/useMobile';
 
@@ -1135,7 +1135,7 @@ export default function KeyJobs() {
   const searchJobs = (text) => { setJobsQuery(text); setJumpJobId(null); setTab('jobs'); };
 
   if (!account) {
-    return <KeyPayLogin onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
+    return <Login onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
   }
 
   if (!role) {

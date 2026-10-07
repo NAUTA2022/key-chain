@@ -2,13 +2,14 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useActiveAccount, useWalletBalance } from 'thirdweb/react';
 import { polygon } from 'thirdweb/chains';
-import { PCard, PBtn, PArea, Icons } from '../components/ui';
+import { PBtn, PArea } from '../components/ui';
 import { MY_HOLDINGS, RWA_ASSETS, fmtUSD2 } from '../data';
 import AssetCard from '../components/AssetCard';
 import { client } from '../lib/client';
-import KeyPay from './KeyPay';
+import CryptoDeposit from '../components/payments/CryptoDeposit';
+import CryptoWithdraw from '../components/payments/CryptoWithdraw';
+import { TOKENS, useWallet, fmtToken, DEPOSIT_ADDRESS } from '../lib/wallet';
 import { useMobile } from '../hooks/useMobile';
-import { TRANSACTIONS } from '../lib/walletActivity';
 
 const POLYGON_TOKENS = [
   { sym: 'POL',  name: 'Polygon',      address: null,                                           abbr: 'PL' },
@@ -65,8 +66,11 @@ function TokenRow({ account, sym, name, address, abbr, isLast }) {
   );
 }
 
+const ARROW_DOWN = <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v13M6 11l6 6 6-6M5 20h14" /></svg>;
+const ARROW_UP = <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20V7M6 13l6-6 6 6M5 4h14" /></svg>;
+
 /* ── Parallax wallet card ── */
-function ParallaxWalletCard({ account, setTab }) {
+function ParallaxWalletCard({ balanceUSD, onDeposit, onWithdraw }) {
   const cardRef = useRef(null);
   const rotX = useMotionValue(0);
   const rotY = useMotionValue(0);
@@ -93,9 +97,7 @@ function ParallaxWalletCard({ account, setTab }) {
     shine.set(0);
   };
 
-  const addrShort = account
-    ? `${account.address.slice(0, 10)}…${account.address.slice(-6)}`
-    : 'Sin wallet conectada';
+  const addrShort = `${DEPOSIT_ADDRESS.slice(0, 10)}…${DEPOSIT_ADDRESS.slice(-6)}`;
 
   return (
     <div style={{ perspective: '900px' }}>
@@ -144,7 +146,7 @@ function ParallaxWalletCard({ account, setTab }) {
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 22 }}>
             <div>
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', letterSpacing: '0.10em', textTransform: 'uppercase', marginBottom: 5 }}>Dirección</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', letterSpacing: '0.10em', textTransform: 'uppercase', marginBottom: 5 }}>Tu dirección KEYCHAIN</div>
               <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, color: 'var(--sec)', letterSpacing: '0.02em' }}>{addrShort}</div>
             </div>
             {/* Network chip */}
@@ -154,27 +156,26 @@ function ParallaxWalletCard({ account, setTab }) {
               borderRadius: 20, padding: '5px 12px',
             }}>
               <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(255,255,255,0.55)' }} />
-              <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 600, color: 'var(--sec)' }}>Polygon</span>
+              <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 600, color: 'var(--sec)' }}>Multi-red</span>
             </div>
           </div>
 
           {/* Main balance */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', letterSpacing: '0.10em', textTransform: 'uppercase', marginBottom: 6 }}>Balance total</div>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 32, letterSpacing: '-0.04em', color: 'rgba(255,255,255,0.95)' }}>$0.00</div>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 4 }}>Polygon Mainnet</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', letterSpacing: '0.10em', textTransform: 'uppercase', marginBottom: 6 }}>Saldo KEYCHAIN</div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 32, letterSpacing: '-0.04em', color: 'rgba(255,255,255,0.95)' }}>{fmtUSD2(balanceUSD)}</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 4 }}>Polygon · BNB Smart Chain · Celo</div>
           </div>
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 8 }}>
             {[
-              { label: 'Depositar', action: null, icon: '↓' },
-              { label: 'Retirar',   action: null, icon: '↑' },
-              { label: 'Swap',      action: 'swap', icon: '⇄' },
+              { label: 'Depositar', action: onDeposit, icon: ARROW_DOWN },
+              { label: 'Retirar',   action: onWithdraw, icon: ARROW_UP },
             ].map(({ label, action, icon }) => (
               <button
                 key={label}
-                onClick={() => action && setTab(action)}
+                onClick={action}
                 style={{
                   flex: 1, padding: '10px 0', borderRadius: 12,
                   border: '1px solid var(--gl-prd-a)',
@@ -187,7 +188,7 @@ function ParallaxWalletCard({ account, setTab }) {
                 onMouseEnter={e => { e.currentTarget.style.background = 'var(--gl-prd-a)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'var(--gl-icon)'; e.currentTarget.style.borderColor = 'var(--gl-prd-a)'; }}
               >
-                <span style={{ fontSize: 15, lineHeight: 1 }}>{icon}</span>
+                <span style={{ display: 'flex' }}>{icon}</span>
                 <span>{label}</span>
               </button>
             ))}
@@ -200,7 +201,10 @@ function ParallaxWalletCard({ account, setTab }) {
 
 export default function Holdings({ nav }) {
   const [tab, setTab] = useState('wallet');
-  const [keyPayOpen, setKeyPayOpen] = useState(false);
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const { balances, activity } = useWallet();
+  const balanceUSD = TOKENS.reduce((s, t) => s + (balances[t.sym] || 0) * t.price, 0);
   const account = useActiveAccount();
   const isMobile = useMobile();
 
@@ -230,16 +234,25 @@ export default function Holdings({ nav }) {
     </div>
   );
 
-  // Key Pay: just a key icon on phones, full label on desktop
-  const keyPayBtn = isMobile ? (
-    <button onClick={() => setKeyPayOpen(true)} aria-label="Abrir en Key Pay" title="Abrir en Key Pay"
-      style={{ width: 46, height: 46, flexShrink: 0, padding: 0, borderRadius: 12, border: 'none', cursor: 'pointer', background: 'var(--accent)', color: 'var(--accent-fg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="7.5" cy="15.5" r="4.5" /><path d="M10.7 12.3L20 3M16 7l3 3M14 9l2 2" />
-      </svg>
-    </button>
-  ) : (
-    <PBtn variant="accent" small onClick={() => setKeyPayOpen(true)} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>Abrir en Key Pay</PBtn>
+  // KEYCHAIN balance (custodial): what deposits credit, withdrawals and
+  // checkout payments debit.
+  const keychainBalance = (
+    <div style={{ ...glass, padding: '18px 20px', marginBottom: 16 }}>
+      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 6 }}>Saldo por moneda</div>
+      {TOKENS.map((t, i) => (
+        <div key={t.sym} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderTop: i ? '1px solid var(--gl-div)' : 'none' }}>
+          <img src={t.icon} alt="" style={{ width: 28, height: 28, borderRadius: '50%' }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, fontWeight: 700, color: 'var(--text)' }}>{t.sym}</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t.name}</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)' }}>{fmtToken(balances[t.sym] || 0, t.sym)}</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{fmtUSD2((balances[t.sym] || 0) * t.price)}</div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 
   const kpis = (
@@ -303,23 +316,22 @@ export default function Holdings({ nav }) {
     <div style={{ ...glass, padding: '18px 20px', minWidth: 0 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Movimientos</div>
-        <button onClick={() => setKeyPayOpen(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 600, color: 'var(--accent-text)' }}>Ver en Key Pay →</button>
       </div>
-      {TRANSACTIONS.map((t, i) => {
+      {activity.slice(0, 10).map((t, i, list) => {
         const name = t.label.split(' — ')[1];
         const asset = name && RWA_ASSETS.find(x => x.name === name);
         const inbound = t.type === 'in';
         return (
           <div key={t.id} onClick={asset ? () => nav('detalle', asset) : undefined}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: i < TRANSACTIONS.length - 1 ? '1px solid var(--gl-div)' : 'none', cursor: asset ? 'pointer' : 'default' }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700,
-              background: inbound ? 'rgba(34,197,94,0.12)' : 'var(--gl-prd-i)', color: inbound ? 'var(--pos)' : 'var(--sec)' }}>{inbound ? '↓' : '↑'}</div>
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: i < list.length - 1 ? '1px solid var(--gl-div)' : 'none', cursor: asset ? 'pointer' : 'default' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: inbound ? 'rgba(34,197,94,0.12)' : 'var(--gl-prd-i)', color: inbound ? 'var(--pos)' : 'var(--sec)' }}>{inbound ? ARROW_DOWN : ARROW_UP}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.label}</div>
               <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginTop: 2 }}>{t.date} · {t.status}</div>
             </div>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13.5, color: inbound ? 'var(--pos)' : 'var(--text)', flexShrink: 0 }}>
-              {inbound ? '+' : '−'}{fmtUSD2(Math.abs(t.amount))}
+              {inbound ? '+' : '−'}{t.sym && t.sym !== 'USDC' && t.sym !== 'USDT' ? fmtToken(Math.abs(t.amount), t.sym) : fmtUSD2(Math.abs(t.amount))}
             </div>
           </div>
         );
@@ -344,12 +356,11 @@ export default function Holdings({ nav }) {
     <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 1200, margin: '0 auto' }}>
 
       {isMobile ? (
-        // Phones: balance card first, then Wallet / Inversiones + Key Pay key
+        // Phones: balance card first, then the Wallet / Inversiones switch
         <>
-          <ParallaxWalletCard account={account} setTab={setTab} />
+          <ParallaxWalletCard balanceUSD={balanceUSD} onDeposit={() => setDepositOpen(true)} onWithdraw={() => setWithdrawOpen(true)} />
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 8, marginBottom: 16 }}>
             {tabSwitch}
-            {keyPayBtn}
           </div>
         </>
       ) : (
@@ -361,7 +372,6 @@ export default function Holdings({ nav }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               {tabSwitch}
-              {keyPayBtn}
             </div>
           </div>
           {kpis}
@@ -374,6 +384,7 @@ export default function Holdings({ nav }) {
             {isMobile ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ marginBottom: -16 }}>{kpis}</div>
+                <div style={{ marginBottom: -16 }}>{keychainBalance}</div>
                 {tokens}
                 {evolution}
                 {movements}
@@ -381,7 +392,8 @@ export default function Holdings({ nav }) {
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: '340px minmax(0, 1fr)', gap: 18, alignItems: 'start' }}>
                 <div>
-                  <ParallaxWalletCard account={account} setTab={setTab} />
+                  <ParallaxWalletCard balanceUSD={balanceUSD} onDeposit={() => setDepositOpen(true)} onWithdraw={() => setWithdrawOpen(true)} />
+                  {keychainBalance}
                   {tokens}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
@@ -401,31 +413,8 @@ export default function Holdings({ nav }) {
 
       </AnimatePresence>
 
-      <AnimatePresence>
-        {keyPayOpen && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setKeyPayOpen(false)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.6)',
-              backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 12 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              onClick={e => e.stopPropagation()}
-              style={{
-                width: '100%', maxWidth: 430, height: '90vh', maxHeight: 860,
-                borderRadius: 32, overflow: 'hidden', boxShadow: '0 30px 90px rgba(0,0,0,0.6)',
-              }}
-            >
-              <KeyPay nav={nav} onClose={() => setKeyPayOpen(false)} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <CryptoDeposit open={depositOpen} onClose={() => setDepositOpen(false)} />
+      <CryptoWithdraw open={withdrawOpen} onClose={() => setWithdrawOpen(false)} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PCard, PBtn, PTag, Icons } from '../components/ui';
-import { addPendingPayment } from '../lib/keypayInbox';
+import { goCheckout } from '../lib/checkout';
 
 const ACCENT = '#6C63FF';
 const GREEN  = '#6ee772';
@@ -155,8 +155,11 @@ export default function TenantPortal({ nav, property }) {
                 </div>
                 {p.status==='pendiente' && (
                   <PBtn variant="accent" small style={{ marginLeft:8, flexShrink:0 }} onClick={() => {
-                    const id = addPendingPayment({ name: `Alquiler — ${p.concept}`, qty: 1, unit: p.amount, source: 'Tenant Portal' });
-                    nav('keypay', { screen: 'cart', focusId: id });
+                    goCheckout(nav, {
+                      title: 'Pago de alquiler', source: 'Portal del inquilino',
+                      items: [{ name: `${p.concept} — ${prop.name}`, img: prop.img, qty: 1, unit: p.amount, meta: `Vence ${p.due}` }],
+                      back: { route: 'inquilino', data: property }, done: { route: 'inquilino', data: property, label: 'Volver al portal' },
+                    });
                   }}>Pagar</PBtn>
                 )}
               </PCard>

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThirdwebProvider } from 'thirdweb/react';
 import { useSessionAccount, startDevSession, endDevSession } from './lib/devSession';
 import { AnimatePresence, motion } from 'framer-motion';
 import { playMouseMove } from './lib/sound';
 
 import Landing from './pages/Landing';
-import KeyPayLogin from './pages/KeyPayLogin';
+import Login from './pages/Login';
 import MenuToggle from './components/layout/MenuToggle';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
@@ -31,7 +31,6 @@ import Admin from './pages/Admin';
 import Config from './pages/Config';
 import Wizard from './pages/Wizard';
 import Ecosystem from './pages/Ecosystem';
-import KeyPay from './pages/KeyPay';
 import KeyDrive from './pages/KeyDrive';
 import KeyJobs from './pages/KeyJobs';
 import EscrowChain from './pages/EscrowChain';
@@ -65,25 +64,6 @@ function Shell({ nav, route, routeData, prevRoute, theme, setTheme, prefs, setPr
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0);
   }, [route]);
-
-  // KeyPay is a standalone, self-themed component (not built on the platform's
-  // design system) so it can be reused elsewhere or served independently later
-  // (e.g. as an API-backed widget). It bypasses the Sidebar/Topbar chrome
-  // entirely and fills 100% of the viewport itself.
-  if (route === 'keypay') {
-    // Every "go pay" CTA across the app (ProductDetail, Dashboard,
-    // TokenUtility, SecondaryMarket, TenantPortal, Checkout.jsx) hands its
-    // purchase off as a pending payment then routes here with
-    // routeData = { screen: 'cart', focusId }, so it opens straight into
-    // KeyPay's Checkout scoped to just that one payment — not the whole
-    // shared pending inbox (which can carry unrelated leftover items).
-    const wantsCart = routeData === 'cart' || routeData?.screen === 'cart';
-    return (
-      <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
-        <KeyPay nav={nav} onClose={() => nav('dashboard')} initialModal={wantsCart ? 'cart' : null} cartFocusId={routeData?.focusId ?? null} />
-      </div>
-    );
-  }
 
   const page = () => {
     switch (route) {
@@ -245,18 +225,6 @@ function AssetTrackerPlatform() {
   return <div style={{ minHeight: '100vh', background: 'var(--bg)' }}><AssetTracker /></div>;
 }
 
-function KeyPayPlatform() {
-  // KeyPay is fully self-themed (own --kp-* variables set on its own root),
-  // same as Bookey — it doesn't need the platform's data-theme at all, just
-  // a full-viewport frame to render into.
-  const navigate = useNavigate();
-  return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      <KeyPay onClose={() => navigate('/')} />
-    </div>
-  );
-}
-
 // ─── Keychain app ─────────────────────────────────────────────────────────────
 
 const PLATFORM_PATHS = {
@@ -360,7 +328,7 @@ function KeychainApp() {
     <>
       {view === 'landing' && <Landing onEnter={() => setView('login')} onDevEnter={startDevSession} />}
       {view === 'login' && (
-        <KeyPayLogin onSuccess={() => setView('app')} onBack={() => setView('landing')} />
+        <Login onSuccess={() => setView('app')} onBack={() => setView('landing')} />
       )}
       {view === 'app' && (
         <Shell
@@ -447,7 +415,8 @@ function PlatformRouter() {
       <Route path="/key-rural/*"    element={<KeyRuralPlatform />} />
       <Route path="/escrow-chain/*" element={<EscrowChainPlatform />} />
       <Route path="/tracker-gps/*"  element={<AssetTrackerPlatform />} />
-      <Route path="/keypay/*"       element={<KeyPayPlatform />} />
+      {/* Key Pay is disabled: payments live in KEYCHAIN's own checkout. */}
+      <Route path="/keypay/*"       element={<Navigate to="/" replace />} />
       <Route path="/*"              element={<KeychainApp />} />
     </Routes>
   );

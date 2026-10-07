@@ -1,4 +1,4 @@
-// Wallet activity shown in Key Pay ("Movimientos") and in Mis Pertenencias.
+// Seed wallet activity shown in Mis Pertenencias (Movimientos); lib/wallet.js builds on it.
 export const TRANSACTIONS = [
   { id:1, type:'in',  label:'Distribución de renta — Campo Agrícola Pergamino', amount:412.00,  date:'01 Jul 2026', wallet:'usdc', status:'Completado' },
   { id:2, type:'out', label:'Liberación de escrow P2P Fiat — recibido por Pavlo', amount:-1200.00, date:'29 Jun 2026', wallet:'usdc', status:'Completado' },

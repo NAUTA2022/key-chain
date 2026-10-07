@@ -2,26 +2,23 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PCard, PBtn, PSection, PTag, PProgress, PDonut, PDiv, PScanLink } from '../components/ui';
 import { FACT_TOKEN, fmtUSD2 } from '../data';
-import { addPendingPayment } from '../lib/keypayInbox';
+import { goCheckout } from '../lib/checkout';
 
 export default function TokenUtility({ nav }) {
   const [buyAmt, setBuyAmt] = useState(500);
-  const [sent, setSent] = useState(false);
-  const [paymentId, setPaymentId] = useState(null);
   const F = FACT_TOKEN;
   const pct = Math.round(F.raised / F.goal * 100);
   const factAmt = Math.round(buyAmt / F.price);
 
-  // Investing here doesn't charge the user directly — it hands the purchase
-  // off to KeyPay as a pending payment, where it's actually paid via
-  // thirdweb's CheckoutWidget (see src/pages/KeyPay.jsx's CartCheckout).
+  // Buying opens KEYCHAIN's checkout. factAmt is rounded to a whole token
+  // count, so unit is derived back from buyAmt — qty*unit must equal exactly
+  // the USDC amount just quoted as "Pagás".
   const handleBuy = () => {
-    // factAmt is rounded to a whole token count, so unit is derived back from
-    // buyAmt (not F.price directly) — qty*unit must equal exactly the USDC
-    // amount just quoted as "Pagás", not a rounding-drifted approximation.
-    const id = addPendingPayment({ name: `Token FACT — ICO Pública`, qty: factAmt, unit: buyAmt / factAmt, source: 'Token FACT' });
-    setPaymentId(id);
-    setSent(true);
+    goCheckout(nav, {
+      title: 'ICO pública', source: 'Token FACT',
+      items: [{ name: 'Token FACT — ICO Pública', img: '/icono.png', qty: factAmt, unit: buyAmt / factAmt, meta: 'TGE 15% · vesting 12 meses' }],
+      back: { route: 'token' }, done: { route: 'token', label: 'Volver a Token FACT' },
+    });
   };
 
   return (
@@ -171,17 +168,7 @@ export default function TokenUtility({ nav }) {
               </div>
             </div>
 
-            {sent ? (
-              <div style={{ textAlign: 'center', padding: '10px 0 14px' }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 12 }}>
-                  Enviamos esta compra como pendiente de pago a Key Pay.
-                </div>
-                <PBtn variant="accent" style={{ width: '100%', padding: '13px', fontSize: 14 }} onClick={() => nav?.('keypay', { screen: 'cart', focusId: paymentId })}>
-                  Pagar en Key Pay →
-                </PBtn>
-              </div>
-            ) : (
-              <>
+            <>
                 <PBtn variant="accent" style={{ width: '100%', padding: '14px', fontSize: 15, marginBottom: 10 }} onClick={handleBuy}>
                   Comprar {factAmt.toLocaleString()} FACT
                 </PBtn>
@@ -189,7 +176,6 @@ export default function TokenUtility({ nav }) {
                   Pago con USDC · TGE: 15% inmediato · Vesting: 12 meses
                 </div>
               </>
-            )}
 
             <PDiv style={{ margin: '18px 0' }} />
 

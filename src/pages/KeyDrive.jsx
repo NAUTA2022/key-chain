@@ -6,7 +6,7 @@ import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
-import KeyPayLogin from './KeyPayLogin';
+import Login from './Login';
 import { CartCheckout, KP_VARS } from './KeyPay';
 import { addPendingPayment, getPendingPayments } from '../lib/keypayInbox';
 import { useMobile } from '../hooks/useMobile';
@@ -409,7 +409,7 @@ function ConfirmRide({ pickup, dest, ride, distanceKm, onBack, onRequest }) {
 
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderRadius:12, background:GRAY2, marginBottom:16 }}>
         {KDIcons.wallet}
-        <span style={{ fontFamily:FONT_B, fontSize:13, color:WHITE }}>Key Pay · USDC</span>
+        <span style={{ fontFamily:FONT_B, fontSize:13, color:WHITE }}>Saldo KEYCHAIN · USDC</span>
       </div>
       </div>
 
@@ -1016,7 +1016,7 @@ export default function KeyDrive() {
   const [history, setHistory] = useState(SEED_HISTORY);
 
   if (!account) {
-    return <KeyPayLogin onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
+    return <Login onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
   }
 
   return (

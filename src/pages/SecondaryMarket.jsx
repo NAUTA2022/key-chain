@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { PCard, PBtn, PSection, PTag, PChip, PAvatar, PImg, Icons, CompanyTag } from '../components/ui';
 import { SECONDARY_LISTINGS, RWA_ASSETS, RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD2 } from '../data';
-import { addPendingPayment } from '../lib/keypayInbox';
+import { goCheckout } from '../lib/checkout';
 import { useMobile } from '../hooks/useMobile';
 import { useMagnetScroll } from '../hooks/useMagnetScroll';
 
@@ -204,8 +204,11 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }) {
     if (stuck) snap.start({ y: [-14, 4, 0], scale: [0.985, 1.006, 1], transition: { duration: 0.45, ease: [0.34, 1.56, 0.64, 1] } });
   }, [stuck, snap]);
   const buy = (l) => {
-    const id = addPendingPayment({ name: `Mercado Secundario — ${l.asset.name}`, qty: l.qty, unit: l.askPrice / l.qty, source: 'Mercado Secundario' });
-    nav('keypay', { screen: 'cart', focusId: id });
+    goCheckout(nav, {
+      title: 'Compra en mercado secundario', source: 'Mercado Secundario',
+      items: [{ name: l.asset.name, img: l.asset.img, qty: l.qty, unit: l.askPrice / l.qty, meta: `Vende ${l.seller}` }],
+      back: { route: 'secundario' }, done: { route: 'pertenencias', label: 'Ver en Mis Pertenencias' },
+    });
   };
 
   const stats = [

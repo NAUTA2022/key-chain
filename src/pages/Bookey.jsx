@@ -10,7 +10,7 @@ import { ConnectButton } from 'thirdweb/react';
 import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
 import { polygon } from 'thirdweb/chains';
 import { client } from '../lib/client';
-import KeyPayLogin from './KeyPayLogin';
+import Login from './Login';
 import { COIN_ICON_URL, CartCheckout, KP_VARS } from './KeyPay';
 import { addPendingPayment, getPendingPayments } from '../lib/keypayInbox';
 import { useMobile } from '../hooks/useMobile';
@@ -1572,7 +1572,7 @@ function BookeyFavorites({ nav }) {
 
 // ─── Help ─────────────────────────────────────────────────────────────────────
 const HELP_FAQS = [
-  { q:'¿Cómo reservo una propiedad?', a:'Elegí una propiedad, seleccioná fechas y huéspedes, y confirmá el pago desde el Checkout de Key Pay.' },
+  { q:'¿Cómo reservo una propiedad?', a:'Elegí una propiedad, seleccioná fechas y huéspedes, y confirmá el pago desde el checkout de KEYCHAIN.' },
   { q:'¿Qué es el descuento inversor?', a:'Si tenés tokens KEYCHAIN de una propiedad, accedés a un descuento de entre 8% y 20% sobre el precio de esa propiedad.' },
   { q:'¿En qué puedo pagar?', a:'Todos los pagos se hacen en cripto on-chain, con USDC o el token KYCN.' },
   { q:'¿Cómo cancelo una reserva?', a:'Escribinos a soporte@keychain.io y te ayudamos según la política de cancelación de esa propiedad.' },
@@ -1762,7 +1762,7 @@ export default function Bookey() {
   const handleEditSearch = () => setSearched(false);
 
   if (!account) {
-    return <KeyPayLogin onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
+    return <Login onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
   }
 
   return (

@@ -29,8 +29,10 @@ function OverlayStat({ label, value, align = 'flex-start' }) {
 // glance rather than something you notice only up close.
 function KeychainAssetCard({ a, left, nav, showCode, holding, actions }) {
   return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
-      <PCard className="market-card-full" onClick={() => nav('detalle', a)} style={{ height:340, position:'relative' }}>
+    // With a holding strip below, the wrapper is taller than the card: only
+    // lift it on hover — a shadow here would draw a box around card + strip.
+    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={holding ? { y:-4 } : { y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
+      <PCard className="market-card market-card-full" onClick={() => nav('detalle', a)} style={{ position:'relative' }}>
         <PImg src={a.img} height="100%" style={{ position:'absolute', inset:0 }}>
           <div style={{ position:'absolute', top:14, left:14 }}>
             {/* This card only renders for issuer === 'keychain' — it's a
@@ -50,7 +52,7 @@ function KeychainAssetCard({ a, left, nav, showCode, holding, actions }) {
           }}>
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
               {showCode && <ProjectCode asset={a} overlay />}
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18, color:'#fff', letterSpacing:'-0.02em' }}>{a.name}</div>
+              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18, color:'#fff', letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', minWidth:0 }}>{a.name}</div>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'rgba(255,255,255,0.7)' }}>
               {Icons.location}
@@ -83,8 +85,8 @@ export default function AssetCard({ asset: a, nav, showCode, holding, actions })
   if (a.issuer === 'keychain') return <KeychainAssetCard a={a} left={left} nav={nav} showCode={showCode} holding={holding} actions={actions} />;
 
   return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
-      <PCard onClick={() => nav('detalle', a)} style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative' }}>
+    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={holding ? { y:-4 } : { y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
+      <PCard className="market-card" onClick={() => nav('detalle', a)} style={{ display:'flex', flexDirection:'column', position:'relative' }}>
         <PImg src={a.img} height={168} className="market-card-img">
           <div style={{ position:'absolute', top:12, left:12, display:'flex', gap:6, flexWrap:'wrap' }}>
             <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
@@ -96,7 +98,7 @@ export default function AssetCard({ asset: a, nav, showCode, holding, actions })
             <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
               <div style={{ display:'flex', alignItems:'center', gap:8, minWidth:0 }}>
                 {showCode && <ProjectCode asset={a} />}
-                <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)', letterSpacing:'-0.02em' }}>{a.name}</div>
+                <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)', letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', minWidth:0 }}>{a.name}</div>
               </div>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'var(--ter)' }}>
@@ -122,23 +124,23 @@ export default function AssetCard({ asset: a, nav, showCode, holding, actions })
             <PProgress value={a.sold} />
           </div>
         </div>
-        {holding && <HoldingStrip holding={holding} actions={actions} inside />}
       </PCard>
+      {holding && <HoldingStrip holding={holding} actions={actions} />}
     </motion.div>
   );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-function HoldingStrip({ holding: h, inside, actions }) {
+// The person's position, as a strip under the card (same for both card types
+// so the cards themselves keep identical sizes).
+function HoldingStrip({ holding: h, actions }) {
   const diff = h.invested ? ((h.current - h.invested) / h.invested) * 100 : 0;
   return (
     <div style={{
       display:'flex', justifyContent:'space-between', alignItems:'center', gap:10, padding:'11px 17px',
       fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)',
-      ...(inside
-        ? { borderTop:'1px solid var(--border-l)', background:'var(--surface2)' }
-        : { marginTop:8, borderRadius:14, border:'1px solid var(--border-l)', background:'var(--surface)' }),
+      marginTop:8, borderRadius:14, border:'1px solid var(--border-l)', background:'var(--surface)',
     }}>
       <span><b style={{ color:'var(--text)' }}>{h.tokens}</b> tokens</span>
       <span>Valor <b style={{ color:'var(--text)' }}>{fmtUSD(h.current)}</b></span>
