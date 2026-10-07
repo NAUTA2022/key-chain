@@ -118,7 +118,7 @@ const adminItems = [
 ];
 
 const bottomItems = [
-  { id: 'subsidiarias', label: 'Subsidiarias', icon: SubsidiariesIcon },
+  { id: 'subsidiarias', label: 'Subsidiarias', icon: SubsidiariesIcon, disabled: true }, // disabled for now
   { id: 'perfil',       label: 'Perfil',       icon: Icons.profile    },
   { id: 'ayuda',        label: 'Help Center',  icon: Icons.help       },
 ];
@@ -148,7 +148,9 @@ const NavItem = memo(function NavItem({ item, active, collapsed, onClick }) {
   const [pillWidth, setPillWidth] = useState(200);
   const btnRef = useRef(null);
 
+  const off = !!item.disabled;
   const handleEnter = () => {
+    if (off) return;
     if (collapsed && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
       setPillTop(r.top + r.height / 2);
@@ -163,16 +165,18 @@ const NavItem = memo(function NavItem({ item, active, collapsed, onClick }) {
         ref={btnRef}
         onMouseEnter={handleEnter}
         onMouseLeave={() => setHovered(false)}
-        onClick={() => onClick(item.id)}
-        title={collapsed ? item.label : undefined}
+        onClick={() => { if (!off) onClick(item.id); }}
+        disabled={off}
+        aria-disabled={off}
+        title={off ? `${item.label} · Próximamente` : collapsed ? item.label : undefined}
         style={{
           display: 'flex', alignItems: 'center',
           gap: collapsed ? 0 : 10,
           width: '100%',
           padding: collapsed ? '6px 0' : '6px 10px',
           justifyContent: collapsed ? 'center' : 'flex-start',
-          borderRadius: 14, border: 'none', cursor: 'pointer',
-          background: 'transparent',
+          borderRadius: 14, border: 'none', cursor: off ? 'not-allowed' : 'pointer',
+          background: 'transparent', opacity: off ? 0.38 : 1,
           color: active ? 'var(--gl-nav-a)' : 'var(--gl-nav)',
           fontFamily: 'var(--font-b)', fontSize: 13.5,
           fontWeight: active ? 600 : 500,
