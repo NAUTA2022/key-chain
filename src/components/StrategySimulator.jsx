@@ -3,12 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { sHover, sWhoosh } from '../lib/landingSound';
 
 /* ── Strategy Icons ── */
-const ICO_ICON = (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7"/>
-    <path d="M9 12h6M12 9v6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-  </svg>
-);
 const CROWD_ICON = (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
     <rect x="3" y="10" width="4" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.7"/>
@@ -16,19 +10,23 @@ const CROWD_ICON = (
     <rect x="17" y="3" width="4" height="17" rx="1.5" stroke="currentColor" strokeWidth="1.7"/>
   </svg>
 );
-const ESCROW_ICON = (
+const STACK_ICON = (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.7"/>
-    <path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-    <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+    <path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/>
+    <path d="M3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-const DAO_ICON = (
+const CYCLE_ICON = (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="7" r="3" stroke="currentColor" strokeWidth="1.7"/>
-    <circle cx="5" cy="17" r="2.5" stroke="currentColor" strokeWidth="1.7"/>
-    <circle cx="19" cy="17" r="2.5" stroke="currentColor" strokeWidth="1.7"/>
-    <path d="M8.5 16l3-2M15.5 16l-3-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M20 12a8 8 0 01-13.66 5.66M4 12a8 8 0 0113.66-5.66" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+    <path d="M17.5 2.5v4h-4M6.5 21.5v-4h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9.5 12.5l1.8 1.8 3.4-3.6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+const REVENUE_ICON = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path d="M12 3a9 9 0 109 9h-9V3z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/>
+    <path d="M15 3.5A9 9 0 0120.5 9H15V3.5z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/>
   </svg>
 );
 const CHECK_ICON = (
@@ -54,107 +52,107 @@ const StatIcon = ({ type }) => {
 };
 
 /* ── Strategies ── */
+const FEE_PARAM = (def, help) => ({ id: 'platform', label: 'Fee de la plataforma', unit: '%', type: 'range', min: 1, max: 5, step: 0.5, default: def, help });
+
 const STRATEGIES = [
-  {
-    id: 'ico',
-    label: 'ICO con Vesting',
-    icon: ICO_ICON,
-    color: '#a78bfa',
-    badge: 'Token de utilidad',
-    tagline: 'Emitís tu propio token y lo vendés al público',
-    desc: 'Creás un token ERC-20, definís cuánto cuesta, cuántos vendés y en qué tiempo los inversores pueden retirar sus tokens. Es la forma más directa de levantar capital tokenizando tu startup.',
-    best: ['Startups tech', 'Protocolos DeFi', 'Plataformas SaaS'],
-    complexity: 'Media',
-    duration: '3–18 meses',
-    params: [
-      { id: 'goal',     label: 'Objetivo de fundraising',    unit: 'USD',     type: 'number', min: 10000,  max: 10000000, step: 10000,  default: 500000,
-        help: '¿Cuánto capital necesitás levantar? Este es tu objetivo total de la ronda. Incluí desarrollo, operaciones y reservas.' },
-      { id: 'supply',   label: 'Supply total de tokens',     unit: 'tokens',  type: 'number', min: 100000, max: 1e9,      step: 100000, default: 10000000,
-        help: 'La cantidad total de tokens que vas a emitir. El 30% típicamente va a la venta pública. Cuanto más supply, menor el precio por unidad.' },
-      { id: 'tge',      label: 'TGE — liberación inicial',  unit: '%',       type: 'range',  min: 5,      max: 40,       step: 5,      default: 15,
-        help: 'Token Generation Event: qué % recibe el inversor el día del lanzamiento. Un TGE bajo (10–20%) genera menos presión de venta inmediata.' },
-      { id: 'cliff',    label: 'Período de cliff',           unit: 'meses',   type: 'range',  min: 0,      max: 12,       step: 1,      default: 3,
-        help: 'Tiempo de espera antes de que empiece el vesting. Durante el cliff nadie puede vender. Transmite compromiso del equipo al mercado.' },
-      { id: 'vesting',  label: 'Duración del vesting',      unit: 'meses',   type: 'range',  min: 6,      max: 36,       step: 3,      default: 12,
-        help: 'Tiempo total en que los tokens restantes se liberan gradualmente tras el cliff. Protege el precio evitando ventas masivas.' },
-      { id: 'platform', label: 'Fee de la plataforma',      unit: '%',       type: 'range',  min: 1,      max: 5,        step: 0.5,    default: 2,
-        help: 'Comisión de Factoract por gestionar la tokenización, contratos y cumplimiento regulatorio.' },
-    ],
-  },
   {
     id: 'crowdfunding',
     label: 'Tokenización Crowdfunding',
     icon: CROWD_ICON,
     color: '#34d399',
-    badge: 'Activos reales (RWA)',
-    tagline: 'Fraccionás un activo físico y lo abrís a múltiples inversores',
-    desc: 'Tokenizás la propiedad de un activo real (inmueble, maquinaria, flota) en tokens digitales. Los inversores compran fracciones y reciben rendimientos proporcionales a su participación.',
+    badge: 'Fraccionada clásica',
+    tagline: 'Dividís el activo en tokens y muchos inversores compran una parte',
+    desc: 'El activo se fracciona en tokens con precio fijo. Cada inversor compra los que quiere y recibe rendimientos mensuales proporcionales (alquiler, producción, cosecha). Es el modelo más simple y el más fácil de explicar.',
     best: ['Inmuebles', 'Maquinaria agrícola', 'Flotas y vehículos'],
     complexity: 'Baja',
     duration: '6–60 meses',
     params: [
-      { id: 'goal',       label: 'Valuación del activo',          unit: 'USD',    type: 'number', min: 50000, max: 10000000, step: 10000, default: 300000,
-        help: 'El valor de mercado del activo que querés tokenizar. Esta es la base para el precio por token y el retorno esperado.' },
-      { id: 'tokens',     label: 'Cantidad de tokens a emitir',   unit: 'tokens', type: 'number', min: 100,   max: 1000000,  step: 100,   default: 10000,
-        help: 'Cada token representa una fracción del activo. Más tokens = menor precio unitario = mayor accesibilidad para pequeños inversores.' },
-      { id: 'apy',        label: 'Rendimiento anual ofrecido',    unit: '%',      type: 'range',  min: 3,     max: 20,       step: 0.5,   default: 9.8,
-        help: 'El retorno porcentual anual que los holders recibirán. Calculalo en base al ingreso real del activo (alquiler, producción, etc.).' },
-      { id: 'duration',   label: 'Plazo del proyecto',            unit: 'meses',  type: 'range',  min: 6,     max: 60,       step: 3,     default: 24,
-        help: 'Período durante el cual los tokens generan rendimientos. Al vencimiento los inversores pueden revender o renovar su participación.' },
-      { id: 'minticket',  label: 'Ticket mínimo por inversor',    unit: 'USD',    type: 'range',  min: 1,     max: 5000,     step: 1,     default: 500,
-        help: 'Inversión mínima por persona. Un ticket bajo amplía la base de inversores; uno alto atrae perfiles más institucionales.' },
-      { id: 'platform',   label: 'Fee de la plataforma',          unit: '%',      type: 'range',  min: 1,     max: 5,        step: 0.5,   default: 2.5,
-        help: 'Comisión de Factoract por tokenización, custodia del activo y distribución de rendimientos on-chain.' },
+      { id: 'goal',      label: 'Valuación del activo',        unit: 'USD',    type: 'number', min: 50000, max: 10000000, step: 10000, default: 300000,
+        help: 'El valor de mercado del activo que querés tokenizar. Es la base para el precio por token y el retorno esperado.' },
+      { id: 'tokens',    label: 'Cantidad de tokens a emitir', unit: 'tokens', type: 'number', min: 100,   max: 1000000,  step: 100,   default: 10000,
+        help: 'Cada token es una fracción del activo. Más tokens = precio unitario más bajo = más inversores pequeños pueden entrar.' },
+      { id: 'apy',       label: 'Rendimiento anual ofrecido',  unit: '%',      type: 'range',  min: 3,     max: 20,       step: 0.5,   default: 9.8,
+        help: 'El retorno anual que reciben los holders. Calculalo sobre el ingreso real del activo (alquiler, producción, etc.).' },
+      { id: 'duration',  label: 'Plazo del proyecto',          unit: 'meses',  type: 'range',  min: 6,     max: 60,       step: 3,     default: 24,
+        help: 'Período en que los tokens generan rendimientos. Al vencimiento los holders pueden revender o renovar.' },
+      { id: 'minticket', label: 'Ticket mínimo por inversor',  unit: 'USD',    type: 'range',  min: 1,     max: 5000,     step: 1,     default: 500,
+        help: 'Inversión mínima por persona. Un ticket bajo amplía la base de inversores; uno alto atrae perfiles institucionales.' },
+      FEE_PARAM(2.5, 'Comisión de Factoract por tokenización, custodia del activo y distribución de rendimientos on-chain.'),
     ],
   },
   {
-    id: 'escrow',
-    label: 'Tokenización Escrow',
-    icon: ESCROW_ICON,
+    id: 'acumulativa',
+    label: 'Tokenización Acumulativa',
+    icon: STACK_ICON,
+    color: '#fbbf24',
+    badge: 'Mejoras con dilución',
+    tagline: 'Los holders proponen mejoras y el activo crece ronda a ronda',
+    desc: 'El activo arranca tokenizado al 100%. Cualquier holder puede proponer una mejora (ampliar, reformar, equipar). Si se financia, se emiten tokens nuevos: quien pone plata en la mejora mantiene su porcentaje y quien no participa se diluye, aunque su parte puede valer más porque el activo creció.',
+    best: ['Inmuebles en desarrollo', 'Campos y viñedos', 'Hoteles y locales'],
+    complexity: 'Media',
+    duration: '24–120 meses',
+    params: [
+      { id: 'goal',    label: 'Valuación inicial del activo', unit: 'USD',    type: 'number', min: 50000, max: 10000000, step: 10000, default: 400000,
+        help: 'Lo que vale el activo hoy. Representa el 100% de los tokens iniciales.' },
+      { id: 'improve', label: 'Costo de cada mejora',         unit: 'USD',    type: 'number', min: 5000,  max: 5000000,  step: 5000,  default: 100000,
+        help: 'Cuánto cuesta cada mejora propuesta. Se financia emitiendo tokens nuevos al precio vigente del activo.' },
+      { id: 'uplift',  label: 'Revalorización por mejora',    unit: '%',      type: 'range',  min: 0,     max: 80,       step: 5,     default: 30,
+        help: 'Cuánto valor extra genera la mejora por encima de lo que costó. Ej: invertís $100K en una pileta y el activo sube $130K → 30%.' },
+      { id: 'rounds',  label: 'Rondas de mejora',             unit: 'rondas', type: 'range',  min: 1,     max: 8,        step: 1,     default: 4,
+        help: 'Cuántas mejoras se aprueban durante la vida del proyecto. Cada una es votada por los holders.' },
+      { id: 'stake',   label: 'Tu participación inicial',     unit: '%',      type: 'range',  min: 1,     max: 50,       step: 1,     default: 10,
+        help: 'El porcentaje del activo que tiene un holder de ejemplo. Vas a ver cómo evoluciona si acompaña las mejoras o si no.' },
+      FEE_PARAM(2, 'Comisión de Factoract por cada ronda de emisión, votación on-chain y actualización de la valuación.'),
+    ],
+  },
+  {
+    id: 'opcion',
+    label: 'Tokenización con Opción a Compra',
+    icon: CYCLE_ICON,
     color: '#60a5fa',
-    badge: 'Por hitos verificados',
-    tagline: 'El capital se libera solo cuando cumplís tus hitos',
-    desc: 'El dinero queda bloqueado en un smart contract. Los inversores aprueban la liberación de fondos cuando verifican que completaste cada hito del proyecto. Máxima transparencia y confianza.',
-    best: ['Construcción', 'I+D tecnológico', 'Proyectos por etapas'],
-    complexity: 'Alta',
-    duration: '2–24 meses',
+    badge: 'Rent-to-own circular',
+    tagline: 'Un operador usa el activo, paga renta y lo va comprando hasta ser dueño',
+    desc: 'Los inversores financian el activo y un operador (productor, transportista, comerciante) lo usa pagando una cuota mensual: una parte es renta para los holders y otra recompra tokens. Cada recompra devuelve capital que se reinvierte en el próximo proyecto, un ciclo que mantiene viva la cartera mientras el operador se hace dueño.',
+    best: ['Tractores y maquinaria', 'Flotas de camiones', 'Locales comerciales'],
+    complexity: 'Media',
+    duration: '24–96 meses',
     params: [
-      { id: 'goal',       label: 'Capital total a levantar',      unit: 'USD',      type: 'number', min: 50000, max: 5000000, step: 10000, default: 200000,
-        help: 'El capital total que necesitás para todo el proyecto. Este monto se divide entre los hitos definidos.' },
-      { id: 'milestones', label: 'Número de hitos',               unit: 'hitos',    type: 'range',  min: 2,     max: 8,       step: 1,     default: 4,
-        help: 'Cada hito es un entregable verificable: prototipo, lanzamiento, métricas de usuarios, etc. Más hitos = más control para inversores.' },
-      { id: 'period',     label: 'Semanas por hito',              unit: 'semanas',  type: 'range',  min: 2,     max: 24,      step: 1,     default: 8,
-        help: 'Cuánto tiempo estimás para completar cada hito. Sé realista — los inversores valorarán tu capacidad de cumplir plazos.' },
-      { id: 'bonus',      label: 'Retorno por hito cumplido',     unit: '%',        type: 'range',  min: 0,     max: 10,      step: 0.5,   default: 2.5,
-        help: 'Bonus porcentual para los inversores al verificarse cada hito. Incentiva la participación y recompensa la confianza temprana.' },
-      { id: 'platform',   label: 'Fee de la plataforma',          unit: '%',        type: 'range',  min: 1,     max: 5,       step: 0.5,   default: 2,
-        help: 'Comisión de Factoract por contratos de escrow, verificación de hitos y distribución de bonos on-chain.' },
+      { id: 'goal',    label: 'Valor del activo',                     unit: 'USD',   type: 'number', min: 10000, max: 5000000, step: 5000, default: 120000,
+        help: 'Precio de compra del activo que va a usar el operador.' },
+      { id: 'down',    label: 'Anticipo del operador',                unit: '%',     type: 'range',  min: 0,     max: 40,      step: 5,    default: 10,
+        help: 'Lo que el operador pone al inicio. Desde el día uno es dueño de ese porcentaje del activo.' },
+      { id: 'term',    label: 'Plazo para ser dueño',                 unit: 'meses', type: 'range',  min: 12,    max: 96,      step: 6,    default: 48,
+        help: 'En cuánto tiempo el operador recompra todos los tokens. Plazo corto = cuota más alta, ciclo más rápido.' },
+      { id: 'rent',    label: 'Renta anual para holders',             unit: '%',     type: 'range',  min: 4,     max: 18,      step: 0.5,  default: 10,
+        help: 'Lo que paga el operador por usar la parte del activo que todavía es de los inversores. Baja a medida que recompra.' },
+      { id: 'recycle', label: 'Capital que se reinvierte en el ciclo', unit: '%',    type: 'range',  min: 0,     max: 100,     step: 10,   default: 80,
+        help: 'Qué parte del capital recomprado vuelve a entrar en nuevos activos de la cartera en vez de retirarse.' },
+      FEE_PARAM(2, 'Comisión de Factoract por contratos de opción, cobro de cuotas y recompra automática de tokens.'),
     ],
   },
   {
-    id: 'dao',
-    label: 'DAO de Gobernanza',
-    icon: DAO_ICON,
-    color: '#fb923c',
-    badge: 'Comunidad + Capital',
-    tagline: 'Los inversores votan las decisiones de tu proyecto',
-    desc: 'Emitís tokens de gobernanza que dan a los holders poder de voto sobre el futuro del proyecto. Ideal cuando querés construir comunidad activa y descentralizar la toma de decisiones.',
-    best: ['Protocolos DeFi', 'Fondos colectivos', 'Cooperativas digitales'],
-    complexity: 'Alta',
-    duration: '12–36 meses',
+    id: 'revenue',
+    label: 'Revenue Share con Techo',
+    icon: REVENUE_ICON,
+    color: '#c084fc',
+    badge: 'Ingresos futuros',
+    tagline: 'Los holders cobran un % de las ventas hasta un tope y el negocio sigue siendo tuyo',
+    desc: 'En vez de vender una parte del activo, tokenizás sus ingresos futuros. Los holders reciben un porcentaje de la facturación mensual hasta cobrar un múltiplo pactado (por ejemplo 1.6x). Al llegar al tope los tokens se queman solos: no cedés propiedad y el inversor sabe exactamente cuánto va a cobrar.',
+    best: ['Restaurantes y franquicias', 'E-commerce', 'Parques solares'],
+    complexity: 'Baja',
+    duration: '12–60 meses',
     params: [
-      { id: 'goal',     label: 'Capital objetivo de la ronda',    unit: 'USD',    type: 'number', min: 50000, max: 5000000, step: 10000,  default: 1000000,
-        help: 'El capital que querés levantar vendiendo tokens de gobernanza. Define la valoración inicial del protocolo.' },
-      { id: 'supply',   label: 'Supply de tokens de gobernanza', unit: 'tokens', type: 'number', min: 100000,max: 1e9,     step: 100000, default: 50000000,
-        help: 'Total de tokens a emitir. Los holders usan estos tokens para votar propuestas. Mayor supply = más distribución comunitaria.' },
-      { id: 'reserved', label: 'Reservado para el equipo',       unit: '%',      type: 'range',  min: 10,    max: 40,      step: 5,      default: 20,
-        help: '% del supply que el equipo fundador retiene. El estándar del mercado es 15–25%. Menos % demuestra mayor descentralización.' },
-      { id: 'staking',  label: 'APY de staking',                 unit: '%',      type: 'range',  min: 2,     max: 20,      step: 0.5,    default: 11,
-        help: 'Recompensa anual para inversores que bloquean sus tokens en staking. Incentiva retención y reduce la presión de venta.' },
-      { id: 'quorum',   label: 'Quórum mínimo para votar',       unit: '%',      type: 'range',  min: 5,     max: 51,      step: 1,      default: 15,
-        help: '% de tokens que deben participar para que una propuesta sea válida. Bajo = más fácil gobernar; alto = más seguridad.' },
-      { id: 'platform', label: 'Fee de la plataforma',           unit: '%',      type: 'range',  min: 1,     max: 5,       step: 0.5,    default: 1.5,
-        help: 'Comisión de Factoract por setup de la DAO, contratos de gobernanza y distribución de recompensas de staking.' },
+      { id: 'goal',    label: 'Capital a levantar',            unit: 'USD', type: 'number', min: 10000, max: 5000000, step: 5000, default: 150000,
+        help: 'Lo que necesitás para crecer: abrir un local, comprar stock, instalar paneles.' },
+      { id: 'revenue', label: 'Facturación mensual actual',    unit: 'USD', type: 'number', min: 5000,  max: 5000000, step: 1000, default: 60000,
+        help: 'Lo que factura el negocio hoy por mes. Es la base sobre la que se calcula el pago a los holders.' },
+      { id: 'share',   label: '% de ingresos para holders',    unit: '%',   type: 'range',  min: 2,     max: 20,      step: 0.5,  default: 8,
+        help: 'Qué porcentaje de cada venta va a los inversores mientras no se llegue al tope.' },
+      { id: 'cap',     label: 'Tope de retorno',               unit: 'x',   type: 'range',  min: 1.2,   max: 3,       step: 0.1,  default: 1.6,
+        help: 'Múltiplo del capital que cobra el inversor antes de que los tokens se quemen. 1.6x = por cada $100 recibe $160.' },
+      { id: 'growth',  label: 'Crecimiento mensual de ventas', unit: '%',   type: 'range',  min: 0,     max: 6,       step: 0.5,  default: 1.5,
+        help: 'Cuánto crecen las ventas cada mes gracias al capital. Más crecimiento = se llega antes al tope.' },
+      FEE_PARAM(2, 'Comisión de Factoract por emisión, conciliación de ventas y pagos automáticos en USDC.'),
     ],
   },
 ];
@@ -167,36 +165,6 @@ function useProjection(strategy, params) {
     const fee = (p.platform || 2) / 100;
     const net = p.goal * (1 - fee);
 
-    if (strategy.id === 'ico') {
-      const publicTokens = (p.supply || 10000000) * 0.30;
-      const price = p.goal / publicTokens;
-      const investors = Math.round(p.goal / 2500);
-      const totalMonths = (p.cliff || 0) + (p.vesting || 12);
-      const months = Array.from({ length: totalMonths + 1 }, (_, i) => {
-        const raised = i <= 2 ? p.goal * (i / 2) * 0.85 : p.goal;
-        const unlocked = i === 0 ? (p.tge || 15) / 100
-          : i <= (p.cliff || 0) ? (p.tge || 15) / 100
-          : (p.tge || 15) / 100 + ((i - (p.cliff || 0)) / (p.vesting || 12)) * (1 - (p.tge || 15) / 100);
-        return { month: i, raised: Math.min(raised, p.goal), unlocked: Math.min(unlocked, 1) * 100 };
-      });
-      return {
-        color: strategy.color,
-        summary: `Tu ICO puede levantar hasta ${fmt(p.goal)} con aproximadamente ${investors.toLocaleString()} inversores a $${price.toFixed(4)} por token. Los primeros fondos llegan en las primeras semanas de apertura de la ronda.`,
-        stats: [
-          { key: 'net',          label: 'Capital neto para vos',    value: fmt(net),                  icon: 'money',    highlight: true,  note: 'Lo que recibís después de la comisión de plataforma.' },
-          { key: 'fee',          label: 'Comisión de Factoract',    value: fmt(p.goal * fee),          icon: 'fee',      highlight: false, note: 'Cubre contratos, cumplimiento y soporte de la ronda.' },
-          { key: 'investors',    label: 'Inversores estimados',     value: investors.toLocaleString(), icon: 'people',   highlight: false, note: 'Basado en un ticket promedio de $2,500 por inversor.' },
-          { key: 'tokenPrice',   label: 'Precio por token',         value: `$${price.toFixed(4)}`,     icon: 'token',    highlight: false, note: '30% del supply va a venta pública para el fundraising.' },
-          { key: 'duration',     label: 'Período total de vesting', value: `${totalMonths} meses`,     icon: 'calendar', highlight: false, note: `${p.cliff || 0} meses de cliff + ${p.vesting || 12} meses de liberación gradual.` },
-          { key: 'publicTokens', label: 'Tokens en venta pública',  value: fmtNum(publicTokens),       icon: 'chart',    highlight: false, note: 'El resto se reserva para equipo, advisors y tesorería.' },
-        ],
-        charts: [
-          { data: months, key: 'raised',   label: 'Capital levantado (USD)',  subtitle: 'La captación sube rápido al abrir la ronda y se estabiliza al alcanzar el objetivo.' },
-          { data: months, key: 'unlocked', label: 'Tokens desbloqueados (%)', subtitle: 'El plateau al inicio es el cliff — en ese período nadie puede vender sus tokens.' },
-        ],
-      };
-    }
-
     if (strategy.id === 'crowdfunding') {
       const tokenPrice = p.goal / (p.tokens || 10000);
       const investors = Math.round(p.goal / (p.minticket || 500));
@@ -208,76 +176,113 @@ function useProjection(strategy, params) {
       });
       const totalReturns = p.goal * ((p.apy || 9.8) / 100) * ((p.duration || 24) / 12);
       return {
-        color: strategy.color,
-        summary: `Tokenizás tu activo de ${fmt(p.goal)} y abrís inversión desde $${p.minticket || 500}. Con ${investors.toLocaleString()} inversores al ${p.apy || 9.8}% APY, distribuís ${fmt(totalReturns)} en rendimientos durante ${p.duration || 24} meses.`,
+        summary: `Tokenizás tu activo de ${fmt(p.goal)} y abrís inversión desde $${p.minticket || 500}. Con ${investors.toLocaleString()} inversores al ${p.apy || 9.8}% anual, distribuís ${fmt(totalReturns)} en rendimientos durante ${p.duration || 24} meses.`,
         stats: [
-          { key: 'net',          label: 'Capital neto para vos',      value: fmt(net),                  icon: 'money',    highlight: true,  note: 'Lo que recibís al completar el fundraising, descontada la comisión.' },
-          { key: 'fee',          label: 'Comisión de Factoract',      value: fmt(p.goal * fee),          icon: 'fee',      highlight: false, note: 'Incluye tokenización, custodia del activo y distribución de yields.' },
-          { key: 'investors',    label: 'Inversores estimados',       value: investors.toLocaleString(), icon: 'people',   highlight: false, note: `Con ticket mínimo de $${p.minticket || 500} por participante.` },
-          { key: 'tokenPrice',   label: 'Precio por token',           value: `$${tokenPrice.toFixed(2)}`,icon: 'token',    highlight: false, note: 'Cada token representa una fracción igual del activo tokenizado.' },
-          { key: 'totalReturns', label: 'Rendimientos a distribuir',  value: fmt(totalReturns),          icon: 'yield',    highlight: false, note: 'Total de rendimientos que pagarás a los holders durante el proyecto.' },
-          { key: 'duration',     label: 'Plazo del proyecto',         value: `${p.duration || 24} meses`,icon: 'calendar', highlight: false, note: 'Los tokens se pueden revender en mercado secundario en cualquier momento.' },
+          { key: 'net',          label: 'Capital neto para vos',     value: fmt(net),                    icon: 'money',    highlight: true, note: 'Lo que recibís al completar la ronda, descontada la comisión.' },
+          { key: 'investors',    label: 'Inversores estimados',      value: investors.toLocaleString(),  icon: 'people',   note: `Con ticket mínimo de $${p.minticket || 500} por participante.` },
+          { key: 'tokenPrice',   label: 'Precio por token',          value: `$${tokenPrice.toFixed(2)}`, icon: 'token',    note: 'Cada token representa una fracción igual del activo.' },
+          { key: 'totalReturns', label: 'Rendimientos a distribuir', value: fmt(totalReturns),           icon: 'yield',    note: 'Total que pagás a los holders durante el proyecto.' },
+          { key: 'fee',          label: 'Comisión de Factoract',     value: fmt(p.goal * fee),           icon: 'fee',      note: 'Tokenización, custodia del activo y distribución de rendimientos.' },
+          { key: 'duration',     label: 'Plazo del proyecto',        value: `${p.duration || 24} meses`, icon: 'calendar', note: 'Los tokens se pueden revender en el mercado secundario.' },
         ],
         charts: [
-          { data: months, key: 'raised', label: 'Capital levantado (USD)',         subtitle: 'Con activo concreto y rendimiento conocido, la captación es rápida y predecible.' },
-          { data: months, key: 'paid',   label: 'Rendimientos distribuidos (USD)', subtitle: 'Los pagos se ejecutan automáticamente on-chain mes a mes sin intervención manual.' },
+          { data: months, key: 'raised', label: 'Capital levantado (USD)',         subtitle: 'Con activo concreto y rendimiento conocido, la ronda se llena rápido.' },
+          { data: months, key: 'paid',   label: 'Rendimientos distribuidos (USD)', subtitle: 'Los pagos se ejecutan on-chain mes a mes, sin intervención manual.' },
         ],
       };
     }
 
-    if (strategy.id === 'escrow') {
-      const totalWeeks = (p.milestones || 4) * (p.period || 8);
-      const perMilestone = p.goal / (p.milestones || 4);
-      const totalReturn = p.goal * (1 + (p.bonus || 2.5) / 100 * (p.milestones || 4));
-      const investors = Math.round(p.goal / 5000);
-      const weeks = Array.from({ length: totalWeeks + 1 }, (_, i) => {
-        const done = Math.floor(i / (p.period || 8));
-        const released = done * perMilestone;
-        return { month: i, released: Math.min(released, p.goal) };
-      });
+    if (strategy.id === 'acumulativa') {
+      const rounds = p.rounds || 4, C = p.improve || 100000, u = (p.uplift ?? 30) / 100, s0 = (p.stake || 10) / 100;
+      let V = p.goal, sNo = s0, extra = 0;
+      const series = [{ month: 0, value: V, no: sNo * 100, yes: s0 * 100 }];
+      const items = [];
+      for (let r = 1; r <= rounds; r++) {
+        const dil = V / (V + C);       // new tokens priced at the pre-mejora value
+        sNo *= dil;
+        extra += s0 * C;               // pro-rata contribution to keep the stake
+        V += C * (1 + u);
+        series.push({ month: r, value: V, no: sNo * 100, yes: s0 * 100 });
+        items.push({ top: `Mejora ${r}`, value: fmt(C), sub: `Activo: ${fmt(V)}`, extra: `${(sNo * 100).toFixed(1)}% sin seguir` });
+      }
+      const valNo = sNo * V, valYes = s0 * V, start = s0 * p.goal;
       return {
-        color: strategy.color,
-        summary: `Tu proyecto se financia en ${p.milestones || 4} hitos verificables. Cada ${p.period || 8} semanas liberás ${fmt(perMilestone)} del escrow al cumplir el entregable. Los inversores reciben un bonus de ${p.bonus || 2.5}% por cada hito aprobado.`,
+        summary: `El activo pasa de ${fmt(p.goal)} a ${fmt(V)} en ${rounds} mejoras. Un holder con ${(s0 * 100).toFixed(0)}% que acompaña cada ronda (aporta ${fmt(extra)}) mantiene su porcentaje y su parte vale ${fmt(valYes)}. Si no invierte, baja a ${(sNo * 100).toFixed(1)}%, aunque su parte vale ${fmt(valNo)} frente a los ${fmt(start)} del inicio.`,
         stats: [
-          { key: 'net',          label: 'Capital neto para vos',      value: fmt(net),              icon: 'money',    highlight: true,  note: 'Capital total menos la comisión de Factoract.' },
-          { key: 'fee',          label: 'Comisión de Factoract',      value: fmt(p.goal * fee),     icon: 'fee',      highlight: false, note: 'Incluye contratos de escrow, verificación y distribución de bonos.' },
-          { key: 'investors',    label: 'Inversores estimados',       value: investors.toLocaleString(), icon: 'people', highlight: false, note: 'Perfil más institucional — ticket promedio $5,000.' },
-          { key: 'perMilestone', label: 'Capital por hito',           value: fmt(perMilestone),     icon: 'lock',     highlight: false, note: 'Se libera automáticamente al verificarse el hito on-chain.' },
-          { key: 'totalReturn',  label: 'Retorno total a inversores', value: fmt(totalReturn),      icon: 'yield',    highlight: false, note: 'Capital original + bonos acumulados por todos los hitos cumplidos.' },
-          { key: 'duration',     label: 'Duración estimada',          value: `${Math.round(totalWeeks / 4)} meses`, icon: 'calendar', highlight: false, note: 'Plazos claros y verificables aumentan la confianza del inversor.' },
+          { key: 'value',  label: 'Valor final del activo',     value: fmt(V),                       icon: 'chart',  highlight: true, note: `Arranca en ${fmt(p.goal)} y suma ${fmt(C * (1 + u))} por mejora.` },
+          { key: 'raised', label: 'Capital levantado en mejoras', value: fmt(C * rounds),            icon: 'money',  note: `${rounds} rondas de ${fmt(C)}, votadas por los holders.` },
+          { key: 'yes',    label: 'Si acompañás las mejoras',   value: `${(s0 * 100).toFixed(1)}%`,  icon: 'token',  note: `Tu parte vale ${fmt(valYes)} y aportaste ${fmt(extra)} extra.` },
+          { key: 'no',     label: 'Si no invertís',             value: `${(sNo * 100).toFixed(1)}%`, icon: 'people', note: `Te diluís, pero tu parte vale ${fmt(valNo)} (empezó en ${fmt(start)}).` },
+          { key: 'gain',   label: 'Ganancia por acompañar',     value: fmt(valYes - valNo - extra),  icon: 'yield',  note: 'Valor extra de seguir las rondas, ya descontado lo que aportaste.' },
+          { key: 'fee',    label: 'Comisión de Factoract',      value: fmt(C * rounds * fee),        icon: 'fee',    note: 'Se cobra sobre cada ronda de mejora emitida.' },
         ],
         charts: [
-          { data: weeks, key: 'released', label: 'Capital liberado por hitos (USD)', subtitle: 'Cada escalón en la curva representa un hito completado y aprobado por los inversores.' },
+          { data: series, key: 'yes', compare: 'no', fmt: 'pct', label: 'Tu porcentaje del activo', subtitle: 'Línea llena: acompañás cada mejora. Punteada: no invertís y te diluís.', legend: ['Acompañás', 'No invertís'] },
+          { data: series, key: 'value', label: 'Valor del activo (USD)', subtitle: 'Cada mejora aprobada y financiada por la comunidad suma valor al activo.' },
         ],
-        milestones: Array.from({ length: p.milestones || 4 }, (_, i) => ({
-          n: i + 1, amount: perMilestone, week: (i + 1) * (p.period || 8), bonus: p.bonus || 2.5,
-        })),
+        timeline: { title: 'Rondas de mejora — cuánto entra y cómo se diluye quien no participa', items },
       };
     }
 
-    if (strategy.id === 'dao') {
-      const publicSupply = (p.supply || 50000000) * (1 - (p.reserved || 20) / 100);
-      const tokenPrice = p.goal / publicSupply;
-      const investors = Math.round(p.goal / 3000);
-      const months = Array.from({ length: 25 }, (_, i) => {
-        const raised = i <= 3 ? p.goal * (i / 3) * 0.85 : p.goal;
-        const stakingPaid = Math.max(0, i - 2) * (p.goal * (p.staking || 11) / 100 / 12);
-        return { month: i, raised: Math.min(raised, p.goal), staking: stakingPaid };
+    if (strategy.id === 'opcion') {
+      const term = p.term || 48, d = (p.down ?? 10) / 100, r = (p.rent || 10) / 100 / 12, rec = (p.recycle ?? 80) / 100;
+      const F = p.goal * (1 - d), buy = F / term;
+      let rentTotal = 0;
+      const months = Array.from({ length: term + 1 }, (_, i) => {
+        const outstanding = F - buy * i;
+        if (i > 0) rentTotal += (outstanding + buy) * r;
+        return { month: i, own: (d + (1 - d) * (i / term)) * 100, recycled: buy * i * rec };
+      });
+      const firstPay = buy + F * r;
+      const items = Array.from({ length: Math.ceil(term / 12) }, (_, k) => {
+        const m = Math.min((k + 1) * 12, term);
+        return { top: `Año ${k + 1}`, value: `${(d * 100 + (1 - d) * (m / term) * 100).toFixed(0)}%`, sub: 'del operador', extra: `${fmt(buy * m * rec)} reinvertido` };
       });
       return {
-        color: strategy.color,
-        summary: `Tu DAO recauda ${fmt(p.goal)} y distribuye ${100 - (p.reserved || 20)}% del poder de voto a la comunidad. Los stakers ganan ${p.staking || 11}% APY por participar activamente en la gobernanza del protocolo.`,
+        summary: `El operador pone ${fmt(p.goal * d)} y paga ${fmt(firstPay)} el primer mes (baja a medida que recompra). En ${term} meses es dueño del 100%. Los holders cobran ${fmt(rentTotal)} de renta y recuperan ${fmt(F)}, de los que ${fmt(F * rec)} vuelven a financiar el próximo activo del ciclo.`,
         stats: [
-          { key: 'net',          label: 'Capital neto del protocolo', value: fmt(net),              icon: 'money',    highlight: true,  note: 'Fondos disponibles para desarrollo y operaciones del protocolo.' },
-          { key: 'fee',          label: 'Comisión de Factoract',      value: fmt(p.goal * fee),     icon: 'fee',      highlight: false, note: 'Setup de la DAO, contratos de gobernanza y distribución de staking.' },
-          { key: 'investors',    label: 'Holders estimados',          value: investors.toLocaleString(), icon: 'people', highlight: false, note: 'Ticket promedio $3,000 en rondas de gobernanza.' },
-          { key: 'tokenPrice',   label: 'Precio por token',           value: `$${tokenPrice.toFixed(5)}`, icon: 'token', highlight: false, note: 'Precio base de lanzamiento para la venta pública inicial.' },
-          { key: 'publicSupply', label: 'Supply para la comunidad',   value: `${100 - (p.reserved || 20)}%`, icon: 'vote', highlight: false, note: 'Mayor distribución = gobernanza más descentralizada y legítima.' },
-          { key: 'quorum',       label: 'Quórum de gobernanza',       value: `${p.quorum || 15}%`,  icon: 'vote',     highlight: false, note: '% de tokens que deben votar para que una propuesta sea válida.' },
+          { key: 'pay',     label: 'Cuota inicial del operador',  value: fmt(firstPay),               icon: 'calendar', highlight: true, note: `${fmt(buy)} de recompra + ${fmt(F * r)} de renta. La renta baja cada mes.` },
+          { key: 'rent',    label: 'Renta total a holders',       value: fmt(rentTotal),              icon: 'yield',    note: `${p.rent || 10}% anual sobre la parte que todavía es de los inversores.` },
+          { key: 'back',    label: 'Capital recuperado',          value: fmt(F),                      icon: 'money',    note: 'Vuelve completo a los holders vía recompra de tokens.' },
+          { key: 'roi',     label: 'Retorno total del inversor',  value: `${(((F + rentTotal) / F - 1) * 100).toFixed(1)}%`, icon: 'chart', note: 'Renta cobrada sobre el capital invertido, sin depender de vender.' },
+          { key: 'cycle',   label: 'Capital que sigue en el ciclo', value: fmt(F * rec),             icon: 'token',    note: `Alcanza para financiar el ${((F * rec) / p.goal * 100).toFixed(0)}% de un activo igual en la próxima vuelta.` },
+          { key: 'fee',     label: 'Comisión de Factoract',       value: fmt(F * fee),                icon: 'fee',      note: 'Contratos de opción, cobro de cuotas y recompras automáticas.' },
         ],
         charts: [
-          { data: months, key: 'raised',  label: 'Capital levantado (USD)',        subtitle: 'Los protocolos DAO atraen capital gradualmente con actividad comunitaria sostenida.' },
-          { data: months, key: 'staking', label: 'Recompensas de staking (USD)',   subtitle: 'Los stakers acumulan retornos mientras participan en la gobernanza del protocolo.' },
+          { data: months, key: 'own',      fmt: 'pct', label: 'Propiedad del operador (%)',            subtitle: 'Cada cuota recompra tokens: el operador pasa de usuario a dueño.' },
+          { data: months, key: 'recycled', label: 'Capital reinvertido en nuevos activos (USD)', subtitle: 'Lo recomprado vuelve al pool y financia el siguiente proyecto del ciclo.' },
+        ],
+        timeline: { title: 'Camino a la propiedad — año a año', items },
+      };
+    }
+
+    if (strategy.id === 'revenue') {
+      const cap = p.goal * (p.cap || 1.6), sh = (p.share || 8) / 100, g = (p.growth ?? 1.5) / 100;
+      let paid = 0, m = 0;
+      const months = [{ month: 0, paid: 0, alive: 100 }];
+      while (paid < cap && m < 120) {
+        m++;
+        paid = Math.min(cap, paid + (p.revenue || 60000) * Math.pow(1 + g, m - 1) * sh);
+        months.push({ month: m, paid, alive: (1 - paid / cap) * 100 });
+      }
+      const done = paid >= cap;
+      const irr = done ? (Math.pow(p.cap || 1.6, 12 / m) - 1) * 100 : null;
+      const firstPay = (p.revenue || 60000) * sh;
+      return {
+        summary: done
+          ? `Levantás ${fmt(p.goal)} sin ceder propiedad. Pagás el ${p.share || 8}% de tus ventas (${fmt(firstPay)} el primer mes) y en ${m} meses los holders cobran ${fmt(cap)}: ahí los tokens se queman y el negocio vuelve a ser 100% tuyo.`
+          : `Con estas ventas no se llega al tope de ${fmt(cap)} en 10 años. Subí el % de ingresos, bajá el tope o el capital a levantar.`,
+        stats: [
+          { key: 'net',   label: 'Capital neto para vos',   value: fmt(net),                     icon: 'money',    highlight: true, note: 'Sin ceder un solo % de propiedad del negocio.' },
+          { key: 'pay',   label: 'Pago del primer mes',     value: fmt(firstPay),                icon: 'calendar', note: `${p.share || 8}% de ${fmt(p.revenue || 60000)} de facturación.` },
+          { key: 'time',  label: 'Meses hasta el tope',     value: done ? `${m} meses` : '+120', icon: 'chart',    note: 'Si vendés más, llegás antes y pagás menos intereses implícitos.' },
+          { key: 'total', label: 'Total a devolver',        value: fmt(cap),                     icon: 'yield',    note: `${p.cap || 1.6}x el capital. Después no se paga nada más.` },
+          { key: 'irr',   label: 'Retorno anual inversor',  value: irr ? `${irr.toFixed(1)}%` : '—', icon: 'token', note: 'Equivalente anual del múltiplo según el tiempo que tarda en cobrarse.' },
+          { key: 'fee',   label: 'Comisión de Factoract',   value: fmt(p.goal * fee),            icon: 'fee',      note: 'Emisión, conciliación de ventas y pagos automáticos.' },
+        ],
+        charts: [
+          { data: months, key: 'paid',  label: 'Pagado a holders (USD)', subtitle: 'Crece con tus ventas y se detiene al llegar al tope pactado.' },
+          { data: months, key: 'alive', fmt: 'pct', label: 'Tokens vigentes (%)', subtitle: 'Los tokens se queman a medida que se cobra: al llegar a 0% el negocio es 100% tuyo.' },
         ],
       };
     }
@@ -298,34 +303,39 @@ function fmtNum(n) {
 }
 
 /* ── Chart ── */
-function MiniChart({ data, dataKey, color, height = 100 }) {
+const fmtVal = (v, kind) => kind === 'pct' ? `${v.toFixed(v < 10 ? 1 : 0)}%` : fmt(v);
+
+function MiniChart({ data, dataKey, compare, kind, color, height = 100 }) {
   if (!data?.length) return null;
-  const vals = data.map(d => d[dataKey] ?? 0);
+  const vals = data.flatMap(d => [d[dataKey] ?? 0, compare ? d[compare] ?? 0 : 0]);
   const max = Math.max(...vals, 1);
   const W = 500, H = height;
-  const pts = data.map((d, i) => {
-    const x = (i / Math.max(data.length - 1, 1)) * W;
-    const y = H - ((d[dataKey] ?? 0) / max) * (H - 14) - 7;
-    return `${x},${y}`;
-  }).join(' ');
+  const yOf = v => H - (v / max) * (H - 14) - 7;
+  const line = key => data.map((d, i) => `${(i / Math.max(data.length - 1, 1)) * W},${yOf(d[key] ?? 0)}`).join(' ');
+  const pts = line(dataKey);
   const gradId = `cg${color.replace(/[^a-z0-9]/gi, '')}${dataKey}`;
   const lastVal = data[data.length - 1]?.[dataKey] ?? 0;
-  const lastY = H - (lastVal / max) * (H - 14) - 7;
+  const lastCmp = compare ? data[data.length - 1]?.[compare] ?? 0 : null;
+  const label = { position: 'absolute', right: 6, fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' };
+  // The svg stretches to the full width (no aspect lock); labels and the end dot
+  // are HTML so they don't get distorted.
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height, display: 'block', overflow: 'visible' }}>
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.30"/>
-          <stop offset="100%" stopColor={color} stopOpacity="0"/>
-        </linearGradient>
-      </defs>
-      <polygon points={`0,${H} ${pts} ${W},${H}`} fill={`url(#${gradId})`}/>
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx={W} cy={lastY} r="5" fill={color} stroke="rgba(0,0,0,0.5)" strokeWidth="2"/>
-      <text x={W - 6} y={lastY - 11} textAnchor="end" fill={color} fontSize="11" fontWeight="700" fontFamily="sans-serif">
-        {fmt(lastVal) !== '$0' ? fmt(lastVal) : ''}
-      </text>
-    </svg>
+    <div style={{ position: 'relative', height }}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height, display: 'block', overflow: 'visible' }}>
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.30"/>
+            <stop offset="100%" stopColor={color} stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        <polygon points={`0,${H} ${pts} ${W},${H}`} fill={`url(#${gradId})`}/>
+        {compare && <polyline points={line(compare)} fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2" strokeDasharray="6 6" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke"/>}
+        <polyline points={pts} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke"/>
+      </svg>
+      <span style={{ position: 'absolute', right: -5, top: yOf(lastVal) - 5, width: 10, height: 10, borderRadius: '50%', background: color, boxShadow: '0 0 0 2px rgba(0,0,0,0.5)' }} />
+      {lastVal ? <span style={{ ...label, top: yOf(lastVal) - 24, color }}>{fmtVal(lastVal, kind)}</span> : null}
+      {compare && <span style={{ ...label, top: yOf(lastCmp) + 6, color: 'rgba(255,255,255,0.55)' }}>{fmtVal(lastCmp, kind)}</span>}
+    </div>
   );
 }
 
@@ -340,7 +350,7 @@ function ParamField({ p, value, onChange, color }) {
         </label>
         <span style={{ fontFamily: 'var(--font-b)', fontSize: 14, fontWeight: 800, color }}>
           {p.type === 'number'
-            ? p.id === 'supply' ? fmtNum(value) + ' tokens' : '$' + Number(value).toLocaleString()
+            ? p.unit === 'USD' ? '$' + Number(value).toLocaleString() : `${fmtNum(value)} ${p.unit}`
             : `${value} ${p.unit}`}
         </span>
       </div>
@@ -473,8 +483,8 @@ export default function StrategySimulator({ head }) {
             <motion.div key="s0" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
               className="sim-pane" style={{ padding: '40px 40px 28px' }}>
               <div style={{ marginBottom: 28 }}>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'rgba(255,255,255,0.88)', marginBottom: 6 }}>¿Qué modelo de tokenización usás?</div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.34)', lineHeight: 1.55 }}>Cada modelo tiene ventajas distintas según el tipo de proyecto, activo y nivel de confianza que querés transmitir a tus inversores.</div>
+                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'rgba(255,255,255,0.88)', marginBottom: 6 }}>¿Cómo querés tokenizar tu activo?</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.34)', lineHeight: 1.55 }}>Cada modelo define cómo entra el capital, cómo cobran los inversores y quién termina siendo dueño del activo.</div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }} className="sim-grid">
                 {STRATEGIES.map(s => {
@@ -606,8 +616,14 @@ export default function StrategySimulator({ head }) {
                     <div style={{ marginBottom: 12 }}>
                       <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{c.label}</div>
                       <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.28)', marginTop: 4, lineHeight: 1.5 }}>{c.subtitle}</div>
+                      {c.legend && (
+                        <div style={{ display: 'flex', gap: 16, marginTop: 8, fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 16, height: 2.5, borderRadius: 2, background: strategy.color }} />{c.legend[0]}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 16, height: 0, borderTop: '2px dashed rgba(255,255,255,0.45)' }} />{c.legend[1]}</span>
+                        </div>
+                      )}
                     </div>
-                    <MiniChart data={c.data} dataKey={c.key} color={strategy.color} height={90}/>
+                    <MiniChart data={c.data} dataKey={c.key} compare={c.compare} kind={c.fmt} color={strategy.color} height={90}/>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
                       <span style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.18)' }}>Inicio</span>
                       <span style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.18)' }}>Fin del período</span>
@@ -616,19 +632,19 @@ export default function StrategySimulator({ head }) {
                 ))}
               </div>
 
-              {/* Escrow milestone timeline */}
-              {proj.milestones && (
+              {/* Timeline */}
+              {proj.timeline && (
                 <div style={{ marginBottom: 22 }}>
                   <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>
-                    Timeline de hitos — cuándo liberás cada tramo de capital
+                    {proj.timeline.title}
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {proj.milestones.map(m => (
-                      <div key={m.n} style={{ flex: 1, minWidth: 90, background: `${strategy.color}0d`, border: `1px solid ${strategy.color}28`, borderRadius: 12, padding: '12px 14px', textAlign: 'center' }}>
-                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: `${strategy.color}bb`, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Hito {m.n}</div>
-                        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 15, color: 'rgba(255,255,255,0.88)' }}>{fmt(m.amount)}</div>
-                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.30)', marginTop: 3 }}>Semana {m.week}</div>
-                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: `${strategy.color}99`, marginTop: 2 }}>+{m.bonus}% bonus</div>
+                    {proj.timeline.items.map(m => (
+                      <div key={m.top} style={{ flex: 1, minWidth: 110, background: `${strategy.color}0d`, border: `1px solid ${strategy.color}28`, borderRadius: 12, padding: '12px 14px', textAlign: 'center' }}>
+                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: `${strategy.color}bb`, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{m.top}</div>
+                        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 15, color: 'rgba(255,255,255,0.88)' }}>{m.value}</div>
+                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.30)', marginTop: 3 }}>{m.sub}</div>
+                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: `${strategy.color}99`, marginTop: 2 }}>{m.extra}</div>
                       </div>
                     ))}
                   </div>

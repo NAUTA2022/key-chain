@@ -711,6 +711,7 @@ body {
   .land-nav { padding: 0 16px !important; }
   .land-hamburger { display: flex !important; }
   .sim-grid { grid-template-columns: 1fr !important; }
+  .proj-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .land-section    { padding: 48px 16px !important; }
   .land-cta-section { padding: 48px 16px !important; }
   .land-nav-links  { display: none !important; }
