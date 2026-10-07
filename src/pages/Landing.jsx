@@ -25,6 +25,7 @@ import CircularGallery from '../components/reactbits/CircularGallery';
 import ClickSpark from '../components/reactbits/ClickSpark';
 import LogoLoop from '../components/reactbits/LogoLoop';
 import ParticleWord from '../components/landing/ParticleWord';
+import ParticleImage from '../components/landing/ParticleImage';
 import { AuditVisual, VaultVisual, YieldVisual, P2PVisual, VoteVisual, KycVisual } from '../components/landing/BentoVisuals';
 import './Landing.css';
 
@@ -37,9 +38,9 @@ const HOW = [
 ];
 
 const BENTO = [
-  { color: '#0b0f1c', label: 'Seguridad',     title: 'Contratos auditados',     description: 'ERC-20 auditados por CertiK antes de cada emisión en Polygon.', icon: Icons.shield, visual: <AuditVisual /> },
+  { color: '#0b0f1c', label: 'Seguridad',     title: 'Contratos auditados',     description: 'ERC-20 auditados por CertiK antes de cada emisión.', icon: Icons.shield, visual: <AuditVisual /> },
   { color: '#0b0f1c', label: 'Custodia',      title: 'Custodia institucional',  description: 'Activos físicos con custodia profesional y póliza de seguro.', icon: Icons.wallet, visual: <VaultVisual /> },
-  { color: '#0d1226', label: 'Rendimiento',   title: 'Rendimientos en USDC',    description: 'Distribuciones on-chain mensuales directo a tu wallet. Sin bancos ni intermediarios, todo verificable en Polygon.', icon: Icons.swap, visual: <YieldVisual /> },
+  { color: '#0d1226', label: 'Rendimiento',   title: 'Rendimientos en USDC',    description: 'Distribuciones on-chain mensuales directo a tu wallet. Sin bancos ni intermediarios, todo verificable on-chain.', icon: Icons.swap, visual: <YieldVisual /> },
   { color: '#0d1226', label: 'Liquidez',      title: 'Mercado secundario P2P',  description: 'Vendé tus tokens cuando quieras a otros inversores, comparando precio pedido contra valor real.', icon: Icons.token, visual: <P2PVisual /> },
   { color: '#0b0f1c', label: 'Gobernanza',    title: 'Votá con FACT',           description: 'Los holders deciden qué proyectos se tokenizan.', icon: Icons.primary, visual: <VoteVisual /> },
   { color: '#0b0f1c', label: 'Onboarding',    title: 'KYC en 5 minutos',        description: 'DNI y selfie. Empezás a invertir el mismo día.', icon: Icons.shield, visual: <KycVisual /> },
@@ -83,6 +84,7 @@ const PARTICLE_COLORS = ['#ffffff', '#8fb8ff', '#b59bff'];
 const MORPH_WORDS = ['autos', 'campos', 'drones', 'inmuebles', 'edificios'];
 const MORPH_COLORS = ['#7fb2ff', '#93a8ff', '#a78bfa', '#c4a7ff', '#f0abfc'];
 
+const HERO_LOGO_STYLE = { filter: 'drop-shadow(0 0 48px rgba(40,100,255,0.65)) drop-shadow(0 24px 64px rgba(0,0,0,0.95))' };
 const NAV_LINKS = [['Proyectos', 'proyectos'], ['Cómo funciona', 'como'], ['Beneficios', 'beneficios'], ['Token FACT', 'fact']];
 
 /* Liquid glass */
@@ -397,7 +399,7 @@ export default function Landing({ onEnter, onDevEnter }) {
             style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 28, position: 'relative', zIndex: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             <div style={{ ...LG, borderRadius: 999, padding: '7px 16px', display: 'inline-flex', gap: 8, alignItems: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12)' }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px rgba(74,222,128,0.8)' }} />
-              <ShinyText text="Activos reales tokenizados en Polygon" speed={2.6} color="rgba(255,255,255,0.55)" shineColor="#ffffff" className="land-shiny" />
+              <ShinyText text="Activos reales tokenizados" speed={2.6} color="rgba(255,255,255,0.55)" shineColor="#ffffff" className="land-shiny" />
             </div>
           </motion.div>
 
@@ -429,10 +431,14 @@ export default function Landing({ onEnter, onDevEnter }) {
             {COINS.right.map((c, i) => coin(c, i, 1))}
             <div style={{ position: 'relative', zIndex: 2, flexShrink: 0 }}>
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-52%)', width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,90,230,0.36) 0%, transparent 68%)', filter: 'blur(36px)', pointerEvents: 'none' }} />
-              <motion.img src="/3ds.png" alt="KEY CHAIN"
-                animate={{ y: [0, -10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                whileHover={{ scale: 1.04, rotate: -2 }} onHoverStart={sHover}
-                style={{ width: isMobile ? 220 : 300, height: 'auto', display: 'block', position: 'relative', zIndex: 1, filter: 'drop-shadow(0 0 48px rgba(40,100,255,0.65)) drop-shadow(0 24px 64px rgba(0,0,0,0.95))', x: imgX, y: imgY, cursor: 'grab' }} />
+              {/* Parallax and levitation live on separate layers so they add up
+                  smoothly instead of fighting over the same `y`. */}
+              <motion.div style={{ x: imgX, y: imgY, position: 'relative', zIndex: 1 }}>
+                <div className="land-levitate">
+                  <ParticleImage src="/3ds.png" alt="KEY CHAIN" width={isMobile ? 220 : 300} gap={isMobile ? 2.5 : 3}
+                    onHoverStart={sHover} onBurst={sWhoosh} imgStyle={HERO_LOGO_STYLE} />
+                </div>
+              </motion.div>
             </div>
           </motion.div>
 
@@ -457,7 +463,7 @@ export default function Landing({ onEnter, onDevEnter }) {
             {[
               {
                 tag: <span className="land-pill"><span className="land-pill-dot" style={{ background: '#7fb2ff', boxShadow: '0 0 8px rgba(127,178,255,0.8)' }} />Proyectos RWA · Abiertos</span>, title: <>Activos del<br />mundo real</>, spot: 'rgba(110,160,255,0.28)',
-                text: 'Invertí en fracciones de autos, campos, drones, inmuebles y edificios tokenizados en Polygon. Cada token representa participación proporcional del activo.',
+                text: 'Invertí en fracciones de autos, campos, drones, inmuebles y edificios tokenizados. Cada token representa participación proporcional del activo.',
                 kpis: [['Desde', '$1 USD'], ['APY promedio', '9.8%'], ['Distribución', 'Mensual USDC'], ['Proyectos activos', '148']],
                 bullets: ['Rendimientos mensuales on-chain', 'Liquidez en mercado secundario P2P', 'Contratos auditados · Seguro incluido', 'Sin bancos ni intermediarios'],
                 cta: 'Explorar proyectos →', primary: false, visual: 'photos',
@@ -591,7 +597,7 @@ export default function Landing({ onEnter, onDevEnter }) {
         {/* ─── FOOTER ─────────────────────────────────────────── */}
         <footer className="land-nav" style={{ padding: '28px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <PLogo size={14} />
-          <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>© 2026 KEY CHAIN. Real World Assets en Polygon.</span>
+          <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>© 2026 KEY CHAIN. Activos reales tokenizados.</span>
           <div style={{ display: 'flex', gap: 24 }}>
             {['Términos', 'Privacidad', 'Contacto'].map(l => (
               <button key={l} onMouseEnter={sHover} className="land-footlink" style={{ background: 'none', border: 'none', padding: 0, fontFamily: 'var(--font-b)', fontSize: 12, cursor: 'pointer' }}>{l}</button>
