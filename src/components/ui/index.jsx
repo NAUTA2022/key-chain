@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 export const Icons = {
+  comment: <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12a8.5 8.5 0 01-12.6 7.4L3 21l1.6-5.1A8.5 8.5 0 1121 12z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></svg>,
+  feed: <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.7"/><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></svg>,
   dash: <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.7"/><rect x="13" y="3" width="8" height="5" rx="2" stroke="currentColor" strokeWidth="1.7"/><rect x="13" y="10" width="8" height="11" rx="2" stroke="currentColor" strokeWidth="1.7"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.7"/></svg>,
   primary: <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-6 9 6v11a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M9 21v-7h6v7" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></svg>,
   secondary: <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>,
@@ -310,6 +312,9 @@ function hashStr(s = '') {
   return h;
 }
 
+// Companies are hexagons everywhere (people — users, sellers — are circles).
+export const HEX_CLIP = 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)';
+
 // KEYCHAIN itself (asset.issuer === 'keychain') isn't just another company —
 // it gets its own logo mark instead of a lettered avatar. Solid black (not
 // the silver/black gradient used elsewhere) so the light-colored logo image
@@ -320,7 +325,7 @@ export function CompanyAvatar({ company, size = 28, style = {} }) {
   const bg = isKeychain ? '#000' : COMPANY_COLORS[hashStr(company) % COMPANY_COLORS.length];
   return (
     <div style={{
-      width: size, height: size, borderRadius: '50%', background: bg, color: '#fff',
+      width: size, height: size, clipPath: HEX_CLIP, background: bg, color: '#fff',
       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
       fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: size * 0.42, ...style,
     }}>
@@ -374,23 +379,34 @@ export function PArea({ data, color, height = 80, id }) {
 }
 
 export function PDonut({ segments, size = 120, label, sub, thickness = 13 }) {
-  const r = 36, cx = 50, cy = 50, circ = 2 * Math.PI * r;
-  let off = 0;
-  const paths = segments.map((s, i) => {
-    const dash = (s.value / 100) * circ;
-    const el = (
-      <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={thickness}
-        strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={-off}
-        style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }}
-      />
-    );
-    off += dash; return el;
+  // Each segment is its own arc path (not overlapping dashed circles, which
+  // left anti-aliasing slivers where the last segment met the first).
+  // Values are normalised so rounded percentages never overrun the ring.
+  const r = 36, cx = 50, cy = 50;
+  const total = segments.reduce((t, s) => t + Math.max(0, s.value), 0) || 1;
+  const live = segments.filter(s => s.value > 0);
+  const gap = live.length > 1 ? 0.012 : 0; // fraction of the ring between segments
+  const pt = f => {
+    const a = f * 2 * Math.PI - Math.PI / 2;
+    return `${(cx + r * Math.cos(a)).toFixed(3)} ${(cy + r * Math.sin(a)).toFixed(3)}`;
+  };
+  const starts = live.map((_, i) => live.slice(0, i).reduce((t, s) => t + s.value / total, 0));
+  const paths = live.map((s, i) => {
+    const frac = s.value / total;
+    const a0 = starts[i] + gap / 2, a1 = starts[i] + frac - gap / 2;
+    if (frac >= 0.999) return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={thickness} />;
+    if (a1 <= a0) return null;
+    const large = a1 - a0 > 0.5 ? 1 : 0;
+    return <path key={i} d={`M ${pt(a0)} A ${r} ${r} 0 ${large} 1 ${pt(a1)}`} fill="none" stroke={s.color} strokeWidth={thickness} />;
   });
+  // Shrink long labels so they stay inside the hole.
+  const hole = size * (2 * (r - thickness / 2)) / 100;
+  const labelSize = label ? Math.min(size * 0.15, (hole * 0.9) / (String(label).length * 0.6)) : 0;
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} viewBox="0 0 100 100">{paths}</svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {label && <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: size * 0.15, color: 'var(--text)', letterSpacing: '-0.02em' }}>{label}</div>}
+        {label && <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: labelSize, color: 'var(--text)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>{label}</div>}
         {sub && <div style={{ fontFamily: 'var(--font-b)', fontSize: size * 0.075, color: 'var(--ter)' }}>{sub}</div>}
       </div>
     </div>

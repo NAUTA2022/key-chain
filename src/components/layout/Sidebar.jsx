@@ -1,3 +1,4 @@
+import { DRAWER_W } from './MenuToggle';
 import { useState, useRef, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -97,7 +98,8 @@ const SUBSIDIARIES = [
 ];
 
 const investorItems = [
-  { id: 'dashboard',    label: 'Inicio',             labelMobile: 'Inicio',        icon: Icons.dash      },
+  { id: 'feed',         label: 'Feed',               labelMobile: 'Feed',          icon: Icons.feed      },
+  { id: 'dashboard',    label: 'Mi dashboard',       labelMobile: 'Dashboard',     icon: Icons.dash      },
   { id: 'primario',     label: 'Tokenizaciones',     labelMobile: 'Tokens',        icon: HexIcon         },
   { id: 'secundario',   label: 'Mercado Secundario', labelMobile: 'Secundario',    icon: Icons.secondary },
   { id: 'token',        label: 'Token KYCN',         labelMobile: 'Token KYCN',    icon: Token3dIcon     },
@@ -116,7 +118,7 @@ const adminItems = [
 ];
 
 const bottomItems = [
-  { id: 'subsidiarias', label: 'Subsidiarias', icon: SubsidiariesIcon },
+  { id: 'subsidiarias', label: 'Subsidiarias', icon: SubsidiariesIcon, disabled: true }, // disabled for now
   { id: 'perfil',       label: 'Perfil',       icon: Icons.profile    },
   { id: 'ayuda',        label: 'Help Center',  icon: Icons.help       },
 ];
@@ -129,7 +131,7 @@ const LogoutIcon = (
 
 // Sizes the hover pill's label text against the icon/gap/chevron chrome that
 // surrounds it (see the pill's paddingLeft/gap/paddingRight below), so short
-// labels ("Inicio") get a snug pill instead of the longest label's width.
+// labels ("Feed") get a snug pill instead of the longest label's width.
 let measureCtx = null;
 function measurePillWidth(label) {
   if (!measureCtx) measureCtx = document.createElement('canvas').getContext('2d');
@@ -146,7 +148,9 @@ const NavItem = memo(function NavItem({ item, active, collapsed, onClick }) {
   const [pillWidth, setPillWidth] = useState(200);
   const btnRef = useRef(null);
 
+  const off = !!item.disabled;
   const handleEnter = () => {
+    if (off) return;
     if (collapsed && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
       setPillTop(r.top + r.height / 2);
@@ -161,16 +165,18 @@ const NavItem = memo(function NavItem({ item, active, collapsed, onClick }) {
         ref={btnRef}
         onMouseEnter={handleEnter}
         onMouseLeave={() => setHovered(false)}
-        onClick={() => onClick(item.id)}
-        title={collapsed ? item.label : undefined}
+        onClick={() => { if (!off) onClick(item.id); }}
+        disabled={off}
+        aria-disabled={off}
+        title={off ? `${item.label} · Próximamente` : collapsed ? item.label : undefined}
         style={{
           display: 'flex', alignItems: 'center',
           gap: collapsed ? 0 : 10,
           width: '100%',
           padding: collapsed ? '6px 0' : '6px 10px',
           justifyContent: collapsed ? 'center' : 'flex-start',
-          borderRadius: 14, border: 'none', cursor: 'pointer',
-          background: 'transparent',
+          borderRadius: 14, border: 'none', cursor: off ? 'not-allowed' : 'pointer',
+          background: 'transparent', opacity: off ? 0.38 : 1,
           color: active ? 'var(--gl-nav-a)' : 'var(--gl-nav)',
           fontFamily: 'var(--font-b)', fontSize: 13.5,
           fontWeight: active ? 600 : 500,
@@ -308,28 +314,27 @@ function SidebarDrawer({ route, nav, role, onClose, onLogout }) {
         key="drawer-backdrop"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose}
-        style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 0, zIndex: 300, background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(2px)' }}
+        style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(2px)' }}
       />
       <motion.div
         key="drawer-panel"
-        initial={{ x: -290 }} animate={{ x: 0 }} exit={{ x: -290 }}
+        initial={{ x: -DRAWER_W - 20 }} animate={{ x: 0 }} exit={{ x: -DRAWER_W - 20 }}
         transition={{ type: 'spring', damping: 32, stiffness: 400 }}
         style={{
-          position: 'fixed', top: 56, left: 0, height: 'calc(100vh - 56px)', width: 272,
+          position: 'fixed', top: 0, left: 0, height: '100vh', width: DRAWER_W,
           zIndex: 301, display: 'flex', flexDirection: 'column',
           background: 'var(--gl-panel)',
           backdropFilter: 'blur(12px) saturate(160%) brightness(1.02)',
           WebkitBackdropFilter: 'blur(12px) saturate(160%) brightness(1.02)',
           borderRight: '1px solid var(--gl-bd)',
-          padding: '18px 14px 16px', boxSizing: 'border-box', overflowY: 'auto',
+          padding: '0 14px 16px', boxSizing: 'border-box', overflowY: 'auto',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px', marginBottom: 20 }}>
-          <button onClick={() => handleNav('dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+        {/* Header row lines up with the topbar; the menu button (MenuToggle)
+            sits at its right edge as the close X. */}
+        <div style={{ display: 'flex', alignItems: 'center', height: 56, padding: '0 2px', marginBottom: 14, flexShrink: 0 }}>
+          <button onClick={() => handleNav('feed')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <PLogo size={14} />
-          </button>
-          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid var(--border-l)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ter)' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
           </button>
         </div>
 
@@ -477,7 +482,7 @@ export default function Sidebar({ route, nav, role, theme, collapsed, setCollaps
             ref={logoRef}
             onMouseEnter={handleLogoEnter}
             onMouseLeave={handleLogoLeave}
-            onClick={() => nav('dashboard')} title="Inicio"
+            onClick={() => nav('feed')} title="Feed"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: 36, height: 36 }}
           >
             <img src={logoIcon} alt="Inicio" style={{ position: 'absolute', width: 36, height: 36, objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />
@@ -488,7 +493,7 @@ export default function Sidebar({ route, nav, role, theme, collapsed, setCollaps
             ref={logoRef}
             onMouseEnter={handleLogoEnter}
             onMouseLeave={handleLogoLeave}
-            onClick={() => nav('dashboard')}
+            onClick={() => nav('feed')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, position: 'relative', height: 42 }}
           >
             <img src={logoFull} alt="KEY CHAIN" style={{ height: 42, width: 'auto', objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />

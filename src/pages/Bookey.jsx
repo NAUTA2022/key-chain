@@ -6,10 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useActiveAccount, useActiveWallet, useDisconnect, ConnectButton } from 'thirdweb/react';
+import { ConnectButton } from 'thirdweb/react';
+import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
 import { polygon } from 'thirdweb/chains';
 import { client } from '../lib/client';
-import KeyPayLogin from './KeyPayLogin';
+import Login from './Login';
 import { COIN_ICON_URL, CartCheckout, KP_VARS } from './KeyPay';
 import { addPendingPayment, getPendingPayments } from '../lib/keypayInbox';
 import { useMobile } from '../hooks/useMobile';
@@ -1571,7 +1572,7 @@ function BookeyFavorites({ nav }) {
 
 // ─── Help ─────────────────────────────────────────────────────────────────────
 const HELP_FAQS = [
-  { q:'¿Cómo reservo una propiedad?', a:'Elegí una propiedad, seleccioná fechas y huéspedes, y confirmá el pago desde el Checkout de Key Pay.' },
+  { q:'¿Cómo reservo una propiedad?', a:'Elegí una propiedad, seleccioná fechas y huéspedes, y confirmá el pago desde el checkout de KEYCHAIN.' },
   { q:'¿Qué es el descuento inversor?', a:'Si tenés tokens KEYCHAIN de una propiedad, accedés a un descuento de entre 8% y 20% sobre el precio de esa propiedad.' },
   { q:'¿En qué puedo pagar?', a:'Todos los pagos se hacen en cripto on-chain, con USDC o el token KYCN.' },
   { q:'¿Cómo cancelo una reserva?', a:'Escribinos a soporte@keychain.io y te ayudamos según la política de cancelación de esa propiedad.' },
@@ -1611,8 +1612,7 @@ function BookeyNavbar({ nav, searched, query, onEditSearch }) {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
-  const wallet = useActiveWallet();
-  const { disconnect } = useDisconnect();
+  const disconnect = useSessionDisconnect();
 
   useEffect(() => {
     const fn = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
@@ -1702,7 +1702,7 @@ function BookeyNavbar({ nav, searched, query, onEditSearch }) {
                   Centro de ayuda
                 </button>
                 <div style={{ height:1, background:'var(--border-l)', margin:'6px 12px' }} />
-                <button onClick={() => { setMenuOpen(false); if (wallet) disconnect(wallet); }}
+                <button onClick={() => { setMenuOpen(false); disconnect(); }}
                   style={{ width:'100%', display:'flex', alignItems:'center', gap:12, padding:'11px 16px', background:'none', border:'none', cursor:'pointer', color:'#c0392b', fontFamily:'var(--font-b)', fontSize:13.5, fontWeight:500, textAlign:'left' }}>
                   <span style={{ display:'flex' }}>{BIcons.logout}</span>
                   Cerrar sesión
@@ -1739,7 +1739,7 @@ function BookeyNavbar({ nav, searched, query, onEditSearch }) {
 // anywhere else in the app: if a session is already active, the gate is
 // skipped entirely and Bookey opens straight into the marketplace.
 export default function Bookey() {
-  const account = useActiveAccount();
+  const account = useSessionAccount();
   const routerNavigate = useNavigate();
   const [page, setPage] = useState('home'); // 'home' | 'detail' | 'profile' | 'favorites' | 'help'
   const [selected, setSelected] = useState(null);
@@ -1762,7 +1762,7 @@ export default function Bookey() {
   const handleEditSearch = () => setSearched(false);
 
   if (!account) {
-    return <KeyPayLogin onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
+    return <Login onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
   }
 
   return (

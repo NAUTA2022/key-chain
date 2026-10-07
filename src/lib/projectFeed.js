@@ -1,0 +1,293 @@
+import { useSyncExternalStore } from 'react';
+import { RWA_ASSETS } from '../data';
+
+// Project feeds, shared across the app: each project's Feed tab reads and
+// writes its own posts here, and the global Feed (pages/GlobalFeed) shows the
+// milestone ("hito") posts of every live project. Kept in memory — posts,
+// likes, comments and uploads reset on reload until there's a backend.
+
+// A project has a feed once it's running, fully funded, or was explicitly
+// flagged early (feedEnabled) — some projects start building/buying the
+// underlying asset before their raise closes and want to post progress
+// during that window too.
+export const isFeedLive = (a) => a.stage === 'Operativo' || a.sold >= 100 || a.feedEnabled === true;
+
+// Posts carry `media`; older ones may still use a single `img` field.
+export const postMedia = (post) => post.media || (post.img ? [{ id: post.img, type: 'image', url: post.img }] : []);
+
+export const issuerNameOf = (a) => (a.issuer === 'keychain' ? 'KEYCHAIN' : (a.company || ''));
+
+// ─── Seed posts ───────────────────────────────────────────────────────────────
+// Deterministic per asset so every project reads a little differently and the
+// global feed interleaves them by date instead of stacking identical posts.
+const TODAY = Date.UTC(2026, 5, 13);
+const DAY = 86400000;
+const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+export const fmtPostDate = (ts) => {
+  const d = new Date(ts);
+  return `${String(d.getUTCDate()).padStart(2, '0')} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+};
+
+// Short pan/zoom clips over each category's own photos (public/videos).
+const CAT_VIDEO = {
+  Autos: '/videos/autos.webm', Campos: '/videos/campos.webm', Drones: '/videos/drones.webm',
+  Inmuebles: '/videos/inmuebles.webm', Edificios: '/videos/edificios.webm',
+};
+
+const CAT_UPDATE = {
+  Autos:     ['Mantenimiento programado completado en toda la flota. Todas las unidades vuelven a operar esta semana.', 'Así quedó la flota después del service anual 🚗'],
+  Campos:    ['Avanza la cosecha: ya levantamos el 60% del lote con rindes por encima del promedio de la zona.', 'Recorrido por el campo esta mañana 🌾'],
+  Drones:    ['Sumamos 3 nuevos contratos de servicio. Los equipos ya están volando en las zonas asignadas.', 'Vuelo de prueba de los equipos nuevos 🛸'],
+  Inmuebles: ['Terminamos la renovación de las unidades: pisos, cocina y climatización nuevos.', 'Así quedaron las unidades renovadas 🏠'],
+  Edificios: ['Se renovaron los contratos de los inquilinos principales por 3 años más. Ocupación actual: 94%.', 'Recorrido por las oficinas renovadas 🏢'],
+};
+const DEFAULT_UPDATE = ['Avanzamos con el plan operativo según lo previsto para este trimestre.', 'Avances del proyecto'];
+
+// Category milestones, posted with a photo or the category video.
+const CAT_HITOS = {
+  Autos:     ['¡Toda la flota ya está operando en plataforma! Primer mes completo con 100% de las unidades activas.', 'Superamos los 50.000 viajes realizados desde el lanzamiento 🎉', 'Renovamos el seguro full cobertura de toda la flota por 12 meses.'],
+  Campos:    ['¡Terminamos la siembra de la campaña 2026! Todo el lote quedó implantado en fecha.', 'Cosecha finalizada con un rinde 12% por encima de lo proyectado 🌾', 'Firmamos el contrato de venta anticipada de la producción con la exportadora.'],
+  Drones:    ['Superamos las 10.000 hectáreas relevadas con la flota 🛸', 'Obtuvimos la habilitación de ANAC para operar en zona ampliada.', 'Incorporamos 5 drones nuevos a la flota, financiados con la última ronda.'],
+  Inmuebles: ['¡Ocupación completa! Todas las unidades están alquiladas este mes 🏠', 'Finalizó la renovación integral y ya recibimos a los primeros inquilinos.', 'La tasación independiente valuó el inmueble un 8% por encima de la compra.'],
+  Edificios: ['Firmamos contrato con un nuevo inquilino corporativo por 5 años 🏢', 'El edificio obtuvo la certificación de eficiencia energética LEED.', 'Ocupación del 96%: el nivel más alto desde la tokenización.'],
+};
+const DEFAULT_HITOS = ['Auditoría operativa del trimestre sin observaciones. El informe completo está en Documentos.', 'Publicamos el reporte trimestral con todos los indicadores del proyecto.', 'Completamos la verificación legal y registral del activo.'];
+const DIST_TEXT = [
+  (m, h) => `Se distribuyeron $${m} USDC entre ${h} holders. Gracias por confiar en el proyecto.`,
+  (m, h) => `💸 Distribución mensual enviada: $${m} USDC repartidos entre ${h} holders.`,
+  (m, h) => `Ya está en sus wallets la renta del mes: $${m} USDC para ${h} holders.`,
+];
+
+const COMMENTERS = ['Lucía M.', 'Martín G.', 'Sofía R.', 'Diego P.', 'Carla V.', 'Tomás L.'];
+const COMMENTS = ['¡Llegó puntual como siempre! 👏', 'Excelente noticia, gracias por la transparencia.', '¿Cuándo es la próxima distribución?', 'Muy buen avance 🙌', 'Se ve impecable.'];
+
+const photo = (src, n) => ({ id: `${src}#${n}`, type: 'image', url: src });
+
+// Every local photo per category, so carousel posts can show more shots
+// than a single project has.
+let catPhotos = null;
+const photosOfCat = (cat) => {
+  if (!catPhotos) {
+    catPhotos = {};
+    RWA_ASSETS.forEach(a => (a.images || [a.img]).forEach(src => {
+      const list = (catPhotos[a.cat] ||= []);
+      if (!list.includes(src)) list.push(src);
+    }));
+  }
+  return catPhotos[cat] || [];
+};
+
+function seedPosts(a) {
+  const imgs = a.images?.length ? a.images : [a.img];
+  const pic = (i) => photo(imgs[i % imgs.length], i);
+  // n distinct photos: the project's own first, then its category's,
+  // rotated per project so neighbours in the feed don't repeat the same set.
+  const carousel = (n, from = 0) => {
+    const pool = photosOfCat(a.cat);
+    const rotated = pool.slice(a.id % (pool.length || 1)).concat(pool.slice(0, a.id % (pool.length || 1)));
+    return [...new Set([...imgs.slice(from), ...rotated])].slice(0, n).map((src, i) => photo(src, `c${from}-${i}`));
+  };
+  const video = CAT_VIDEO[a.cat];
+  const [updateText, videoText] = CAT_UPDATE[a.cat] || DEFAULT_UPDATE;
+  const monthly = Math.round((a.valuation * a.apy) / 100 / 12);
+  const holders = Math.max(12, Math.round((a.totalTokens * a.sold) / 100 / 24));
+  // Each post type gets its own per-project offset so the global feed mixes
+  // distributions, videos and funding milestones instead of stacking one kind.
+  const at = (days, mult) => TODAY - (days + ((a.id * mult) % 17)) * DAY;
+  const withVideo = video && a.id % 2 === 0;
+  const pick = (k) => COMMENTERS[(a.id + k) % COMMENTERS.length];
+  const hitos = CAT_HITOS[a.cat] || DEFAULT_HITOS;
+  const hito = hitos[a.id % hitos.length];
+
+  const posts = [
+    { id: `${a.id}-1`, ts: at(2, 7), milestone: true,
+      text: DIST_TEXT[a.id % DIST_TEXT.length](monthly.toLocaleString('en-US'), holders),
+      media: [pic(0)], likes: 18 + (a.id % 23),
+      comments: [{ id: `${a.id}-1c`, date: fmtPostDate(at(2, 7)), author: pick(0), text: COMMENTS[a.id % COMMENTS.length], isIssuer: false }] },
+    { id: `${a.id}-2`, ts: at(6, 5), milestone: false, text: updateText,
+      media: carousel(3, 1), likes: 6 + (a.id % 9) },
+    // Category milestone: a 3–5 photo carousel, or the category video
+    // followed by two photos (mixed carousel).
+    { id: `${a.id}-3`, ts: at(0, 3), milestone: true,
+      text: withVideo ? `${hito} ${videoText}` : hito,
+      media: withVideo
+        ? [{ id: `${a.id}-v`, type: 'video', url: video }, ...carousel(2)]
+        : carousel(3 + (a.id % 3)),
+      likes: 12 + (a.id % 17) },
+    { id: `${a.id}-4`, ts: at(4, 11), milestone: true,
+      text: a.sold >= 100 ? '¡Ronda cerrada! El proyecto se financió al 100%.' : `El proyecto alcanzó el ${a.sold}% de financiación.`,
+      media: a.id % 3 === 1 ? carousel(3) : [pic(3)], likes: 20 + (a.id % 13) },
+    { id: `${a.id}-5`, ts: at(30, 2), milestone: false, text: 'Se firmó contrato de operación por 24 meses adicionales.',
+      media: [], likes: 4 + (a.id % 7) },
+  ];
+  return posts.map(p => ({ ...p, date: fmtPostDate(p.ts), liked: false, comments: p.comments || [] }));
+}
+
+// ─── Store ────────────────────────────────────────────────────────────────────
+const byAsset = new Map();
+const listeners = new Set();
+let version = 0;
+
+const postsOf = (a) => {
+  if (!byAsset.has(a.id)) byAsset.set(a.id, seedPosts(a));
+  return byAsset.get(a.id);
+};
+
+function emit() {
+  version += 1;
+  listeners.forEach(fn => fn());
+}
+
+function subscribe(fn) {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+const useVersion = () => useSyncExternalStore(subscribe, () => version, () => version);
+
+export function setProjectPosts(a, updater) {
+  byAsset.set(a.id, typeof updater === 'function' ? updater(postsOf(a)) : updater);
+  emit();
+}
+
+// [posts, setPosts] for one project — same shape as useState.
+export function useProjectPosts(a) {
+  useVersion();
+  return [postsOf(a), (updater) => setProjectPosts(a, updater)];
+}
+
+// ─── Featured profiles ────────────────────────────────────────────────────────
+// One profile per issuer with a live feed (the author shown on its posts).
+const PROFILE_BIO = {
+  KEYCHAIN:   'Plataforma de tokenización de activos reales. Proyectos propios en autos, campos, drones e inmuebles.',
+  AutoMax:    'Flotas de vehículos tokenizadas operando en ride-hailing y logística urbana.',
+  CarRent:    'Renta premium de vehículos de colección y alta gama para eventos.',
+  AgroToken:  'Campos productivos de soja, maíz y cítricos en la zona núcleo argentina.',
+  VitivinARG: 'Viñedos y bodegas boutique de altura, con exportación directa.',
+  DroneAgro:  'Drones agrícolas para pulverización y relevamiento de precisión.',
+  SkyOps:     'Operaciones con drones para inspección, seguridad y producciones audiovisuales.',
+  PropChain:  'Oficinas y edificios corporativos tokenizados en España y LATAM.',
+  EuroRent:   'Apartamentos turísticos y de larga estadía en las principales ciudades de Europa.',
+  HomeChain:  'Residencias premium en alquiler en Buenos Aires, Miami y Nueva York.',
+  LogiCorp:   'Centros logísticos y de distribución last-mile pre-alquilados.',
+};
+
+// Owner (founder) behind each company: the personal account the company
+// profile can switch to. Demo data until issuers have real accounts.
+const PROFILE_OWNER = {
+  KEYCHAIN:   'Andrés Quinteros',
+  AutoMax:    'Lucía Fernández',
+  CarRent:    'Martín Salvatierra',
+  AgroToken:  'Joaquín Pereyra',
+  VitivinARG: 'Valentina Ocampo',
+  DroneAgro:  'Tomás Giménez',
+  SkyOps:     'Camila Rossi',
+  PropChain:  'Javier Morales',
+  EuroRent:   'Elena García',
+  HomeChain:  'Sofía Benítez',
+  LogiCorp:   'Diego Herrera',
+};
+const OWNER_GRADIENTS = [
+  'linear-gradient(135deg, #f97316, #ec4899)', 'linear-gradient(135deg, #10b981, #3b82f6)',
+  'linear-gradient(135deg, #f59e0b, #ef4444)', 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+  'linear-gradient(135deg, #84cc16, #0ea5e9)', 'linear-gradient(135deg, #e11d48, #7c3aed)',
+];
+function ownerOf(company) {
+  const name = PROFILE_OWNER[company] || `Equipo ${company}`;
+  const hash = [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+  return {
+    name,
+    initial: name.slice(0, 1).toUpperCase(),
+    handle: name.toLowerCase().normalize('NFD').replace(/[^a-z]/g, ''),
+    gradient: OWNER_GRADIENTS[hash % OWNER_GRADIENTS.length],
+    bio: `Fundador y CEO de ${company}.`,
+  };
+}
+
+// Projects shown on an issuer's profile: its real ones, plus the QA fixture
+// the signed-in user owns (isMine) so "my company" has a profile to open.
+const profileAssets = (name) => RWA_ASSETS.filter(a => issuerNameOf(a) === name && (a.cat !== 'QA' || a.isMine));
+
+function buildProfile(name, liveAssets, allAssets) {
+  const investors = liveAssets.reduce((s, a) => s + Math.round((a.totalTokens * a.sold) / 100 / 24), 0);
+  const first = liveAssets[0] || allAssets[0];
+  return {
+    name,
+    handle: name.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    cover: (first.images || [first.img])[0],
+    bio: PROFILE_BIO[name] || `Emisor de ${allAssets.length} proyectos tokenizados en KEYCHAIN.`,
+    verified: name === 'KEYCHAIN' || allAssets.some(a => a.issuer === 'verified' || a.issuer === 'keychain'),
+    projects: liveAssets.length,
+    followers: investors * 7,
+    owner: ownerOf(name),
+    liveAssets,
+    // Every project this issuer has, including ones still raising.
+    allAssets,
+  };
+}
+
+// One profile per issuer with a live feed, most followed first.
+export function featuredProfiles() {
+  const names = [...new Set(RWA_ASSETS.filter(a => isFeedLive(a) && a.cat !== 'QA').map(issuerNameOf))];
+  return names
+    .map(name => buildProfile(name, RWA_ASSETS.filter(a => isFeedLive(a) && a.cat !== 'QA' && issuerNameOf(a) === name), profileAssets(name)))
+    .sort((x, y) => y.followers - x.followers);
+}
+
+export const fmtCount = (n) => (n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, '')}K` : String(n));
+
+export function profileByName(name) {
+  const all = profileAssets(name);
+  return all.length ? buildProfile(name, all.filter(isFeedLive), all) : null;
+}
+
+// ─── Following ────────────────────────────────────────────────────────────────
+// Shared so "Seguir" stays in sync between the Feed and the company profile.
+let followed = [];
+export function useFollowing() {
+  useVersion();
+  const toggle = (name) => {
+    followed = followed.includes(name) ? followed.filter(x => x !== name) : [...followed, name];
+    emit();
+  };
+  return [followed, toggle];
+}
+
+// People I follow (by name) — separate from companies so names never clash.
+let followedPeople = [];
+export function useFollowingPeople() {
+  useVersion();
+  const toggle = (name) => {
+    followedPeople = followedPeople.includes(name) ? followedPeople.filter(x => x !== name) : [...followedPeople, name];
+    emit();
+  };
+  return [followedPeople, toggle];
+}
+
+// The company a person owns, if any (owners are users too).
+export function ownerCompanyOf(personName) {
+  const names = [...new Set(RWA_ASSETS.map(issuerNameOf).filter(Boolean))];
+  return names.find(n => PROFILE_OWNER[n] === personName) || null;
+}
+
+// Every post (milestones and regular updates) from the given projects, newest first.
+export function useAssetsPosts(assets) {
+  useVersion();
+  return assets
+    .flatMap(a => postsOf(a).map(post => ({ post, asset: a })))
+    .sort((x, y) => (y.post.ts ?? 0) - (x.post.ts ?? 0));
+}
+
+// Milestone posts from every live project, newest first.
+export function useGlobalMilestones() {
+  useVersion();
+  return RWA_ASSETS.filter(isFeedLive)
+    .flatMap(a => postsOf(a).filter(p => p.milestone).map(post => ({ post, asset: a })))
+    .sort((x, y) => (y.post.ts ?? 0) - (x.post.ts ?? 0));
+}
+
+// ─── Project identifier ───────────────────────────────────────────────────────
+// Short code shown next to a project wherever it's referenced from a company
+// (posts, reviews, analytics), e.g. "EDF-021".
+const CAT_PREFIX = { Autos: 'AUT', Campos: 'CAM', Drones: 'DRN', Inmuebles: 'INM', Edificios: 'EDF', QA: 'QA' };
+export const projectCode = (a) => `${CAT_PREFIX[a.cat] || 'PRY'}-${String(a.id).padStart(3, '0')}`;

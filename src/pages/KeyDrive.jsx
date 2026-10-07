@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useActiveAccount, useDisconnect } from 'thirdweb/react';
-import KeyPayLogin from './KeyPayLogin';
+import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
+import Login from './Login';
 import { CartCheckout, KP_VARS } from './KeyPay';
 import { addPendingPayment, getPendingPayments } from '../lib/keypayInbox';
 import { useMobile } from '../hooks/useMobile';
@@ -409,7 +409,7 @@ function ConfirmRide({ pickup, dest, ride, distanceKm, onBack, onRequest }) {
 
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderRadius:12, background:GRAY2, marginBottom:16 }}>
         {KDIcons.wallet}
-        <span style={{ fontFamily:FONT_B, fontSize:13, color:WHITE }}>Key Pay · USDC</span>
+        <span style={{ fontFamily:FONT_B, fontSize:13, color:WHITE }}>Saldo KEYCHAIN · USDC</span>
       </div>
       </div>
 
@@ -976,7 +976,7 @@ function ActivityScreen({ history }) {
 
 // ─── Account tab ──────────────────────────────────────────────────────────────
 function AccountScreen({ onLogout }) {
-  const account = useActiveAccount();
+  const account = useSessionAccount();
   return (
     <div style={{ flex:1, overflowY:'auto', padding:'20px 18px' }}>
       <div style={{ maxWidth:640, margin:'0 auto' }}>
@@ -1008,15 +1008,15 @@ const SEED_HISTORY = [
 // root <ThirdwebProvider>) and its own tab navigation instead of relying on
 // an external nav/routeData pair.
 export default function KeyDrive() {
-  const account = useActiveAccount();
-  const { disconnect } = useDisconnect();
+  const account = useSessionAccount();
+  const disconnect = useSessionDisconnect();
   const routerNavigate = useNavigate();
   const isMobile = useMobile(DESKTOP_BP);
   const [tab, setTab] = useState('home');
   const [history, setHistory] = useState(SEED_HISTORY);
 
   if (!account) {
-    return <KeyPayLogin onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
+    return <Login onSuccess={() => {}} onBack={() => routerNavigate('/')} />;
   }
 
   return (

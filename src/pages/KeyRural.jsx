@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useActiveAccount, useDisconnect } from 'thirdweb/react';
-import KeyPayLogin from './KeyPayLogin';
+import { useSessionAccount, useSessionDisconnect } from '../lib/devSession';
+import Login from './Login';
 import { CartCheckout, KP_VARS } from './KeyPay';
 import { addPendingPayment, getPendingPayments } from '../lib/keypayInbox';
 import { RWA_ASSETS, fmtUSD } from '../data';
@@ -665,7 +665,7 @@ function ProfileScreen({ account, onSwitchAccount, holdings, isMobile }) {
       </div>
 
       <div style={{ fontFamily: FONT_B, fontSize: 12, color: SUB, marginBottom: 20, lineHeight: 1.6 }}>
-        Esta sesión se comparte con el resto del ecosistema KEYCHAIN (Key Pay, Bookey, Key Go, Key Jobs). Cambiar de cuenta acá cierra la sesión en toda la plataforma.
+        Esta sesión se comparte con el resto del ecosistema KEYCHAIN (Bookey, Key Go, Key Jobs). Cambiar de cuenta acá cierra la sesión en toda la plataforma.
       </div>
       <button onClick={onSwitchAccount} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: `1px solid ${BORDER}`, background: 'none', color: TERRA, fontFamily: FONT_B, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>
         {KRIcons.logout} Cambiar de cuenta
@@ -719,8 +719,8 @@ function TabBar({ tab, setTab }) {
 // existing KeyPay checkout/pending-payment infrastructure rather than
 // building new auth or payment plumbing.
 export default function KeyRural() {
-  const account = useActiveAccount();
-  const { disconnect } = useDisconnect();
+  const account = useSessionAccount();
+  const disconnect = useSessionDisconnect();
   const routerNavigate = useNavigate();
   const isMobile = useMobile(DESKTOP_BP);
   const [showLogin, setShowLogin] = useState(false);
@@ -735,7 +735,7 @@ export default function KeyRural() {
 
   if (!account) {
     if (!showLogin) return <LandingScreen onStart={() => setShowLogin(true)} onExit={() => routerNavigate('/')} />;
-    return <KeyPayLogin onSuccess={() => {}} onBack={() => setShowLogin(false)} />;
+    return <Login onSuccess={() => {}} onBack={() => setShowLogin(false)} />;
   }
 
   const displayName = account?.address ? `${account.address.slice(0, 6)}…${account.address.slice(-4)}` : 'inversor';

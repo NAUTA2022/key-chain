@@ -1,7 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { PCard, PBtn, PSection, PTag, PChip, PStat, PProgress, PImg, Icons, CompanyTag } from '../components/ui';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
+import { PCard, PBtn, PSection, PTag, PChip, PStat, PImg, Icons, CompanyTag } from '../components/ui';
 import { RWA_ASSETS, RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD, fmtUSD2 } from '../data';
+import AssetCard from '../components/AssetCard';
+import { useMobile } from '../hooks/useMobile';
+import { useMagnetScroll } from '../hooks/useMagnetScroll';
 
 // TEMP DEV FILTER — lets a developer jump straight to any of the 7 QA fixture
 // states (see devNote on each asset in data/index.js) without hunting through
@@ -18,14 +21,14 @@ const QA_STATES = [
 ];
 
 // ─── Search + filter bar ──────────────────────────────────────────────────────
-function FilterBar({ search, setSearch, cat, setCat, country, setCountry, company, setCompany, issuer, setIssuer, qaState, setQaState }) {
+function FilterBar({ search, setSearch, cat, setCat, country, setCountry, company, setCompany, issuer, setIssuer, qaState, setQaState, pinned }) {
   const [open, setOpen] = useState(false);
   const hasFilters = cat !== 'Todos' || country !== 'Todos' || company !== 'Todos' || issuer !== 'Todos' || qaState !== 'Todos';
 
   return (
-    <div style={{ marginBottom: 22 }}>
+    <div style={{ marginBottom: pinned ? 0 : 22 }}>
       {/* Search row */}
-      <div style={{ display:'flex', gap:10, marginBottom:10 }}>
+      <div style={{ display:'flex', gap:10, marginBottom: pinned && !open ? 0 : 10 }}>
         <div style={{ flex:1, position:'relative' }}>
           <span style={{ position:'absolute', left:13, top:'50%', transform:'translateY(-50%)', color:'var(--ter)', pointerEvents:'none', display:'flex' }}>
             {Icons.search || <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
@@ -54,7 +57,7 @@ function FilterBar({ search, setSearch, cat, setCat, country, setCountry, compan
         {open && (
           <motion.div initial={{ height:0, opacity:0 }} animate={{ height:'auto', opacity:1 }} exit={{ height:0, opacity:0 }}
             style={{ overflow:'hidden' }}>
-            <div style={{ padding:'16px 18px', background:'var(--surface)', border:'1.5px solid var(--border)', borderRadius:14, display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:16 }}>
+            <div style={{ padding:'16px 18px', background:'var(--surface)', border:'1.5px solid var(--border)', borderRadius:14, maxHeight: pinned ? '55vh' : undefined, overflowY: pinned ? 'auto' : undefined, display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:16 }}>
               <FilterGroup label="Categoría" value={cat} onChange={setCat} options={RWA_CATS} />
               <FilterGroup label="País" value={country} onChange={setCountry} options={RWA_COUNTRIES} />
               <FilterGroup label="Empresa" value={company} onChange={setCompany} options={RWA_COMPANIES} />
@@ -88,118 +91,6 @@ function FilterGroup({ label, value, onChange, options, labels }) {
   );
 }
 
-// ─── Asset card ───────────────────────────────────────────────────────────────
-// PStat hardcodes its own label/value colors (var(--ter)/var(--text)), which
-// flip dark in light theme — unreadable over a photo scrim that's always
-// dark regardless of the app's theme. This is the same stat shape with
-// colors fixed to white so it stays legible either way.
-function OverlayStat({ label, value, align = 'flex-start' }) {
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:3, alignItems:align }}>
-      <div style={{ fontSize:11, fontFamily:'var(--font-b)', color:'rgba(255,255,255,0.65)', letterSpacing:'0.05em', textTransform:'uppercase' }}>{label}</div>
-      <div style={{ fontSize:18, fontFamily:'var(--font-h)', fontWeight:700, color:'#fff', letterSpacing:'-0.02em' }}>{value}</div>
-    </div>
-  );
-}
-
-// KEYCHAIN's own tokenizations get a distinct full-bleed photo treatment
-// (name/stats readable directly over the image, dark scrim at the bottom)
-// instead of just a glowing border — makes "this one is ours" obvious at a
-// glance rather than something you notice only up close.
-function KeychainAssetCard({ a, left, nav }) {
-  return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
-      <PCard onClick={() => nav('detalle', a)} style={{ height:340, position:'relative' }}>
-        <PImg src={a.img} height="100%" style={{ position:'absolute', inset:0 }}>
-          <div style={{ position:'absolute', top:14, left:14 }}>
-            {/* This card only renders for issuer === 'keychain' — it's a
-                KEYCHAIN tokenization, not AutoMax/AgroToken/etc.'s own
-                listing, even though one of those companies operates it
-                day-to-day. */}
-            <CompanyTag company="KEYCHAIN" cat={a.cat} variant="overlay" />
-          </div>
-          <div style={{ position:'absolute', top:14, right:14 }}>
-            <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
-          </div>
-
-          <div style={{
-            position:'absolute', left:0, right:0, bottom:0, height:'66%',
-            background:'linear-gradient(to top, rgba(6,8,14,0.92) 0%, rgba(6,8,14,0.65) 48%, transparent 100%)',
-            display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:'18px 18px 16px',
-          }}>
-            <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18, color:'#fff', letterSpacing:'-0.02em' }}>{a.name}</div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'rgba(255,255,255,0.7)' }}>
-              {Icons.location}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12 }}>{a.location}</span>
-            </div>
-
-            <div style={{ display:'flex', justifyContent:'space-between', marginTop:14 }}>
-              <OverlayStat label="Token" value={fmtUSD(a.tokenPrice)} />
-              <OverlayStat label="APY est." value={`${a.apy}%`} />
-              <OverlayStat label="Disponibles" value={left.toLocaleString()} align="flex-end" />
-            </div>
-
-            <div style={{ marginTop:10 }}>
-              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'rgba(255,255,255,0.65)' }}>Financiado</span>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, fontWeight:700, color:'#fff' }}>{a.sold}%</span>
-              </div>
-              <PProgress value={a.sold} style={{ background:'rgba(255,255,255,0.22)' }} color="#fff" />
-            </div>
-          </div>
-        </PImg>
-      </PCard>
-    </motion.div>
-  );
-}
-
-function AssetCard({ asset: a, nav }) {
-  const left = a.totalTokens - Math.round(a.totalTokens * a.sold / 100);
-  if (a.issuer === 'keychain') return <KeychainAssetCard a={a} left={left} nav={nav} />;
-
-  return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }}>
-      <PCard onClick={() => nav('detalle', a)} style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative' }}>
-        <PImg src={a.img} height={168} className="market-card-img">
-          <div style={{ position:'absolute', top:12, left:12, display:'flex', gap:6, flexWrap:'wrap' }}>
-            <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
-          </div>
-        </PImg>
-
-        <div style={{ padding:'15px 17px 17px', display:'flex', flexDirection:'column', gap:12, flex:1 }}>
-          <div>
-            <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)', letterSpacing:'-0.02em' }}>{a.name}</div>
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'var(--ter)' }}>
-              {Icons.location}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)' }}>{a.location}</span>
-            </div>
-            {a.company && (
-              <CompanyTag company={a.company} cat={a.cat} size="sm" style={{ marginTop:8 }} />
-            )}
-          </div>
-
-          <div style={{ display:'flex', justifyContent:'space-between' }}>
-            <PStat label="Token" value={fmtUSD(a.tokenPrice)} />
-            <PStat label="APY est." value={`${a.apy}%`} accent />
-            <PStat label="Disponibles" value={left.toLocaleString()} style={{ alignItems:'flex-end' }} />
-          </div>
-
-          <div>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)' }}>Financiado</span>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, fontWeight:700, color:'var(--accent-text)' }}>{a.sold}%</span>
-            </div>
-            <PProgress value={a.sold} />
-          </div>
-        </div>
-      </PCard>
-    </motion.div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
   const [search, setSearch] = useState('');
   const [cat, setCat]       = useState('Todos');
@@ -284,6 +175,16 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
   };
 
   const featured = heroItems[heroIndex] || heroItems[0];
+  const isMobile = useMobile();
+  // Mobile "magnet" toolbar, same as the Feed: search + Filtros pin at the
+  // top with a snap; scrolling back up glides out of it to the featured hero.
+  const sentinelRef = useRef(null);
+  const { stuck } = useMagnetScroll(sentinelRef, 0, isMobile);
+  const snap = useAnimationControls();
+  useEffect(() => {
+    if (stuck) snap.start({ y: [-14, 4, 0], scale: [0.985, 1.006, 1], transition: { duration: 0.45, ease: [0.34, 1.56, 0.64, 1] } });
+  }, [stuck, snap]);
+  const heroH = isMobile ? 440 : 296;
 
   const heroCounter = heroItems.length > 1 && (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:8 }}>
@@ -316,7 +217,7 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
       <PSection
         title="Mercado Primario"
         sub="Proyectos tokenizados en el ecosistema KEYCHAIN. Invertí desde la emisión."
-        action={heroCounter}
+        action={isMobile ? null : heroCounter}
       />
 
       {/* Hero carousel — rotates through heroItems, see state/effects above.
@@ -324,7 +225,7 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
           clipped only by this viewport's overflow:hidden — not by any outer
           page margin — so the outgoing/incoming cards fully cross the frame. */}
       {featured && (
-        <div style={{ position:'relative', overflow:'hidden', height:296, marginBottom:28, borderRadius:20 }}>
+        <div style={{ position:'relative', overflow:'hidden', height:heroH, marginBottom: isMobile ? 14 : 28, borderRadius:20 }}>
           <AnimatePresence initial={false} custom={heroDir}>
             <motion.div key={featured.id}
               custom={heroDir}
@@ -340,6 +241,30 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
               onDrag={handleDrag}
               onDragEnd={handleDragEnd}
             >
+              {isMobile ? (
+              <PCard onClick={handleHeroClick} style={{ height:heroH, position:'relative', cursor:'grab', touchAction:'pan-y' }}>
+                <PImg src={featured.img} height="100%" style={{ position:'absolute', inset:0 }}>
+                  <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.88) 100%)' }} />
+                  <div style={{ position:'absolute', top:14, left:14, right:14, display:'flex', justifyContent:'space-between', gap:8 }}>
+                    <PTag label="Destacado" color="dark" />
+                    <PTag label={featured.stage} color="green" />
+                  </div>
+                  <div style={{ position:'absolute', left:18, right:18, bottom:18, color:'#fff' }}>
+                    <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:24, letterSpacing:'-0.03em', lineHeight:1.15, marginBottom:6 }}>{featured.name}</div>
+                    <div style={{ fontFamily:'var(--font-b)', fontSize:13, color:'rgba(255,255,255,0.75)', marginBottom:14, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden', lineHeight:1.45 }}>{featured.desc}</div>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(3, minmax(0,1fr))', gap:8, marginBottom:14 }}>
+                      {[['Token', fmtUSD(featured.tokenPrice)], ['APY est.', `${featured.apy}%`], ['Financiado', `${featured.sold}%`]].map(([l, v]) => (
+                        <div key={l}>
+                          <div style={{ fontFamily:'var(--font-b)', fontSize:10.5, textTransform:'uppercase', letterSpacing:'0.07em', color:'rgba(255,255,255,0.65)' }}>{l}</div>
+                          <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18 }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <PBtn variant="accent" style={{ width:'100%', justifyContent:'center', background:'#fff', color:'#0b0b0f' }} onClick={e => { e.stopPropagation(); nav('detalle', featured); }}>Ver proyecto</PBtn>
+                  </div>
+                </PImg>
+              </PCard>
+              ) : (
               <PCard onClick={handleHeroClick}
                 style={{ display:'flex', height:296, cursor:'grab', flexWrap:'wrap', touchAction:'pan-y',
                   ...(featured.issuer==='keychain' && { boxShadow:'var(--sh-lg)', background:'var(--surface)' }) }}>
@@ -370,8 +295,20 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
                   </div>
                 </div>
               </PCard>
+              )}
             </motion.div>
           </AnimatePresence>
+        </div>
+      )}
+      {isMobile && featured && heroCounter && (
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:22 }}>
+          <div style={{ display:'flex', gap:6 }}>
+            {heroItems.map((item, i) => (
+              <button key={item.id} onClick={() => goToHero(i)} aria-label={item.name}
+                style={{ width: i === heroIndex ? 20 : 7, height:7, borderRadius:999, border:'none', padding:0, cursor:'pointer',
+                  background: i === heroIndex ? 'var(--accent)' : 'var(--border)', transition:'width 0.25s ease, background 0.25s ease' }} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -382,9 +319,26 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }) {
           <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>Filtrado desde Personalización.</span>
         </div>
       ) : (
-        <FilterBar search={search} setSearch={setSearch} cat={cat} setCat={setCat}
-          country={country} setCountry={setCountry} company={company} setCompany={setCompany}
-          issuer={issuer} setIssuer={setIssuer} qaState={qaState} setQaState={setQaState} />
+        <>
+          <div ref={sentinelRef} />
+          {(() => {
+            const bar = (
+              <FilterBar search={search} setSearch={setSearch} cat={cat} setCat={setCat}
+                country={country} setCountry={setCountry} company={company} setCompany={setCompany}
+                issuer={issuer} setIssuer={setIssuer} qaState={qaState} setQaState={setQaState} pinned={isMobile} />
+            );
+            if (!isMobile) return bar;
+            return (
+              <div style={{ position:'sticky', top:0, zIndex:30, margin:'0 -14px 12px' }}>
+                <motion.div animate={snap}
+                  style={{ padding:'10px 14px', background: stuck ? 'var(--bg)' : 'transparent', transition:'background 0.2s ease, box-shadow 0.2s ease',
+                    boxShadow: stuck ? '0 10px 24px -12px rgba(0,0,0,0.45)' : 'none' }}>
+                  {bar}
+                </motion.div>
+              </div>
+            );
+          })()}
+        </>
       )}
 
       {/* Results count */}

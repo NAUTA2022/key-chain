@@ -1,0 +1,93 @@
+import { useState } from 'react';
+import { SquareMedia, PostComments } from './feed';
+import { Icons, CompanyAvatar } from './ui';
+import { setProjectPosts, issuerNameOf, postMedia, projectCode } from '../lib/projectFeed';
+
+// One post as shown in the global Feed and on a company profile, laid out
+// like Instagram: company header (hexagon + name open its profile; the
+// project name opens the project),
+// square media, likes/comments/"Ver proyecto", then the caption.
+export default function FeedPostCard({ post, asset, nav }) {
+  const [open, setOpen] = useState(false);
+  const media = postMedia(post);
+  const issuer = issuerNameOf(asset);
+
+  const update = (fn) => setProjectPosts(asset, posts => posts.map(p => (p.id === post.id ? fn(p) : p)));
+  const toggleLike = () => update(p => ({ ...p, liked: !p.liked, likes: p.likes + (p.liked ? -1 : 1) }));
+  const addComment = (text) => update(p => ({
+    ...p, comments: [...(p.comments || []), {
+      id: Date.now(), date: 'Ahora', text,
+      author: asset.isMine ? issuer : 'Vos', isIssuer: !!asset.isMine,
+    }],
+  }));
+
+  const linkStyle = { background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'inherit' };
+
+  return (
+    <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 16, padding: '16px 18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        {/* Posts are always the company's: its hexagon + name lead, the
+            project is the secondary line. */}
+        <button onClick={() => nav('empresa', issuer)} aria-label={`Ver perfil de ${issuer}`} style={{ ...linkStyle, display: 'flex', flexShrink: 0 }}>
+          <CompanyAvatar company={issuer} size={38} />
+        </button>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <button onClick={() => nav('empresa', issuer)}
+            style={{ ...linkStyle, textAlign: 'left', maxWidth: '100%', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+            {issuer}
+          </button>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <ProjectCode asset={asset} onClick={() => nav('detalle', asset)} />{' '}
+            <button onClick={() => nav('detalle', asset)} style={{ ...linkStyle, fontWeight: 600, color: 'var(--sec)' }}>{asset.name}</button>
+            {' · '}{asset.cat} · {post.date}
+          </div>
+        </div>
+        {post.milestone && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 999, background: 'var(--accent-bg)', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 10.5, flexShrink: 0 }}>
+            ★ Hito
+          </span>
+        )}
+      </div>
+
+      <SquareMedia media={media} />
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '4px 0 8px' }}>
+        <button onClick={toggleLike} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: post.liked ? 'var(--neg)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, padding: 0 }}>
+          {post.liked ? '♥' : '♡'} {post.likes}
+        </button>
+        <button onClick={() => setOpen(o => !o)} aria-expanded={open}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: open ? 'var(--text)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, padding: 0 }}>
+          {Icons.comment} {post.comments?.length ? `${post.comments.length} ${post.comments.length === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
+        </button>
+        <button onClick={() => nav('detalle', { ...asset, focusPostId: post.id })}
+          style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, padding: 0 }}>
+          Ver proyecto →
+        </button>
+      </div>
+      {post.text && (
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--text)', lineHeight: 1.55 }}>
+          <b style={{ fontWeight: 700 }}>{issuer}</b> {post.text}
+        </div>
+      )}
+      {open && (
+        <PostComments comments={post.comments || []} onAdd={addComment} issuerName={issuer} isOwner={!!asset.isMine} />
+      )}
+    </div>
+  );
+}
+
+// Project identifier chip ("EDF-021"); used on posts, reviews and analytics.
+export function ProjectCode({ asset, onClick, overlay }) {
+  const Tag = onClick ? 'button' : 'span';
+  return (
+    <Tag onClick={onClick} title={asset.name}
+      style={{
+        display: 'inline-block', padding: '1px 6px', borderRadius: 6, flexShrink: 0,
+        border: overlay ? '1px solid rgba(255,255,255,0.3)' : '1px solid var(--border-l)', background: overlay ? 'rgba(255,255,255,0.14)' : 'var(--surface2)',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 10, fontWeight: 700, letterSpacing: '0.03em', color: overlay ? '#fff' : 'var(--sec)',
+        cursor: onClick ? 'pointer' : 'default', verticalAlign: 'middle', lineHeight: 1.5,
+      }}>
+      {projectCode(asset)}
+    </Tag>
+  );
+}
