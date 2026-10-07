@@ -1,15 +1,11 @@
-import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FaTimes, FaFilter, FaShieldAlt, FaBolt, FaCoins, FaLock, FaCheckCircle, FaSortAmountDown, FaSortAmountUp, FaCube } from 'react-icons/fa';
+import { FaTimes, FaFilter, FaShieldAlt, FaBolt, FaCoins, FaLock, FaCheckCircle, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { playNodeHover, playNodeSelect, playZoomIn, playZoomOut } from '../lib/sound';
 import { GOLD, AMBER, WHITE, BLUE, GREEN, BG, ICON_MAP, ICON_OPTIONS, COUNTRY_META, PROJECT_META, INITIAL_DATA, uid, cardColor } from '../lib/ecosystemData';
 import { buildGraph } from '../lib/ecosystemGraph';
 import { CoreCard, CountryCard, CategoryCard, CompanyCard, ProjectCard, CompanyGalleryOverlay } from '../components/EcosystemCards';
 
-// Lazy-loaded: three.js + @react-three/fiber/drei are a heavy bundle that most
-// visitors (who stay on the 2D graph) should never have to download or run.
-// Only fetched — and only mounted — once the user explicitly opts into 3D.
-const Ecosystem3D = lazy(() => import('./Ecosystem3D'));
 
 // ─── GEOMETRY ────────────────────────────────────────────────────────────────
 const hexPoints = (cx, cy, r) => Array.from({ length: 6 }, (_, i) => {
@@ -210,12 +206,12 @@ function Ecosystem2D({ nav }) {
             <filter id="glow-white" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <filter id="glow-blue" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <filter id="glow-green" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            <radialGradient id="grad-bg" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#12100a" stopOpacity="0.45"/><stop offset="100%" stopColor={BG} stopOpacity="0"/></radialGradient>
-            <radialGradient id="grad-core"><stop offset="0%" stopColor="#2a1e00"/><stop offset="100%" stopColor="#020100"/></radialGradient>
-            <radialGradient id="grad-country"><stop offset="0%" stopColor="#1e1400"/><stop offset="100%" stopColor="#060400"/></radialGradient>
-            <radialGradient id="grad-cat"><stop offset="0%" stopColor="#181818"/><stop offset="100%" stopColor="#080808"/></radialGradient>
-            <radialGradient id="grad-comp"><stop offset="0%" stopColor="#061420"/><stop offset="100%" stopColor="#020608"/></radialGradient>
-            <radialGradient id="grad-proj"><stop offset="0%" stopColor="#041208"/><stop offset="100%" stopColor="#020402"/></radialGradient>
+            <radialGradient id="grad-bg" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#f3e3b5" stopOpacity="0.45"/><stop offset="100%" stopColor={BG} stopOpacity="0"/></radialGradient>
+            <radialGradient id="grad-core"><stop offset="0%" stopColor="#fff7df"/><stop offset="100%" stopColor="#f6e4b0"/></radialGradient>
+            <radialGradient id="grad-country"><stop offset="0%" stopColor="#fff6e5"/><stop offset="100%" stopColor="#ffe2b8"/></radialGradient>
+            <radialGradient id="grad-cat"><stop offset="0%" stopColor="#ffffff"/><stop offset="100%" stopColor="#eef1f5"/></radialGradient>
+            <radialGradient id="grad-comp"><stop offset="0%" stopColor="#eff6ff"/><stop offset="100%" stopColor="#d6e6ff"/></radialGradient>
+            <radialGradient id="grad-proj"><stop offset="0%" stopColor="#ecfdf3"/><stop offset="100%" stopColor="#cff5dd"/></radialGradient>
           </defs>
 
           <ellipse cx={cx} cy={cy} rx={560*zoom} ry={420*zoom} fill="url(#grad-bg)"/>
@@ -224,7 +220,7 @@ function Ecosystem2D({ nav }) {
             {/* Edges */}
             {visibleEdges.map((e,i) => {
               if (e.tier==='cross') {
-                return <line key={i} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke="#ffffff" strokeWidth={0.6} strokeOpacity={0.18} strokeDasharray="5 8" strokeLinecap="round"/>;
+                return <line key={i} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke="#0f172a" strokeWidth={0.6} strokeOpacity={0.18} strokeDasharray="5 8" strokeLinecap="round"/>;
               }
               const color = e.tier==='core'?GOLD:e.tier==='country'?AMBER:e.tier==='sub'?BLUE:GREEN;
               const op = e.tier==='core'?0.6:e.tier==='country'?0.45:e.tier==='sub'?0.35:0.22;
@@ -241,29 +237,29 @@ function Ecosystem2D({ nav }) {
         </svg>
 
         {/* Title pill */}
-        <div style={{ position:'absolute', top:14, left:'50%', transform:'translateX(-50%)', display:'flex', alignItems:'center', gap:8, background:'#0a0a0ecc', border:`1px solid ${GOLD}18`, borderRadius:20, padding:'5px 16px', backdropFilter:'blur(12px)', pointerEvents:'none', whiteSpace:'nowrap' }}>
+        <div style={{ position:'absolute', top:14, left:'50%', transform:'translateX(-50%)', display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.9)', border:`1px solid ${GOLD}18`, borderRadius:20, padding:'5px 16px', backdropFilter:'blur(12px)', boxShadow:'0 4px 18px rgba(15,23,42,0.08)', pointerEvents:'none', whiteSpace:'nowrap' }}>
           <span style={{ color:GOLD, fontSize:8, letterSpacing:3, fontWeight:800, textTransform:'uppercase', opacity:0.55 }}>Factoract</span>
-          <span style={{ color:'#333', fontSize:10 }}>·</span>
-          <span style={{ color:'#666', fontSize:8, letterSpacing:2, textTransform:'uppercase' }}>Red Neuronal del Ecosistema</span>
+          <span style={{ color:'#cbd5e1', fontSize:10 }}>·</span>
+          <span style={{ color:'#64748b', fontSize:8, letterSpacing:2, textTransform:'uppercase' }}>Red Neuronal del Ecosistema</span>
         </div>
 
         {/* Legend card — top left */}
-        <div style={{ position:'absolute', top:14, left:16, display:'flex', flexDirection:'column', gap:5, background:'#0a0a0ecc', border:`1px solid #ffffff0a`, borderRadius:12, padding:'10px 14px', backdropFilter:'blur(12px)', pointerEvents:'none' }}>
+        <div style={{ position:'absolute', top:14, left:16, display:'flex', flexDirection:'column', gap:5, background:'rgba(255,255,255,0.9)', border:`1px solid #e2e8f0`, borderRadius:12, padding:'10px 14px', backdropFilter:'blur(12px)', boxShadow:'0 4px 18px rgba(15,23,42,0.08)', pointerEvents:'none' }}>
           {[[GOLD,'⬡','Núcleo'],[AMBER,'⬡','País'],[WHITE,'◼','Categoría'],[BLUE,'●','Empresa']].map(([c,s,l]) => (
             <div key={l} style={{ display:'flex', alignItems:'center', gap:7 }}>
               <span style={{ fontSize:12, color:c, opacity:0.8 }}>{s}</span>
-              <span style={{ color:'#888', fontSize:8.5, letterSpacing:0.3 }}>{l}</span>
+              <span style={{ color:'#64748b', fontSize:8.5, letterSpacing:0.3 }}>{l}</span>
             </div>
           ))}
         </div>
 
         {/* Zoom + filter controls — right center */}
-        <div style={{ position:'absolute', top:'50%', right:16, transform:'translateY(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:4, background:'#0a0a0ecc', border:`1px solid #ffffff0d`, borderRadius:14, padding:'10px 6px', backdropFilter:'blur(12px)' }}>
+        <div style={{ position:'absolute', top:'50%', right:16, transform:'translateY(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:4, background:'rgba(255,255,255,0.9)', border:`1px solid #e2e8f0`, borderRadius:14, padding:'10px 6px', backdropFilter:'blur(12px)', boxShadow:'0 4px 18px rgba(15,23,42,0.08)' }}>
           {[['+',()=>{playZoomIn();setZoom(z=>Math.min(z*1.2,6));},'Acercar'],['−',()=>{playZoomOut();setZoom(z=>Math.max(z*0.8,0.1));},'Alejar'],['⌂',()=>{ setCard(null); animateTo({x:0,y:0},0.72); },'Centrar']].map(([l,f,title])=>(
             <button key={l} title={title} onMouseDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();f();}} style={{ width:34, height:34, borderRadius:9, border:`1px solid ${GOLD}28`, background:`${GOLD}08`, color:GOLD, fontSize:l==='⌂'?14:18, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.15s' }}>{l}</button>
           ))}
           <div style={{ color:GOLD, fontSize:7.5, textAlign:'center', opacity:0.35, margin:'2px 0', letterSpacing:0.5 }}>{Math.round(zoom*100)}%</div>
-          <div style={{ width:22, height:1, background:'#ffffff0a', margin:'2px 0' }}/>
+          <div style={{ width:22, height:1, background:'#0f172a0a', margin:'2px 0' }}/>
           <button title="Filtrar proyectos" onMouseDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();setFilterOpen(o=>!o);}} style={{ width:34, height:34, borderRadius:9, border:`1px solid ${filterOpen?GREEN+'60':GREEN+'20'}`, background:filterOpen?`${GREEN}18`:`${GREEN}06`, color:filterOpen?GREEN:`${GREEN}99`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.15s' }}><FaFilter size={12}/></button>
         </div>
 
@@ -327,13 +323,13 @@ function CoreHex({ active, onSelect }) {
         const q = top[(i + 1) % 6];
         const bp = bot[i], bq = bot[(i + 1) % 6];
         const pts = `${p[0]},${p[1]} ${q[0]},${q[1]} ${bq[0]},${bq[1]} ${bp[0]},${bp[1]}`;
-        return <polygon key={i} points={pts} fill="#000" fillOpacity={i>=2&&i<=4?0.55:0.32} stroke={GOLD} strokeOpacity={0.14} strokeWidth={0.5}/>;
+        return <polygon key={i} points={pts} fill="#94a3b8" fillOpacity={i>=2&&i<=4?0.55:0.32} stroke={GOLD} strokeOpacity={0.14} strokeWidth={0.5}/>;
       })}
 
-      <polygon points={hexPoints(0,0,63)} fill="url(#grad-core)" stroke={active?'#fff':GOLD} strokeWidth={active?3:2} filter="url(#glow-gold)"/>
+      <polygon points={hexPoints(0,0,63)} fill="url(#grad-core)" stroke={active?'#0f172a':GOLD} strokeWidth={active?3:2} filter="url(#glow-gold)"/>
       <polygon points={hexPoints(0,0,54)} fill="none" stroke={GOLD} strokeWidth={0.6} strokeOpacity={0.4}/>
       <polygon points={hexPoints(0,0,45)} fill="none" stroke={GOLD} strokeWidth={0.3} strokeOpacity={0.2} strokeDasharray="4 5"/>
-      <polygon points={hexPoints(0,0,27)} fill="#1e1600" stroke={GOLD} strokeWidth={1.6} filter="url(#glow-gold)"/>
+      <polygon points={hexPoints(0,0,27)} fill="#fff3cc" stroke={GOLD} strokeWidth={1.6} filter="url(#glow-gold)"/>
       <text x={0} y={-1} textAnchor="middle" dominantBaseline="middle" fill={GOLD} fontSize={6.5} fontWeight={900} letterSpacing={0.8}>KYCN</text>
       <text x={0} y={10} textAnchor="middle" fill={GOLD} fontSize={4.5} fillOpacity={0.45}>COIN</text>
       <text x={0} y={79+DEPTH} textAnchor="middle" fill={GOLD} fontSize={10.5} fontWeight={900} letterSpacing={3}>KEYCHAIN</text>
@@ -354,9 +350,9 @@ function NodeShape({ node, active, onSelect }) {
       <g transform={`translate(${node.x},${node.y})`} style={{ cursor:'pointer' }} onMouseDown={stop} onClick={click} onMouseEnter={hover}>
         {active && <><polygon points={hexPoints(0,0,r+7)} fill="none" stroke={AMBER} strokeWidth={2} strokeOpacity={0.6} className="pn1"/><polygon points={hexPoints(0,0,r+7)} fill="none" stroke={AMBER} strokeWidth={1.5} strokeOpacity={0.4} className="pn2"/></>}
         <polygon points={hexPoints(0,0,r+7)} fill={AMBER} fillOpacity={0.04} stroke="none"/>
-        <polygon points={hexPoints(0,0,r)} fill="url(#grad-country)" stroke={active?'#fff':AMBER} strokeWidth={active?2.5:1.6} filter="url(#glow-amber)"/>
+        <polygon points={hexPoints(0,0,r)} fill="url(#grad-country)" stroke={active?'#0f172a':AMBER} strokeWidth={active?2.5:1.6} filter="url(#glow-amber)"/>
         <polygon points={hexPoints(0,0,r-6)} fill="none" stroke={AMBER} strokeWidth={0.4} strokeOpacity={0.3}/>
-        <circle cx={0} cy={0} r={13} fill="#00000055" stroke={AMBER} strokeWidth={0.4} strokeOpacity={0.35}/>
+        <circle cx={0} cy={0} r={13} fill="#ffffffaa" stroke={AMBER} strokeWidth={0.4} strokeOpacity={0.35}/>
         <text x={0} y={0} textAnchor="middle" dominantBaseline="central" fontSize={17}>{node.flag}</text>
         <text x={0} y={r+14} textAnchor="middle" fill={AMBER} fontSize={8.5} fontWeight={700}>{node.name}</text>
       </g>
@@ -369,7 +365,7 @@ function NodeShape({ node, active, onSelect }) {
       <g transform={`translate(${node.x},${node.y})`} style={{ cursor:'pointer' }} onMouseDown={stop} onClick={click} onMouseEnter={hover}>
         {active && <><rect x={-(s+5)} y={-(s+5)} width={(s+5)*2} height={(s+5)*2} fill="none" stroke={WHITE} strokeWidth={2} strokeOpacity={0.6} rx={4} className="pn1"/><rect x={-(s+5)} y={-(s+5)} width={(s+5)*2} height={(s+5)*2} fill="none" stroke={WHITE} strokeWidth={1.5} strokeOpacity={0.35} rx={4} className="pn2"/></>}
         <rect x={-(s+5)} y={-(s+5)} width={(s+5)*2} height={(s+5)*2} fill={WHITE} fillOpacity={0.02} rx={4}/>
-        <rect x={-s} y={-s} width={s*2} height={s*2} fill="url(#grad-cat)" stroke={active?'#fff':WHITE} strokeWidth={active?2.5:1.3} filter="url(#glow-white)" rx={3}/>
+        <rect x={-s} y={-s} width={s*2} height={s*2} fill="url(#grad-cat)" stroke={active?'#0f172a':WHITE} strokeWidth={active?2.5:1.3} filter="url(#glow-white)" rx={3}/>
         <rect x={-(s-4)} y={-(s-4)} width={(s-4)*2} height={(s-4)*2} fill="none" stroke={WHITE} strokeWidth={0.4} strokeOpacity={0.28} rx={2}/>
         {Icon && (
           <foreignObject x={-11} y={-11} width={22} height={22}>
@@ -389,7 +385,7 @@ function NodeShape({ node, active, onSelect }) {
       <g transform={`translate(${node.x},${node.y})`} style={{ cursor:'pointer' }} onMouseDown={stop} onClick={click} onMouseEnter={hover}>
         {active && <><circle r={r+5} fill="none" stroke={BLUE} strokeWidth={2} strokeOpacity={0.6} className="pn1"/><circle r={r+5} fill="none" stroke={BLUE} strokeWidth={1.5} strokeOpacity={0.35} className="pn2"/></>}
         <circle r={r+5} fill={BLUE} fillOpacity={0.04}/>
-        <circle r={r} fill="url(#grad-comp)" stroke={active?'#fff':BLUE} strokeWidth={active?2.5:1.3} filter="url(#glow-blue)"/>
+        <circle r={r} fill="url(#grad-comp)" stroke={active?'#0f172a':BLUE} strokeWidth={active?2.5:1.3} filter="url(#glow-blue)"/>
         <circle r={r-4} fill="none" stroke={BLUE} strokeWidth={0.4} strokeOpacity={0.3}/>
         <text x={0} y={0} textAnchor="middle" dominantBaseline="central" fill={BLUE} fontSize={6} fontWeight={800}>{initials}</text>
         <text x={0} y={r+12} textAnchor="middle" fill={BLUE} fontSize={7} fillOpacity={0.8}>{node.name}</text>
@@ -415,7 +411,7 @@ function NodeInfoCard({ node, onClose, nav, data, pan, zoom, vp, cw, ch, allNode
       initial={{ opacity:0, scale:0.9, x:-12 }} animate={{ opacity:1, scale:1, x:0 }} exit={{ opacity:0, scale:0.9, x:-12 }}
       transition={{ duration:0.18, ease:'easeOut' }}
       onMouseDown={e=>e.stopPropagation()}
-      style={{ position:'absolute', left, top, width:CARD_W, zIndex:30, background:'linear-gradient(160deg,#0e0c0a,#08080f)', border:`1px solid ${color}22`, borderRadius:20, overflow:'hidden', boxShadow:`0 0 0 1px ${color}08, 0 0 50px ${color}10, 0 24px 64px rgba(0,0,0,0.85)` }}
+      style={{ position:'absolute', left, top, width:CARD_W, zIndex:30, background:'linear-gradient(160deg,#ffffff,#ffffff)', border:`1px solid ${color}22`, borderRadius:20, overflow:'hidden', boxShadow:`0 0 0 1px ${color}08, 0 0 50px ${color}10, 0 24px 64px rgba(15,23,42,0.16)` }}
     >
       <button onClick={onClose} style={{ position:'absolute', top:11, right:11, width:26, height:26, borderRadius:7, border:`1px solid ${color}25`, background:`${color}10`, color, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', zIndex:2 }}>
         <FaTimes size={9}/>
@@ -474,49 +470,49 @@ function FilterPanel({ data, onClose, nav }) {
       initial={{ opacity:0, x:20, scale:0.95 }} animate={{ opacity:1, x:0, scale:1 }} exit={{ opacity:0, x:20, scale:0.95 }}
       transition={{ duration:0.18, ease:'easeOut' }}
       onMouseDown={e=>e.stopPropagation()}
-      style={{ position:'absolute', bottom:80, right:56, width:300, zIndex:35, background:'linear-gradient(160deg,#0c0a0e,#080810)', border:`1px solid ${GREEN}22`, borderRadius:18, overflow:'hidden', boxShadow:`0 0 40px ${GREEN}10, 0 20px 60px rgba(0,0,0,0.85)` }}
+      style={{ position:'absolute', bottom:80, right:56, width:300, zIndex:35, background:'linear-gradient(160deg,#ffffff,#ffffff)', border:`1px solid ${GREEN}22`, borderRadius:18, overflow:'hidden', boxShadow:`0 0 40px ${GREEN}10, 0 20px 60px rgba(15,23,42,0.16)` }}
     >
       <div style={{ padding:'14px 16px 10px', borderBottom:`1px solid ${GREEN}10`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div style={{ display:'flex', alignItems:'center', gap:7 }}>
           <FaFilter size={11} color={GREEN}/>
-          <span style={{ color:'#ccc', fontSize:11, fontWeight:700 }}>Filtrar Proyectos</span>
+          <span style={{ color:'#334155', fontSize:11, fontWeight:700 }}>Filtrar Proyectos</span>
         </div>
         <button onClick={onClose} style={{ width:22, height:22, borderRadius:6, border:`1px solid ${GREEN}25`, background:`${GREEN}10`, color:GREEN, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}><FaTimes size={8}/></button>
       </div>
 
       {/* Sort chips */}
       <div style={{ padding:'10px 14px 8px' }}>
-        <div style={{ fontSize:8, color:'#444', letterSpacing:1, textTransform:'uppercase', marginBottom:7 }}>Ordenar por</div>
+        <div style={{ fontSize:8, color:'#94a3b8', letterSpacing:1, textTransform:'uppercase', marginBottom:7 }}>Ordenar por</div>
         <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
           {SORTS.map(s => (
-            <button key={s.k} onClick={()=>setSort(s.k)} style={{ display:'flex', alignItems:'center', gap:4, padding:'5px 9px', borderRadius:7, fontSize:8.5, fontWeight:600, cursor:'pointer', border:`1px solid ${sort===s.k?GREEN+'60':'#1e1e2e'}`, background:sort===s.k?`${GREEN}18`:'#0c0c18', color:sort===s.k?GREEN:'#555', transition:'all 0.15s' }}>{s.icon}{s.label}</button>
+            <button key={s.k} onClick={()=>setSort(s.k)} style={{ display:'flex', alignItems:'center', gap:4, padding:'5px 9px', borderRadius:7, fontSize:8.5, fontWeight:600, cursor:'pointer', border:`1px solid ${sort===s.k?GREEN+'60':'#e2e8f0'}`, background:sort===s.k?`${GREEN}18`:'#f8fafc', color:sort===s.k?GREEN:'#94a3b8', transition:'all 0.15s' }}>{s.icon}{s.label}</button>
           ))}
         </div>
       </div>
 
       {/* Status filter */}
       <div style={{ padding:'0 14px 10px' }}>
-        <div style={{ fontSize:8, color:'#444', letterSpacing:1, textTransform:'uppercase', marginBottom:7 }}>Estado</div>
+        <div style={{ fontSize:8, color:'#94a3b8', letterSpacing:1, textTransform:'uppercase', marginBottom:7 }}>Estado</div>
         <div style={{ display:'flex', gap:5 }}>
           {[['all','Todos'],['Activo','Activos'],['Lanzando','Lanzando']].map(([k,l]) => (
-            <button key={k} onClick={()=>setStatusF(k)} style={{ flex:1, padding:'5px 4px', borderRadius:7, fontSize:8.5, fontWeight:600, cursor:'pointer', border:`1px solid ${statusF===k?GREEN+'50':'#1e1e2e'}`, background:statusF===k?`${GREEN}14`:'#0c0c18', color:statusF===k?GREEN:'#555', transition:'all 0.15s' }}>{l}</button>
+            <button key={k} onClick={()=>setStatusF(k)} style={{ flex:1, padding:'5px 4px', borderRadius:7, fontSize:8.5, fontWeight:600, cursor:'pointer', border:`1px solid ${statusF===k?GREEN+'50':'#e2e8f0'}`, background:statusF===k?`${GREEN}14`:'#f8fafc', color:statusF===k?GREEN:'#94a3b8', transition:'all 0.15s' }}>{l}</button>
           ))}
         </div>
       </div>
 
       {/* Results */}
       <div style={{ borderTop:`1px solid ${GREEN}10`, maxHeight:280, overflowY:'auto' }}>
-        <div style={{ padding:'8px 14px 4px', fontSize:8, color:'#444', letterSpacing:1, textTransform:'uppercase', display:'flex', justifyContent:'space-between' }}>
+        <div style={{ padding:'8px 14px 4px', fontSize:8, color:'#94a3b8', letterSpacing:1, textTransform:'uppercase', display:'flex', justifyContent:'space-between' }}>
           <span>Proyectos</span><span style={{ color:GREEN }}>{sorted.length} resultados</span>
         </div>
         {sorted.map((p,i) => {
-          const sc = p.pm.status==='Activo'?GREEN:p.pm.status==='Lanzando'?AMBER:'#888';
+          const sc = p.pm.status==='Activo'?GREEN:p.pm.status==='Lanzando'?AMBER:'#64748b';
           return (
-            <div key={p.id} style={{ padding:'9px 14px', borderTop:'1px solid #ffffff04', display:'flex', alignItems:'center', gap:10, cursor:'pointer' }} onClick={()=>nav('detalle',{id:p.id})}>
+            <div key={p.id} style={{ padding:'9px 14px', borderTop:'1px solid #0f172a04', display:'flex', alignItems:'center', gap:10, cursor:'pointer' }} onClick={()=>nav('detalle',{id:p.id})}>
               <div style={{ width:24, height:24, borderRadius:6, background:`${GREEN}12`, border:`1px solid ${GREEN}20`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, color:GREEN, fontWeight:800, flexShrink:0 }}>{i+1}</div>
               <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ color:'#ccc', fontSize:9.5, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.name}</div>
-                <div style={{ color:'#444', fontSize:8 }}>{p.country.flag} {p.country.name} · {p.comp.name}</div>
+                <div style={{ color:'#334155', fontSize:9.5, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.name}</div>
+                <div style={{ color:'#94a3b8', fontSize:8 }}>{p.country.flag} {p.country.name} · {p.comp.name}</div>
               </div>
               <div style={{ textAlign:'right', flexShrink:0 }}>
                 <div style={{ color:GREEN, fontSize:10, fontWeight:800 }}>{p.pm.apy}%</div>
@@ -565,7 +561,7 @@ function ManagementPanel({ open, setOpen, tab, setTab, form, setForm, data, allC
     <div
       ref={panelRef}
       onMouseDown={e => e.stopPropagation()}
-      style={{ position:'absolute', ...posStyle, width:open?300:44, background:'#0a0a0e', border:`1px solid ${GOLD}28`, borderRadius:14, display:'flex', flexDirection:'column', overflow:'hidden', zIndex:40, fontFamily:"'Space Grotesk','Inter',system-ui,sans-serif", transition:'width 0.2s', boxShadow:`0 12px 48px rgba(0,0,0,0.75), 0 0 0 1px ${GOLD}0a`, maxHeight:'calc(100vh - 90px)' }}
+      style={{ position:'absolute', ...posStyle, width:open?300:44, background:'#ffffff', border:`1px solid ${GOLD}28`, borderRadius:14, display:'flex', flexDirection:'column', overflow:'hidden', zIndex:40, fontFamily:"'Space Grotesk','Inter',system-ui,sans-serif", transition:'width 0.2s', boxShadow:`0 12px 48px rgba(15,23,42,0.15), 0 0 0 1px ${GOLD}0a`, maxHeight:'calc(100vh - 90px)' }}
     >
       {/* Drag handle */}
       <div
@@ -583,7 +579,7 @@ function ManagementPanel({ open, setOpen, tab, setTab, form, setForm, data, allC
         <button
           onMouseDown={e=>e.stopPropagation()}
           onClick={()=>setOpen(o=>!o)}
-          style={{ width:24, height:24, borderRadius:6, border:`1px solid ${GOLD}40`, background:'#111118', color:GOLD, cursor:'pointer', fontSize:14, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
+          style={{ width:24, height:24, borderRadius:6, border:`1px solid ${GOLD}40`, background:'#ffffff', color:GOLD, cursor:'pointer', fontSize:14, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
         >{open ? '×' : '⋮'}</button>
       </div>
 
@@ -591,7 +587,7 @@ function ManagementPanel({ open, setOpen, tab, setTab, form, setForm, data, allC
         <div style={{ padding:'12px 16px', overflowY:'auto', flex:1 }}>
           <div style={{ display:'flex', gap:4, marginBottom:18, flexWrap:'wrap' }}>
             {[['country','País'],['category','Categoría'],['company','Empresa'],['project','Proyecto']].map(([t,l]) => (
-              <button key={t} onClick={()=>setTab(t)} style={{ padding:'4px 10px', borderRadius:6, fontSize:9, fontWeight:600, cursor:'pointer', border:'none', background:tab===t?GOLD:'#1a1a22', color:tab===t?'#000':'#888' }}>{l}</button>
+              <button key={t} onClick={()=>setTab(t)} style={{ padding:'4px 10px', borderRadius:6, fontSize:9, fontWeight:600, cursor:'pointer', border:'none', background:tab===t?GOLD:'#f1f5f9', color:tab===t?'#ffffff':'#64748b' }}>{l}</button>
             ))}
           </div>
 
@@ -603,9 +599,9 @@ function ManagementPanel({ open, setOpen, tab, setTab, form, setForm, data, allC
             <div style={{ marginTop:18 }}>
               <PLabel color={AMBER}>Países ({data.countries.length})</PLabel>
               {data.countries.map(c => (
-                <div key={c.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'#111118', borderRadius:8, marginBottom:5 }}>
-                  <span style={{ fontSize:14 }}>{c.flag}</span><span style={{ color:'#ccc', fontSize:11 }}>{c.name}</span>
-                  <span style={{ marginLeft:'auto', color:'#555', fontSize:9 }}>{c.categories.length} cats.</span>
+                <div key={c.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'#ffffff', borderRadius:8, marginBottom:5 }}>
+                  <span style={{ fontSize:14 }}>{c.flag}</span><span style={{ color:'#334155', fontSize:11 }}>{c.name}</span>
+                  <span style={{ marginLeft:'auto', color:'#94a3b8', fontSize:9 }}>{c.categories.length} cats.</span>
                 </div>
               ))}
             </div>
@@ -651,86 +647,17 @@ function ManagementPanel({ open, setOpen, tab, setTab, form, setForm, data, allC
 }
 
 function PLabel({ color, children }) { return <div style={{ color, fontSize:10, fontWeight:700, letterSpacing:1, textTransform:'uppercase', marginBottom:10, borderBottom:`1px solid ${color}20`, paddingBottom:6 }}>{children}</div>; }
-function SLab({ children }) { return <div style={{ color:'#777', fontSize:9, fontWeight:600, letterSpacing:0.5, textTransform:'uppercase', marginBottom:4, marginTop:10 }}>{children}</div>; }
-function PIn({ value, onChange, ph }) { return <input value={value} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ width:'100%', boxSizing:'border-box', padding:'7px 10px', borderRadius:7, border:'1px solid #2a2a35', background:'#0e0e16', color:'#ddd', fontSize:12, outline:'none', fontFamily:'inherit' }}/>; }
-function PSel({ value, onChange, children }) { return <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', boxSizing:'border-box', padding:'7px 10px', borderRadius:7, border:'1px solid #2a2a35', background:'#0e0e16', color:'#ddd', fontSize:12, outline:'none', fontFamily:'inherit', cursor:'pointer' }}>{children}</select>; }
+function SLab({ children }) { return <div style={{ color:'#64748b', fontSize:9, fontWeight:600, letterSpacing:0.5, textTransform:'uppercase', marginBottom:4, marginTop:10 }}>{children}</div>; }
+function PIn({ value, onChange, ph }) { return <input value={value} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ width:'100%', boxSizing:'border-box', padding:'7px 10px', borderRadius:7, border:'1px solid #e2e8f0', background:'#f8fafc', color:'#1e293b', fontSize:12, outline:'none', fontFamily:'inherit' }}/>; }
+function PSel({ value, onChange, children }) { return <select value={value} onChange={e=>onChange(e.target.value)} style={{ width:'100%', boxSizing:'border-box', padding:'7px 10px', borderRadius:7, border:'1px solid #e2e8f0', background:'#f8fafc', color:'#1e293b', fontSize:12, outline:'none', fontFamily:'inherit', cursor:'pointer' }}>{children}</select>; }
 function PBt({ color, onClick, children }) { return <button onClick={onClick} style={{ marginTop:14, width:'100%', padding:'8px', borderRadius:8, border:`1px solid ${color}50`, background:`${color}14`, color, fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>{children}</button>; }
 
-// ─── 2D / 3D SWITCH ─────────────────────────────────────────────────────────
-// Both views render the exact same hierarchical, weighted-sunburst graph
-// (buildGraph in ../lib/ecosystemGraph) over the exact same data, so switching
-// never changes what's shown — only how it's rendered.
+// ─── PAGE ───────────────────────────────────────────────────────────────────
+// Only the 2D graph (the 3D view was removed).
 export default function Ecosystem({ nav }) {
-  const [view, setView] = useState('2d');
-  // Asking every time (rather than remembering "yes" for the session) is the
-  // point — the user wants 3D to cost nothing until explicitly opted into,
-  // and to fully give that cost back up the moment they leave it.
-  const [confirming, setConfirming] = useState(false);
-
-  const requestGoto3D = () => setConfirming(true);
-  const cancel3D = () => setConfirming(false);
-  const confirm3D = () => { setConfirming(false); setView('3d'); };
-  const backTo2D = () => setView('2d');
-
   return (
     <div style={{ position:'absolute', inset:0 }}>
-      {view === '2d' ? (
-        <Ecosystem2D nav={nav} />
-      ) : (
-        <Suspense fallback={<Loader3D />}>
-          <Ecosystem3D nav={nav} />
-        </Suspense>
-      )}
-
-      <button
-        onMouseDown={e=>e.stopPropagation()}
-        onClick={() => view === '2d' ? requestGoto3D() : backTo2D()}
-        style={{ position:'absolute', bottom:14, left:'50%', transform:'translateX(-50%)', zIndex:100, display:'flex', alignItems:'center', gap:8, background:'#0a0a0ecc', border:`1px solid ${GOLD}30`, borderRadius:20, padding:'8px 18px', color:GOLD, fontSize:10, fontWeight:700, letterSpacing:1, cursor:'pointer', backdropFilter:'blur(12px)', boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}
-      >
-        {view === '2d' ? '◈ Ver en 3D' : '◆ Ver en 2D'}
-      </button>
-
-      <AnimatePresence>
-        {confirming && (
-          <motion.div
-            initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} transition={{ duration:0.15 }}
-            onMouseDown={e=>e.stopPropagation()} onClick={cancel3D}
-            style={{ position:'absolute', inset:0, zIndex:150, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(4,4,7,0.72)', backdropFilter:'blur(4px)' }}
-          >
-            <motion.div
-              initial={{ opacity:0, scale:0.94, y:8 }} animate={{ opacity:1, scale:1, y:0 }} exit={{ opacity:0, scale:0.94, y:8 }}
-              transition={{ type:'spring', stiffness:340, damping:30 }}
-              onClick={e=>e.stopPropagation()}
-              style={{ width:340, background:'linear-gradient(160deg,#0e0c0a,#08080f)', border:`1px solid ${GOLD}30`, borderRadius:18, padding:'26px 24px', boxShadow:`0 24px 64px rgba(0,0,0,0.85)`, textAlign:'center' }}
-            >
-              <div style={{ width:44, height:44, borderRadius:12, background:`${GOLD}14`, border:`1px solid ${GOLD}30`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 14px' }}>
-                <FaCube size={18} color={GOLD}/>
-              </div>
-              <div style={{ color:'#eee', fontWeight:800, fontSize:15, marginBottom:8 }}>¿Activar la vista 3D?</div>
-              <div style={{ color:'#888', fontSize:12, lineHeight:1.6, marginBottom:20 }}>
-                Usa más recursos gráficos que la vista 2D. Se descarga y arranca solo mientras la tengas abierta — al salir se libera por completo.
-              </div>
-              <div style={{ display:'flex', gap:10 }}>
-                <button onClick={cancel3D} style={{ flex:1, padding:'10px', borderRadius:10, border:'1px solid #ffffff18', background:'transparent', color:'#ccc', fontSize:12, fontWeight:600, cursor:'pointer' }}>Cancelar</button>
-                <button onClick={confirm3D} style={{ flex:1, padding:'10px', borderRadius:10, border:'none', background:GOLD, color:'#161200', fontSize:12, fontWeight:700, cursor:'pointer' }}>Activar</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function Loader3D() {
-  return (
-    <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:14, background:BG }}>
-      <div style={{
-        width:38, height:38, borderRadius:'50%', border:`3px solid ${GOLD}25`, borderTopColor:GOLD,
-        animation:'ecosystem-spin 0.8s linear infinite',
-      }}/>
-      <style>{'@keyframes ecosystem-spin { to { transform: rotate(360deg); } }'}</style>
-      <div style={{ color:'#999', fontSize:11.5, letterSpacing:0.5 }}>Cargando el ecosistema 3D…</div>
+      <Ecosystem2D nav={nav} />
     </div>
   );
 }

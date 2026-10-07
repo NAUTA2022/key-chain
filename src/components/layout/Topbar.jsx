@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectButton } from 'thirdweb/react';
 import { polygon } from 'thirdweb/chains';
@@ -6,121 +6,6 @@ import { PLogo, PAvatar, PDiv, Icons } from '../ui';
 import { NOTIFICATIONS } from '../../data';
 import { client } from '../../lib/client';
 
-// ─── ECOSYSTEM AUDIO ────────────────────────────────────────────────────────
-// Fades in over 1s when entering the 3D ecosystem view, fades back out over 1s
-// when leaving it (or on manual pause) — never a hard cut. Topbar itself never
-// unmounts on route change, so a single <audio> instance can live for the
-// whole session and survive the ecosistema page mounting/unmounting.
-const FADE_MS = 1000;
-
-function useEcosystemAudio(route) {
-  const audioRef = useRef(null);
-  const targetVolRef = useRef(1);
-  const fadeRAF = useRef(null);
-  const prevRoute = useRef(route);
-  const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(100);
-
-  useEffect(() => {
-    if (!audioRef.current) {
-      const audio = new Audio('/music/music3d.mp3');
-      audio.loop = true;
-      audio.volume = 0;
-      audioRef.current = audio;
-    }
-  }, []);
-
-  const fadeTo = (target, duration, onDone) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (fadeRAF.current) cancelAnimationFrame(fadeRAF.current);
-    const start = performance.now();
-    const from = audio.volume;
-    const step = (now) => {
-      const t = Math.min(1, (now - start) / duration);
-      audio.volume = from + (target - from) * t;
-      if (t < 1) {
-        fadeRAF.current = requestAnimationFrame(step);
-      } else {
-        fadeRAF.current = null;
-        onDone?.();
-      }
-    };
-    fadeRAF.current = requestAnimationFrame(step);
-  };
-
-  const startPlayback = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.play().catch(() => {});
-    setPlaying(true);
-    fadeTo(targetVolRef.current, FADE_MS);
-  };
-
-  const stopPlayback = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    fadeTo(0, FADE_MS, () => audio.pause());
-    setPlaying(false);
-  };
-
-  useEffect(() => {
-    const entering = route === 'ecosistema' && prevRoute.current !== 'ecosistema';
-    const leaving = route !== 'ecosistema' && prevRoute.current === 'ecosistema';
-    prevRoute.current = route;
-    if (entering) startPlayback();
-    if (leaving) stopPlayback();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route]);
-
-  useEffect(() => () => {
-    if (fadeRAF.current) cancelAnimationFrame(fadeRAF.current);
-    audioRef.current?.pause();
-  }, []);
-
-  const toggle = () => (playing ? stopPlayback() : startPlayback());
-
-  const changeVolume = (v) => {
-    setVolume(v);
-    targetVolRef.current = v / 100;
-    const audio = audioRef.current;
-    if (playing && audio) {
-      if (fadeRAF.current) cancelAnimationFrame(fadeRAF.current);
-      audio.volume = v / 100;
-    }
-  };
-
-  return { playing, volume, toggle, changeVolume };
-}
-
-function MusicPlayer({ playing, volume, toggle, changeVolume }) {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 8,
-      background: 'var(--surface2)', borderRadius: 999,
-      padding: '6px 12px 6px 6px', flexShrink: 0,
-    }}>
-      <button onClick={toggle} title={playing ? 'Pausar música' : 'Reproducir música'} style={{
-        width: 26, height: 26, borderRadius: '50%', border: 'none', cursor: 'pointer',
-        background: 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-      }}>
-        {playing
-          ? <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/></svg>
-          : <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l15 8-15 8V4z"/></svg>}
-      </button>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--sec)', flexShrink: 0 }}>
-        <path d="M3 10v4h4l5 4V6L7 10H3z" fill="currentColor"/>
-        <path d="M16 8a5 5 0 010 8M18.5 5.5a9 9 0 010 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-      </svg>
-      <input
-        type="range" min={0} max={100} value={volume}
-        onChange={(e) => changeVolume(Number(e.target.value))}
-        style={{ width: 64, accentColor: 'var(--accent)', cursor: 'pointer' }}
-        title="Volumen"
-      />
-    </div>
-  );
-}
 
 const FONT_OPTIONS = [
   { id: 'moderna',    label: 'Moderna',    sub: 'DM Sans + Inter',          h: '"DM Sans", sans-serif',       b: '"Inter", sans-serif' },
@@ -284,12 +169,11 @@ function PersonalizePanel({ open, onClose, prefs, setPrefs }) {
   );
 }
 
-export default function Topbar({ theme, setTheme, nav, route, prefs, setPrefs, sidebarCollapsed, isMobile, onMenuOpen, onLogout }) {
+export default function Topbar({ theme, setTheme, nav, prefs, setPrefs, sidebarCollapsed, isMobile, onMenuOpen, onLogout }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [persOpen, setPersOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const unread = NOTIFICATIONS.filter(n => n.unread).length;
-  const audio = useEcosystemAudio(route);
 
   const iconBtn = (active, onClick, children, title) => (
     <button onClick={onClick} title={title}
@@ -326,17 +210,6 @@ export default function Topbar({ theme, setTheme, nav, route, prefs, setPrefs, s
 
         <div style={{ flex: 1 }} />
 
-        {/* Reproductor — solo en el ecosistema 3D */}
-        {route === 'ecosistema' && (
-          <button onClick={audio.toggle} title={audio.playing ? 'Pausar música' : 'Reproducir música'} style={{
-            width: 30, height: 30, borderRadius: '50%', border: 'none', cursor: 'pointer',
-            background: 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            {audio.playing
-              ? <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/></svg>
-              : <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l15 8-15 8V4z"/></svg>}
-          </button>
-        )}
 
         {/* Cambiar tema — sin recuadro */}
         <button onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')} style={{ width: 36, height: 36, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sec)', flexShrink: 0 }}>
@@ -417,10 +290,6 @@ export default function Topbar({ theme, setTheme, nav, route, prefs, setPrefs, s
 
       <div style={{ flex: 1 }} />
 
-      {/* Reproductor — solo en el ecosistema 3D */}
-      {route === 'ecosistema' && (
-        <MusicPlayer playing={audio.playing} volume={audio.volume} toggle={audio.toggle} changeVolume={audio.changeVolume} />
-      )}
 
       {/* Theme */}
       {iconBtn(false, () => setTheme(t => t === 'light' ? 'dark' : 'light'),

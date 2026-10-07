@@ -2,7 +2,8 @@ import { FaCar, FaBuilding, FaShip, FaMicrochip, FaLeaf, FaIndustry, FaStore, Fa
 import { MdApartment, MdSolarPower } from 'react-icons/md';
 
 // ─── COLORS ─────────────────────────────────────────────────────────────────
-export const GOLD = '#c9a84c', AMBER = '#f59e0b', WHITE = '#e2e2e2', BLUE = '#4a9eff', GREEN = '#4ade80', BG = '#060608';
+// Light theme palette (names kept from the original dark version).
+export const GOLD = '#a8832a', AMBER = '#d97706', WHITE = '#475569', BLUE = '#2563eb', GREEN = '#16a34a', BG = '#f5f6f9';
 export const cardColor = (type) => type==='core'?GOLD:type==='country'?AMBER:type==='category'?WHITE:type==='company'?BLUE:GREEN;
 
 // ─── ICONS ──────────────────────────────────────────────────────────────────
