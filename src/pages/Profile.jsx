@@ -11,9 +11,9 @@ import { holdingsOf, portfolioStats, personSocial } from '../lib/people';
 import { useFollowing, useFollowingPeople, fmtCount } from '../lib/projectFeed';
 import FollowListModal, { FollowButton } from '../components/FollowList';
 import { fmtUSD } from '../data';
-import AssetCard from '../components/AssetCard';
 import AchievementIcon from '../components/AchievementIcon';
 import { achievementsOf } from '../lib/achievements';
+import ProjectBrowser from '../components/ProjectBrowser';
 
 const TABS = [
   ['kyc',  'KYC / Identidad'],
@@ -694,77 +694,8 @@ function AccountTabs({ tab, setTab, twofa, setTwofa, priv, setPriv }) {
 }
 
 
-// Portfolio as a mini marketplace: the same project cards as the market,
-// only the projects this person invested in, with search, category and
-// stage filters and sorting. The person's position (tokens, value) is private.
-const SORTS = [['recent', 'Más recientes'], ['apy', 'Mayor APY'], ['name', 'Nombre A–Z']];
+// Portfolio as a mini marketplace: only the projects this person invested
+// in. The person's position (tokens, value) is private and never shown.
 function InvestmentsMarket({ holdings, nav, isMobile }) {
-  const [q, setQ] = useState('');
-  const [cat, setCat] = useState('Todos');
-  const [stage, setStage] = useState('Todos');
-  const [sort, setSort] = useState('recent');
-  const cats = Object.entries(holdings.reduce((m, h) => ({ ...m, [h.asset.cat]: (m[h.asset.cat] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1]);
-  const stages = ['Todos', ...new Set(holdings.map(h => h.asset.stage))];
-  const term = q.trim().toLowerCase();
-  const list = holdings
-    .filter(h => cat === 'Todos' || h.asset.cat === cat)
-    .filter(h => stage === 'Todos' || h.asset.stage === stage)
-    .filter(h => !term || `${h.asset.name} ${h.asset.location} ${h.asset.company} ${h.asset.cat}`.toLowerCase().includes(term))
-    .sort((a, b) => sort === 'apy' ? b.asset.apy - a.asset.apy : sort === 'name' ? a.asset.name.localeCompare(b.asset.name) : monthsSince(a.since) - monthsSince(b.since));
-  const clear = () => { setQ(''); setCat('Todos'); setStage('Todos'); };
-  const chip = (active) => ({
-    display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-    border: `1px solid ${active ? 'var(--text)' : 'var(--border-l)'}`, background: active ? 'var(--text)' : 'var(--surface)',
-    color: active ? 'var(--surface)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600,
-  });
-  const sortSelect = (
-    <select value={sort} onChange={e => setSort(e.target.value)} aria-label="Ordenar"
-      style={{ height: isMobile ? 32 : 42, padding: '0 10px', borderRadius: isMobile ? 9 : 12, border: '1px solid var(--border-l)', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
-      {SORTS.map(([id, l]) => <option key={id} value={id}>{l}</option>)}
-    </select>
-  );
-  const count = (n, active) => <span style={{ fontSize: 11, opacity: active ? 0.7 : 0.6 }}>{n}</span>;
-
-  return (
-    <div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 12, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
-        <label style={{ flex: 1, minWidth: isMobile ? '100%' : 0, display: 'flex', alignItems: 'center', gap: 8, height: 42, padding: '0 14px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border-l)', color: 'var(--ter)' }}>
-          {Icons.search}
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar en mis inversiones…"
-            style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 13.5 }} />
-          {q && <button onClick={() => setQ('')} aria-label="Borrar búsqueda" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ter)', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>}
-        </label>
-        <div style={{ display: 'flex', padding: 3, borderRadius: 12, background: 'var(--surface2)', border: '1px solid var(--border-l)', height: 42, boxSizing: 'border-box', flexShrink: 0, flex: isMobile ? '1 1 100%' : 'none' }}>
-          {stages.map(s => (
-            <button key={s} onClick={() => setStage(s)}
-              style={{ flex: isMobile ? 1 : 'none', padding: '0 12px', borderRadius: 9, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600,
-                background: stage === s ? 'var(--surface)' : 'transparent', color: stage === s ? 'var(--text)' : 'var(--ter)', boxShadow: stage === s ? 'var(--sh-sm)' : 'none' }}>{s}</button>
-          ))}
-        </div>
-        {!isMobile && sortSelect}
-      </div>
-
-      <div className="no-scrollbar" style={{ display: 'flex', gap: 6, overflowX: 'auto', overflowY: 'hidden', marginBottom: 16, paddingBottom: 2 }}>
-        <button onClick={() => setCat('Todos')} style={chip(cat === 'Todos')}>Todos {count(holdings.length, cat === 'Todos')}</button>
-        {cats.map(([c, n]) => <button key={c} onClick={() => setCat(c)} style={chip(cat === c)}>{c} {count(n, cat === c)}</button>)}
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 12 }}>
-        <span>{list.length} {list.length === 1 ? 'proyecto' : 'proyectos'}{list.length !== holdings.length ? ` de ${holdings.length}` : ''}</span>
-        {isMobile && sortSelect}
-      </div>
-
-      {list.length ? (
-        <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18 }}>
-          {list.map(h => <AssetCard key={h.assetId} asset={h.asset} nav={nav} />)}
-        </div>
-      ) : (
-        <PCard style={{ padding: '36px 20px', textAlign: 'center' }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, margin: '0 auto 12px', background: 'var(--surface2)', color: 'var(--ter)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{Icons.search}</div>
-          <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{holdings.length ? 'Ningún proyecto coincide' : 'Todavía no tiene inversiones'}</div>
-          {holdings.length > 0 && <button onClick={clear} style={{ marginTop: 10, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', textDecoration: 'underline', fontFamily: 'var(--font-b)', fontSize: 13 }}>Limpiar filtros</button>}
-        </PCard>
-      )}
-    </div>
-  );
+  return <ProjectBrowser items={holdings} nav={nav} isMobile={isMobile} placeholder="Buscar en mis inversiones…" emptyText="Todavía no tiene inversiones" />;
 }

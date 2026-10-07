@@ -9,7 +9,7 @@ import IdentityAvatar from '../components/IdentityAvatar';
 import Profile from './Profile';
 import { CompanySummary, CompanyAnalytics, CompanyTrust, CompanyReviews } from '../components/CompanySections';
 import { seedReviews } from '../lib/companyStats';
-import AssetCard from '../components/AssetCard';
+import ProjectBrowser from '../components/ProjectBrowser';
 import FollowListModal from '../components/FollowList';
 import { companyFollowers } from '../lib/people';
 import { MY_COMPANY, ME } from '../lib/me';
@@ -150,7 +150,7 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
         <CompanySummary {...sectionProps} owner={owner} onOwner={toPersonal} onTab={setTab} />
       )}
 
-      {tab === 'proyectos' && <ProjectsGrid nav={nav} assets={profile.allAssets} />}
+      {tab === 'proyectos' && <ProjectsGrid nav={nav} assets={profile.allAssets} isMobile={isMobile} />}
 
       {/* Milestones of all its projects, with the same browser as the Feed
           (search, filters, magnet toolbar); each post carries the project
@@ -168,11 +168,8 @@ export default function CompanyProfile({ nav, name, fromRoute, embedded, onPerso
   );
 }
 
-// Same cards as the marketplace, with each project's identifier.
-function ProjectsGrid({ nav, assets }) {
-  return (
-    <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-      {assets.map(a => <AssetCard key={a.id} asset={a} nav={nav} showCode />)}
-    </div>
-  );
+// Mini marketplace of the company's projects (search, Rubro / Estado, sort),
+// same cards as the market with each project's identifier.
+function ProjectsGrid({ nav, assets, isMobile }) {
+  return <ProjectBrowser items={assets.map(asset => ({ asset }))} nav={nav} isMobile={isMobile} showCode minCard={300} placeholder="Buscar proyectos de la empresa…" />;
 }

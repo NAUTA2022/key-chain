@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PCard, PBtn } from './ui';
 import { ProjectCode } from './FeedPostCard';
-import AssetCard from './AssetCard';
+import ProjectBrowser from './ProjectBrowser';
 import { VerifiedBadge } from './ProfileCard';
 import { fmtUSD } from '../data';
 import { fmtCount } from '../lib/projectFeed';
@@ -204,14 +204,11 @@ export function CompanySummary({ profile, posts, reviews, owner, nav, isMobile, 
         </div>
       </div>
 
-      {/* Projects — same cards as the marketplace */}
+      {/* Projects — mini marketplace with search and filters (first 6) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '24px 0 12px' }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Proyectos <span style={{ color: 'var(--ter)', fontWeight: 600 }}>({m.assets.length})</span></div>
-        <button onClick={() => onTab('proyectos')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>Ver todos →</button>
       </div>
-      <div className="g-market-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-        {m.assets.slice(0, 3).map(a => <AssetCard key={a.id} asset={a} nav={nav} showCode />)}
-      </div>
+      <ProjectBrowser items={m.assets.map(asset => ({ asset }))} nav={nav} isMobile={isMobile} showCode minCard={300} limit={6} onMore={() => onTab('proyectos')} placeholder="Buscar proyectos de la empresa…" />
     </div>
   );
 }
