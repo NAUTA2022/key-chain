@@ -418,7 +418,7 @@ export default function Landing({ onEnter, onDevEnter }) {
           <div className="land-invest-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
             {[
               {
-                tag: <span className="land-pill"><span className="land-pill-dot" style={{ background: '#7fb2ff', boxShadow: '0 0 8px rgba(127,178,255,0.8)' }} />Proyectos RWA · Abiertos</span>, title: <>Activos del<br />mundo real</>, icon: Icons.primary, spot: 'rgba(110,160,255,0.28)',
+                tag: <span className="land-pill"><span className="land-pill-dot" style={{ background: '#7fb2ff', boxShadow: '0 0 8px rgba(127,178,255,0.8)' }} />Proyectos RWA · Abiertos</span>, title: <>Activos del<br />mundo real</>, spot: 'rgba(110,160,255,0.28)',
                 text: 'Invertí en fracciones de autos, campos, drones, inmuebles y edificios tokenizados en Polygon. Cada token representa participación proporcional del activo.',
                 kpis: [['Desde', '$1 USD'], ['APY promedio', '9.8%'], ['Distribución', 'Mensual USDC'], ['Proyectos activos', '148']],
                 bullets: ['Rendimientos mensuales on-chain', 'Liquidez en mercado secundario P2P', 'Contratos auditados · Seguro incluido', 'Sin bancos ni intermediarios'],
@@ -426,7 +426,7 @@ export default function Landing({ onEnter, onDevEnter }) {
               },
               {
                 tag: <span className="land-pill land-pill-green"><span className="land-pill-dot" style={{ background: '#4ade80', boxShadow: '0 0 8px rgba(74,222,128,0.8)' }} />ICO activa · Ronda pública</span>,
-                title: <>Token FACT<br />— la empresa</>, icon: Icons.token, spot: 'rgba(181,155,255,0.28)',
+                title: <>Token FACT<br />— la empresa</>, spot: 'rgba(181,155,255,0.28)',
                 text: 'FACT es el token de utilidad de la plataforma. Al invertir en la ICO participás del crecimiento: descuentos en fees, gobernanza DAO y staking.',
                 kpis: [['Precio ICO', `$${FACT_TOKEN.price}`], ['Staking APY', '9–14%'], ['TGE', '15% inmediato'], ['Vesting', '12 meses']],
                 bullets: ['50% de descuento en fees de plataforma', 'Gobernanza DAO · Votás los proyectos', 'Staking con APY 9–14% anual', 'Acceso anticipado a proyectos nuevos'],
@@ -437,12 +437,9 @@ export default function Landing({ onEnter, onDevEnter }) {
                 onMouseEnter={sHover} style={{ display: 'flex' }}>
                 <SpotlightCard spotlightColor={c.spot} className="land-spot">
                   {c.visual === 'photos' ? <FannedPhotos assets={showcaseAssets} /> : <IcoRing pct={factPct} />}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12 }}>
-                    <div>
-                      <div style={{ marginBottom: 12 }}>{c.tag}</div>
-                      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1 }}>{c.title}</div>
-                    </div>
-                    <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.75)', flexShrink: 0, border: '1px solid rgba(255,255,255,0.10)' }}>{c.icon}</div>
+                  <div style={{ marginBottom: 20 }}>
+                    <div style={{ marginBottom: 12 }}>{c.tag}</div>
+                    <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1 }}>{c.title}</div>
                   </div>
                   <p style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'rgba(255,255,255,0.48)', lineHeight: 1.65, margin: '0 0 22px', minHeight: '4.95em' }}>{c.text}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 22 }}>
