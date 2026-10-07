@@ -65,7 +65,7 @@ export function seedReviews(profile) {
       const pool = REVIEW_TEXT[rating];
       return {
         id: `${a.id}-r${i}`, asset: a, rating, author: REVIEWERS[h % REVIEWERS.length],
-        text: pool[h % pool.length], date: REVIEW_DATES[(h >> 3) % REVIEW_DATES.length], ts: -((h >> 3) % REVIEW_DATES.length),
+        text: pool[h % pool.length], date: REVIEW_DATES[(h >>> 3) % REVIEW_DATES.length], ts: -((h >>> 3) % REVIEW_DATES.length),
       };
     });
   }).sort((x, y) => y.ts - x.ts);

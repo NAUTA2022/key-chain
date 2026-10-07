@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { fmtUSD } from '../data';
+import AchievementIcon from './AchievementIcon';
+import { achievementsOf } from '../lib/achievements';
 
 // "Nivel y logros" as a set of widget tiles (weather-app style): level
 // staircase, invested-amount wave, reputation gauge, return scale,
@@ -301,19 +303,6 @@ function SeniorityTimeline({ months, since }) {
 }
 
 // ─── Achievements ─────────────────────────────────────────────────────────────
-function achievementsOf(d) {
-  return [
-    { icon: '🏆', label: 'Primera inversión', desc: 'Invertiste en tu primer proyecto', p: d.holdings > 0 ? 1 : 0 },
-    { icon: '🛡️', label: 'KYC completo', desc: 'Identidad verificada', p: 1 },
-    { icon: '⭐', label: '6 meses activo', desc: 'Medio año invirtiendo', p: clamp(d.months / 6) },
-    { icon: '🧭', label: 'Diversificado', desc: 'Proyectos en 3 rubros o más', p: clamp(d.cats.length / 3) },
-    { icon: '💧', label: 'Primer $1K de yield', desc: 'Rentas cobradas acumuladas', p: clamp(d.yieldEarned / 1000) },
-    { icon: '🎂', label: '1 año en KEYCHAIN', desc: 'Doce meses de antigüedad', p: clamp(d.months / 12) },
-    { icon: '💎', label: '$50K invertido', desc: 'Llegá al Nivel 5', p: clamp(d.invested / 50000) },
-    { icon: '🚀', label: '10 proyectos', desc: 'Un portafolio amplio', p: clamp(d.holdings / 10) },
-  ];
-}
-
 function AchievementTile({ a }) {
   const done = a.p >= 1;
   return (
@@ -323,7 +312,7 @@ function AchievementTile({ a }) {
       borderRadius: 20, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, background: done ? 'rgba(130,71,229,0.12)' : 'var(--surface2)', filter: done ? 'none' : 'grayscale(0.8)', opacity: done ? 1 : 0.7 }}>{a.icon}</div>
+        <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: done ? 'rgba(130,71,229,0.12)' : 'var(--surface2)', color: done ? '#8247E5' : 'var(--ter)' }}><AchievementIcon name={done ? a.icon : 'lock'} /></div>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)' }}>{a.label}</div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{a.desc}</div>

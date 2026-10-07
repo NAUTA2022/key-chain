@@ -96,9 +96,9 @@ export function holdingsOf(person) {
   for (let i = 0; out.length < n && i < INVESTABLE.length; i++) {
     const a = INVESTABLE[(h + i * 7) % INVESTABLE.length];
     if (out.some(x => x.asset.id === a.id)) continue;
-    const tokens = 10 + ((h >> (i + 2)) % 140);
+    const tokens = 10 + ((h >>> (i + 2)) % 140);
     const invested = Math.round(tokens * a.tokenPrice);
-    const growth = 1 + (((h >> i) % 18) - 3) / 100;
+    const growth = 1 + (((h >>> i) % 18) - 3) / 100;
     out.push({
       assetId: a.id, asset: a, tokens, invested,
       current: Math.round(invested * growth),
