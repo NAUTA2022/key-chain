@@ -194,6 +194,46 @@ function IcoRing({ pct }) {
   );
 }
 
+// Floating "back to top" button: appears after the hero, and its ring fills
+// with how far down the page you are.
+function BackToTop() {
+  const [show, setShow] = useState(false);
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const on = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        setShow(window.scrollY > window.innerHeight * 0.8);
+        setPct(max > 0 ? Math.min(1, window.scrollY / max) : 0);
+      });
+    };
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    window.addEventListener('resize', on);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('scroll', on); window.removeEventListener('resize', on); };
+  }, []);
+  const C = 2 * Math.PI * 22;
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.button className="land-totop" aria-label="Volver arriba" title="Volver arriba"
+          initial={{ opacity: 0, y: 20, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.8 }}
+          whileHover={{ y: -3 }} whileTap={{ scale: 0.92 }} onMouseEnter={sHover}
+          onClick={() => { sWhoosh(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+          <svg width="50" height="50" viewBox="0 0 50 50" style={{ position: 'absolute', inset: -1, transform: 'rotate(-90deg)' }} aria-hidden="true">
+            <circle cx="25" cy="25" r="22" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
+            <circle cx="25" cy="25" r="22" fill="none" stroke="url(#totop-g)" strokeWidth="2" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - pct)} />
+            <defs><linearGradient id="totop-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#7fb2ff" /><stop offset="1" stopColor="#b59bff" /></linearGradient></defs>
+          </svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // Hero play button: turns the page's sounds + ambient music on, with a
 // shockwave that sweeps the whole page; clicking again turns it all off.
 function SoundPower({ onPulse }) {
@@ -606,6 +646,7 @@ export default function Landing({ onEnter, onDevEnter }) {
         </footer>
       </div>
       <PowerPulse pulse={pulse} />
+      <BackToTop />
     </ClickSpark>
   );
 }

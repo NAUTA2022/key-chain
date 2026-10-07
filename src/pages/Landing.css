@@ -233,3 +233,12 @@
 .land-levitate { animation: land-levitate 5s ease-in-out infinite; will-change: transform; }
 @keyframes land-levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @media (prefers-reduced-motion: reduce) { .land-levitate { animation: none; } }
+
+/* Back to top */
+.land-totop { position: fixed; right: 24px; bottom: 24px; z-index: 60; width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff;
+  background: rgba(12,14,22,0.72); border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 24px rgba(127,178,255,0.15); }
+.land-totop:hover { border-color: rgba(127,178,255,0.45); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 30px rgba(127,178,255,0.35); }
+@media (max-width: 767px) { .land-totop { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); } }
