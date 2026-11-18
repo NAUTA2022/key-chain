@@ -1,54 +1,55 @@
 {
-  "name": "factoract-app",
+  "name": "key-chain-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
-  "alias": {
-    "thirdweb/react": "./src/stubs/thirdweb-react.jsx",
-    "thirdweb/chains": "./src/stubs/thirdweb-chains.js",
-    "thirdweb": "./src/stubs/thirdweb.js"
-  },
-  "staticFiles": {
-    "staticPath": "public",
-    "watcherGlob": "**"
+  "engines": {
+    "node": ">=22.22"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "parcel build index.html",
-    "dev:static": "node static-server.mjs",
-    "dev:x402": "node server/x402-server.mjs",
-    "build:static": "node build-esbuild.mjs",
+    "dev": "react-router dev",
+    "build": "react-router build && node scripts/postbuild.mjs",
+    "preview": "vite preview --outDir build/client",
+    "typecheck": "react-router typegen && tsc",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "check": "npm run typecheck && npm run lint && npm run build",
+    "api:types": "npx -y openapi-typescript@7 ${API_SPEC:-http://localhost:4000/openapi.json} -o app/lib/api/schema.ts"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.6.1",
-    "@react-three/postprocessing": "^3.0.4",
-    "@tailwindcss/vite": "^4.3.1",
+    "@react-router/node": "^8.4.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "downshift": "^9.4.0",
-    "framer-motion": "^12.40.0",
+    "framer-motion": "^12.43.0",
+    "gsap": "^3.15.0",
+    "isbot": "^5.1.36",
     "leaflet": "^1.9.4",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-icons": "^5.6.0",
+    "ogl": "^1.0.11",
+    "openapi-fetch": "^0.17.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-icons": "^5.7.0",
     "react-leaflet": "^5.0.0",
-    "react-router-dom": "^7.18.1",
-    "tailwindcss": "^4.3.1",
-    "thirdweb": "^5.120.1",
-    "three": "0.184.0"
+    "react-router": "^8.4.0",
+    "thirdweb": "^5.121.6",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@react-router/dev": "^8.4.0",
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^22.20.5",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "eslint": "^10.3.0",
+    "eslint": "^10.12.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
-    "parcel": "^2.16.4",
-    "parcel-reporter-static-files-copy": "^1.5.3",
-    "vite": "^5.4.21"
+    "sharp": "^0.35.5",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vite": "^8.3.3"
   }
 }

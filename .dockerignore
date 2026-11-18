@@ -1,0 +1,12 @@
+node_modules
+build
+.react-router
+.env
+.env.*
+.vercel
+.git
+*.log
+docs
+# Legacy Vite entry (pending manual removal), not part of the React Router app.
+src
+index.html

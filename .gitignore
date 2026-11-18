@@ -1,7 +1,17 @@
-.vercel
+# Dependencies
 node_modules
-dist
-.parcel-cache
+
+# Build output
+build
+.react-router
 *.timestamp-*.mjs
+
+# Environment (never commit secrets)
 .env
-.env.local
+.env.*
+!.env.example
+
+# Tooling
+.vercel
+.DS_Store
+*.log

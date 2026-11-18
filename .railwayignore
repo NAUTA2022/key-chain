@@ -1,0 +1,9 @@
+# Never upload local secrets or build artifacts to Railway.
+node_modules
+build
+.react-router
+.env
+.env.*
+!.env.example
+.vercel
+*.log

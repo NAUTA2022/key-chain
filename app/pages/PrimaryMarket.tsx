@@ -1,0 +1,415 @@
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useAnimationControls, type PanInfo, type Variants } from 'framer-motion';
+import { PCard, PBtn, PSection, PTag, PStat, PImg, Icons, CompanyTag } from '~/components/ui';
+import { RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD, type AssetIssuer } from '~/data';
+import AssetCard from '~/components/AssetCard';
+import type { NavFn } from '~/lib/navigation';
+import { useCatalog, type CatalogAsset } from '~/lib/catalog';
+import { useSession } from '~/lib/session';
+import { useMobile } from '~/hooks/useMobile';
+import { useMagnetScroll } from '~/hooks/useMagnetScroll';
+import GuideButton from '~/features/guide/GuideButton';
+import FeaturedDemoCard from '~/features/demo-flow/FeaturedDemoCard';
+
+// ─── Filter options ───────────────────────────────────────────────────────────
+type FilterOptions = { cats: readonly string[]; countries: readonly string[]; companies: readonly string[]; issuers: readonly string[] };
+
+const ISSUER_ORDER: readonly AssetIssuer[] = ['keychain', 'verified', 'community'];
+const ISSUER_LABEL: Record<'Todos' | AssetIssuer, string> = { Todos: 'Todos', keychain: 'KEYCHAIN', verified: 'Verificado', community: 'Comunidad' };
+const DEMO_OPTIONS: FilterOptions = { cats: RWA_CATS, countries: RWA_COUNTRIES, companies: RWA_COMPANIES, issuers: ['Todos', ...ISSUER_ORDER] };
+
+const uniqueSorted = (values: string[]) => [...new Set(values.filter(Boolean))].sort((x, y) => x.localeCompare(y, 'es'));
+
+/** Live: only the categories, countries, companies and issuer types present in the catalog. */
+function optionsFrom(assets: readonly CatalogAsset[]): FilterOptions {
+  return {
+    cats: RWA_CATS.filter(c => c === 'Todos' || assets.some(a => a.cat === c)),
+    countries: ['Todos', ...uniqueSorted(assets.map(a => a.country))],
+    companies: ['Todos', ...uniqueSorted(assets.map(a => a.company))],
+    issuers: ['Todos', ...ISSUER_ORDER.filter(k => assets.some(a => a.issuer === k))],
+  };
+}
+
+const ISSUER_KEYS: readonly string[] = ['Todos', ...ISSUER_ORDER];
+const isIssuerKey = (v: string): v is 'Todos' | AssetIssuer => ISSUER_KEYS.includes(v);
+
+/** On-chain badge: the asset's pool is deployed and accepting investments. */
+const OnchainTag = () => <PTag label="On-chain" color="purple" style={{ background:'rgba(130,71,229,0.92)', color:'#fff' }} />;
+
+// ─── Search + filter bar ──────────────────────────────────────────────────────
+type FilterBarProps = {
+  search: string; setSearch: (v: string) => void;
+  cat: string; setCat: (v: string) => void;
+  country: string; setCountry: (v: string) => void;
+  company: string; setCompany: (v: string) => void;
+  issuer: string; setIssuer: (v: string) => void;
+  options: FilterOptions;
+  /** Mobile: the bar is pinned at the top of the page (magnet toolbar). */
+  pinned?: boolean;
+};
+
+function FilterBar({ search, setSearch, cat, setCat, country, setCountry, company, setCompany, issuer, setIssuer, options, pinned }: FilterBarProps) {
+  const [open, setOpen] = useState(false);
+  const hasFilters = cat !== 'Todos' || country !== 'Todos' || company !== 'Todos' || issuer !== 'Todos';
+
+  return (
+    <div data-guide="market-filters" style={{ marginBottom: pinned ? 0 : 22 }}>
+      {/* Search row */}
+      <div style={{ display:'flex', gap:10, marginBottom: pinned && !open ? 0 : 10 }}>
+        <div style={{ flex:1, position:'relative' }}>
+          <span style={{ position:'absolute', left:13, top:'50%', transform:'translateY(-50%)', color:'var(--ter)', pointerEvents:'none', display:'flex' }}>
+            {Icons.search || <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
+          </span>
+          <input
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar proyectos, tokens, empresas..."
+            style={{ width:'100%', boxSizing:'border-box', padding:'10px 14px 10px 38px', borderRadius:12, border:'1.5px solid var(--border)', background:'var(--surface)', color:'var(--text)', fontFamily:'var(--font-b)', fontSize:13.5, outline:'none' }}
+          />
+        </div>
+        <button onClick={() => setOpen(o => !o)}
+          style={{ display:'flex', alignItems:'center', gap:7, padding:'10px 16px', borderRadius:12, border:`1.5px solid ${hasFilters ? 'var(--accent)' : 'var(--border)'}`, background: hasFilters ? 'var(--accent-bg)' : 'var(--surface)', color: hasFilters ? 'var(--accent-text)' : 'var(--sec)', cursor:'pointer', fontFamily:'var(--font-b)', fontSize:13, fontWeight:600, flexShrink:0 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          Filtros {hasFilters && <span style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', display:'inline-block' }}/>}
+        </button>
+        {hasFilters && (
+          <button onClick={() => { setCat('Todos'); setCountry('Todos'); setCompany('Todos'); setIssuer('Todos'); }}
+            style={{ padding:'10px 14px', borderRadius:12, border:'1.5px solid var(--border)', background:'transparent', color:'var(--ter)', cursor:'pointer', fontSize:12, fontFamily:'var(--font-b)' }}>
+            Limpiar
+          </button>
+        )}
+      </div>
+
+      {/* Expandable filter panel */}
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height:0, opacity:0 }} animate={{ height:'auto', opacity:1 }} exit={{ height:0, opacity:0 }}
+            style={{ overflow:'hidden' }}>
+            <div style={{ padding:'16px 18px', background:'var(--surface)', border:'1.5px solid var(--border)', borderRadius:14, maxHeight: pinned ? '55vh' : undefined, overflowY: pinned ? 'auto' : undefined, display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:16 }}>
+              <FilterGroup label="Categoría" value={cat} onChange={setCat} options={options.cats} />
+              <FilterGroup label="País" value={country} onChange={setCountry} options={options.countries} />
+              <FilterGroup label="Empresa" value={company} onChange={setCompany} options={options.companies} />
+              <FilterGroup label="Tipo de emisor" value={issuer} onChange={setIssuer}
+                options={options.issuers}
+                labels={options.issuers.map(k => (isIssuerKey(k) ? ISSUER_LABEL[k] : k))} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+type FilterGroupProps = {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: readonly string[];
+  labels?: readonly string[];
+};
+
+function FilterGroup({ label, value, onChange, options, labels }: FilterGroupProps) {
+  return (
+    <div>
+      <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>{label}</div>
+      <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+        {options.map((opt, i) => (
+          <button key={opt} onClick={() => onChange(opt)}
+            style={{ padding:'5px 11px', borderRadius:999, border:`1.5px solid ${value===opt ? 'var(--accent)' : 'var(--border)'}`, background: value===opt ? 'var(--accent-bg)' : 'transparent', color: value===opt ? 'var(--accent-text)' : 'var(--sec)', cursor:'pointer', fontFamily:'var(--font-b)', fontSize:12, fontWeight: value===opt ? 700 : 400 }}>
+            {labels ? labels[i] : opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+type PrimaryMarketProps = { nav: NavFn; rubro?: string };
+
+export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketProps) {
+  const [search, setSearch] = useState('');
+  const [cat, setCat]       = useState('Todos');
+  const [country, setCountry] = useState('Todos');
+  const [company, setCompany] = useState('Todos');
+  const [issuer, setIssuer]   = useState('Todos');
+  const mobile = useMobile();
+
+  // Backend enabled: the catalog comes from the API (GET /v1/assets); otherwise the demo data.
+  const live = useSession().status !== 'disabled';
+  const { assets, loading } = useCatalog();
+  const options = useMemo(() => (live ? optionsFrom(assets) : DEMO_OPTIONS), [live, assets]);
+  const waiting = live && loading && assets.length === 0;
+
+  const locked = rubro !== 'Todos';
+
+  const filtered = useMemo(() => {
+    const effectiveCat = locked ? rubro : cat;
+    return assets.filter(a => {
+      if (effectiveCat !== 'Todos' && a.cat !== effectiveCat) return false;
+      if (country !== 'Todos' && a.country !== country) return false;
+      if (company !== 'Todos' && a.company !== company) return false;
+      if (issuer !== 'Todos' && a.issuer !== issuer) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return a.name.toLowerCase().includes(q) || a.company?.toLowerCase().includes(q) || a.cat.toLowerCase().includes(q) || a.location.toLowerCase().includes(q);
+      }
+      return true;
+    // KEYCHAIN's own tokenizations always show first, then everyone else —
+    // stable sort keeps each group's original relative order intact.
+    }).sort((a, b) => (a.issuer === 'keychain' ? 0 : 1) - (b.issuer === 'keychain' ? 0 : 1));
+  }, [assets, search, cat, country, company, issuer, rubro, locked]);
+
+  // Hero carousel — rotates through the top results (KEYCHAIN's own listings
+  // sort first, see `filtered` above), auto-advancing every 5s and resetting
+  // whenever the active filters change the result set. Index + direction are
+  // tracked together so the slide animation knows which way to travel.
+  const heroItems = useMemo(() => (filtered.length ? filtered : assets).slice(0, 10), [filtered, assets]);
+  const [[heroIndex, heroDir], setHeroSlide] = useState<[number, number]>([0, 1]);
+  const [heroCountdown, setHeroCountdown] = useState(5);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- pre-existing reset-on-filter-change pattern; rewriting it would change behavior
+    setHeroSlide([0, 1]);
+    setHeroCountdown(5);
+  }, [heroItems]);
+
+  // Drag-to-advance — a real drag suppresses the card's own click-through to
+  // the detail page (draggedRef) and pauses auto-advance (isDraggingRef) so
+  // the timer doesn't fire mid-gesture; clearing past a threshold moves to
+  // the next/previous slide in that direction, otherwise it springs back.
+  const draggedRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const handleDragStart = () => { draggedRef.current = false; isDraggingRef.current = true; };
+  const handleDrag = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => { if (Math.abs(info.offset.x) > 5) draggedRef.current = true; };
+  const handleDragEnd = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    isDraggingRef.current = false;
+    const n = heroItems.length;
+    if (info.offset.x < -80 || info.velocity.x < -400) {
+      goToHero((heroIndex + 1) % n);
+    } else if (info.offset.x > 80 || info.velocity.x > 400) {
+      goToHero((heroIndex - 1 + n) % n);
+    }
+  };
+
+  useEffect(() => {
+    if (heroItems.length <= 1) return;
+    const id = setInterval(() => {
+      if (isDraggingRef.current) return;
+      setHeroCountdown(c => {
+        if (c <= 1) {
+          setHeroSlide(([i]) => [(i + 1) % heroItems.length, 1]);
+          return 5;
+        }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [heroItems]);
+
+  const goToHero = (i: number) => {
+    setHeroSlide(([current]) => [i, i > current ? 1 : i < current ? -1 : 1]);
+    setHeroCountdown(5);
+  };
+  const handleHeroClick = () => {
+    if (draggedRef.current) { draggedRef.current = false; return; }
+    nav('detalle', featured);
+  };
+
+  const featured = heroItems[heroIndex] || heroItems[0];
+  // Mobile "magnet" toolbar, same as the Feed: search + Filtros pin at the
+  // top with a snap; scrolling back up glides out of it to the featured hero.
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const { stuck } = useMagnetScroll(sentinelRef, 0, mobile);
+  const snap = useAnimationControls();
+  useEffect(() => {
+    if (stuck) void snap.start({ y: [-14, 4, 0], scale: [0.985, 1.006, 1], transition: { duration: 0.45, ease: [0.34, 1.56, 0.64, 1] } });
+  }, [stuck, snap]);
+  const heroH = mobile ? 460 : 340;
+
+  const heroCounter = heroItems.length > 1 && (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:8 }}>
+      <div style={{ fontFamily:'var(--font-b)', fontSize:11, fontWeight:600, color:'var(--sec)',
+        background:'var(--surface2)', padding:'4px 10px', borderRadius:999, border:'1px solid var(--border-l)' }}>
+        Próximo en {heroCountdown}s
+      </div>
+      <div style={{ display:'flex', gap:6 }}>
+        {heroItems.map((item, i) => (
+          <button key={item.id} onClick={() => goToHero(i)} title={item.name} aria-label={`Destacado ${i + 1}: ${item.name}`} aria-current={i === heroIndex ? 'true' : undefined}
+            style={{
+              width: i === heroIndex ? 20 : 7, height:7, borderRadius:999,
+              border:'none', padding:0, cursor:'pointer',
+              background: i === heroIndex ? 'var(--accent)' : 'var(--border)',
+              transition:'width 0.25s ease, background 0.25s ease',
+            }} />
+        ))}
+      </div>
+    </div>
+  );
+
+  const heroSlideVariants: Variants = {
+    enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%' }),
+    center: { x: 0 },
+    exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%' }),
+  };
+
+  const filterBar = (
+    <FilterBar search={search} setSearch={setSearch} cat={cat} setCat={setCat}
+      country={country} setCountry={setCountry} company={company} setCompany={setCompany}
+      issuer={issuer} setIssuer={setIssuer} options={options} pinned={mobile} />
+  );
+
+  return (
+    <div className="g-page" style={{ padding:'28px 32px 40px', maxWidth:1200, margin:'0 auto' }}>
+      <PSection
+        title="Mercado Primario"
+        sub="Proyectos tokenizados en el ecosistema KEYCHAIN. Invertí desde la emisión."
+        help={<GuideButton tour="tokenizations" />}
+        action={mobile ? null : heroCounter}
+      />
+
+      {live && <FeaturedDemoCard style={{ marginBottom: mobile ? 14 : 24 }} />}
+
+      {/* Hero carousel — rotates through heroItems, see state/effects above.
+          Slides travel edge-to-edge (±100% of their own width) with no fade,
+          clipped only by this viewport's overflow:hidden — not by any outer
+          page margin — so the outgoing/incoming cards fully cross the frame. */}
+      {featured && (
+        <div style={{ position:'relative', overflow:'hidden', height:heroH, marginBottom: mobile ? 14 : 28, borderRadius:20 }}>
+          <AnimatePresence initial={false} custom={heroDir}>
+            <motion.div key={featured.id}
+              custom={heroDir}
+              variants={heroSlideVariants}
+              initial="enter" animate="center" exit="exit"
+              transition={{ duration:0.45, ease:[0.4, 0, 0.2, 1] }}
+              style={{ position:'absolute', inset:0 }}
+              drag={heroItems.length > 1 ? 'x' : false}
+              dragConstraints={{ left:0, right:0 }}
+              dragElastic={0.35}
+              dragMomentum={false}
+              onDragStart={handleDragStart}
+              onDrag={handleDrag}
+              onDragEnd={handleDragEnd}
+            >
+              {mobile ? (
+              <PCard onClick={handleHeroClick} style={{ height:heroH, position:'relative', cursor:'grab', touchAction:'pan-y' }}>
+                <PImg src={featured.img} alt={featured.name} priority height="100%" style={{ position:'absolute', inset:0 }}>
+                  <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.88) 100%)' }} />
+                  <div style={{ position:'absolute', top:14, left:14, right:14, display:'flex', justifyContent:'space-between', gap:8 }}>
+                    {featured.pool?.status === 'active'
+                      ? <div style={{ display:'flex', gap:8 }}><PTag label="Destacado" color="dark" /><OnchainTag /></div>
+                      : <PTag label="Destacado" color="dark" />}
+                    <PTag label={featured.stage} color="green" />
+                  </div>
+                  <div style={{ position:'absolute', left:18, right:18, bottom:18, color:'#fff' }}>
+                    <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:24, letterSpacing:'-0.03em', lineHeight:1.15, marginBottom:6 }}>{featured.name}</div>
+                    <div style={{ fontFamily:'var(--font-b)', fontSize:13, color:'rgba(255,255,255,0.75)', marginBottom:14, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden', lineHeight:1.45 }}>{featured.desc}</div>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(3, minmax(0,1fr))', gap:8, marginBottom:14 }}>
+                      {([['Token', fmtUSD(featured.tokenPrice)], ['APY est.', `${featured.apy}%`], ['Financiado', `${featured.sold}%`]] as const).map(([l, v]) => (
+                        <div key={l}>
+                          <div style={{ fontFamily:'var(--font-b)', fontSize:10.5, textTransform:'uppercase', letterSpacing:'0.07em', color:'rgba(255,255,255,0.65)' }}>{l}</div>
+                          <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18 }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <PBtn variant="accent" style={{ width:'100%', justifyContent:'center', background:'#fff', color:'#0b0b0f' }} onClick={e => { e.stopPropagation(); nav('detalle', featured); }}>Ver proyecto</PBtn>
+                  </div>
+                </PImg>
+              </PCard>
+              ) : (
+              <PCard onClick={handleHeroClick}
+                style={{ display:'flex', height:heroH, cursor:'grab', flexWrap:'nowrap', overflow:'hidden', touchAction:'pan-y',
+                  ...(featured.issuer==='keychain' && { boxShadow:'var(--sh-lg)', background:'var(--surface)' }) }}>
+                <PImg src={featured.img} alt={featured.name} priority height="auto" style={{ width:'42%', height:'100%', minHeight:0, flex:'0 0 42%' }}>
+                  <div style={{ position:'absolute', top:14, left:14, display:'flex', gap:8 }}>
+                    <PTag label="Destacado" color="dark" />
+                    {featured.pool?.status === 'active' && <OnchainTag />}
+                  </div>
+                </PImg>
+                <div style={{ flex:1, minWidth:0, padding:'22px 28px', display:'flex', flexDirection:'column', justifyContent:'space-between', gap:12 }}>
+                  <div>
+                    <div style={{ display:'flex', gap:8, marginBottom:10 }}>
+                      <PTag label={featured.stage} color="green" />
+                    </div>
+                    <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:26, color:'var(--text)', letterSpacing:'-0.03em', lineHeight:1.15, marginBottom:8, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{featured.name}</div>
+                    {featured.company && (
+                      <CompanyTag company={featured.issuer === 'keychain' ? 'KEYCHAIN' : featured.company} cat={featured.cat} style={{ marginBottom:12 }} />
+                    )}
+                    <div style={{ fontFamily:'var(--font-b)', fontSize:14, color:'var(--sec)', lineHeight:1.55, maxWidth:480, display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{featured.desc}</div>
+                  </div>
+                  <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:16, flexWrap:'wrap', marginTop:8 }}>
+                    <div style={{ display:'flex', gap:'clamp(18px, 2.4vw, 36px)', flexWrap:'wrap', rowGap:12, minWidth:0 }}>
+                      <PStat label="Valuación" value={fmtUSD(featured.valuation)} />
+                      <PStat label="Token" value={fmtUSD(featured.tokenPrice)} />
+                      <PStat label="APY est." value={`${featured.apy}%`} accent />
+                      <PStat label="Financiado" value={`${featured.sold}%`} />
+                    </div>
+                    <PBtn variant="accent" onClick={e => { e.stopPropagation(); nav('detalle', featured); }}>Ver proyecto</PBtn>
+                  </div>
+                </div>
+              </PCard>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      )}
+      {mobile && featured && heroCounter && (
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:22 }}>
+          <div style={{ display:'flex', gap:6 }}>
+            {heroItems.map((item, i) => (
+              <button key={item.id} onClick={() => goToHero(i)} aria-label={`Destacado ${i + 1}: ${item.name}`} aria-current={i === heroIndex ? 'true' : undefined}
+                style={{ width: i === heroIndex ? 20 : 7, height:7, borderRadius:999, border:'none', padding:0, cursor:'pointer',
+                  background: i === heroIndex ? 'var(--accent)' : 'var(--border)', transition:'width 0.25s ease, background 0.25s ease' }} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      {locked ? (
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:22 }}>
+          <PTag label={`Rubro: ${rubro}`} color="green" />
+          <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>Filtrado desde Personalización.</span>
+        </div>
+      ) : (
+        <>
+          <div ref={sentinelRef} />
+          {mobile ? (
+            <div style={{ position:'sticky', top:0, zIndex:30, margin:'0 -14px 12px' }}>
+              <motion.div animate={snap}
+                style={{ padding:'10px 14px', background: stuck ? 'var(--bg)' : 'transparent', transition:'background 0.2s ease, box-shadow 0.2s ease',
+                  boxShadow: stuck ? '0 10px 24px -12px rgba(0,0,0,0.45)' : 'none' }}>
+                {filterBar}
+              </motion.div>
+            </div>
+          ) : filterBar}
+        </>
+      )}
+
+      {/* Results count */}
+      <div role="status" style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:16 }}>
+        {waiting
+          ? 'Cargando proyectos…'
+          : <>{filtered.length} proyecto{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}</>}
+      </div>
+
+      {/* Grid */}
+      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20 }}>
+        {filtered.map(a => <AssetCard key={a.id} asset={a} nav={nav} />)}
+      </div>
+
+      {waiting && (
+        <div className="g-market-grid" aria-hidden="true" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20 }}>
+          {[0, 1, 2].map(i => <PCard key={i} className="market-card" style={{ background:'var(--surface2)', boxShadow:'none' }} />)}
+        </div>
+      )}
+
+      {!waiting && filtered.length === 0 && (
+        <div style={{ textAlign:'center', padding:'60px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:14 }}>
+          {live && assets.length === 0
+            ? 'Todavía no hay proyectos publicados. Volvé pronto.'
+            : 'No se encontraron proyectos con los filtros seleccionados.'}
+        </div>
+      )}
+    </div>
+  );
+}
