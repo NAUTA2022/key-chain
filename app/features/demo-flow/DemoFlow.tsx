@@ -97,7 +97,7 @@ const NETWORK_SHORT: Record<string, string> = { TRX: 'TRON', BSC: 'BSC' };
 /** The diagram's source node for a payment method. */
 function flowSource(method: Method | null, network: string | null): FlowSource {
   if (!method) return { title: 'Tu recarga', sub: 'Binance, wallet o gratis' };
-  if (method === 'binance_pay') return { title: 'Binance Pay', sub: 'Pagás en USDT', accent: '#F0B90B' };
+  if (method === 'binance_pay') return { title: 'Binance Pay', sub: 'Pagas en USDT', accent: '#F0B90B' };
   if (method === 'crypto') return { title: `USDT · ${NETWORK_SHORT[network ?? ''] ?? network ?? 'red'}`, sub: 'Desde tu wallet', accent: '#3ddc97' };
   return { title: 'Recarga de prueba', sub: 'Sin dinero real', accent: '#9fb7d3' };
 }
@@ -130,16 +130,16 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
         <PBtn variant="ghost" small disabled={act.busy} onClick={() => act.run(() => cancelRun(run.id))} style={{ justifySelf: 'start' }}>
           ← Elegir otro método de pago
         </PBtn>
-        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>Si ya enviaste el pago, esperá: si llega, la demo sigue sola.</span>
+        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>Si ya enviaste el pago, espera: si llega, la demo sigue sola.</span>
       </div>
     );
     if (run.method === 'crypto' && run.depositAddress) {
       return (
         <div style={{ display: 'grid', gap: 12 }}>
           <ol style={{ margin: 0, paddingLeft: 18, fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.6 }}>
-            <li>Desde cualquier exchange o wallet, retirá/enviá <strong style={{ color: 'var(--text)' }}>USDT</strong>.</li>
+            <li>Desde cualquier exchange o wallet, retira/envía <strong style={{ color: 'var(--text)' }}>USDT</strong>.</li>
             <li>Red: <strong style={{ color: 'var(--text)' }}>{NETWORK_LABEL[run.network ?? ''] ?? run.network}</strong>. Otra red o moneda se pierde.</li>
-            <li>Monto que tiene que llegar: <strong style={{ color: 'var(--text)' }}>exactamente {amount} USDT</strong> (si tu exchange cobra comisión, sumala aparte).</li>
+            <li>Monto que tiene que llegar: <strong style={{ color: 'var(--text)' }}>exactamente {amount} USDT</strong> (si tu exchange cobra comisión, súmala aparte).</li>
           </ol>
           <CopyField label="Dirección de depósito" value={run.depositAddress} />
           <CopyField label="Monto exacto (USDT)" value={amount} />
@@ -152,9 +152,9 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
     return (
       <div style={{ display: 'grid', gap: 12 }}>
         <ol style={{ margin: 0, paddingLeft: 18, fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.6 }}>
-          <li>Abrí Binance y entrá a <strong style={{ color: 'var(--text)' }}>Pay → Enviar</strong>.</li>
-          <li>Elegí <strong style={{ color: 'var(--text)' }}>Pay ID</strong> y pegá el de abajo.</li>
-          <li>Enviá <strong style={{ color: 'var(--text)' }}>exactamente {amount} USDT</strong>: los centavos identifican tu pago.</li>
+          <li>Abre Binance y entra a <strong style={{ color: 'var(--text)' }}>Pay → Enviar</strong>.</li>
+          <li>Elige <strong style={{ color: 'var(--text)' }}>Pay ID</strong> y pega el de abajo.</li>
+          <li>Envía <strong style={{ color: 'var(--text)' }}>exactamente {amount} USDT</strong>: los centavos identifican tu pago.</li>
         </ol>
         {s.payId && <CopyField label="Pay ID" value={s.payId} />}
         <CopyField label="Monto exacto (USDT)" value={amount} />
@@ -173,7 +173,7 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
   return (
     <div style={{ display: 'grid', gap: 10 }}>
       <div style={{ display: 'grid', gap: 6 }}>
-        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 700, color: 'var(--text)' }}>¿Cuántas partes querés comprar?</span>
+        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 700, color: 'var(--text)' }}>¿Cuántas partes quieres comprar?</span>
         <div role="radiogroup" aria-label="Partes a comprar" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
           {[1, 2, 3, 4, 5].map(n => (
             <button key={n} type="button" role="radio" aria-checked={tokens === n} onClick={() => setTokens(n)}
@@ -186,8 +186,8 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
           {tokens} {tokens === 1 ? 'parte' : 'partes'} = {usd(price)} USD · {tokens * 20}% de la casa · te toca {tokens * 20}% de cada ganancia
         </span>
       </div>
-      {run?.status === 'expired' && !run.steps.some(x => x.key === 'cancelled') && <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)' }}>El pago anterior venció sin confirmarse. Podés generar uno nuevo.</div>}
-      {s.methods.binancePay && <Option selected={method === 'binance_pay'} onSelect={() => setMethod('binance_pay')} title="Binance Pay" sub={`Desde la app de Binance, sin comisión. Pagás unos ${usd(price)} USDT y te devolvemos ${usd(back)}.`} />}
+      {run?.status === 'expired' && !run.steps.some(x => x.key === 'cancelled') && <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)' }}>El pago anterior venció sin confirmarse. Puedes generar uno nuevo.</div>}
+      {s.methods.binancePay && <Option selected={method === 'binance_pay'} onSelect={() => setMethod('binance_pay')} title="Binance Pay" sub={`Desde la app de Binance, sin comisión. Pagas unos ${usd(price)} USDT y te devolvemos ${usd(back)}.`} />}
       {s.methods.crypto && <Option selected={method === 'crypto'} onSelect={() => setMethod('crypto')} title="USDT desde tu wallet o exchange" sub="Por red TRON o BNB Smart Chain, desde MetaMask, Trust Wallet, otro exchange o cualquier wallet. Te devolvemos a tu dirección." />}
       <Option selected={method === 'free'} onSelect={() => setMethod('free')} title="Ver la demo gratis" sub="Todo el recorrido con dinero de prueba. Sin pago ni devolución." />
       {method === 'crypto' && (
@@ -206,7 +206,7 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
       )}
       <PBtn variant="accent" disabled={act.busy || !s.available || !method || !refundOk} onClick={start}
         style={{ width: '100%', justifyContent: 'center', marginTop: 2, ...(method === 'binance_pay' ? { background: '#F0B90B', color: '#1a1406' } : {}) }}>
-        {act.busy ? 'Preparando…' : !method ? 'Elegí una opción' : method === 'free' ? (again ? 'Ver la demo otra vez' : 'Ver la demo gratis') : method === 'crypto' ? 'Generar dirección de pago' : 'Recargar con Binance'}
+        {act.busy ? 'Preparando…' : !method ? 'Elige una opción' : method === 'free' ? (again ? 'Ver la demo otra vez' : 'Ver la demo gratis') : method === 'crypto' ? 'Generar dirección de pago' : 'Recargar con Binance'}
       </PBtn>
     </div>
   );
@@ -226,7 +226,7 @@ function Ledger({ s, run, p, hito }: { s: DemoFlowState; run: DemoRun | null; p:
   const visible = rows.filter(r => r.show);
   const ins = visible.filter(r => r.kind === 'in').reduce((a, r) => a + r.amount, 0);
   const outs = visible.filter(r => r.kind === 'out').reduce((a, r) => a + r.amount, 0);
-  if (!visible.length) return <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>Tus movimientos aparecen acá a medida que avanza la demo.</div>;
+  if (!visible.length) return <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>Tus movimientos aparecen aquí a medida que avanza la demo.</div>;
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
@@ -396,7 +396,7 @@ export default function DemoFlow() {
       );
       case 'failed': return (
         <div role="alert" style={{ display: 'grid', gap: 10, fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--neg)' }}>
-          La red no confirmó un paso de la demo. Tu pago está registrado: reintentá y seguimos desde donde quedó.
+          La red no confirmó un paso de la demo. Tu pago está registrado: reintenta y seguimos desde donde quedó.
           {run && <PBtn variant="accent" disabled={busy} onClick={() => act.run(() => retryRun(run.id))}>{busy ? 'Reintentando…' : 'Reintentar'}</PBtn>}
         </div>
       );
@@ -418,7 +418,7 @@ export default function DemoFlow() {
         <img src={DEMO_IMAGES[0]} alt="" width={44} height={44} style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover' }} />
         <div style={{ minWidth: 0 }}>
           <h1 style={{ margin: 0, fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: mobile ? 19 : 22, letterSpacing: '-0.02em', color: 'var(--text)' }}>Villa Mirador</h1>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>Casa de alquiler en 5 partes de 1 USD · seguí el dinero paso a paso</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>Casa de alquiler en 5 partes de 1 USD · sigue el dinero paso a paso</div>
         </div>
         <div style={{ display: 'flex', gap: 6, marginLeft: 'auto', flexWrap: 'wrap' }}>
           <PTag label="Proyecto destacado" color="dark" />
@@ -428,7 +428,7 @@ export default function DemoFlow() {
 
       <div style={{ position: 'relative', height: stageH, minHeight: 460, background: 'var(--surface)', border: '1px solid var(--border-l)', borderRadius: 22, padding: 6, boxShadow: 'var(--sh-md)', overflow: 'hidden' }}>
         {!s ? (
-          <div role="status" style={{ padding: 40, textAlign: 'center', fontFamily: 'var(--font-b)', color: 'var(--sec)' }}>{flow.failed ? 'No pudimos cargar la demo. Recargá la página.' : 'Cargando la demo…'}</div>
+          <div role="status" style={{ padding: 40, textAlign: 'center', fontFamily: 'var(--font-b)', color: 'var(--sec)' }}>{flow.failed ? 'No pudimos cargar la demo. Recarga la página.' : 'Cargando la demo…'}</div>
         ) : (
           <>
             <FlowDiagram fill mobile={mobile} status={choosing ? null : (run?.status ?? null)} p={choosing ? progress(null) : p} wallets={s.wallets} image={DEMO_IMAGES[0] ?? ''}
@@ -449,7 +449,7 @@ export default function DemoFlow() {
               )}
             </AnimatePresence>
             {sheet === 'ledger' && <Sheet title="Tus ingresos y egresos" onClose={() => setSheet(null)}><Ledger s={s} run={run} p={p} hito={hito} /></Sheet>}
-            {sheet === 'chain' && <Sheet title="Blockchain" onClose={() => setSheet(null)}><BlockchainLog run={run} rpcUrl={chain?.rpcUrl ?? null} networkName={chain?.name ?? 'KEY CHAIN Devnet'} /></Sheet>}
+            {sheet === 'chain' && <Sheet title="Blockchain" onClose={() => setSheet(null)}><BlockchainLog run={run} rpcUrl={chain?.rpcUrl ?? null} networkName={chain?.name ?? 'Brikme Devnet'} /></Sheet>}
           </>
         )}
       </div>

@@ -254,7 +254,7 @@ export default function Holdings({ nav }: HoldingsProps) {
     : MY_HOLDINGS;
   const { assets: catalog, byId } = useCatalog();
 
-  // Demo: the KEYCHAIN custodial balance (in-memory store the payment flows credit and debit).
+  // Demo: the Brikme custodial balance (in-memory store the payment flows credit and debit).
   const { balances: demoBalances, activity: demoActivity } = useWallet();
   const balanceUSD = TOKENS.reduce((s, t) => s + (demoBalances[t.sym] || 0) * t.price, 0);
 
@@ -273,10 +273,10 @@ export default function Holdings({ nav }: HoldingsProps) {
     balance: !account ? '$0.00' : usdcBalance === null ? '…' : fmtUSD2(usdcBalance),
     sub: gasBalance === null ? `USDC en ${network}` : `USDC · ${gasBalance.toLocaleString('es-AR', { maximumFractionDigits: 4 })} ${gasSymbol} para gas`,
   } : {
-    addressLabel: 'Tu dirección KEYCHAIN',
+    addressLabel: 'Tu dirección Brikme',
     address: `${DEPOSIT_ADDRESS.slice(0, 10)}…${DEPOSIT_ADDRESS.slice(-6)}`,
     network: 'Multi-red',
-    balanceLabel: 'Saldo KEYCHAIN',
+    balanceLabel: 'Saldo Brikme',
     balance: fmtUSD2(balanceUSD),
     sub: 'Polygon · BNB Smart Chain · Celo',
   };
@@ -322,11 +322,11 @@ export default function Holdings({ nav }: HoldingsProps) {
     }
   };
   const claimAllDividends = (assetId: number) => runClaim(assetId, async () => {
-    if (!account) throw new Error('Conectá tu wallet.');
+    if (!account) throw new Error('Conecta tu wallet.');
     for (const d of pendingDividends(assetId)) await claimDividend(d, account, wallet);
   }, 'Dividendos cobrados en tu wallet.');
   const claimLiquidation = (h: ApiHolding) => runClaim(h.assetId, async () => {
-    if (!account) throw new Error('Conectá tu wallet.');
+    if (!account) throw new Error('Conecta tu wallet.');
     await claimCapital(h, account, wallet);
   }, 'Capital cobrado en tu wallet.');
 
@@ -364,7 +364,7 @@ export default function Holdings({ nav }: HoldingsProps) {
     </div>
   );
 
-  // KEYCHAIN balance (custodial, demo): what deposits credit, withdrawals and
+  // Brikme balance (custodial, demo): what deposits credit, withdrawals and
   // checkout payments debit. Live has no custodial balance: the wallet's own
   // tokens are listed in "Activos en wallet".
   const keychainBalance = !live && (
@@ -410,7 +410,7 @@ export default function Holdings({ nav }: HoldingsProps) {
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginBottom: 12 }}>Tokens en {live ? network : 'Polygon'}</div>
       {!account && (
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '12px 0', textAlign: 'center' }}>
-          Conectá tu wallet para ver balances reales
+          Conecta tu wallet para ver balances reales
         </div>
       )}
       {live && account && !balances.info && (
@@ -559,7 +559,7 @@ export default function Holdings({ nav }: HoldingsProps) {
         <div role="status" style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: claimMsg.ok ? 'var(--pos)' : 'var(--neg)', padding: '0 2px 12px' }}>{claimMsg.text}</div>
       )}
       {live && holdings.length === 0 && (
-        <div role="status" style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '8px 2px' }}>{holdingsLoading ? 'Cargando tus inversiones…' : 'Todavía no tenés inversiones on-chain. Explorá las tokenizaciones para empezar.'}</div>
+        <div role="status" style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '8px 2px' }}>{holdingsLoading ? 'Cargando tus inversiones…' : 'Todavía no tienes inversiones on-chain. Explora las tokenizaciones para empezar.'}</div>
       )}
       {investments}
     </>

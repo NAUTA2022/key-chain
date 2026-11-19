@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Small live illustrations that fill the Magic Bento cards on the landing.
-const BLUE = '#7fb2ff', VIOLET = '#a78bfa', GREEN = '#4ade80';
+const BLUE = '#1EC6D9', VIOLET = '#F0900F', GREEN = '#4ade80';
 const mono: CSSProperties = { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' };
 
 function useTicker(n: number, ms: number): number {
@@ -18,10 +18,10 @@ function useTicker(n: number, ms: number): number {
 export function AuditVisual() {
   const lines = ['function mint(address to)', 'require(kyc[to], "KYC");', 'emit Distribution(usdc);', 'onlyRole(ESCROW)'];
   return (
-    <div style={{ position: 'relative', borderRadius: 12, border: '1px solid rgba(127,178,255,0.18)', background: 'rgba(8,12,24,0.7)', padding: '10px 12px', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', borderRadius: 12, border: '1px solid rgba(30,198,217,0.18)', background: 'rgba(9,8,34,0.7)', padding: '10px 12px', overflow: 'hidden' }}>
       {lines.map((l, i) => (
         <div key={l} style={{ ...mono, fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, whiteSpace: 'nowrap' }}>
-          <span style={{ color: 'rgba(127,178,255,0.5)', marginRight: 8 }}>{i + 1}</span>{l}
+          <span style={{ color: 'rgba(30,198,217,0.5)', marginRight: 8 }}>{i + 1}</span>{l}
         </div>
       ))}
       <motion.div animate={{ top: ['-20%', '110%'] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
@@ -97,7 +97,7 @@ export function P2PVisual() {
         const d = ((ask / real - 1) * 100).toFixed(1);
         return (
           <motion.div key={`${i}-${k}`} layout initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1 - k * 0.22, x: 0 }} transition={{ duration: 0.35, delay: k * 0.05 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, background: k === 0 ? 'rgba(127,178,255,0.10)' : 'rgba(255,255,255,0.03)', border: `1px solid ${k === 0 ? 'rgba(127,178,255,0.35)' : 'rgba(255,255,255,0.06)'}` }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, background: k === 0 ? 'rgba(30,198,217,0.10)' : 'rgba(255,255,255,0.03)', border: `1px solid ${k === 0 ? 'rgba(30,198,217,0.35)' : 'rgba(255,255,255,0.06)'}` }}>
             <span style={{ flex: 1, minWidth: 0, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'rgba(255,255,255,0.75)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n}</span>
             <span style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 13.5, color: '#fff' }}>${ask}</span>
             <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>${real}</span>
@@ -131,7 +131,7 @@ export function VoteVisual() {
 // KYC checklist ticking itself.
 export function KycVisual() {
   const i = useTicker(5, 900);
-  const items = ['DNI', 'Selfie', 'Verificación'];
+  const items = ['Documento', 'Selfie', 'Verificación'];
   return (
     <div style={{ display: 'flex', gap: 8 }}>
       {items.map((t, k) => {

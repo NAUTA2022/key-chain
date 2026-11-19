@@ -17,7 +17,7 @@ export default function Page() {
       <ComingSoon
         nav={nav}
         title="Portal del inquilino"
-        description="Pronto quienes alquilan propiedades tokenizadas van a poder pagar, ver contratos y reportar mantenimiento desde acá."
+        description="Pronto quienes alquilan propiedades tokenizadas van a poder pagar, ver contratos y reportar mantenimiento desde aquí."
         highlights={['Pagos de alquiler en USDC', 'Contrato y comprobantes', 'Reportes de mantenimiento al operador']}
       />
     );

@@ -54,10 +54,10 @@ function smartRecommend(history: ChatMessage[], catalog: readonly RwaAsset[], li
   }
   const assets = ids.map(id => catalog.find(a => a.id === id)).filter((a): a is RwaAsset => Boolean(a));
   if (!assets.length) {
-    return { text: 'Todavía no hay proyectos publicados para recomendarte. Volvé a consultarme pronto.', ids: [] };
+    return { text: 'Todavía no hay proyectos publicados para recomendarte. Vuelve a consultarme pronto.', ids: [] };
   }
   return {
-    text: `Basándome en lo que me contás, estas son mis recomendaciones principales para tu perfil:\n\n${assets.map(a => `**${a.name}** — APY ${a.apy}%, token desde $${a.tokenPrice}. ${a.desc.slice(0, 80)}...`).join('\n\n')}\n\n¿Querés explorar alguno de estos proyectos en el mercado?`,
+    text: `Basándome en lo que me cuentas, estas son mis recomendaciones principales para tu perfil:\n\n${assets.map(a => `**${a.name}** — APY ${a.apy}%, token desde $${a.tokenPrice}. ${a.desc.slice(0, 80)}...`).join('\n\n')}\n\n¿Quieres explorar alguno de estos proyectos en el mercado?`,
     ids,
   };
 }
@@ -150,8 +150,8 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
   // Greeting on mount
   useEffect(() => {
     const greeting = hasAdvisorBackend
-      ? '¡Hola! Soy tu asesor de inversiones de KEY CHAIN. 👋\n\n¿Qué tipo de activo te genera más interés? Por ejemplo: campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.'
-      : '¡Hola! Soy tu asesor de inversiones. 👋\n\n¿Qué tipo de activo te genera más interés? Podés elegir entre campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.';
+      ? '¡Hola! Soy tu asesor de inversiones de Brikme. 👋\n\n¿Qué tipo de activo te genera más interés? Por ejemplo: campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.'
+      : '¡Hola! Soy tu asesor de inversiones. 👋\n\n¿Qué tipo de activo te genera más interés? Puedes elegir entre campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.';
     // eslint-disable-next-line react-hooks/set-state-in-effect -- pre-existing greeting-on-mount pattern; rewriting it would change behavior
     setMessages([{ role: 'assistant', content: greeting }]);
     setTimeout(() => inputRef.current?.focus(), 300);
@@ -193,14 +193,14 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
         } else {
           const followUps = [
             '¿Y cuál sería tu presupuesto aproximado en dólares para esta inversión?',
-            '¿Pensás mantener la inversión a corto plazo (menos de 2 años), mediano (2-5 años) o largo plazo?',
+            '¿Piensas mantener la inversión a corto plazo (menos de 2 años), mediano (2-5 años) o largo plazo?',
           ];
           const q = followUps[newMessages.filter(m => m.role === 'user').length - 1] || '¿Algún otro detalle que quieras contarme sobre tus objetivos?';
           setMessages(prev => [...prev, { role: 'assistant', content: q }]);
         }
       }
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Hubo un error consultando el asesor. Intentá de nuevo.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Hubo un error consultando el asesor. Intenta de nuevo.' }]);
     }
     setLoading(false);
   };
@@ -238,7 +238,7 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
           </div>
           <div>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'rgba(255,255,255,0.95)' }}>Asesor de inversión</div>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(80,150,255,0.8)' }}>Powered by IA · KEY CHAIN</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(80,150,255,0.8)' }}>Powered by IA · Brikme</div>
           </div>
           <button onClick={onClose} style={{ marginLeft: 'auto', width: 28, height: 28, borderRadius: 8, border: '1px solid rgba(255,255,255,0.10)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ter)' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
@@ -294,7 +294,7 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-            placeholder="Escribí tu respuesta..."
+            placeholder="Escribe tu respuesta..."
             style={{
               flex: 1, padding: '10px 14px', borderRadius: 12,
               background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)',

@@ -57,7 +57,7 @@ export default function WizardLive({ nav }: { nav: NavFn }) {
         {Icons.back} Volver al panel
       </button>
 
-      <PSection title={<span data-guide="tokenize-title">Tokenizar activo</span>} sub="Contanos sobre tu activo: el equipo de KEY CHAIN revisa cada solicitud antes de cualquier publicación." help={<GuideButton tour="tokenize" />} />
+      <PSection title={<span data-guide="tokenize-title">Tokenizar activo</span>} sub="Cuéntanos sobre tu activo: el equipo de Brikme revisa cada solicitud antes de cualquier publicación." help={<GuideButton tour="tokenize" />} />
 
       <div role="tablist" aria-label="Solicitudes de tokenización" data-guide="tokenize-tabs" style={{ display: 'flex', flexWrap: 'wrap', gap: 4, boxShadow: 'inset 0 -1px 0 var(--border-l)', marginBottom: 24 }}>
         {TABS.map(t => {

@@ -25,12 +25,12 @@ const COUNTRY_CODES = COUNTRY_OPTIONS.map(([code]) => code) as [CountryCode, ...
 
 const profileSchema = z.object({
   displayName: z.string().trim()
-    .min(2, 'Ingresá al menos 2 caracteres.')
-    .max(80, 'Usá como máximo 80 caracteres.')
+    .min(2, 'Ingresa al menos 2 caracteres.')
+    .max(80, 'Usa como máximo 80 caracteres.')
     .regex(/^[^\p{Cc}]+$/u, 'El nombre tiene caracteres no permitidos.'),
-  email: z.string().trim().min(1, 'Ingresá tu email.').max(200, 'El email es demasiado largo.').pipe(z.email('Ingresá un email válido.')),
-  country: z.enum(COUNTRY_CODES, 'Elegí tu país.'),
-  acceptTerms: z.literal(true, 'Tenés que aceptar los Términos y la Política de privacidad.'),
+  email: z.string().trim().min(1, 'Ingresa tu email.').max(200, 'El email es demasiado largo.').pipe(z.email('Ingresa un email válido.')),
+  country: z.enum(COUNTRY_CODES, 'Elige tu país.'),
+  acceptTerms: z.literal(true, 'Tienes que aceptar los Términos y la Política de privacidad.'),
 });
 
 type ProfileField = 'displayName' | 'email' | 'country' | 'acceptTerms';
@@ -98,7 +98,7 @@ function UsageChoice({ value, onChange }: { value: Usage; onChange: (u: Usage) =
   const isMobile = useMobile();
   return (
     <fieldset style={{ border: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
-      <legend style={{ ...labelText, padding: 0, marginBottom: 8 }}>¿Cómo vas a usar KEY CHAIN?</legend>
+      <legend style={{ ...labelText, padding: 0, marginBottom: 8 }}>¿Cómo vas a usar Brikme?</legend>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
         {USAGES.map(([id, title, text]) => {
           const active = value === id;
@@ -188,19 +188,19 @@ function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: Onboar
   return (
     <form onSubmit={submit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <h2 style={titleStyle}>Contanos quién sos</h2>
-        <p style={helpText}>Usamos estos datos para tu cuenta y para avisarte sobre tus inversiones. Podés cambiarlos después desde tu perfil.</p>
+        <h2 style={titleStyle}>Cuéntanos quién eres</h2>
+        <p style={helpText}>Usamos estos datos para tu cuenta y para avisarte sobre tus inversiones. Puedes cambiarlos después desde tu perfil.</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
           <span style={labelText}>Nombre</span>
-          <PInput name="displayName" autoComplete="name" maxLength={80} ariaLabel="Nombre" placeholder="Cómo querés que te llamemos" value={form.displayName} onChange={e => set('displayName', e.target.value)} />
+          <PInput name="displayName" autoComplete="name" maxLength={80} ariaLabel="Nombre" placeholder="Cómo quieres que te llamemos" value={form.displayName} onChange={e => set('displayName', e.target.value)} />
           {errors.displayName && <span role="alert" style={errorText}>{errors.displayName}</span>}
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
           <span style={labelText}>Email</span>
-          <PInput name="email" type="email" autoComplete="email" maxLength={200} ariaLabel="Email" placeholder="vos@ejemplo.com" value={form.email} onChange={e => set('email', e.target.value)} />
+          <PInput name="email" type="email" autoComplete="email" maxLength={200} ariaLabel="Email" placeholder="tu@ejemplo.com" value={form.email} onChange={e => set('email', e.target.value)} />
           {errors.email && <span role="alert" style={errorText}>{errors.email}</span>}
         </label>
       </div>
@@ -208,7 +208,7 @@ function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: Onboar
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label htmlFor={countryId} style={labelText}>País de residencia</label>
         <select id={countryId} name="country" autoComplete="country" value={form.country} onChange={e => set('country', e.target.value in COUNTRY_NAMES ? (e.target.value as CountryCode) : '')} style={{ ...selectStyle, color: form.country ? 'var(--text)' : 'var(--ter)' }}>
-          <option value="" disabled>Seleccioná tu país</option>
+          <option value="" disabled>Selecciona tu país</option>
           {COUNTRY_OPTIONS.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
         </select>
         {errors.country && <span role="alert" style={errorText}>{errors.country}</span>}
@@ -319,7 +319,7 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
     e.preventDefault();
     if (checking) return;
     if (!/^\d{6}$/.test(code)) {
-      setError('Ingresá los 6 dígitos del código.');
+      setError('Ingresa los 6 dígitos del código.');
       return;
     }
     setChecking(true);
@@ -344,8 +344,8 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
 
   const header = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <h2 style={titleStyle}>Verificá tu email</h2>
-      <p style={helpText}>Así confirmamos que <strong style={{ color: 'var(--text)', overflowWrap: 'anywhere' }}>{email || 'tu email'}</strong> es tuyo. Es opcional: podés hacerlo más tarde.</p>
+      <h2 style={titleStyle}>Verifica tu email</h2>
+      <p style={helpText}>Así confirmamos que <strong style={{ color: 'var(--text)', overflowWrap: 'anywhere' }}>{email || 'tu email'}</strong> es tuyo. Es opcional: puedes hacerlo más tarde.</p>
     </div>
   );
 
@@ -362,7 +362,7 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         {header}
-        <Note>La verificación por email estará disponible pronto. Podés seguir usando la plataforma con normalidad.</Note>
+        <Note>La verificación por email estará disponible pronto. Puedes seguir usando la plataforma con normalidad.</Note>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <PBtn variant="accent" onClick={onDone} style={isMobile ? { width: '100%' } : undefined}>Continuar</PBtn>
         </div>
@@ -377,7 +377,7 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
       {send.kind === 'sending' && <Note>Enviando un código de 6 dígitos…</Note>}
       {send.kind === 'sent' && (
         <p style={{ ...helpText, fontSize: 13 }}>
-          Te enviamos un código a <strong style={{ color: 'var(--text)' }}>{send.sentTo}</strong>. Vence en {Math.max(1, Math.round(send.expiresInSeconds / 60))} minutos. Revisá también la carpeta de spam.
+          Te enviamos un código a <strong style={{ color: 'var(--text)' }}>{send.sentTo}</strong>. Vence en {Math.max(1, Math.round(send.expiresInSeconds / 60))} minutos. Revisa también la carpeta de spam.
         </p>
       )}
       {send.kind === 'error' && <Alert>{send.message}</Alert>}
@@ -433,7 +433,7 @@ function CompanyDone({ company, onFinish }: { company: MyCompany; onFinish: (pat
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <span aria-hidden="true" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--accent-bg)', color: 'var(--accent-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{Icons.check}</span>
         <h2 style={titleStyle}>Registramos {company.name}</h2>
-        <p style={helpText}>Tu empresa quedó pendiente de verificación. Completá la verificación de empresa (KYB) para que podamos aprobarla; mientras tanto ya podés preparar la tokenización de tus activos.</p>
+        <p style={helpText}>Tu empresa quedó pendiente de verificación. Completa la verificación de empresa (KYB) para que podamos aprobarla; mientras tanto ya puedes preparar la tokenización de tus activos.</p>
       </div>
       <Note>
         <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -462,17 +462,17 @@ function DoneStep({ user, onFinish }: { user: SessionUser; onFinish: (path: stri
         <p style={helpText}>
           {user.emailVerified ? 'Tu cuenta está configurada y tu email verificado.' : 'Tu cuenta está configurada.'}{' '}
           {needsKyc
-            ? 'Para invertir necesitás verificar tu identidad (KYC). Te lleva unos minutos y habilita tu wallet on-chain.'
+            ? 'Para invertir necesitas verificar tu identidad (KYC). Te lleva unos minutos y habilita tu wallet on-chain.'
             : user.kycStatus === 'pending'
               ? 'Tu verificación de identidad está en revisión: te avisamos cuando esté lista.'
-              : 'Tu identidad ya está verificada: podés empezar a invertir.'}
+              : 'Tu identidad ya está verificada: puedes empezar a invertir.'}
         </p>
       </div>
       {needsKyc && (
         <Note>
           <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <PTag label="KYC pendiente" color="neutral" />
-            Sin KYC podés explorar proyectos, pero no invertir ni cobrar rendimientos.
+            Sin KYC puedes explorar proyectos, pero no invertir ni cobrar rendimientos.
           </span>
         </Note>
       )}
@@ -524,7 +524,7 @@ export default function Onboarding({ user, onStarted, onFinished }: Props) {
   return (
     // data-guide-block: guided tours wait until the onboarding flow is over.
     <div className="g-page" data-guide-block="" style={{ padding: '28px 32px 40px', maxWidth: 640, margin: '0 auto' }}>
-      <PSection title="Bienvenido a KEY CHAIN" sub="Completá tu perfil para empezar a invertir en activos reales." />
+      <PSection title="Bienvenido a Brikme" sub="Completa tu perfil para empezar a invertir en activos reales." />
       <Steps step={step} />
       <motion.div key={step} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
         <PCard style={{ padding: isMobile ? '22px 18px' : '28px 30px' }}>

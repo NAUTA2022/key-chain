@@ -36,7 +36,7 @@ export default function DocumentsTab({ years, onOpenYear }: { years: number[]; o
         {loading && !kyc ? (
           <Skeleton rows={4} />
         ) : !kyc || kyc.status === 'none' ? (
-          <div style={mutedStyle}>Todavía no enviaste tus datos de identidad. Completalos en la pestaña KYC / Identidad.</div>
+          <div style={mutedStyle}>Todavía no enviaste tus datos de identidad. Complétalos en la pestaña KYC / Identidad.</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {([
@@ -73,7 +73,7 @@ export default function DocumentsTab({ years, onOpenYear }: { years: number[]; o
             </li>
           ))}
         </ul>
-        {failed !== null && <Notice tone="error" style={{ marginTop: 12 }}>No pudimos descargar el resumen {failed}. Probá de nuevo.</Notice>}
+        {failed !== null && <Notice tone="error" style={{ marginTop: 12 }}>No pudimos descargar el resumen {failed}. Prueba de nuevo.</Notice>}
       </Section>
     </div>
   );

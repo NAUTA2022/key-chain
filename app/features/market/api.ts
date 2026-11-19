@@ -78,7 +78,7 @@ function tradeError(e: unknown, fallback: string): Error {
   if (/Transfer not possible/i.test(msg)) return new Error('El token no permite esta transferencia: tu wallet debe estar verificada (KYC) y habilitada para este activo.', { cause: e });
   if (/wallet is frozen/i.test(msg)) return new Error('La wallet del vendedor está congelada; esta venta no se puede completar.', { cause: e });
   if (/paused/i.test(msg)) return new Error('El mercado o el token están pausados en este momento.', { cause: e });
-  if (/exceeds balance|insufficient balance/i.test(msg)) return new Error('No tenés saldo suficiente para esta operación.', { cause: e });
+  if (/exceeds balance|insufficient balance/i.test(msg)) return new Error('No tienes saldo suficiente para esta operación.', { cause: e });
   return new Error(fallback, { cause: e });
 }
 
@@ -133,9 +133,9 @@ export async function sellOnchain(o: {
   const token = o.holding.token;
   if (!token || o.holding.poolStatus !== 'active') throw new Error('Este activo no se puede negociar ahora.');
   if (o.holding.chainId !== o.info.chainId) throw new Error('El activo está en otra red.');
-  if (!Number.isInteger(o.quantity) || o.quantity < 1) throw new Error('Elegí una cantidad entera de tokens.');
+  if (!Number.isInteger(o.quantity) || o.quantity < 1) throw new Error('Elige una cantidad entera de tokens.');
   const priceAtomic = BigInt(Math.round(o.priceUsd * 1e6));
-  if (priceAtomic <= 0n) throw new Error('Elegí un precio mayor a cero.');
+  if (priceAtomic <= 0n) throw new Error('Elige un precio mayor a cero.');
   const amount = BigInt(o.quantity) * ONE_TOKEN;
 
   let hash: Hex;
@@ -143,9 +143,9 @@ export async function sellOnchain(o: {
     await ensureChain(o.wallet, chain);
     const marketContract = getContract({ client, chain, address: market });
     const allowed = await readContract({ contract: marketContract, method: 'function isTokenAllowed(address token) view returns (bool)', params: [token] });
-    if (!allowed) throw new PreflightError('Este activo todavía no está habilitado en el mercado secundario. Probá de nuevo en unos minutos.');
+    if (!allowed) throw new PreflightError('Este activo todavía no está habilitado en el mercado secundario. Prueba de nuevo en unos minutos.');
     const committed = await committedOf(chain, market, o.account.address, token);
-    if (BigInt(o.holding.balanceAtomic) - committed < amount) throw new PreflightError('No tenés tantos tokens libres: parte ya está publicada en otra venta.');
+    if (BigInt(o.holding.balanceAtomic) - committed < amount) throw new PreflightError('No tienes tantos tokens libres: parte ya está publicada en otra venta.');
     o.onStep('approve');
     const tokenContract = getContract({ client, chain, address: token });
     await sendAndConfirmTransaction({
@@ -180,8 +180,8 @@ export async function buyOnchain(o: {
 }): Promise<TradeResult> {
   const { chain, market, usdc } = marketOf(o.info);
   if (!same(o.listing.market, market) || o.listing.chainId !== o.info.chainId) throw new Error('La oferta no pertenece al mercado de la plataforma.');
-  if (same(o.listing.sellerWallet, o.account.address)) throw new Error('No podés comprar tu propia oferta.');
-  if (!Number.isInteger(o.quantity) || o.quantity < 1 || o.quantity > Math.floor(o.listing.available)) throw new Error('Elegí una cantidad disponible.');
+  if (same(o.listing.sellerWallet, o.account.address)) throw new Error('No puedes comprar tu propia oferta.');
+  if (!Number.isInteger(o.quantity) || o.quantity < 1 || o.quantity > Math.floor(o.listing.available)) throw new Error('Elige una cantidad disponible.');
   const amount = BigInt(o.quantity) * ONE_TOKEN;
   // Whole tokens: the cost is exact (quantity × price); it is also the most the contract may charge.
   const cost = BigInt(o.quantity) * BigInt(o.listing.priceAtomic);
@@ -197,13 +197,13 @@ export async function buyOnchain(o: {
     ]);
     const [seller, , active, token, , remaining, pricePerToken, unit] = onchain;
     if (!same(paymentToken, usdc)) throw new PreflightError('El token de pago del mercado no coincide. No se envió ninguna aprobación.');
-    if (!active || remaining < amount) throw new PreflightError('Esta oferta ya no está disponible en esa cantidad. Actualizá el mercado.');
+    if (!active || remaining < amount) throw new PreflightError('Esta oferta ya no está disponible en esa cantidad. Actualiza el mercado.');
     if (!same(seller, o.listing.sellerWallet) || !same(token, o.listing.token) || pricePerToken !== BigInt(o.listing.priceAtomic) || unit !== ONE_TOKEN) {
       throw new PreflightError('Los datos de la oferta no coinciden con el contrato. No se envió ninguna aprobación.');
     }
     const usdcContract = getContract({ client, chain, address: paymentToken });
     const balance = await readContract({ contract: usdcContract, method: 'function balanceOf(address account) view returns (uint256)', params: [o.account.address] });
-    if (balance < cost) throw new PreflightError('No tenés USDC suficiente para esta compra.');
+    if (balance < cost) throw new PreflightError('No tienes USDC suficiente para esta compra.');
     o.onStep('approve');
     await sendAndConfirmTransaction({
       account: o.account,

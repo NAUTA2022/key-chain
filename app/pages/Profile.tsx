@@ -68,7 +68,7 @@ const ACTIVITY: ActivityRow[] = [
 ];
 
 const KYC_CHECKS = [
-  'Verificación de identidad (DNI)',
+  'Verificación de identidad (documento)',
   'Verificación facial (liveness)',
   'Prueba de domicilio',
   'Verificación PEP / Sanciones',
@@ -77,7 +77,7 @@ const KYC_CHECKS = [
 
 const activityColor: Record<ActivityTone, string> = { pos: '#22c55e', invest: '#8247E5', kyc: '#3b82f6', support: '#F5A623', account: '#5BC4BE' };
 
-const ACCOUNT_NOTE = 'Solo vos ves esta sección.';
+const ACCOUNT_NOTE = 'Solo tú ves esta sección.';
 
 const CATEGORY_LABEL: Record<Stats['categories'][number]['category'], AssetCategory> = {
   autos: 'Autos', campos: 'Campos', drones: 'Drones', inmuebles: 'Inmuebles', edificios: 'Edificios',
@@ -656,9 +656,9 @@ function ActivityCard({ items, loading, error, paged }: { items: readonly Activi
         <PCard style={{ padding: '22px 24px' }}>
           <h2 style={{ ...cardTitle, margin: '0 0 12px' }}>Actividad reciente</h2>
           {!items ? (
-            loading ? <Skeleton rows={4} /> : error ? <Notice tone="error">No pudimos cargar tu actividad. Probá recargar la página.</Notice> : null
+            loading ? <Skeleton rows={4} /> : error ? <Notice tone="error">No pudimos cargar tu actividad. Prueba recargar la página.</Notice> : null
           ) : list.length === 0 ? (
-            <EmptyState title="Todavía no hay movimientos" text="Acá vas a ver tus inversiones, dividendos, verificaciones y consultas de soporte." />
+            <EmptyState title="Todavía no hay movimientos" text="Aquí vas a ver tus inversiones, dividendos, verificaciones y consultas de soporte." />
           ) : (
           <ul style={{ display: 'flex', flexDirection: 'column', listStyle: 'none', margin: 0, padding: 0 }}>
             {shown.map((a, i) => (
@@ -769,7 +769,7 @@ function QuickLinks({ nav, live }: { nav: NavFn; live: boolean }) {
             {([
               ['Mis inversiones',   () => nav('pertenencias'), 'var(--accent-bg)', 'var(--accent-text)'],
               ['Panel principal',   () => nav('dashboard'),    'var(--surface2)',  'var(--sec)'         ],
-              ['Academia KEY CHAIN',() => nav('academia'),     'var(--surface2)',  'var(--sec)'         ],
+              ['Academia Brikme',() => nav('academia'),     'var(--surface2)',  'var(--sec)'         ],
               ['Centro de ayuda',   () => nav('ayuda'),        'var(--surface2)',  'var(--sec)'         ],
             ] as const).map(([label, action, bg, color]) => (
               <button key={label} onClick={action} style={{
@@ -793,9 +793,9 @@ function QuickLinks({ nav, live }: { nav: NavFn; live: boolean }) {
           background: 'linear-gradient(135deg, oklch(0.20 0.03 265) 0%, oklch(0.28 0.08 270) 100%)',
           color: '#fff', position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16, marginBottom: 6 }}>Invitá un amigo</div>
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16, marginBottom: 6 }}>Invita un amigo</div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, opacity: 0.7, lineHeight: 1.55, marginBottom: 14 }}>
-            Ganá $50 en USDC cuando tu referido haga su primera inversión.
+            Gana $50 en USDC cuando tu referido haga su primera inversión.
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{
@@ -896,7 +896,7 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
                 <PCard style={{ padding: '22px 24px' }}>
                   <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>Documentos subidos</div>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 12 }}>
-                    {[['DNI — frente','Documento de identidad','28 May 2026'],['DNI — reverso','Documento de identidad','28 May 2026'],['Prueba de domicilio','Factura de servicio','30 May 2026'],['Selfie con documento','Verificación facial','28 May 2026']].map(([name, type, date], i) => (
+                    {[['Documento — frente','Documento de identidad','28 May 2026'],['Documento — reverso','Documento de identidad','28 May 2026'],['Prueba de domicilio','Factura de servicio','30 May 2026'],['Selfie con documento','Verificación facial','28 May 2026']].map(([name, type, date], i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 14, border: '1.5px solid var(--border-l)', background: 'var(--surface2)' }}>
                         <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-text)', flexShrink: 0 }}>{Icons.doc}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -969,7 +969,7 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
                   ))}
                 </div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 14, lineHeight: 1.65, padding: '0 4px' }}>
-                  Los reportes incluyen todas las distribuciones recibidas, ganancias/pérdidas realizadas y costos de transacción deducibles. Consultá un asesor fiscal para tu situación particular.
+                  Los reportes incluyen todas las distribuciones recibidas, ganancias/pérdidas realizadas y costos de transacción deducibles. Consulta un asesor fiscal para tu situación particular.
                 </div>
                 </>)}
               </motion.div>
@@ -983,7 +983,7 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
                   <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>Privacidad y datos</div>
                   {[
                     ['Portafolio público',          'Otros inversores pueden ver el valor de tus posiciones'],
-                    ['Notificaciones de marketing', 'Recibir noticias, lanzamientos y promociones de KEY CHAIN'],
+                    ['Notificaciones de marketing', 'Recibir noticias, lanzamientos y promociones de Brikme'],
                     ['Compartir datos con Sumsub',  'Necesario para mantener la verificación KYC activa'],
                     ['Analítica de uso',             'Ayudar a mejorar la plataforma con datos anónimos'],
                   ].map(([label, desc], i) => (
@@ -1005,7 +1005,7 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
 
                 <PCard style={{ padding: '22px 24px', border: '1.5px solid var(--neg)' }}>
                   <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--neg)', marginBottom: 6 }}>Zona de peligro</div>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 16 }}>Estas acciones son irreversibles. Procedé con cuidado.</div>
+                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 16 }}>Estas acciones son irreversibles. Procede con cuidado.</div>
                   <div style={{ display: 'flex', gap: 12, flexWrap: isMobile ? 'wrap' : undefined }}>
                     <PBtn variant="secondary" small style={{ borderColor: 'var(--neg)', color: 'var(--neg)' }}>Descargar mis datos</PBtn>
                     <PBtn variant="secondary" small style={{ borderColor: 'var(--neg)', color: 'var(--neg)' }}>Eliminar cuenta</PBtn>

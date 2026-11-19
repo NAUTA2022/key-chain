@@ -28,9 +28,9 @@ export function lifecycleOf(r: Source): Lifecycle {
     case 'submitted':
       return { stage: 'submitted', label: 'Enviada', color: 'blue', milestone: 0, viewable: false, text: 'Recibimos tu solicitud. El equipo la va a revisar pronto.' };
     case 'in_review':
-      return { stage: 'in_review', label: 'En revisión', color: 'purple', milestone: 0, viewable: false, text: 'El equipo está revisando los datos y la documentación. Podés sumar documentos mientras tanto.' };
+      return { stage: 'in_review', label: 'En revisión', color: 'purple', milestone: 0, viewable: false, text: 'El equipo está revisando los datos y la documentación. Puedes sumar documentos mientras tanto.' };
     case 'changes_requested':
-      return { stage: 'changes_requested', label: 'Requiere cambios', color: 'dark', milestone: 0, viewable: false, text: 'El equipo necesita cambios o más documentación: leé la nota y subí lo que falta desde el detalle.' };
+      return { stage: 'changes_requested', label: 'Requiere cambios', color: 'dark', milestone: 0, viewable: false, text: 'El equipo necesita cambios o más documentación: lee la nota y sube lo que falta desde el detalle.' };
     case 'rejected':
       return { stage: 'rejected', label: 'Rechazada', color: 'red', milestone: 0, viewable: false, text: 'La solicitud no fue aprobada. El motivo está en la nota del equipo.' };
     case 'approved':
@@ -44,7 +44,7 @@ function projectLifecycle(r: Source): Lifecycle {
     return { stage: 'approved', label: 'Aprobada', color: 'green', milestone: 1, viewable: false, text: 'Solicitud aprobada. El equipo está preparando el proyecto.' };
   }
   if (r.assetStatus === 'archived') {
-    return { stage: 'archived', label: 'Archivado', color: 'neutral', milestone: 1, viewable: false, text: 'El proyecto fue archivado y ya no está publicado. Escribinos a soporte si tenés dudas.' };
+    return { stage: 'archived', label: 'Archivado', color: 'neutral', milestone: 1, viewable: false, text: 'El proyecto fue archivado y ya no está publicado. Escríbenos a soporte si tienes dudas.' };
   }
   switch (r.poolStatus) {
     case 'liquidated':

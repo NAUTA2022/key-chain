@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from
 import { useNavigate } from 'react-router';
 import { PLogo, Icons } from '~/components/ui';
 import StrategySimulator from '~/features/landing/StrategySimulator';
-import { RWA_ASSETS, FACT_TOKEN, type RwaAsset } from '~/data';
+import { RWA_ASSETS, type RwaAsset } from '~/data';
 import { useMobile } from '~/hooks/useMobile';
 import {
   unlockSound, isMuted, setMuted, onMuteChange, startAmbient, stopAmbient,
@@ -33,19 +33,19 @@ import './Landing.css';
 type HowStep = { n: string; t: string; d: string; icon: ReactNode; tint: string };
 
 const HOW: HowStep[] = [
-  { n: '01', t: 'Verificá tu identidad', d: 'Completá el KYC en menos de 5 minutos. Solo DNI y selfie.', icon: Icons.shield, tint: '#4d8dff' },
-  { n: '02', t: 'Elegí tu activo',       d: 'Explorá drones, campos, autos premium, edificios tokenizados.', icon: Icons.primary, tint: '#9b7bff' },
-  { n: '03', t: 'Invertí en tokens',     d: 'Comprá fracciones desde tu wallet. Desde $1 USD.', icon: Icons.token, tint: '#f5a623' },
-  { n: '04', t: 'Cobrá rendimientos',    d: 'Distribuciones mensuales en USDC directo a tu wallet.', icon: Icons.receive, tint: '#4ade80' },
+  { n: '01', t: 'Verifica tu identidad', d: 'Completa el KYC en minutos con tu documento y una selfie.', icon: Icons.shield, tint: '#1EC6D9' },
+  { n: '02', t: 'Elige tu activo',       d: 'Explora inmuebles, energía, minería, agricultura y activos de lujo tokenizados.', icon: Icons.primary, tint: '#a35cf0' },
+  { n: '03', t: 'Invierte en tokens',    d: 'Compra fracciones desde tu wallet. Participa desde $200 USD.', icon: Icons.token, tint: '#F0900F' },
+  { n: '04', t: 'Recibe rendimientos',   d: 'Distribuciones en USDC directo a tu wallet, verificables on-chain.', icon: Icons.receive, tint: '#4ade80' },
 ];
 
 const BENTO: BentoCardProps[] = [
-  { color: '#0b0f1c', label: 'Seguridad',     title: 'Contratos auditados',     description: 'ERC-20 auditados por CertiK antes de cada emisión.', icon: Icons.shield, visual: <AuditVisual /> },
-  { color: '#0b0f1c', label: 'Custodia',      title: 'Custodia institucional',  description: 'Activos físicos con custodia profesional y póliza de seguro.', icon: Icons.wallet, visual: <VaultVisual /> },
-  { color: '#0d1226', label: 'Rendimiento',   title: 'Rendimientos en USDC',    description: 'Distribuciones on-chain mensuales directo a tu wallet. Sin bancos ni intermediarios, todo verificable on-chain.', icon: Icons.swap, visual: <YieldVisual /> },
-  { color: '#0d1226', label: 'Liquidez',      title: 'Mercado secundario P2P',  description: 'Vendé tus tokens cuando quieras a otros inversores, comparando precio pedido contra valor real.', icon: Icons.token, visual: <P2PVisual /> },
-  { color: '#0b0f1c', label: 'Gobernanza',    title: 'Votá con KYCN',           description: 'Los holders deciden qué proyectos se tokenizan.', icon: Icons.primary, visual: <VoteVisual /> },
-  { color: '#0b0f1c', label: 'Onboarding',    title: 'KYC en 5 minutos',        description: 'DNI y selfie. Empezás a invertir el mismo día.', icon: Icons.shield, visual: <KycVisual /> },
+  { color: '#0b0a2a', label: 'Smart contracts', title: 'Ejecución automática',   description: 'Transparentes, inmutables y auditables por cualquier persona en el mundo.', icon: Icons.shield, visual: <AuditVisual /> },
+  { color: '#0b0a2a', label: 'Regulación',      title: 'Licenciada en Dubái',     description: 'Registrada y licenciada en Dubái (VARA), sobre la infraestructura regulatoria de los Emiratos Árabes Unidos.', icon: Icons.wallet, visual: <VaultVisual /> },
+  { color: '#0e0b36', label: 'Rendimiento',     title: 'Rendimientos en USDC',    description: 'Distribuciones on-chain directo a tu wallet. Sin bancos, notarios ni comisiones altas: todo verificable on-chain.', icon: Icons.swap, visual: <YieldVisual /> },
+  { color: '#0e0b36', label: 'Liquidez',        title: 'Mercado global 24/7',     description: 'Vende tus tokens cuando quieras a otros inversionistas, en un mercado abierto las 24 horas.', icon: Icons.token, visual: <P2PVisual /> },
+  { color: '#0b0a2a', label: 'Comunidad',       title: 'Club sin fronteras',      description: 'Una comunidad de inversión global con acceso anticipado a los nuevos proyectos.', icon: Icons.primary, visual: <VoteVisual /> },
+  { color: '#0b0a2a', label: 'Onboarding',      title: 'KYC en minutos',          description: 'Documento y selfie. Empiezas a invertir el mismo día.', icon: Icons.shield, visual: <KycVisual /> },
 ];
 
 type Coin = {
@@ -89,20 +89,31 @@ const GALLERY_ASSETS = REAL_ASSETS.slice(0, 10);
 const GALLERY_ITEMS: GalleryItem[] = GALLERY_ASSETS.map(a => ({ image: a.img, text: a.name }));
 const showcaseAssets = REAL_ASSETS.slice(0, 3);
 
-const PARTICLE_COLORS = ['#ffffff', '#8fb8ff', '#b59bff'];
-const MORPH_WORDS = ['autos', 'campos', 'drones', 'inmuebles', 'edificios'];
-const MORPH_COLORS = ['#7fb2ff', '#93a8ff', '#a78bfa', '#c4a7ff', '#f0abfc'];
+const PARTICLE_COLORS = ['#ffffff', '#8fe9f3', '#f7b860'];
+const MORPH_WORDS = ['inmuebles', 'energía', 'minería', 'agro', 'transporte', 'arte'];
+const MORPH_COLORS = ['#1EC6D9', '#F0900F', '#6fe3f0', '#f7b860', '#F01BDB', '#a35cf0'];
 
-const HERO_LOGO_STYLE: CSSProperties = { filter: 'drop-shadow(0 0 48px rgba(40,100,255,0.65)) drop-shadow(0 24px 64px rgba(0,0,0,0.95))' };
+const HERO_LOGO_STYLE: CSSProperties = { filter: 'drop-shadow(0 0 48px rgba(30,198,217,0.45)) drop-shadow(0 24px 64px rgba(0,0,0,0.95))' };
 // In-page sections (real anchors, smooth-scrolled).
-const NAV_LINKS: ReadonlyArray<readonly [label: string, id: string]> = [['Proyectos', 'proyectos'], ['Cómo funciona', 'como'], ['Beneficios', 'beneficios'], ['Token KYCN', 'fact']];
+const NAV_LINKS: ReadonlyArray<readonly [label: string, id: string]> = [['Proyectos', 'proyectos'], ['Sectores', 'sectores'], ['Cómo funciona', 'como'], ['Beneficios', 'beneficios'], ['Tokeniza tu activo', 'participa']];
 // Public pages, listed for crawlers and screen readers (visually hidden).
 const SITE_LINKS: ReadonlyArray<readonly [label: string, href: string]> = [
-  ['Tokenizaciones', '/tokenizaciones'], ['Mercado secundario', '/mercado-secundario'], ['Token KYCN', '/token'],
+  ['Tokenizaciones', '/tokenizaciones'], ['Mercado secundario', '/mercado-secundario'],
   ['Academia', '/academia'], ['Centro de ayuda', '/ayuda'],
 ];
 const FOOTER_LINKS: ReadonlyArray<readonly [label: string, href: string]> = [['Términos', '/terminos'], ['Privacidad', '/privacidad'], ['Contacto', '/ayuda']];
 const LOGIN_PATH = '/ingresar';
+
+// Sectors of the real economy Brikme tokenizes (client deck, slide 7).
+type Sector = { id: string; title: string; sub: string; img: string };
+const SECTORS: Sector[] = [
+  { id: 'real-estate', title: 'Real Estate',      sub: 'Propiedades y hoteles',         img: '/images/brikme/sector-real-estate.webp' },
+  { id: 'mineria',     title: 'Minería',          sub: 'Activos físicos y extracción',  img: '/images/brikme/sector-mineria.webp' },
+  { id: 'agricultura', title: 'Agricultura',      sub: 'Producción sostenible',         img: '/images/brikme/sector-agricultura.webp' },
+  { id: 'energia',     title: 'Energía',          sub: 'Infraestructura renovable',     img: '/images/brikme/sector-energia.webp' },
+  { id: 'transporte',  title: 'Transporte',       sub: 'Logística global',              img: '/images/brikme/sector-transporte.webp' },
+  { id: 'lujo',        title: 'Activos de lujo',  sub: 'Arte y coleccionables',         img: '/images/brikme/sector-lujo.webp' },
+];
 
 /* Liquid glass */
 const LG: CSSProperties = {
@@ -123,7 +134,7 @@ const DEV_BTN: CSSProperties = {
   border: '1px dashed rgba(255,184,0,0.55)',
 };
 
-const KICKER: CSSProperties = { fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(140,180,255,0.75)', textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 14, fontWeight: 700 };
+const KICKER: CSSProperties = { fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(111,227,240,0.85)', textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 14, fontWeight: 700 };
 
 const scrollToId = (id: string): void => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -214,7 +225,7 @@ function FannedPhotos({ assets }: { assets: RwaAsset[] }) {
   );
 }
 
-// KYCN card header: ICO progress as a glowing ring around the token.
+// B2B card header: the Dubai case study from the deck, as a glowing ring.
 function IcoRing({ pct }: { pct: number }) {
   const R = 58, C = 2 * Math.PI * R;
   return (
@@ -222,20 +233,20 @@ function IcoRing({ pct }: { pct: number }) {
       <div style={{ position: 'relative', width: 124, height: 124 }}>
         <svg width="124" height="124" viewBox="0 0 140 140" style={{ transform: 'rotate(-90deg)', overflow: 'visible' }} aria-hidden="true">
           <defs>
-            <linearGradient id="icoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#7fb2ff" /><stop offset="100%" stopColor="#c084fc" /></linearGradient>
+            <linearGradient id="icoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#1EC6D9" /><stop offset="100%" stopColor="#F0900F" /></linearGradient>
           </defs>
           <circle cx="70" cy="70" r={R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="10" />
           <motion.circle cx="70" cy="70" r={R} fill="none" stroke="url(#icoGrad)" strokeWidth="10" strokeLinecap="round"
             strokeDasharray={C} initial={{ strokeDashoffset: C }} whileInView={{ strokeDashoffset: C * (1 - pct / 100) }} viewport={{ once: true }}
-            transition={{ duration: 1.8, ease: 'easeOut' }} style={{ filter: 'drop-shadow(0 0 8px rgba(160,140,255,0.7)) drop-shadow(0 0 18px rgba(127,150,255,0.45))' }} />
+            transition={{ duration: 1.8, ease: 'easeOut' }} style={{ filter: 'drop-shadow(0 0 8px rgba(30,198,217,0.6)) drop-shadow(0 0 18px rgba(240,144,15,0.35))' }} />
         </svg>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, color: '#fff' }}><CountUp to={pct} duration={1.8} />%</div>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Recaudado</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Valorización</div>
         </div>
       </div>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
-        ${(FACT_TOKEN.raised / 1e6).toFixed(2)}M de ${(FACT_TOKEN.goal / 1e6).toFixed(1)}M · {FACT_TOKEN.holders.toLocaleString()} holders
+        Caso Dubái · $40M USD · 40.000 tokens de $1.000
       </div>
 
     </div>
@@ -273,7 +284,7 @@ function BackToTop() {
           <svg width="50" height="50" viewBox="0 0 50 50" style={{ position: 'absolute', inset: -1, transform: 'rotate(-90deg)' }} aria-hidden="true">
             <circle cx="25" cy="25" r="22" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
             <circle cx="25" cy="25" r="22" fill="none" stroke="url(#totop-g)" strokeWidth="2" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - pct)} />
-            <defs><linearGradient id="totop-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#7fb2ff" /><stop offset="1" stopColor="#b59bff" /></linearGradient></defs>
+            <defs><linearGradient id="totop-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#1EC6D9" /><stop offset="1" stopColor="#F0900F" /></linearGradient></defs>
           </svg>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
         </motion.button>
@@ -333,9 +344,9 @@ function PowerPulse({ pulse }: { pulse: Pulse | null }) {
   return (
     <div key={pulse.id} aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 80, pointerEvents: 'none', overflow: 'hidden' }}>
       <motion.span initial={{ opacity: 0.55 }} animate={{ opacity: 0 }} transition={{ duration: 1.1, ease: 'easeOut' }}
-        style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at ${pulse.x}px ${pulse.y}px, rgba(127,178,255,0.45), rgba(167,139,250,0.18) 35%, transparent 70%)` }} />
-      {ring(0, 2, 'rgba(127,178,255,0.75)')}
-      {ring(0.14, 1, 'rgba(181,155,255,0.55)')}
+        style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at ${pulse.x}px ${pulse.y}px, rgba(30,198,217,0.40), rgba(240,144,15,0.16) 35%, transparent 70%)` }} />
+      {ring(0, 2, 'rgba(30,198,217,0.75)')}
+      {ring(0.14, 1, 'rgba(240,144,15,0.55)')}
       {ring(0.3, 1, 'rgba(255,255,255,0.25)')}
     </div>
   );
@@ -421,7 +432,8 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
     mouseY.set((e.clientY / window.innerHeight) * 2 - 1);
   }, [isMobile, mouseX, mouseY]);
 
-  const factPct = Math.round((FACT_TOKEN.raised / FACT_TOKEN.goal) * 100);
+  // Dubai case study (deck): 15% projected yearly appreciation.
+  const casePct = 15;
 
   const coin = (c: Coin, i: number, side: 0 | 1) => {
     const cx = isMobile ? c.mx : c.x, cy = isMobile ? c.my : c.y, cs = isMobile ? c.msize : c.size;
@@ -440,25 +452,25 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
 
   const investCards: InvestCard[] = [
     {
-      tag: <span className="land-pill"><span className="land-pill-dot" style={{ background: '#7fb2ff', boxShadow: '0 0 8px rgba(127,178,255,0.8)' }} />Proyectos RWA · Abiertos</span>, title: <>Activos del<br />mundo real</>, spot: 'rgba(110,160,255,0.28)',
-      text: 'Invertí en fracciones de autos, campos, drones, inmuebles y edificios tokenizados. Cada token representa participación proporcional del activo.',
-      kpis: [['Desde', '$1 USD'], ['APY promedio', '9.8%'], ['Distribución', 'Mensual USDC'], ['Proyectos activos', '148']],
-      bullets: ['Rendimientos mensuales on-chain', 'Liquidez en mercado secundario P2P', 'Contratos auditados · Seguro incluido', 'Sin bancos ni intermediarios'],
+      tag: <span className="land-pill"><span className="land-pill-dot" style={{ background: '#1EC6D9', boxShadow: '0 0 8px rgba(30,198,217,0.8)' }} />Inversionistas · B2C</span>, title: <>Activos del<br />mundo real</>, spot: 'rgba(30,198,217,0.24)',
+      text: 'Invierte en fracciones de inmuebles, energía, minería, agricultura, transporte y activos de lujo. Cada token representa una participación proporcional y trazable del activo.',
+      kpis: [['Participa desde', '$200 USD'], ['Liquidez', 'Global 24/7'], ['Fronteras', 'Ninguna'], ['Intermediarios', 'Smart contracts']],
+      bullets: ['Acceso a activos de alto valor, antes reservados a instituciones', 'Liquidez inmediata en mercados globales 24/7', 'Acceso digital sin fronteras geográficas', 'Ejecución automática con smart contracts'],
       cta: 'Explorar proyectos →', primary: false, visual: 'photos',
     },
     {
-      tag: <span className="land-pill land-pill-green"><span className="land-pill-dot" style={{ background: '#4ade80', boxShadow: '0 0 8px rgba(74,222,128,0.8)' }} />ICO activa · Ronda pública</span>,
-      title: <>Token KYCN<br />— la empresa</>, spot: 'rgba(181,155,255,0.28)',
-      text: 'KYCN es el token de utilidad de la plataforma. Al invertir en la ICO participás del crecimiento: descuentos en fees, gobernanza DAO y staking.',
-      kpis: [['Precio ICO', `$${FACT_TOKEN.price}`], ['Staking APY', '9–14%'], ['TGE', '15% inmediato'], ['Vesting', '12 meses']],
-      bullets: ['50% de descuento en fees de plataforma', 'Gobernanza DAO · Votás los proyectos', 'Staking con APY 9–14% anual', 'Acceso anticipado a proyectos nuevos'],
-      cta: 'Participar en la ICO →', primary: true, visual: 'ring',
+      tag: <span className="land-pill land-pill-green"><span className="land-pill-dot" style={{ background: '#F0900F', boxShadow: '0 0 8px rgba(240,144,15,0.8)' }} />Desarrolladores · B2B</span>,
+      title: <>Tokeniza<br />tu activo</>, spot: 'rgba(240,144,15,0.22)',
+      text: 'Generamos liquidez para desarrolladores donde la banca tradicional falla: estructuramos tu activo físico y lo lanzamos en el Marketplace Brikme a una red global de inversionistas.',
+      kpis: [['Paso 1', 'Originación'], ['Paso 2', 'Distribución'], ['Setup fee', 'Curaduría y análisis'], ['Success fee', 'Al fondear']],
+      bullets: ['Estructuración legal y tecnológica del activo', 'Curaduría, análisis y digitalización con smart contracts', 'Lanzamiento a inversionistas retail de todo el mundo', 'Registrada y licenciada en Dubái (VARA)'],
+      cta: 'Simular mi tokenización →', primary: true, visual: 'ring',
     },
   ];
 
   return (
-    <ClickSpark fixed sparkColor="#9cc3ff" sparkSize={11} sparkRadius={22} sparkCount={10} duration={480} onSpark={sClick}>
-      <div onMouseMove={onMouseMove} style={{ minHeight: '100vh', background: '#07080c', overflowX: 'hidden', position: 'relative', paddingTop: 64 }}>
+    <ClickSpark fixed sparkColor="#6fe3f0" sparkSize={11} sparkRadius={22} sparkCount={10} duration={480} onSpark={sClick}>
+      <div onMouseMove={onMouseMove} style={{ minHeight: '100vh', background: '#070620', overflowX: 'hidden', position: 'relative', paddingTop: 64 }}>
 
         {/* Page-wide particle field */}
         <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.7 }} aria-hidden="true">
@@ -469,7 +481,7 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
         {/* ─── NAV ─────────────────────────────────────────────── */}
         <nav aria-label="Principal" className="land-nav navbar-glow" style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, height: 64,
-          background: 'rgba(7,8,12,0.72)', borderBottom: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(7,6,32,0.72)', borderBottom: '1px solid rgba(255,255,255,0.08)',
           backdropFilter: 'blur(28px) saturate(180%)', WebkitBackdropFilter: 'blur(28px) saturate(180%)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 48px', gap: 12,
         }}>
@@ -505,7 +517,7 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
         <AnimatePresence>
           {showMenu && (
             <motion.div id="land-mobile-menu" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.22 }}
-              style={{ position: 'fixed', top: 64, left: 0, right: 0, zIndex: 49, background: 'rgba(7,8,12,0.96)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '12px 20px 24px', display: 'flex', flexDirection: 'column' }}>
+              style={{ position: 'fixed', top: 64, left: 0, right: 0, zIndex: 49, background: 'rgba(7,6,32,0.96)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '12px 20px 24px', display: 'flex', flexDirection: 'column' }}>
               {NAV_LINKS.map(([l, id], i) => (
                 <motion.a key={l} href={`#${id}`} initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.04 * i }}
                   onClick={e => { e.preventDefault(); setMenuOpen(false); setTimeout(() => scrollToId(id), 60); }}
@@ -528,31 +540,31 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
         <section className="land-hero-section" style={{ position: 'relative', zIndex: 2, padding: '36px 48px 0', textAlign: 'center' }}>
           {/* Light rays from the top, following the cursor */}
           <div style={{ position: 'absolute', top: -64, left: 0, right: 0, height: '115vh', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true">
-            <LightRays raysOrigin="top-center" raysColor="#6aa2ff" raysSpeed={1.1} lightSpread={0.9} rayLength={1.4}
+            <LightRays raysOrigin="top-center" raysColor="#1EC6D9" raysSpeed={1.1} lightSpread={0.9} rayLength={1.4}
               followMouse mouseInfluence={0.12} noiseAmount={0.06} distortion={0.04} className="land-rays" />
           </div>
-          <div style={{ position: 'absolute', bottom: -60, left: '50%', transform: 'translateX(-50%)', width: 1000, maxWidth: '120vw', height: 600, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(30,80,220,0.30) 0%, transparent 68%)', filter: 'blur(70px)', pointerEvents: 'none', zIndex: 0 }} />
+          <div style={{ position: 'absolute', bottom: -60, left: '50%', transform: 'translateX(-50%)', width: 1000, maxWidth: '120vw', height: 600, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(25,19,179,0.42) 0%, transparent 68%)', filter: 'blur(70px)', pointerEvents: 'none', zIndex: 0 }} />
 
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 28, position: 'relative', zIndex: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             <div style={{ ...LG, borderRadius: 999, padding: '7px 16px', display: 'inline-flex', gap: 8, alignItems: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12)' }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px rgba(74,222,128,0.8)' }} />
-              <ShinyText text="Activos reales tokenizados" speed={2.6} color="rgba(255,255,255,0.55)" shineColor="#ffffff" className="land-shiny" />
+              <ShinyText text="Registrada y licenciada en Dubái · VARA" speed={2.6} color="rgba(255,255,255,0.55)" shineColor="#ffffff" className="land-shiny" />
             </div>
           </motion.div>
 
           <h1 className="land-hero-h1" style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 'clamp(40px, 7vw, 82px)', lineHeight: 1.02, letterSpacing: '-0.05em', color: 'rgba(255,255,255,0.96)', margin: '0 auto 22px', maxWidth: 980, position: 'relative', zIndex: 1 }}>
-            <BlurText text="Cociná tu fábrica" delay={110} animateBy="words" direction="top" className="land-h1-line" />
+            <BlurText text="La nueva era" delay={110} animateBy="words" direction="top" className="land-h1-line" />
             <motion.div initial={{ opacity: 0, filter: 'blur(12px)' }} animate={{ opacity: 1, filter: 'blur(0px)' }} transition={{ delay: 0.55, duration: 0.7 }}>
-              <GradientText colors={['#ffffff', '#8fb8ff', '#b59bff', '#ffffff']} animationSpeed={7} className="land-h1-grad">de tokenizaciones.</GradientText>
+              <GradientText colors={['#ffffff', '#1EC6D9', '#F0900F', '#ffffff']} animationSpeed={7} className="land-h1-grad">de la inversión tokenizada.</GradientText>
             </motion.div>
           </h1>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
             className="land-hero-sub land-morph" style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto 30px' }}>
-            <div className="land-morph-label">Invertí en</div>
+            <div className="land-morph-label">Invierte en</div>
             <ParticleWord words={MORPH_WORDS} colors={MORPH_COLORS} fontSize={isMobile ? 50 : 76} gap={isMobile ? 2.4 : 3} interval={2900} />
-            <div className="land-morph-tail">tokenizados, desde $1 y con rentas mensuales en USDC.</div>
+            <div className="land-morph-tail">tokenizados, desde $200 USD y con acceso global 24/7.</div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }} className="land-hero-power"
@@ -561,19 +573,19 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
           </motion.div>
 
 
-          {/* Visual: oven with floating coins */}
+          {/* Visual: the Brikme cube with floating coins */}
           <motion.div initial={{ opacity: 0, y: 36 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.8 }}
             className="land-hero-visual" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', minHeight: 340, zIndex: 1 }}>
-            <div style={{ position: 'absolute', top: '45%', left: '10%', right: '10%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(60,120,255,0.30), rgba(80,150,255,0.55), rgba(60,120,255,0.30), transparent)', filter: 'blur(1px)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: '45%', left: '10%', right: '10%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(30,198,217,0.28), rgba(30,198,217,0.55), rgba(30,198,217,0.28), transparent)', filter: 'blur(1px)', pointerEvents: 'none' }} />
             {COINS.left.map((c, i) => coin(c, i, 0))}
             {COINS.right.map((c, i) => coin(c, i, 1))}
             <div style={{ position: 'relative', zIndex: 2, flexShrink: 0 }}>
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-52%)', width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,90,230,0.36) 0%, transparent 68%)', filter: 'blur(36px)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-52%)', width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(25,19,179,0.55) 0%, transparent 68%)', filter: 'blur(36px)', pointerEvents: 'none' }} />
               {/* Parallax and levitation live on separate layers so they add up
                   smoothly instead of fighting over the same `y`. */}
               <motion.div style={{ x: imgX, y: imgY, position: 'relative', zIndex: 1 }}>
                 <div className="land-levitate">
-                  <ParticleImage src="/3ds.webp" alt="Ilustración 3D de la fábrica de tokenizaciones" width={isMobile ? 220 : 300} gap={isMobile ? 2.5 : 3}
+                  <ParticleImage src="/3ds.webp" alt="Cubo de Brikme, Real World Tokenization" width={isMobile ? 220 : 300} gap={isMobile ? 2.5 : 3}
                     onHoverStart={sHover} onBurst={sWhoosh} imgStyle={HERO_LOGO_STYLE} />
                 </div>
               </motion.div>
@@ -586,23 +598,23 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
         {/* ─── Built on ───────────────────────────────────────── */}
         <section aria-label="Redes blockchain compatibles" style={{ position: 'relative', zIndex: 2, padding: '8px 0 40px' }}>
           <div style={{ ...KICKER, textAlign: 'center', color: 'rgba(255,255,255,0.32)' }}>Redes blockchain compatibles</div>
-          <LogoLoop logos={CHAIN_LOGOS} speed={60} direction="left" logoHeight={28} gap={96} pauseOnHover scaleOnHover fadeOut fadeOutColor="#07080c" ariaLabel="Redes blockchain" />
+          <LogoLoop logos={CHAIN_LOGOS} speed={60} direction="left" logoHeight={28} gap={96} pauseOnHover scaleOnHover fadeOut fadeOutColor="#070620" ariaLabel="Redes blockchain" />
         </section>
 
         {/* ─── Velocity band ──────────────────────────────────── */}
         <section aria-hidden="true" className="land-velocity" style={{ position: 'relative', zIndex: 2, padding: '30px 0 70px' }}>
-          <ScrollVelocity texts={['Autos ✦ Campos ✦ Drones ✦ Inmuebles ✦ Edificios ✦', 'Tokenizá ✦ Invertí ✦ Cobrá en USDC ✦']} velocity={60} className="land-velocity-text" />
+          <ScrollVelocity texts={['Real Estate ✦ Minería ✦ Agricultura ✦ Energía ✦ Transporte ✦ Activos de lujo ✦', 'Tokeniza ✦ Invierte ✦ Crece ✦']} velocity={60} className="land-velocity-text" />
         </section>
 
         {/* ─── DOS FORMAS ─────────────────────────────────────── */}
-        <section id="fact" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 48px 96px', position: 'relative', zIndex: 2, scrollMarginTop: 80 }} className="land-section">
-          <SectionHead kicker="Dos formas de invertir" title="Invertí en proyectos o en la empresa misma" sub="Elegí entre activos tokenizados del mundo real o el token KYCN de la plataforma." />
+        <section id="participa" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 48px 96px', position: 'relative', zIndex: 2, scrollMarginTop: 80 }} className="land-section">
+          <SectionHead kicker="El puente digital" title="Invierte en activos reales o tokeniza el tuyo" sub="La primera comunidad y marketplace DeFi de activos del mundo real (RWA): todo en un único lugar, confiable, transparente y global." />
           <div className="land-invest-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
             {investCards.map((c, idx) => (
               <motion.div key={idx} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.12 }}
                 onMouseEnter={sHover} style={{ display: 'flex' }}>
                 <SpotlightCard spotlightColor={c.spot} className="land-spot">
-                  {c.visual === 'photos' ? <FannedPhotos assets={showcaseAssets} /> : <IcoRing pct={factPct} />}
+                  {c.visual === 'photos' ? <FannedPhotos assets={showcaseAssets} /> : <IcoRing pct={casePct} />}
                   <div style={{ marginBottom: 20 }}>
                     <div style={{ marginBottom: 12 }}>{c.tag}</div>
                     <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1 }}>{c.title}</div>
@@ -625,7 +637,7 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
                     ))}
                   </div>
                   {c.primary
-                    ? <LBtn block variant="primary" chime href={LOGIN_PATH} onClick={onEnter}>{c.cta.replace(' →', '')}</LBtn>
+                    ? <LBtn block variant="primary" chime href="#simulador" onClick={() => scrollToId('simulador')}>{c.cta.replace(' →', '')}</LBtn>
                     : <LBtn block variant="ghost" href="#proyectos" onClick={() => scrollToId('proyectos')}>{c.cta.replace(' →', '')}</LBtn>}
                 </SpotlightCard>
               </motion.div>
@@ -633,18 +645,37 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
           </div>
         </section>
 
+        {/* ─── SECTORES ───────────────────────────────────────── */}
+        <section id="sectores" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 48px 96px', position: 'relative', zIndex: 2, scrollMarginTop: 80 }} className="land-section">
+          <SectionHead kicker="Sectores de la economía real" title="Activos tangibles, no especulación"
+            sub="Respaldados por activos reales: diversificación y trazabilidad legal en cada proyecto." />
+          <ul className="land-sectors">
+            {SECTORS.map((sec, i) => (
+              <motion.li key={sec.id} className="land-sector" onMouseEnter={sHover}
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ delay: (i % 3) * 0.08 }}>
+                <img src={sec.img} alt="" loading="lazy" decoding="async" width={1196} height={468} />
+                <div className="land-sector-tint" aria-hidden="true" />
+                <div className="land-sector-txt">
+                  <h3>{sec.title}</h3>
+                  <p>{sec.sub}</p>
+                </div>
+              </motion.li>
+            ))}
+          </ul>
+        </section>
+
         {/* ─── BENEFICIOS (Magic Bento) ───────────────────────── */}
         <section id="beneficios" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 48px 96px', position: 'relative', zIndex: 2, scrollMarginTop: 80 }} className="land-section">
-          <SectionHead kicker="Por qué KEY CHAIN" title="Seguridad y transparencia, sin compromiso" sub="Pasá el cursor por las tarjetas: cada beneficio está respaldado on-chain." />
+          <SectionHead kicker="Por qué Brikme" title="Confiable, transparente y global" sub="Pasa el cursor por las tarjetas: cada beneficio está respaldado on-chain." />
           <div className="land-bento" onMouseEnter={sHover}>
             <MagicBento cards={BENTO} textAutoHide={false} enableStars enableSpotlight enableBorderGlow enableTilt={false}
-              enableMagnetism clickEffect spotlightRadius={320} particleCount={10} glowColor="110, 160, 255" />
+              enableMagnetism clickEffect spotlightRadius={320} particleCount={10} glowColor="30, 198, 217" />
           </div>
         </section>
 
         {/* ─── CÓMO FUNCIONA (steps drive a live showcase) ───── */}
         <section id="como" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 48px 110px', position: 'relative', zIndex: 2, scrollMarginTop: 80 }} className="land-section">
-          <SectionHead kicker="Cómo funciona" title="Empezá en 4 pasos" sub="Del registro a tu primera renta en USDC, todo desde el celular." />
+          <SectionHead kicker="Cómo funciona" title="Empieza en 4 pasos" sub="Del registro a tu primera renta en USDC, todo desde el celular." />
           <div className="land-how" onMouseEnter={() => setStepsPaused(true)} onMouseLeave={() => setStepsPaused(false)}>
             <ol className="how-list">
               {HOW.map((h, i) => {
@@ -676,7 +707,7 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
         {/* ─── PROYECTOS (Circular Gallery) ───────────────────── */}
         <section id="proyectos" style={{ position: 'relative', zIndex: 2, padding: '40px 0 60px', scrollMarginTop: 80 }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px' }} className="land-section-pad">
-            <SectionHead kicker="Proyectos destacados" title="Activos disponibles hoy" sub="Arrastrá la galería para recorrer los proyectos." />
+            <SectionHead kicker="Proyectos destacados" title="Activos disponibles hoy" sub="Arrastra la galería para recorrer los proyectos." />
           </div>
           <div style={{ height: isMobile ? 380 : 560, position: 'relative' }} onPointerDown={sHover}>
             <CircularGallery items={GALLERY_ITEMS} bend={isMobile ? 1.5 : 2.6} textColor="#ffffff" borderRadius={0.06} scrollSpeed={2} scrollEase={0.05} />
@@ -693,28 +724,28 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
         </section>
 
         {/* ─── SIMULADOR ──────────────────────────────────────── */}
-        <div style={{ position: 'relative', zIndex: 2 }}>
+        <div id="simulador" style={{ position: 'relative', zIndex: 2, scrollMarginTop: 80 }}>
           <StrategySimulator head={
-            <SectionHead kicker="Para emprendedores · B2B" title="Simulá la tokenización de tu proyecto"
-              sub="Elegí el modelo, configurá los parámetros de tu empresa y mirá cuánto podés levantar en tu ronda." />
+            <SectionHead kicker="Para desarrolladores · B2B" title="Simula la tokenización de tu proyecto"
+              sub="Elige el modelo, configura los parámetros de tu empresa y mira cuánto puedes levantar en tu ronda." />
           } />
         </div>
 
         {/* ─── CTA ────────────────────────────────────────────── */}
         <section style={{ position: 'relative', zIndex: 2, overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 800, maxWidth: '120vw', height: 460, borderRadius: '50%', background: 'radial-gradient(circle, rgba(70,110,255,0.16) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 800, maxWidth: '120vw', height: 460, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,198,217,0.14) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
           <div style={{ maxWidth: 900, margin: '0 auto', padding: '110px 48px', textAlign: 'center', position: 'relative' }} className="land-cta-section">
             <ScrollReveal baseOpacity={0.08} enableBlur baseRotation={3} blurStrength={6} containerClassName="land-reveal" textClassName="land-reveal-text">
-              Tu capital, trabajando sin intermediarios.
+              Asegura tu lugar en el futuro del capital.
             </ScrollReveal>
             <p style={{ fontFamily: 'var(--font-b)', fontSize: 16, color: 'rgba(255,255,255,0.42)', lineHeight: 1.65, maxWidth: 520, margin: '10px auto 40px' }}>
-              Uníte a miles de inversores que ya generan rendimientos reales en USDC, con plena transparencia on-chain.
+              Por primera vez en la historia, la riqueza global no pertenece solo a las instituciones.
             </p>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <LBtn href={LOGIN_PATH} onClick={onEnter} chime icon={BOLT} size="xl">Comenzar ahora</LBtn>
             </div>
             <ul aria-label="Garantías" style={{ marginTop: 40, display: 'flex', gap: 28, justifyContent: 'center', flexWrap: 'wrap', listStyle: 'none', padding: 0, marginBottom: 0 }}>
-              {['Regulado', 'Contratos auditados CertiK', 'Custodia institucional', 'KYC verificado'].map(t => (
+              {['Licenciada en Dubái · VARA', 'Smart contracts auditables', 'Acceso global 24/7', 'KYC verificado'].map(t => (
                 <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 6 }} onMouseEnter={sHover}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l5 5L20 7" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   <DecryptedText text={t} animateOn="hover" speed={30} maxIterations={6} className="land-trust" encryptedClassName="land-trust-enc" />
@@ -727,13 +758,16 @@ export default function Landing({ onEnter, onDevEnter }: LandingProps) {
         {/* ─── FOOTER ─────────────────────────────────────────── */}
         <footer className="land-nav" style={{ padding: '28px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <PLogo size={14} />
-          <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>© 2026 KEY CHAIN. Activos reales tokenizados.</span>
+          <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.3)', lineHeight: 1.6 }}>
+            © 2026 Brikme · Real World Tokenization<br />
+            Zlafa Building, Al Garhoud Office M02, Business Bay Bridge, Dubái, EAU · <a href="mailto:hello@brikme.com" className="land-footlink" style={{ textDecoration: 'none' }}>hello@brikme.com</a>
+          </span>
           <div style={{ display: 'flex', gap: 24 }}>
             {FOOTER_LINKS.map(([l, href]) => (
               <a key={l} href={href} onMouseEnter={sHover} onClick={e => goPage(e, href)} className="land-footlink" style={{ background: 'none', border: 'none', padding: 0, fontFamily: 'var(--font-b)', fontSize: 12, cursor: 'pointer', textDecoration: 'none' }}>{l}</a>
             ))}
           </div>
-          <nav aria-label="Páginas de KEY CHAIN" className="sr-only">
+          <nav aria-label="Páginas de Brikme" className="sr-only">
             <ul>
               {SITE_LINKS.map(([l, href]) => (
                 <li key={href}><a href={href} onClick={e => goPage(e, href)}>{l}</a></li>

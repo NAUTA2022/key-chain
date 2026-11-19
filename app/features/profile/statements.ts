@@ -16,7 +16,7 @@ export function statementYears(memberSince: string | null | undefined, currentYe
 
 export function statementCsv(s: Statement): string {
   const rows: Array<Array<string | number | null>> = [
-    ['Resumen anual KEY CHAIN', s.year],
+    ['Resumen anual Brikme', s.year],
     [],
     ['Inversiones'],
     ['Fecha', 'Activo', 'ID activo', 'Tokens', 'Monto (USD)', 'Transacción'],
@@ -34,7 +34,7 @@ export function statementCsv(s: Statement): string {
 
 /** Saves the statement as CSV (UTF-8 with BOM so spreadsheet apps keep the accents). */
 export function saveStatementCsv(s: Statement): void {
-  saveBlob(new Blob(['﻿', statementCsv(s)], { type: 'text/csv;charset=utf-8' }), `keychain-resumen-${s.year}.csv`);
+  saveBlob(new Blob(['﻿', statementCsv(s)], { type: 'text/csv;charset=utf-8' }), `brikme-resumen-${s.year}.csv`);
 }
 
 /** Fetches a year's statement and saves it as CSV. Returns false when it could not be loaded. */
@@ -66,7 +66,7 @@ export function printStatement(s: Statement, holder: { name: string; wallet: str
     parent?.appendChild(node);
     return node;
   };
-  doc.title = `Resumen ${s.year} — KEY CHAIN`;
+  doc.title = `Resumen ${s.year} — Brikme`;
   const style = el('style', 'body{font-family:system-ui,-apple-system,sans-serif;color:#111;margin:32px}h1{font-size:20px;margin:0 0 4px}h2{font-size:15px;margin:24px 0 8px}p{margin:2px 0;font-size:12px;color:#444}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #ddd}th{background:#f4f4f4}.t{margin-top:20px;font-size:13px}.n{font-size:11px;color:#666;margin-top:24px}');
   doc.head.appendChild(style);
   const body = doc.body;
@@ -94,7 +94,7 @@ export function printStatement(s: Statement, holder: { name: string; wallet: str
   table('Dividendos', ['Fecha', 'Activo', 'Monto'], s.dividends.map(d => [fmtDate(d.date), d.assetName, usd(d.amount)]));
   el('p', `Total invertido: ${usd(s.totals.invested)}`, body).className = 't';
   el('p', `Total dividendos: ${usd(s.totals.dividends)}`, body).className = 't';
-  el('p', 'Incluye inversiones confirmadas on-chain y dividendos asignados en el año calendario (UTC). Este resumen es informativo; consultá a un asesor fiscal para tu situación particular.', body).className = 'n';
+  el('p', 'Incluye inversiones confirmadas on-chain y dividendos asignados en el año calendario (UTC). Este resumen es informativo; consulta a un asesor fiscal para tu situación particular.', body).className = 'n';
 
   const cleanup = () => setTimeout(() => frame.remove(), 500);
   win.addEventListener('afterprint', cleanup, { once: true });

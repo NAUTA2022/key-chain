@@ -56,7 +56,7 @@ export function useAvatarActions() {
     setError(null);
     const { data, error: e } = await uploadFile<Me>('/v1/me/avatar', file);
     if (data) await refresh();
-    else setError(errorText(e, 'No pudimos subir la foto. Probá con otra imagen.', { validation_failed: 'La imagen no es válida. Usá PNG, JPG o WebP de hasta 2 MB.', bad_request: 'La imagen no es válida. Usá PNG, JPG o WebP de hasta 2 MB.' }));
+    else setError(errorText(e, 'No pudimos subir la foto. Prueba con otra imagen.', { validation_failed: 'La imagen no es válida. Usa PNG, JPG o WebP de hasta 2 MB.', bad_request: 'La imagen no es válida. Usa PNG, JPG o WebP de hasta 2 MB.' }));
     setBusy(false);
   }, [refresh]);
   const remove = useCallback(async () => {

@@ -11,10 +11,10 @@ import { problemMessage } from '~/lib/onchain';
 export class AdminError extends Error {}
 
 const GENERIC: Partial<Record<number, string>> = {
-  401: 'Tu sesión expiró: volvé a conectar la wallet.',
-  403: 'No tenés permisos para esta acción.',
+  401: 'Tu sesión expiró: vuelve a conectar la wallet.',
+  403: 'No tienes permisos para esta acción.',
   413: 'El archivo supera el tamaño permitido.',
-  429: 'Demasiadas solicitudes: probá de nuevo en unos segundos.',
+  429: 'Demasiadas solicitudes: prueba de nuevo en unos segundos.',
 };
 
 /** Message for an RFC 9457 problem, including field issues of a 422. */

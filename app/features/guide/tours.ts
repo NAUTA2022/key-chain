@@ -43,29 +43,29 @@ const isTestNetwork = () => Number(import.meta.env.VITE_CHAIN_ID ?? 0) !== 137;
 
 const WELCOME: Tour = {
   id: 'welcome',
-  title: 'Bienvenida a KEY CHAIN',
-  summary: 'Qué es KEY CHAIN, tu wallet, el USDC, el KYC y dónde ver tus inversiones.',
+  title: 'Bienvenida a Brikme',
+  summary: 'Qué es Brikme, tu wallet, el USDC, el KYC y dónde ver tus inversiones.',
   path: '/panel',
   steps: [
     {
-      title: 'Te damos la bienvenida a KEY CHAIN',
-      body: 'Acá podés invertir en activos reales —inmuebles, campos, energía— comprando pequeñas partes llamadas tokens. En un minuto te mostramos lo básico.',
+      title: 'Te damos la bienvenida a Brikme',
+      body: 'Aquí puedes invertir en activos reales —inmuebles, campos, energía— comprando pequeñas partes llamadas tokens. En un minuto te mostramos lo básico.',
     },
     {
       target: ['topbar-wallet', 'mnav-pertenencias'],
       fallback: 'center',
       title: 'Tu wallet: tu cuenta y tu billetera',
-      body: 'Con tu wallet entrás a KEY CHAIN sin contraseña y ahí guardás tu dinero y tus tokens. Nadie más puede moverlos: cada operación la autorizás vos con una firma.',
+      body: 'Con tu wallet entras a Brikme sin contraseña y ahí guardas tu dinero y tus tokens. Nadie más puede moverlos: cada operación la autorizas tú con una firma.',
     },
     {
       title: 'USDC, el dólar digital',
-      body: 'Invertís y cobrás en USDC: cada USDC vale 1 dólar estadounidense, 1 a 1. Lo depositás en tu wallet desde Mis Pertenencias.',
+      body: 'Inviertes y cobras en USDC: cada USDC vale 1 dólar estadounidense, 1 a 1. Lo depositas en tu wallet desde Mis Pertenencias.',
     },
     {
       target: ['nav-perfil', 'mnav-perfil'],
       fallback: 'center',
-      title: 'Verificá tu identidad (KYC)',
-      body: 'Antes de invertir te pedimos verificar quién sos. Lo exige la ley para activos reales y protege a todos de fraudes. Lo hacés una sola vez desde tu Perfil.',
+      title: 'Verifica tu identidad (KYC)',
+      body: 'Antes de invertir te pedimos verificar quién eres. Lo exige la ley para activos reales y protege a todos de fraudes. Lo haces una sola vez desde tu Perfil.',
     },
     {
       target: ['nav-pertenencias', 'mnav-pertenencias'],
@@ -77,7 +77,7 @@ const WELCOME: Tour = {
       target: ['nav-ayuda'],
       fallback: 'center',
       title: 'Ayuda cuando la necesites',
-      body: 'Cada sección tiene un botón «¿Cómo funciona?» para repasar su guía. En el Centro de Ayuda tenés todas las guías y un glosario con las palabras nuevas.',
+      body: 'Cada sección tiene un botón «¿Cómo funciona?» para repasar su guía. En el Centro de Ayuda tienes todas las guías y un glosario con las palabras nuevas.',
     },
   ],
 };
@@ -92,27 +92,27 @@ const FEED: Tour = {
       target: ['feed-post'],
       fallback: 'center',
       title: 'Novedades de las empresas',
-      body: 'Acá ves lo que publican las empresas detrás de cada proyecto: avances, resultados y anuncios. Las marcadas como «Hito» son avances importantes.',
+      body: 'Aquí ves lo que publican las empresas detrás de cada proyecto: avances, resultados y anuncios. Las marcadas como «Hito» son avances importantes.',
     },
     {
       target: ['feed-profiles'],
-      title: 'Seguí a las empresas',
-      body: 'Tocá «Seguir» en una empresa para no perderte sus novedades ni sus próximos proyectos.',
+      title: 'Sigue a las empresas',
+      body: 'Toca «Seguir» en una empresa para no perderte sus novedades ni sus próximos proyectos.',
     },
     {
       target: ['feed-comment'],
-      title: 'Comentá y preguntá',
-      body: 'Podés dar me gusta y comentar. Es una buena forma de preguntarle a la empresa sobre su proyecto antes de invertir.',
+      title: 'Comenta y pregunta',
+      body: 'Puedes dar me gusta y comentar. Es una buena forma de preguntarle a la empresa sobre su proyecto antes de invertir.',
     },
     {
       target: ['feed-filters', 'feed-filters-mobile', 'feed-search'],
-      title: 'Filtrá lo que te interesa',
-      body: 'Buscá por empresa o proyecto y filtrá por tipo de publicación para ver solo lo que te importa.',
+      title: 'Filtra lo que te interesa',
+      body: 'Busca por empresa o proyecto y filtra por tipo de publicación para ver solo lo que te importa.',
     },
     {
       target: ['feed-project-link'],
       title: 'Del post al proyecto',
-      body: 'Con «Ver proyecto» vas a la ficha completa para revisar los números y, si querés, invertir.',
+      body: 'Con «Ver proyecto» vas a la ficha completa para revisar los números y, si quieres, invertir.',
     },
   ],
 };
@@ -125,12 +125,12 @@ const TOKENIZATIONS: Tour = {
   steps: [
     {
       title: '¿Qué es tokenizar un activo?',
-      body: 'Es dividir un activo real (un edificio, un campo, una planta solar) en muchas partes digitales llamadas tokens. Así podés invertir con poco dinero y tu parte queda registrada en la blockchain.',
+      body: 'Es dividir un activo real (un edificio, un campo, una planta solar) en muchas partes digitales llamadas tokens. Así puedes invertir con poco dinero y tu parte queda registrada en la blockchain.',
     },
     {
       target: ['asset-card'],
       title: 'Cada tarjeta es un proyecto',
-      body: 'Un token representa una parte del activo y te da derecho a su parte de los rendimientos. Tocá la tarjeta para ver la ficha completa.',
+      body: 'Un token representa una parte del activo y te da derecho a su parte de los rendimientos. Toca la tarjeta para ver la ficha completa.',
     },
     {
       target: ['asset-apy'],
@@ -144,8 +144,8 @@ const TOKENIZATIONS: Tour = {
     },
     {
       target: ['market-filters'],
-      title: 'Filtrá y compará',
-      body: 'Filtrá por tipo de activo o rendimiento para encontrar proyectos que se ajusten a vos.',
+      title: 'Filtra y compara',
+      body: 'Filtra por tipo de activo o rendimiento para encontrar proyectos que se ajusten a ti.',
     },
   ],
 };
@@ -161,12 +161,12 @@ const PROJECT: Tour = {
       target: ['project-title'],
       fallback: 'center',
       title: 'La ficha del proyecto',
-      body: 'Acá está todo lo que necesitás para decidir: qué activo es, quién lo gestiona, cuánto podría rendir y sus documentos.',
+      body: 'Aquí está todo lo que necesitas para decidir: qué activo es, quién lo gestiona, cuánto podría rendir y sus documentos.',
     },
     {
       target: ['project-price'],
       title: 'Precio por token',
-      body: 'Es lo que cuesta cada parte del activo, en USDC (1 USDC = 1 dólar). Podés empezar con un solo token.',
+      body: 'Es lo que cuesta cada parte del activo, en USDC (1 USDC = 1 dólar). Puedes empezar con un solo token.',
     },
     {
       target: ['project-apy'],
@@ -187,11 +187,11 @@ const PROJECT: Tour = {
       target: ['project-invest'],
       fallback: 'center',
       title: 'Cómo invertir',
-      body: 'Elegí cuántos tokens querés, tocá Invertir y confirmá en tu wallet. Necesitás tu identidad verificada y USDC en tu saldo.',
+      body: 'Elige cuántos tokens quieres, toca Invertir y confirma en tu wallet. Necesitas tu identidad verificada y USDC en tu saldo.',
     },
     {
-      title: 'Tené en cuenta los riesgos',
-      body: 'Toda inversión tiene riesgo: el activo puede rendir menos de lo estimado y vender tus tokens puede tomar tiempo. Invertí solo lo que puedas mantener.',
+      title: 'Ten en cuenta los riesgos',
+      body: 'Toda inversión tiene riesgo: el activo puede rendir menos de lo estimado y vender tus tokens puede tomar tiempo. Invierte solo lo que puedas mantener.',
     },
   ],
 };
@@ -206,22 +206,22 @@ const CHECKOUT: Tour = {
     {
       target: ['checkout-summary'],
       fallback: 'center',
-      title: 'Revisá tu compra',
-      body: 'Acá ves cuántos tokens comprás, el precio y el total en USDC antes de pagar.',
+      title: 'Revisa tu compra',
+      body: 'Aquí ves cuántos tokens compras, el precio y el total en USDC antes de pagar.',
     },
     {
       title: 'Tu wallet te va a pedir dos firmas',
-      body: 'Primero autorizás el monto exacto de USDC de esta compra, ni un centavo más. Después confirmás la operación.',
+      body: 'Primero autorizas el monto exacto de USDC de esta compra, ni un centavo más. Después confirmas la operación.',
     },
     {
       title: '¿Qué es el gas?',
-      body: 'Cada operación en la blockchain paga una pequeña comisión de red, llamada gas. No la cobra KEY CHAIN: tu wallet te muestra el monto antes de confirmar.',
+      body: 'Cada operación en la blockchain paga una pequeña comisión de red, llamada gas. No la cobra Brikme: tu wallet te muestra el monto antes de confirmar.',
     },
     {
       target: ['checkout-pay', 'checkout-summary'],
       fallback: 'center',
       title: '¿Y después?',
-      body: 'Cuando la red confirma, los tokens llegan a tu wallet y los ves en Mis Pertenencias, desde donde también cobrás tus dividendos.',
+      body: 'Cuando la red confirma, los tokens llegan a tu wallet y los ves en Mis Pertenencias, desde donde también cobras tus dividendos.',
     },
   ],
 };
@@ -236,7 +236,7 @@ const SECONDARY: Tour = {
       target: ['secondary-title'],
       fallback: 'center',
       title: 'Compra y venta entre inversores',
-      body: 'Acá los inversores se compran y venden tokens entre sí, después de la emisión. Cada operación se hace directo entre wallets.',
+      body: 'Aquí los inversores se compran y venden tokens entre sí, después de la emisión. Cada operación se hace directo entre wallets.',
     },
     {
       target: ['listing-card'],
@@ -252,13 +252,13 @@ const SECONDARY: Tour = {
       target: ['secondary-sell'],
       fallback: 'center',
       title: 'Vender tus tokens',
-      body: 'Publicá una venta eligiendo cantidad y precio. Al venderse se descuenta la comisión del vendedor, que ves antes de confirmar.',
+      body: 'Publica una venta eligiendo cantidad y precio. Al venderse se descuenta la comisión del vendedor, que ves antes de confirmar.',
     },
     {
       target: ['listing-withdraw'],
       fallback: 'center',
       title: 'Tus tokens siguen en tu wallet',
-      body: 'Publicar una venta no saca los tokens de tu wallet: solo se mueven cuando alguien compra. Podés retirar tu oferta cuando quieras.',
+      body: 'Publicar una venta no saca los tokens de tu wallet: solo se mueven cuando alguien compra. Puedes retirar tu oferta cuando quieras.',
     },
   ],
 };
@@ -278,30 +278,30 @@ const HOLDINGS: Tour = {
     {
       target: ['holdings-deposit'],
       title: 'Depositar',
-      body: 'Te mostramos la dirección de tu wallet y la red. Enviá USDC solo por esa red: si usás otra, los fondos se pueden perder.',
+      body: 'Te mostramos la dirección de tu wallet y la red. Envía USDC solo por esa red: si usas otra, los fondos se pueden perder.',
     },
     {
       target: ['holdings-deposit'],
       when: isTestNetwork,
       title: 'Fondos de prueba',
-      body: 'Estamos en una red de pruebas: dentro de Depositar encontrás «Fondos de prueba» para practicar con dinero ficticio. En la red real no existe.',
+      body: 'Estamos en una red de pruebas: dentro de Depositar encuentras «Fondos de prueba» para practicar con dinero ficticio. En la red real no existe.',
     },
     {
       target: ['holdings-withdraw'],
       title: 'Retirar',
-      body: 'Enviá tus USDC a otra wallet o a un exchange. Revisá bien la dirección: en blockchain las transferencias no se pueden revertir.',
+      body: 'Envía tus USDC a otra wallet o a un exchange. Revisa bien la dirección: en blockchain las transferencias no se pueden revertir.',
     },
     {
       target: ['holdings-dividends', 'holdings-tabs'],
       fallback: 'center',
       title: 'Dividendos',
-      body: 'Cuando un proyecto reparte ganancias te toca una parte según tus tokens. Aparece como «por cobrar» y lo cobrás en USDC desde tus inversiones.',
+      body: 'Cuando un proyecto reparte ganancias te toca una parte según tus tokens. Aparece como «por cobrar» y lo cobras en USDC desde tus inversiones.',
     },
     {
       target: ['holdings-capital'],
       fallback: 'center',
       title: 'Capital tras la liquidación',
-      body: 'Cuando un proyecto termina y se liquida, recuperás tu parte del capital con «Cobrar capital».',
+      body: 'Cuando un proyecto termina y se liquida, recuperas tu parte del capital con «Cobrar capital».',
     },
     {
       target: ['holdings-movements'],
@@ -313,15 +313,15 @@ const HOLDINGS: Tour = {
 
 const TOKEN: Tour = {
   id: 'token',
-  title: 'Token KYCN',
+  title: 'Token BRIK',
   summary: 'Qué es el token de la plataforma, sus rondas y utilidades.',
   path: '/token',
   steps: [
     {
       target: ['token-title'],
       fallback: 'center',
-      title: 'KYCN, el token de la plataforma',
-      body: 'KYCN es un token de utilidad: no representa un activo real, sino beneficios dentro de KEY CHAIN.',
+      title: 'BRIK, el token de la plataforma',
+      body: 'BRIK es un token de utilidad: no representa un activo real, sino beneficios dentro de Brikme.',
     },
     {
       target: ['token-sale'],
@@ -331,17 +331,17 @@ const TOKEN: Tour = {
     {
       target: ['token-utilities'],
       title: '¿Para qué sirve?',
-      body: 'Acá están sus utilidades dentro de la plataforma. Leelas antes de comprar: su valor puede subir o bajar.',
+      body: 'Aquí están sus utilidades dentro de la plataforma. Leelas antes de comprar: su valor puede subir o bajar.',
     },
     {
       target: ['token-buy'],
-      title: 'Comprar KYCN',
-      body: 'Cuando la venta esté abierta vas a poder comprar desde acá con USDC, confirmando en tu wallet.',
+      title: 'Comprar BRIK',
+      body: 'Cuando la venta esté abierta vas a poder comprar desde aquí con USDC, confirmando en tu wallet.',
     },
     {
       target: ['token-position'],
       title: 'Tu posición',
-      body: 'Acá ves cuántos KYCN tenés en tu wallet.',
+      body: 'Aquí ves cuántos BRIK tienes en tu wallet.',
     },
   ],
 };
@@ -356,22 +356,22 @@ const PROFILE: Tour = {
       target: ['profile-tabs'],
       fallback: 'center',
       title: 'Tu perfil',
-      body: 'Desde acá manejás tu cuenta: datos, verificación de identidad, documentos, privacidad y tu empresa.',
+      body: 'Desde aquí manejas tu cuenta: datos, verificación de identidad, documentos, privacidad y tu empresa.',
     },
     {
       target: ['profile-kyc', 'profile-account-tab'],
       fallback: 'center',
       title: 'Verificación de identidad (KYC)',
-      body: 'Completá tus datos una sola vez en «Cuenta y seguridad». Al aprobarse, tu wallet recibe una identidad on-chain: un sello que dice «verificada» sin publicar tus datos.',
+      body: 'Completa tus datos una sola vez en «Cuenta y seguridad». Al aprobarse, tu wallet recibe una identidad on-chain: un sello que dice «verificada» sin publicar tus datos.',
     },
     {
       title: 'Tu privacidad',
-      body: 'Tus datos personales nunca se publican en la blockchain. En Privacidad elegís si otros inversores ven tu nombre, tu foto o en qué proyectos invertiste (nunca los montos).',
+      body: 'Tus datos personales nunca se publican en la blockchain. En Privacidad eliges si otros inversores ven tu nombre, tu foto o en qué proyectos invertiste (nunca los montos).',
     },
     {
       target: ['profile-company-tab'],
       title: 'Tu empresa',
-      body: 'Si querés tokenizar un activo, registrá tu empresa acá. La verificamos (KYB) antes de que pueda publicar proyectos.',
+      body: 'Si quieres tokenizar un activo, registra tu empresa aquí. La verificamos (KYB) antes de que pueda publicar proyectos.',
     },
   ],
 };
@@ -385,22 +385,22 @@ const TOKENIZE: Tour = {
     {
       target: ['tokenize-title'],
       fallback: 'center',
-      title: 'Tokenizá tu activo',
-      body: 'Si tu empresa tiene un activo que genera ingresos, podés financiarlo vendiendo tokens a inversores. Todo empieza con una solicitud.',
+      title: 'Tokeniza tu activo',
+      body: 'Si tu empresa tiene un activo que genera ingresos, puedes financiarlo vendiendo tokens a inversores. Todo empieza con una solicitud.',
     },
     {
       target: ['tokenize-steps'],
       title: 'Una solicitud por pasos',
-      body: 'Tipo de activo, información, estructura del token, contacto y revisión. Sumá documentos que respalden el activo: aceleran la revisión.',
+      body: 'Tipo de activo, información, estructura del token, contacto y revisión. Suma documentos que respalden el activo: aceleran la revisión.',
     },
     {
       target: ['tokenize-tabs'],
-      title: 'Seguí el estado',
+      title: 'Sigue el estado',
       body: 'En «Mis solicitudes» ves en qué va cada una: enviada, en revisión, aprobada o rechazada. Si falta algo, te avisamos.',
     },
     {
       title: 'Después de la aprobación',
-      body: 'Nuestro equipo estructura el token junto con vos y publica el proyecto en Tokenizaciones para que los inversores puedan comprar.',
+      body: 'Nuestro equipo estructura el token junto contigo y publica el proyecto en Tokenizaciones para que los inversores puedan comprar.',
     },
   ],
 };
@@ -416,26 +416,26 @@ const COMPANIES: Tour = {
       target: ['company-title'],
       fallback: 'center',
       title: 'Perfil de empresa',
-      body: 'Cada empresa publica acá sus proyectos y avances. Revisá quién está detrás antes de invertir.',
+      body: 'Cada empresa publica aquí sus proyectos y avances. Revisa quién está detrás antes de invertir.',
     },
     {
       target: ['company-verified'],
       title: 'Empresa verificada',
-      body: 'Este sello indica que KEY CHAIN revisó sus documentos legales (KYB, la verificación de empresas).',
+      body: 'Este sello indica que Brikme revisó sus documentos legales (KYB, la verificación de empresas).',
     },
     {
       target: ['company-follow'],
-      title: 'Seguila',
-      body: 'Al seguir una empresa ves sus novedades en tu feed y te enterás de sus nuevos proyectos.',
+      title: 'Síguela',
+      body: 'Al seguir una empresa ves sus novedades en tu feed y te enteras de sus nuevos proyectos.',
     },
     {
       target: ['company-tabs'],
       title: 'Proyectos, hitos y reseñas',
-      body: 'Recorré las pestañas para ver sus proyectos, los hitos que fue cumpliendo y lo que opinan otros inversores.',
+      body: 'Recorre las pestañas para ver sus proyectos, los hitos que fue cumpliendo y lo que opinan otros inversores.',
     },
     {
-      title: '¿Tenés una empresa?',
-      body: 'Registrala desde tu Perfil, en «Registrar mi empresa». Una vez verificada, podés solicitar tokenizar un activo.',
+      title: '¿Tienes una empresa?',
+      body: 'Regístrala desde tu Perfil, en «Registrar mi empresa». Una vez verificada, puedes solicitar tokenizar un activo.',
     },
   ],
 };

@@ -58,7 +58,7 @@ export default function RequestDetail({ id, open, onClose, nav }: { id: string; 
     setDownloadError(null);
     const ok = await downloadAuthed(doc.url, doc.filename);
     setDownloading(null);
-    if (!ok) setDownloadError(`No pudimos descargar ${doc.filename}. Probá de nuevo.`);
+    if (!ok) setDownloadError(`No pudimos descargar ${doc.filename}. Prueba de nuevo.`);
   };
 
   const d = data;

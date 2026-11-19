@@ -55,8 +55,8 @@ function EditForm({ user, onClose, avatar }: { user: SessionUser; onClose: () =>
         if (typeof k === 'string' && !(k in next)) next[k as keyof ProfileForm] = issue.message;
       }
     }
-    if (form.displayName.trim() === '' && user.displayName) next.displayName = 'Ingresá tu nombre.';
-    if (form.email.trim() === '' && user.email) next.email = 'Ingresá un email válido.';
+    if (form.displayName.trim() === '' && user.displayName) next.displayName = 'Ingresa tu nombre.';
+    if (form.email.trim() === '' && user.email) next.email = 'Ingresa un email válido.';
     setErrors(next);
     if (!parsed.success || Object.keys(next).length) return;
 
@@ -72,7 +72,7 @@ function EditForm({ user, onClose, avatar }: { user: SessionUser; onClose: () =>
     setError(null);
     const { data, error: e } = await call(api.PATCH('/v1/me', { body }));
     setSaving(false);
-    if (!data) return setError(errorText(e, 'No pudimos guardar los cambios. Revisá los datos.', { conflict: 'Ese email ya está en uso por otra cuenta.' }));
+    if (!data) return setError(errorText(e, 'No pudimos guardar los cambios. Revisa los datos.', { conflict: 'Ese email ya está en uso por otra cuenta.' }));
     await refresh();
     // A new email must be verified again: keep the dialog open so the user can do it now.
     if (body.email) setSaved(true);
@@ -106,7 +106,7 @@ function EditForm({ user, onClose, avatar }: { user: SessionUser; onClose: () =>
       <PDiv />
 
       <Field label="Nombre visible" htmlFor={ids.name} error={errors.displayName}>
-        <TextInput id={ids.name} name="displayName" autoComplete="name" maxLength={80} value={form.displayName} invalid={Boolean(errors.displayName)} onChange={e => set('displayName', e.target.value)} placeholder="Cómo querés que te veamos" />
+        <TextInput id={ids.name} name="displayName" autoComplete="name" maxLength={80} value={form.displayName} invalid={Boolean(errors.displayName)} onChange={e => set('displayName', e.target.value)} placeholder="Cómo quieres que te veamos" />
       </Field>
 
       <Field label="Email" htmlFor={ids.email} error={errors.email} hint={emailChanged && user.email ? 'Al cambiar el email vas a tener que verificarlo de nuevo.' : undefined}>
@@ -117,7 +117,7 @@ function EditForm({ user, onClose, avatar }: { user: SessionUser; onClose: () =>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
         <Field label="País de residencia" htmlFor={ids.country} error={errors.country}>
           <Select id={ids.country} value={form.country} onChange={e => set('country', e.target.value as ProfileForm['country'])}>
-            {form.country === '' && <option value="">Elegí un país</option>}
+            {form.country === '' && <option value="">Elige un país</option>}
             {COUNTRY_OPTIONS.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
           </Select>
         </Field>
@@ -128,7 +128,7 @@ function EditForm({ user, onClose, avatar }: { user: SessionUser; onClose: () =>
         </Field>
       </div>
 
-      {saved && <Notice tone="success">Guardamos tus cambios. Verificá tu nuevo email para recibir avisos.</Notice>}
+      {saved && <Notice tone="success">Guardamos tus cambios. Verifica tu nuevo email para recibir avisos.</Notice>}
       {error && <Notice tone="error">{error}</Notice>}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, flexWrap: 'wrap' }}>

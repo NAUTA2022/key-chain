@@ -29,7 +29,7 @@ const SECTIONS: Section[] = [
   { key: 'dashboard', title: 'Mi dashboard', subtitle: 'Tu panel', keywords: 'panel dashboard resumen home' },
   { key: 'primario', title: 'Tokenizaciones', subtitle: 'Mercado primario', keywords: 'proyectos invertir mercado primario tokens rwa activos' },
   { key: 'secundario', title: 'Mercado secundario', subtitle: 'Compra y venta entre inversores', keywords: 'p2p comprar vender ordenes listados trading' },
-  { key: 'token', title: 'Token KYCN', subtitle: 'Token de la plataforma', keywords: 'kycn token ico staking vesting tokenomics' },
+  { key: 'token', title: 'Token BRIK', subtitle: 'Token de la plataforma', keywords: 'kycn token ico staking vesting tokenomics' },
   { key: 'pertenencias', title: 'Mis pertenencias', subtitle: 'Tu portafolio', keywords: 'wallet billetera portafolio cartera inversiones dividendos rendimientos cobrar holdings' },
   { key: 'ecosistema', title: 'Ecosistema', subtitle: 'Mapa del ecosistema', keywords: 'mapa 3d red productos' },
   { key: 'academia', title: 'Academia', subtitle: 'Guías y artículos', keywords: 'guias articulos aprender blog educacion' },

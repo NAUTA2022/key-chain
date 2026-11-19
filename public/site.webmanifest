@@ -1,16 +1,29 @@
 {
-  "name": "KEY CHAIN",
-  "short_name": "KEY CHAIN",
-  "description": "Plataforma de tokenización de activos reales (RWA) en Polygon.",
+  "name": "BRIKME — Real World Tokenization",
+  "short_name": "Brikme",
+  "description": "Marketplace de activos del mundo real (RWA) tokenizados. Registrada y licenciada en Dubái (VARA).",
   "lang": "es",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#090909",
-  "theme_color": "#090909",
+  "background_color": "#070620",
+  "theme_color": "#070620",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

@@ -36,11 +36,11 @@ function AcademyEmpty() {
   const isMobile = useMobile();
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 1200, margin: '0 auto' }}>
-      <PSection title="Academia" sub="Aprendé sobre tokenización, RWA y finanzas descentralizadas." />
+      <PSection title="Academia" sub="Aprende sobre tokenización, RWA y finanzas descentralizadas." />
       <PCard style={{ padding: '8px 24px' }}>
         <EmptyState
           title="Todavía no hay artículos publicados"
-          text="Muy pronto vas a encontrar acá guías sobre tokenización, activos reales y finanzas descentralizadas."
+          text="Muy pronto vas a encontrar aquí guías sobre tokenización, activos reales y finanzas descentralizadas."
         />
       </PCard>
     </div>
@@ -60,7 +60,7 @@ function AcademyView({ nav, posts, cats, read = NO_READS }: AcademyViewProps) {
 
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 1200, margin: '0 auto' }}>
-      <PSection title="Academia" sub="Aprendé sobre tokenización, RWA y finanzas descentralizadas." />
+      <PSection title="Academia" sub="Aprende sobre tokenización, RWA y finanzas descentralizadas." />
 
       {/* Featured */}
       {cat === 'Todos' && featured && (

@@ -104,7 +104,7 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
       const fields = rejectedFields(error).filter(isDraftField);
       if (fields.length) {
         const found: FieldErrors = {};
-        for (const f of fields) found[f] = 'Revisá este dato: el servidor no lo aceptó.';
+        for (const f of fields) found[f] = 'Revisa este dato: el servidor no lo aceptó.';
         setErrors(found);
         return go(Math.max(0, firstStepWith(found)));
       }
@@ -174,7 +174,7 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
         {/* Step 0: asset type */}
         {step === 0 && (
           <motion.div key="s0" {...STEP_MOTION}>
-            <h2 id={`${base}-type-title`} data-step-title tabIndex={-1} style={STEP_TITLE}>¿Qué tipo de activo querés tokenizar?</h2>
+            <h2 id={`${base}-type-title`} data-step-title tabIndex={-1} style={STEP_TITLE}>¿Qué tipo de activo quieres tokenizar?</h2>
             <p style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', marginBottom: 24 }}>El tipo define la documentación y los datos que revisa el equipo.</p>
             <CategoryPicker
               id={fid('category')}
@@ -192,7 +192,7 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 32 }}>
-              {!draft.category && <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>Elegí un tipo de activo para continuar.</span>}
+              {!draft.category && <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>Elige un tipo de activo para continuar.</span>}
               <PBtn variant="accent" onClick={next} disabled={!draft.category}>Continuar →</PBtn>
             </div>
           </motion.div>
@@ -212,7 +212,7 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
                 <FormField id={fid('country')} label="País" error={errors.country}>
                   {p => (
                     <Select {...p} value={draft.country} onChange={e => set('country', e.target.value)} aria-invalid={errors.country ? true : undefined} style={errors.country ? INVALID_BORDER : undefined}>
-                      <option value="" disabled>Elegí un país</option>
+                      <option value="" disabled>Elige un país</option>
                       {COUNTRY_OPTIONS.map(([code, name]) => <option key={code} value={name}>{name}</option>)}
                     </Select>
                   )}
@@ -263,7 +263,7 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
               </div>
               <Capitalization valuation={num.valuation} tokenPrice={num.tokenPrice} totalTokens={num.totalTokens} isMobile={isMobile} />
               <p style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginTop: 14 }}>
-                Podés escribir los montos con puntos de miles y coma decimal (1.500.000,50) o como número simple (1500000.50).
+                Puedes escribir los montos con puntos de miles y coma decimal (1.500.000,50) o como número simple (1500000.50).
               </p>
             </PCard>
             <StepNav onBack={() => go(1)} onNext={next} />
@@ -296,7 +296,7 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
         {step === 4 && (
           <motion.div key="s4" {...STEP_MOTION}>
             <PCard style={{ padding: cardPadding, marginBottom: 16 }}>
-              <h2 data-step-title tabIndex={-1} style={CARD_TITLE}>Revisá tu solicitud</h2>
+              <h2 data-step-title tabIndex={-1} style={CARD_TITLE}>Revisa tu solicitud</h2>
               {body ? (
                 <>
                   <ReviewGroup
@@ -340,13 +340,13 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
                   />
                 </>
               ) : (
-                <Notice tone="warn">Hay datos incompletos. Volvé a los pasos anteriores para completarlos.</Notice>
+                <Notice tone="warn">Hay datos incompletos. Vuelve a los pasos anteriores para completarlos.</Notice>
               )}
             </PCard>
 
             <PCard style={{ padding: isMobile ? '16px' : '20px 24px', marginBottom: 24, background: 'var(--accent-bg)', border: '1.5px solid var(--accent)' }}>
               <p style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--sec)', lineHeight: 1.6 }}>
-                Al enviar, tu solicitud queda <strong style={{ color: 'var(--text)' }}>Enviada</strong> y el equipo de KEY CHAIN la revisa. En el paso siguiente vas a poder subir la documentación del activo. Enviar la solicitud no publica el activo ni emite tokens.
+                Al enviar, tu solicitud queda <strong style={{ color: 'var(--text)' }}>Enviada</strong> y el equipo de Brikme la revisa. En el paso siguiente vas a poder subir la documentación del activo. Enviar la solicitud no publica el activo ni emite tokens.
               </p>
             </PCard>
 
@@ -371,13 +371,13 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
               </div>
               <h2 data-step-title tabIndex={-1} style={{ ...STEP_TITLE, textAlign: 'center' }}>Recibimos tu solicitud</h2>
               <p style={{ ...bodyStyle, textAlign: 'center', maxWidth: 520, margin: '0 auto 20px', overflowWrap: 'anywhere' }}>
-                El equipo de KEY CHAIN va a revisar <strong style={{ color: 'var(--text)' }}>{created.data.assetName}</strong> junto con la documentación que subiste. Vas a ver cada cambio de estado en Mis solicitudes.
+                El equipo de Brikme va a revisar <strong style={{ color: 'var(--text)' }}>{created.data.assetName}</strong> junto con la documentación que subiste. Vas a ver cada cambio de estado en Mis solicitudes.
               </p>
               <h3 style={{ ...labelStyle, maxWidth: 520, margin: '0 auto 8px' }}>Qué sigue</h3>
               <ol style={{ ...bodyStyle, maxWidth: 520, margin: '0 auto', paddingLeft: 20, listStyle: 'decimal', display: 'flex', flexDirection: 'column', gap: 6, overflowWrap: 'anywhere' }}>
                 <li>El equipo revisa los datos y los documentos; la solicitud pasa a <strong style={{ color: 'var(--text)' }}>En revisión</strong>.</li>
                 <li>Si falta algo, te deja una nota en la solicitud o te contacta a {created.data.contactEmail}.</li>
-                <li>Si necesita cambios, la vas a ver como <strong style={{ color: 'var(--text)' }}>Requiere cambios</strong> con una nota; podés sumar documentos desde Mis solicitudes.</li>
+                <li>Si necesita cambios, la vas a ver como <strong style={{ color: 'var(--text)' }}>Requiere cambios</strong> con una nota; puedes sumar documentos desde Mis solicitudes.</li>
                 <li>Si se aprueba, el equipo crea el proyecto en borrador, lo publica y emite el token en la red. Vas a seguir cada etapa en Mis solicitudes.</li>
               </ol>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 24 }}>
@@ -540,7 +540,7 @@ function Capitalization({ valuation, tokenPrice, totalTokens, isMobile }: { valu
         ? { warn: false, text: 'La capitalización coincide con la valuación declarada.' }
         : ratio < 1
           ? { warn: false, text: `La emisión representa el ${fmtPercent(ratio * 100)} de la valuación del activo.` }
-          : { warn: true, text: `La capitalización supera la valuación en un ${fmtPercent((ratio - 1) * 100)}. Revisá el precio por token o la cantidad.` };
+          : { warn: true, text: `La capitalización supera la valuación en un ${fmtPercent((ratio - 1) * 100)}. Revisa el precio por token o la cantidad.` };
   const metric = (label: string, value: string) => (
     <div style={{ minWidth: 0 }}>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)' }}>{label}</div>

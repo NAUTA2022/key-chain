@@ -51,7 +51,7 @@ export function PoolActions({ assetId, assetName, pool, onChange }: { assetId: n
   }
 
   async function submit() {
-    if (!(value > 0) || !Number.isFinite(value)) return setError('Ingresá un monto mayor a 0.');
+    if (!(value > 0) || !Number.isFinite(value)) return setError('Ingresa un monto mayor a 0.');
     const dividend = mode === 'dividend';
     const ok = await confirm({
       title: dividend ? 'Distribuir dividendo' : 'Liquidar activo',
@@ -144,7 +144,7 @@ export function KycQueueLive({ queue, loaded, loadError = null, onChange }: { qu
 
   function reject(k: KycReview) {
     const v = validate(reasonSchema, { reason });
-    if (!v.ok) return setError({ userId: k.userId, text: v.errors.reason ?? 'Revisá el motivo.' });
+    if (!v.ok) return setError({ userId: k.userId, text: v.errors.reason ?? 'Revisa el motivo.' });
     void act(k.userId, () => ensureOk(api.POST('/v1/admin/kyc/{userId}/reject', { params: { path: { userId: k.userId } }, body: v.data }), 'No se pudo rechazar el KYC.'));
   }
 

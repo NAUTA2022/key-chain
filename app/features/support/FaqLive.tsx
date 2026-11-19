@@ -69,7 +69,7 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
       <EmptyState
         icon={Icons.help}
         title="Todavía no hay preguntas frecuentes"
-        text="Si tenés una duda, escribinos y te respondemos por acá."
+        text="Si tienes una duda, escríbenos y te respondemos por aquí."
         action={<PBtn variant="secondary" small onClick={onAsk}>Abrir un ticket</PBtn>}
       />
     );
@@ -78,7 +78,7 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
       <EmptyState
         icon={Icons.search}
         title="No encontramos resultados"
-        text="Probá con otras palabras o abrí un ticket y te ayudamos."
+        text="Prueba con otras palabras o abre un ticket y te ayudamos."
         action={<PBtn variant="secondary" small onClick={clearFilters}>Limpiar búsqueda</PBtn>}
       />
     );

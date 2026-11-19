@@ -34,7 +34,7 @@ export default function FeaturedDemoCard({ style }: { style?: CSSProperties }) {
           <div style={{ flex: 1, minWidth: 0, padding: '18px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 21, letterSpacing: '-0.03em', color: 'var(--text)', lineHeight: 1.15 }}>Villa Mirador: la demo completa desde 1 USD</div>
             <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.5, maxWidth: '62ch' }}>
-              Elegí cuántas partes comprar (gratis, con Binance o con tu wallet), la casa genera ganancia y la ves llegar a tu wallet paso a paso, con voz.
+              Elige cuántas partes comprar (gratis, con Binance o con tu wallet), la casa genera ganancia y la ves llegar a tu wallet paso a paso, con voz.
             </div>
             <div style={{ marginTop: 4 }}><span className="df-featured-cta">Hacer la demo en vivo<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span></div>
           </div>

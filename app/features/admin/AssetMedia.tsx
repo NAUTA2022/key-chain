@@ -124,7 +124,7 @@ export function DocumentsPanel({ asset, onChanged }: { asset: AdminAssetDetail; 
   async function upload() {
     setNotice(null);
     const v = validate(documentSchema, { title, kind });
-    const fileError = file ? checkFile(file, 'document') : 'Elegí un archivo.';
+    const fileError = file ? checkFile(file, 'document') : 'Elige un archivo.';
     if (!v.ok || fileError || !file) {
       setErrors({ ...(v.ok ? {} : v.errors), ...(fileError ? { file: fileError } : {}) });
       return;

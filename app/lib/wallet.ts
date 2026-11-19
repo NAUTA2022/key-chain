@@ -1,4 +1,4 @@
-// KEYCHAIN custodial wallet (demo): balances per token, the user's deposit
+// Brikme custodial wallet (demo): balances per token, the user's deposit
 // address, supported networks and the activity feed. Deposits, withdrawals
 // and checkout payments all read and write here. No backend: an in-memory
 // store with a tiny pub-sub (resets on reload, like the rest of the demo).
@@ -79,7 +79,7 @@ export type ActivityExtra = { source?: string; net?: string; hash?: string };
 
 let state: WalletState = {
   balances: { USDC: 12480.5, USDT: 1250, ETH: 0.42, POL: 340.2 },
-  activity: TRANSACTIONS.map(t => ({ id: t.id, type: t.type, label: t.label, amount: t.amount, date: t.date, status: t.status, sym: t.wallet === 'kycn' ? 'KYCN' : 'USDC' })),
+  activity: TRANSACTIONS.map(t => ({ id: t.id, type: t.type, label: t.label, amount: t.amount, date: t.date, status: t.status, sym: t.wallet === 'kycn' ? 'BRIK' : 'USDC' })),
 };
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach(fn => fn());

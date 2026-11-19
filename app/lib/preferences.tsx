@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 
 export type Theme = 'dark' | 'light';
-export type Palette = 'mono' | 'verde' | 'rojo' | 'azul' | 'marron';
-export type FontPreset = 'moderna' | 'geometrica' | 'humanista' | 'tech';
+export type Palette = 'brikme' | 'mono' | 'verde' | 'rojo' | 'azul' | 'marron';
+export type FontPreset = 'brikme' | 'moderna' | 'geometrica' | 'humanista' | 'tech';
 export type Role = 'investor' | 'admin';
 
 export type Prefs = { palette: Palette; font: FontPreset; rubro: string };
@@ -20,13 +20,14 @@ type PreferencesValue = {
 };
 
 export const FONTS: Record<FontPreset, { h: string; b: string }> = {
+  brikme:     { h: '"Raleway", sans-serif',       b: '"Raleway", sans-serif' },
   moderna:    { h: '"DM Sans", sans-serif',       b: '"Inter", sans-serif' },
   geometrica: { h: '"Space Grotesk", sans-serif', b: '"IBM Plex Sans", sans-serif' },
   humanista:  { h: '"Manrope", sans-serif',       b: '"Sora", sans-serif' },
   tech:       { h: '"Space Grotesk", sans-serif', b: '"IBM Plex Mono", monospace' },
 };
 
-const STORAGE_KEY = 'kc_prefs';
+const STORAGE_KEY = 'bk_prefs';
 type Stored = { theme?: Theme; palette?: Palette; font?: FontPreset; collapsed?: boolean };
 
 function readStored(): Stored {
@@ -48,8 +49,8 @@ const PreferencesContext = createContext<PreferencesValue | null>(null);
 export function PreferencesProvider({ children }: { children: ReactNode }) {
   // Light by default (the landing forces dark on its own, see useApplyPreferences).
   const [theme, setTheme] = useState<Theme>('light');
-  const [palette, setPalette] = useState<Palette>('mono');
-  const [font, setFont] = useState<FontPreset>('moderna');
+  const [palette, setPalette] = useState<Palette>('brikme');
+  const [font, setFont] = useState<FontPreset>('brikme');
   const [rubro, setRubro] = useState('Todos');
   const [role, setRole] = useState<Role>('investor');
   const [collapsed, setCollapsed] = useState(false);
@@ -101,8 +102,8 @@ export function usePreferences(): PreferencesValue {
   return ctx;
 }
 
-/** The landing is always dark, whatever theme the app itself is set to. */
-const DARK_ONLY_PATHS: ReadonlySet<string> = new Set(['/']);
+/** Paths forced to the dark theme. The Brikme landing is light, so none today. */
+const DARK_ONLY_PATHS: ReadonlySet<string> = new Set<string>();
 
 /** Applies the user's theme, palette and font to <html> while a Keychain page is mounted. */
 export function useApplyPreferences(pathname: string): void {

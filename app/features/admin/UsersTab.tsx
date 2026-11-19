@@ -150,7 +150,7 @@ function UserDetailBody({ user: u, onChanged }: { user: AdminUserDetail; onChang
 
   async function block() {
     const v = validate(reasonSchema, { reason });
-    if (!v.ok) return setReasonError(v.errors.reason ?? 'Indicá el motivo.');
+    if (!v.ok) return setReasonError(v.errors.reason ?? 'Indica el motivo.');
     setReasonError(null);
     const ok = await confirm({ title: 'Bloquear usuario', message: `${name} no podrá operar ni iniciar sesión y se cerrarán sus sesiones activas.`, confirmLabel: 'Bloquear', danger: true });
     if (!ok) return;
@@ -273,7 +273,7 @@ function UserDetailBody({ user: u, onChanged }: { user: AdminUserDetail; onChang
                 {u.orders.map((o, i) => (
                   <tr key={o.id} style={{ borderBottom: i < u.orders.length - 1 ? '1px solid var(--border-l)' : 'none' }}>
                     <td style={{ ...tdDim, padding: '10px 14px' }}>{fmtDate(o.createdAt)}</td>
-                    <td style={{ ...td, padding: '10px 14px' }}><span style={strong}>{o.assetName}</span><div style={sub}>{o.mode === 'onchain' ? 'On-chain' : 'KeyPay'}</div></td>
+                    <td style={{ ...td, padding: '10px 14px' }}><span style={strong}>{o.assetName}</span><div style={sub}>{o.mode === 'onchain' ? 'On-chain' : 'Brikme Pay'}</div></td>
                     <td style={{ ...td, padding: '10px 14px' }}>{fmtInt(o.quantity)}</td>
                     <td style={{ ...td, padding: '10px 14px' }}>{fmtPrice(o.unitPrice)}</td>
                     <td style={{ ...td, padding: '10px 14px' }}>{fmtMoney(o.fee)}</td>

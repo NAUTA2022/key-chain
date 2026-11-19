@@ -50,7 +50,7 @@ export default function LiveDocuments({ idOrSlug, nav }: LiveDocumentsProps) {
   } else if (status !== 'authenticated') {
     body = (
       <div style={note}>
-        <div style={{ marginBottom: 14 }}>Iniciá sesión para ver los documentos del proyecto.</div>
+        <div style={{ marginBottom: 14 }}>Inicia sesión para ver los documentos del proyecto.</div>
         <PBtn variant="accent" small onClick={() => nav('login')}>Iniciar sesión</PBtn>
       </div>
     );

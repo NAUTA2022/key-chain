@@ -60,7 +60,7 @@ type DateRange = { from: Date | null; to: Date | null };
 type SearchQuery = { dest: string; dates: DateRange; guests: number };
 type ProfileTab = 'info' | 'bookings';
 type BookeyPage = 'home' | 'detail' | 'profile' | 'favorites' | 'help';
-type PayToken = 'USDC' | 'KYCN';
+type PayToken = 'USDC' | 'BRIK';
 
 // Bookey's internal navigation state machine: each id with the payload it takes.
 type BookeyNavArgs =
@@ -238,7 +238,7 @@ const PROPERTIES: BookeyProperty[] = [
       'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=800&h=600&fit=crop&auto=format&q=80',
     ],
     amenities: ['wifi','ac','tv','kitchen','washer','gym','security','parking'],
-    description: 'Loft de 85 m² con techos de 4 metros en el barrio más cotizado de Madrid. Espacio de trabajo integrado con fibra óptica simétrica de 1 Gbps, sala de reuniones compartida en el edificio y recepción 24hs. Diseño nórdico con materiales de primera calidad. A 3 minutos a pie del metro Alonso Martínez. Contracto de arrendamiento mínimo 3 meses, con descuento del 8% para inversores KEYCHAIN.',
+    description: 'Loft de 85 m² con techos de 4 metros en el barrio más cotizado de Madrid. Espacio de trabajo integrado con fibra óptica simétrica de 1 Gbps, sala de reuniones compartida en el edificio y recepción 24hs. Diseño nórdico con materiales de primera calidad. A 3 minutos a pie del metro Alonso Martínez. Contracto de arrendamiento mínimo 3 meses, con descuento del 8% para inversores Brikme.',
     host: { name: 'Isabel Moreno', since: 2019, rating: 4.92, reviews: 201, superhost: true },
     reviews: [
       { name:'Thomas H.', date:'Jun 2026', rating:5, text:'Perfect location for business travel. The workspace is excellent and the building services are top notch. Would stay again without hesitation.' },
@@ -780,7 +780,7 @@ function BookingWidget({ p }: BookingWidgetProps) {
         </div>
         <button onClick={() => routerNavigate('/')}
           style={{ width:'100%', padding:'13px', borderRadius:14, background:`${A}18`, border:`1.5px solid ${A}40`, color:A, fontFamily:'var(--font-b)', fontWeight:700, fontSize:14, cursor:'pointer' }}>
-          Ver portal del inquilino en KEYCHAIN →
+          Ver portal del inquilino en Brikme →
         </button>
         <button onClick={() => setStep('idle')}
           style={{ width:'100%', padding:'11px', borderRadius:14, background:'transparent', border:'none', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:13, cursor:'pointer', marginTop:8 }}>
@@ -828,7 +828,7 @@ function BookingWidget({ p }: BookingWidgetProps) {
       <div style={{ marginBottom:14 }}>
         <div style={{ fontFamily:'var(--font-b)', fontSize:11, fontWeight:700, color:'var(--ter)', letterSpacing:'0.06em', marginBottom:8 }}>PAGÁS EN CRIPTO CON</div>
         <div style={{ display:'flex', gap:8 }}>
-          {(['USDC','KYCN'] as const).map(tk => (
+          {(['USDC','BRIK'] as const).map(tk => (
             <button key={tk} onClick={() => setPayToken(tk)}
               style={{
                 flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:7, padding:'10px', borderRadius:11, cursor:'pointer',
@@ -906,7 +906,7 @@ function BookingWidget({ p }: BookingWidgetProps) {
         </div>
         {saved > 0 && (
           <div style={{ display:'flex', justifyContent:'space-between' }}>
-            <span style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:G }}>Ahorro inversor KEYCHAIN</span>
+            <span style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:G }}>Ahorro inversor Brikme</span>
             <span style={{ fontFamily:'var(--font-b)', fontWeight:700, fontSize:13.5, color:G }}>−${saved}</span>
           </div>
         )}
@@ -992,7 +992,7 @@ function PropertyDetail({ p, nav }: PropertyDetailProps) {
           {p.verified && (
             <div style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:999, background:`${A}12`, border:`1px solid ${A}30`, flexShrink:0 }}>
               <span style={{ color:A, display:'flex' }}>{BIcons.token}</span>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:A, fontWeight:700, whiteSpace:'nowrap' }}>Tokenizado en KEYCHAIN</span>
+              <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:A, fontWeight:700, whiteSpace:'nowrap' }}>Tokenizado en Brikme</span>
             </div>
           )}
         </div>
@@ -1029,7 +1029,7 @@ function PropertyDetail({ p, nav }: PropertyDetailProps) {
             {/* Features */}
             <div style={{ padding:'28px 0', borderBottom:'1px solid var(--border-l)', display:'flex', flexDirection:'column', gap:16 }}>
               {[
-                { icon:BIcons.token, title:`Token KEYCHAIN · −${p.investor_discount}% para inversores`, desc:'El activo está tokenizado on-chain. Holders de tokens acceden a descuentos exclusivos y rendimientos.' },
+                { icon:BIcons.token, title:`Token Brikme · −${p.investor_discount}% para inversores`, desc:'El activo está tokenizado on-chain. Holders de tokens acceden a descuentos exclusivos y rendimientos.' },
                 { icon:BIcons.medal, title: p.superhost ? 'Superhost verificado' : 'Anfitrión verificado', desc:`${p.host.name} lleva ${new Date().getFullYear()-p.host.since} años en la plataforma con ${p.host.reviews} reseñas y calificación ${p.host.rating}.` },
                 { icon:BIcons.clipboard, title:`Check-in ${p.checkin} · Check-out ${p.checkout}`, desc:'Acceso autónomo con código en tu wallet. El smart contract libera el acceso al confirmar el pago.' },
               ].map(f => (
@@ -1207,7 +1207,7 @@ function BookeyHome({ nav, query, searched, onSearch }: BookeyHomeProps) {
               style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20, justifyContent:'center' }}>
               <span style={{ display:'flex' }}>{BIcons.logo}</span>
               <span style={{ fontFamily:'var(--font-h)', fontWeight:900, fontSize:34, color:'var(--text)', letterSpacing:'-0.03em' }}>Bookey</span>
-              <span style={{ padding:'3px 10px', borderRadius:999, background:`${A}14`, color:A, fontSize:11, fontWeight:700, letterSpacing:'0.04em' }}>by KEYCHAIN</span>
+              <span style={{ padding:'3px 10px', borderRadius:999, background:`${A}14`, color:A, fontSize:11, fontWeight:700, letterSpacing:'0.04em' }}>by Brikme</span>
             </motion.div>
 
             <motion.h1
@@ -1280,7 +1280,7 @@ function BookeyHome({ nav, query, searched, onSearch }: BookeyHomeProps) {
           <span style={{ color:A, display:'flex', transform:'scale(1.5)' }}>{BIcons.token}</span>
           <div style={{ flex:1 }}>
             <span style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:13.5, color:A }}>Precio inversor activo · </span>
-            <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--sec)' }}>Como holder de tokens KEYCHAIN, obtenés entre 8% y 20% de descuento en cada propiedad. El precio ya está aplicado en los listados.</span>
+            <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--sec)' }}>Como holder de tokens Brikme, obtenés entre 8% y 20% de descuento en cada propiedad. El precio ya está aplicado en los listados.</span>
           </div>
         </motion.div>
       </div>
@@ -1600,10 +1600,10 @@ function BookeyFavorites({ nav }: BookeyFavoritesProps) {
 
 // ─── Help ─────────────────────────────────────────────────────────────────────
 const HELP_FAQS = [
-  { q:'¿Cómo reservo una propiedad?', a:'Elegí una propiedad, seleccioná fechas y huéspedes, y confirmá el pago desde el checkout de KEYCHAIN.' },
-  { q:'¿Qué es el descuento inversor?', a:'Si tenés tokens KEYCHAIN de una propiedad, accedés a un descuento de entre 8% y 20% sobre el precio de esa propiedad.' },
-  { q:'¿En qué puedo pagar?', a:'Todos los pagos se hacen en cripto on-chain, con USDC o el token KYCN.' },
-  { q:'¿Cómo cancelo una reserva?', a:'Escribinos a soporte@keychain.io y te ayudamos según la política de cancelación de esa propiedad.' },
+  { q:'¿Cómo reservo una propiedad?', a:'Elegí una propiedad, seleccioná fechas y huéspedes, y confirmá el pago desde el checkout de Brikme.' },
+  { q:'¿Qué es el descuento inversor?', a:'Si tenés tokens Brikme de una propiedad, accedés a un descuento de entre 8% y 20% sobre el precio de esa propiedad.' },
+  { q:'¿En qué puedo pagar?', a:'Todos los pagos se hacen en cripto on-chain, con USDC o el token BRIK.' },
+  { q:'¿Cómo cancelo una reserva?', a:'Escribinos a hello@brikme.com y te ayudamos según la política de cancelación de esa propiedad.' },
 ];
 
 type BookeyHelpProps = { nav: BookeyNav };
@@ -1630,7 +1630,7 @@ function BookeyHelp({ nav }: BookeyHelpProps) {
 }
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
-// Bookey's own persistent chrome — separate from KEYCHAIN's Sidebar/Topbar,
+// Bookey's own persistent chrome — separate from Brikme's Sidebar/Topbar,
 // since Bookey is a standalone subsidiary product (see app/routes.ts).
 // Every sticky offset below it (category bar `top:64`, booking widget `top:88`)
 // was already sized to sit right under this 64px bar.
@@ -1759,13 +1759,13 @@ function BookeyNavbar({ nav, searched, query, onEditSearch }: BookeyNavbarProps)
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
-// Bookey is a standalone product (its own route, outside KEYCHAIN's
+// Bookey is a standalone product (its own route, outside Brikme's
 // login-gated Shell — see app/routes.ts), so it can't rely on an
 // external nav/routeData pair from a parent app. It owns its own
 // Home <-> Detail navigation instead; `nav('bookey-detail', property)` and
 // `nav('bookey')` (used throughout PropertyCard/PropertyDetail) resolve here.
 //
-// It also owns its own login gate — the same Login screen KEYCHAIN
+// It also owns its own login gate — the same Login screen Brikme
 // itself gates on. Since both sit under the same root <ThirdwebProvider>
 // (see app/root.tsx), useSessionAccount() already reflects a wallet connected
 // (or an "Entrar dev" session started) anywhere else in the app: if a session is already active, the gate is

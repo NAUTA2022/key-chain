@@ -32,12 +32,12 @@ type CryptoWithdrawProps = {
   live?: LiveWithdraw;
 };
 
-const TITLES: Record<Step, string> = { form: 'Retirar cripto', review: 'Revisá el retiro', processing: 'Enviando retiro', done: 'Retiro enviado' };
+const TITLES: Record<Step, string> = { form: 'Retirar cripto', review: 'Revisa el retiro', processing: 'Enviando retiro', done: 'Retiro enviado' };
 const field: CSSProperties = { width: '100%', boxSizing: 'border-box', height: 48, padding: '0 14px', borderRadius: 14, border: '1px solid var(--border-l)', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 14, outline: 'none' };
 const maxBtn: CSSProperties = { height: 34, padding: '0 10px', borderRadius: 10, border: 'none', background: 'var(--surface2)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 700, cursor: 'pointer' };
 const errorText: CSSProperties = { marginTop: 8, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)' };
 
-// Crypto withdrawal from the KEYCHAIN balance: token + network, destination
+// Crypto withdrawal from the Brikme balance: token + network, destination
 // address and amount, review with fees, 2FA code, processing and receipt.
 export default function CryptoWithdraw({ live, ...props }: CryptoWithdrawProps) {
   return live ? <LiveWithdrawFlow {...props} live={live} /> : <DemoWithdrawFlow {...props} />;
@@ -62,7 +62,7 @@ function DemoWithdrawFlow({ open, onClose, defaultSym = 'USDC' }: Omit<CryptoWit
   const addrOk = isAddress(addr);
   const errors = [
     addr && !addrOk && 'La dirección no es válida (0x + 40 caracteres).',
-    amount > bal && 'No tenés saldo suficiente.',
+    amount > bal && 'No tienes saldo suficiente.',
     amount > 0 && amount < token.min && `El mínimo es ${fmtToken(token.min, sym)}.`,
   ].filter((e): e is string => typeof e === 'string');
   const canReview = addrOk && amount > 0 && !errors.length;
@@ -109,7 +109,7 @@ function DemoWithdrawFlow({ open, onClose, defaultSym = 'USDC' }: Omit<CryptoWit
 
           <div style={{ marginTop: 14, padding: '4px 14px', borderRadius: 14, background: 'var(--surface2)' }}>
             <KV k="Comisión de red" v={`${fmtToken(feeTok, sym)}`} />
-            <KV k="Recibís" v={fmtToken(receive, sym)} strong />
+            <KV k="Recibes" v={fmtToken(receive, sym)} strong />
           </div>
         </>
       )}
@@ -127,11 +127,11 @@ function DemoWithdrawFlow({ open, onClose, defaultSym = 'USDC' }: Omit<CryptoWit
             <KV k="Monto" v={fmtToken(amount, sym)} />
             <KV k="Comisión de red" v={fmtToken(feeTok, sym)} />
           </div>
-          <Notice>Revisá la dirección y la red. Los retiros on-chain no se pueden revertir.</Notice>
+          <Notice>Revisa la dirección y la red. Los retiros on-chain no se pueden revertir.</Notice>
           <label style={{ ...T.label, marginTop: 16 }} htmlFor="wd-2fa">Código de verificación (2FA)</label>
           <input id="wd-2fa" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="••••••"
             style={{ ...field, textAlign: 'center', letterSpacing: '0.5em', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20 }} />
-          <div style={{ marginTop: 6, fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Ingresá el código de 6 dígitos de tu app autenticadora.</div>
+          <div style={{ marginTop: 6, fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Ingresa el código de 6 dígitos de tu app autenticadora.</div>
         </motion.div>
       )}
 
@@ -236,7 +236,7 @@ function LiveWithdrawFlow({ open, onClose, live }: Omit<CryptoWithdrawProps, 'li
 
           <div style={{ marginTop: 14, padding: '4px 14px', borderRadius: 14, background: 'var(--surface2)' }}>
             <KV k="Comisión de red" v={`Gas en ${gasSymbol}`} />
-            <KV k="Recibís" v={fmtToken(amount, 'USDC')} strong />
+            <KV k="Recibes" v={fmtToken(amount, 'USDC')} strong />
           </div>
         </>
       )}
@@ -254,7 +254,7 @@ function LiveWithdrawFlow({ open, onClose, live }: Omit<CryptoWithdrawProps, 'li
             <KV k="Monto" v={fmtToken(amount, 'USDC')} />
             <KV k="Comisión de red" v={`Gas en ${gasSymbol} (lo cobra la red)`} />
           </div>
-          <Notice>Revisá la dirección y la red. Los retiros on-chain no se pueden revertir.</Notice>
+          <Notice>Revisa la dirección y la red. Los retiros on-chain no se pueden revertir.</Notice>
           <div style={{ marginTop: 12, fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Vas a confirmar el envío con tu wallet.</div>
         </motion.div>
       )}
@@ -262,7 +262,7 @@ function LiveWithdrawFlow({ open, onClose, live }: Omit<CryptoWithdrawProps, 'li
       {step === 'processing' && (
         <>
           <ProgressSteps current={phase} failed={error !== null} steps={[
-            { label: 'Firmá el retiro en tu wallet', sub: `${fmtToken(amount, 'USDC')} a ${check.ok ? shortAddr(check.to) : ''}` },
+            { label: 'Firma el retiro en tu wallet', sub: `${fmtToken(amount, 'USDC')} a ${check.ok ? shortAddr(check.to) : ''}` },
             { label: `Enviando en ${network.name}`, sub: 'Esperando la confirmación de la red' },
           ]} />
           {error && <div style={{ marginTop: 12 }}><Notice>{error}</Notice></div>}

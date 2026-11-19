@@ -11,11 +11,11 @@ import { mutedStyle } from './styles';
 // when outgoing email is not configured: that is shown as a calm note, not an error.
 
 const REASONS: Record<string, string> = {
-  no_email: 'Guardá primero un email en tu perfil.',
+  no_email: 'Guarda primero un email en tu perfil.',
   already_verified: 'Tu email ya está verificado.',
-  code_expired: 'El código venció o no fue solicitado. Pedí uno nuevo.',
-  too_many_attempts: 'Demasiados intentos. Pedí un código nuevo.',
-  email_changed: 'Tu email cambió mientras lo verificabas. Pedí un código nuevo.',
+  code_expired: 'El código venció o no fue solicitado. Pide uno nuevo.',
+  too_many_attempts: 'Demasiados intentos. Pide un código nuevo.',
+  email_changed: 'Tu email cambió mientras lo verificabas. Pide un código nuevo.',
 };
 
 export default function EmailVerification() {
@@ -42,7 +42,7 @@ export default function EmailVerification() {
     const reason = problemReason(e);
     if (reason === 'email_unavailable') return setUnavailable(true);
     if (reason === 'already_verified') await refresh();
-    setError(errorText(e, 'No pudimos enviar el código. Probá de nuevo en unos minutos.', REASONS));
+    setError(errorText(e, 'No pudimos enviar el código. Prueba de nuevo en unos minutos.', REASONS));
   }
 
   async function confirm() {

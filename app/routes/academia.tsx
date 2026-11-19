@@ -5,7 +5,7 @@ import { breadcrumbs, seo } from '~/lib/seo';
 
 export const meta: Route.MetaFunction = () =>
   seo({
-    title: 'Academia: aprendé sobre tokenización y RWA',
+    title: 'Academia: aprende sobre tokenización y RWA',
     description: 'Guías y artículos sobre tokenización de activos reales (RWA), inversión en tokens, mercado secundario, vesting y finanzas descentralizadas.',
     path: '/academia',
     jsonLd: [breadcrumbs([{ name: 'Inicio', path: '/' }, { name: 'Academia', path: '/academia' }])],

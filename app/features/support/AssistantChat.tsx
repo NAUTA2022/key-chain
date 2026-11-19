@@ -18,7 +18,7 @@ function Bubble({ role, children }: { role: ChatMessage['role']; children: React
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
       <div style={{ ...mutedStyle, fontSize: 11.5, fontWeight: 600, marginBottom: 4, color: mine ? 'var(--sec)' : 'var(--accent-text)' }}>
-        {mine ? 'Vos' : 'Asistente'}
+        {mine ? 'Tú' : 'Asistente'}
       </div>
       <div
         style={{
@@ -67,12 +67,12 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
       const id = seq.current;
       setMessages(m => [...m, { id, role: 'assistant', content: text }]);
     } else if (problemReason(r.error) === 'assistant_unavailable') {
-      setError({ kind: 'unavailable', text: 'El asistente no está disponible ahora; abrí un ticket y te respondemos.' });
+      setError({ kind: 'unavailable', text: 'El asistente no está disponible ahora; abre un ticket y te respondemos.' });
     } else {
       setError({
         kind: 'other',
-        text: errorText(r.error, 'No pudimos obtener una respuesta. Probá de nuevo en un momento.', {
-          rate_limited: 'El asistente recibió muchas consultas seguidas. Esperá un momento y volvé a probar.',
+        text: errorText(r.error, 'No pudimos obtener una respuesta. Prueba de nuevo en un momento.', {
+          rate_limited: 'El asistente recibió muchas consultas seguidas. Espera un momento y vuelve a probar.',
         }),
       });
     }
@@ -99,8 +99,8 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
   if (status === 'anonymous') {
     body = (
       <SignInCta
-        title="Iniciá sesión para usar el asistente"
-        text="El asistente está disponible con tu sesión iniciada. Mientras tanto, podés buscar en las preguntas frecuentes."
+        title="Inicia sesión para usar el asistente"
+        text="El asistente está disponible con tu sesión iniciada. Mientras tanto, puedes buscar en las preguntas frecuentes."
       />
     );
   } else if (!authed) {
@@ -110,7 +110,7 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {messages.length === 0 && (
           <p style={{ ...bodyStyle, margin: 0 }}>
-            Hola, soy el asistente virtual de KEY CHAIN. Preguntame cómo usar la plataforma: tu cuenta, la verificación de identidad, las inversiones o los pagos.
+            Hola, soy el asistente virtual de Brikme. Pregúntame cómo usar la plataforma: tu cuenta, la verificación de identidad, las inversiones o los pagos.
           </p>
         )}
         <div role="log" aria-live="polite" aria-label="Conversación con el asistente" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -159,7 +159,7 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
     <Modal
       open={open}
       onClose={onClose}
-      title="Asistente de KEY CHAIN"
+      title="Asistente de Brikme"
       width={560}
       footer={
         authed ? (
@@ -171,7 +171,7 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
                   value={input}
                   rows={2}
                   maxLength={ASSISTANT_MAX_CHARS}
-                  placeholder="Escribí tu consulta…"
+                  placeholder="Escribe tu consulta…"
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {

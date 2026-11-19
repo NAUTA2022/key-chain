@@ -6,7 +6,7 @@ import { productAppJsonLd } from '~/lib/structured-data';
 
 export const handle: RouteHandle = { theme: 'light' };
 
-const DESCRIPTION = 'Reservá estadías en propiedades tokenizadas con descuentos para inversores. Buscá por destino, fechas y huéspedes.';
+const DESCRIPTION = 'Reserva estadías en propiedades tokenizadas con descuentos para inversores. Busca por destino, fechas y huéspedes.';
 
 export const meta: Route.MetaFunction = () =>
   seo({

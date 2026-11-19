@@ -92,7 +92,7 @@ function RequestBody({ request: r, onChanged, onOpenAsset }: { request: Tokeniza
 
   async function review(status: 'in_review' | 'changes_requested' | 'rejected') {
     const v = validate(reviewSchema, { status, note: note.trim() ? note : undefined });
-    if (!v.ok) return setNoteError(v.errors.note ?? 'Revisá la nota.');
+    if (!v.ok) return setNoteError(v.errors.note ?? 'Revisa la nota.');
     setNoteError(null);
     if (status === 'rejected' && !(await confirm({ title: 'Rechazar solicitud', message: `Se rechazará "${d.assetName}" y se notificará al solicitante${v.data.note ? ' con tu nota' : ''}.`, confirmLabel: 'Rechazar', danger: true }))) return;
     setBusy(true);
@@ -110,11 +110,11 @@ function RequestBody({ request: r, onChanged, onOpenAsset }: { request: Tokeniza
   }
 
   async function approve() {
-    if (!category) return setCategoryError('Elegí la categoría del activo antes de aprobar.');
+    if (!category) return setCategoryError('Elige la categoría del activo antes de aprobar.');
     setCategoryError(null);
     const ok = await confirm({
       title: 'Aprobar solicitud',
-      message: `Se creará el activo "${d.assetName}" como borrador en la categoría ${CATEGORY[category]} (emisor: ${d.contactName}) con los datos de la solicitud. Después podés completarlo, cargar imágenes y publicarlo.`,
+      message: `Se creará el activo "${d.assetName}" como borrador en la categoría ${CATEGORY[category]} (emisor: ${d.contactName}) con los datos de la solicitud. Después puedes completarlo, cargar imágenes y publicarlo.`,
       confirmLabel: 'Aprobar y crear borrador',
     });
     if (!ok) return;
@@ -191,11 +191,11 @@ function RequestBody({ request: r, onChanged, onOpenAsset }: { request: Tokeniza
             </Field>
             <Field
               label="Categoría del activo al aprobar"
-              hint={d.category === 'otro' ? `El solicitante eligió "Otro"${d.otherType ? ` (${d.otherType})` : ''}: elegí la categoría más cercana.` : 'Por defecto, la que eligió el solicitante.'}
+              hint={d.category === 'otro' ? `El solicitante eligió "Otro"${d.otherType ? ` (${d.otherType})` : ''}: elige la categoría más cercana.` : 'Por defecto, la que eligió el solicitante.'}
               error={categoryError ?? undefined}
             >
               <Select value={category} onChange={e => { setCategory(e.target.value === '' ? '' : (ASSET_CATEGORIES.find(c => c === e.target.value) ?? '')); setCategoryError(null); }} invalid={Boolean(categoryError)}>
-                <option value="" disabled>Elegí una categoría</option>
+                <option value="" disabled>Elige una categoría</option>
                 {ASSET_CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY[c]}</option>)}
               </Select>
             </Field>

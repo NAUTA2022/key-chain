@@ -76,7 +76,7 @@ export default function LiveTokenomics({ asset: a, dto, mobile }: LiveTokenomics
       ))}
       {!pool?.token && (
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginTop: 4 }}>
-          Los contratos del activo se publican acá cuando se despliega on-chain.
+          Los contratos del activo se publican aquí cuando se despliega on-chain.
         </div>
       )}
     </PCard>

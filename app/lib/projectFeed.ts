@@ -38,7 +38,7 @@ export const isFeedLive = (a: FeedAsset): boolean => a.stage === 'Operativo' || 
 export const postMedia = (post: Pick<ProjectPost, 'media' | 'img'>): MediaItem[] =>
   post.media || (post.img ? [{ id: post.img, type: 'image', url: post.img }] : []);
 
-export const issuerNameOf = (a: IssuerAsset): string => (a.issuer === 'keychain' ? 'KEYCHAIN' : (a.company || ''));
+export const issuerNameOf = (a: IssuerAsset): string => (a.issuer === 'keychain' ? 'BRIKME' : (a.company || ''));
 
 /** The design branch's developer-only QA fixtures (category "QA"); our catalog has none. */
 export const isQaFixture = (a: Pick<RwaAsset, 'cat'>): boolean => String(a.cat) === 'QA';
@@ -217,7 +217,7 @@ export function useProjectPosts(a: RwaAsset): [ProjectPost[], (updater: PostsUpd
 // ─── Featured profiles ────────────────────────────────────────────────────────
 // One profile per issuer with a live feed (the author shown on its posts).
 const PROFILE_BIO: Record<string, string> = {
-  KEYCHAIN:   'Plataforma de tokenización de activos reales. Proyectos propios en autos, campos, drones e inmuebles.',
+  Brikme:   'Plataforma de tokenización de activos reales. Proyectos propios en autos, campos, drones e inmuebles.',
   AutoMax:    'Flotas de vehículos tokenizadas operando en ride-hailing y logística urbana.',
   CarRent:    'Renta premium de vehículos de colección y alta gama para eventos.',
   AgroToken:  'Campos productivos de soja, maíz y cítricos en la zona núcleo argentina.',
@@ -233,7 +233,7 @@ const PROFILE_BIO: Record<string, string> = {
 // Owner (founder) behind each company: the personal account the company
 // profile can switch to. Demo data until issuers have real accounts.
 const PROFILE_OWNER: Record<string, string> = {
-  KEYCHAIN:   'Andrés Quinteros',
+  Brikme:   'Andrés Quinteros',
   AutoMax:    'Lucía Fernández',
   CarRent:    'Martín Salvatierra',
   AgroToken:  'Joaquín Pereyra',
@@ -292,8 +292,8 @@ function buildProfile(name: string, liveAssets: RwaAsset[], allAssets: RwaAsset[
     name,
     handle: name.toLowerCase().replace(/[^a-z0-9]/g, ''),
     cover: first ? (first.images.length ? first.images : [first.img])[0] ?? first.img : '',
-    bio: PROFILE_BIO[name] || `Emisor de ${allAssets.length} proyectos tokenizados en KEYCHAIN.`,
-    verified: name === 'KEYCHAIN' || allAssets.some(a => a.issuer === 'verified' || a.issuer === 'keychain'),
+    bio: PROFILE_BIO[name] || `Emisor de ${allAssets.length} proyectos tokenizados en Brikme.`,
+    verified: name === 'BRIKME' || allAssets.some(a => a.issuer === 'verified' || a.issuer === 'keychain'),
     projects: liveAssets.length,
     followers: investors * 7,
     owner: ownerOf(name),

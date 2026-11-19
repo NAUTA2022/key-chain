@@ -50,11 +50,11 @@ export function useApi<T>(key: string | null, load: () => Promise<ApiResult<T>>)
 }
 
 const CODE_MESSAGES: Record<string, string> = {
-  rate_limited: 'Demasiados intentos seguidos. Esperá unos minutos y volvé a probar.',
+  rate_limited: 'Demasiados intentos seguidos. Espera unos minutos y vuelve a probar.',
   payload_too_large: 'El archivo es demasiado grande.',
-  unauthorized: 'Tu sesión expiró. Volvé a conectar tu wallet.',
-  forbidden: 'No tenés permiso para hacer esto.',
-  service_unavailable: 'El servicio no está disponible en este momento. Probá más tarde.',
+  unauthorized: 'Tu sesión expiró. Vuelve a conectar tu wallet.',
+  forbidden: 'No tienes permiso para hacer esto.',
+  service_unavailable: 'El servicio no está disponible en este momento. Prueba más tarde.',
 };
 
 /**
@@ -62,7 +62,7 @@ const CODE_MESSAGES: Record<string, string> = {
  * (or `code`) to custom copy; the API's own titles are English, so they are never shown.
  */
 export function errorText(error: unknown, fallback: string, reasons: Record<string, string> = {}): string {
-  if (!isProblem(error)) return error instanceof TypeError ? 'No pudimos conectar con el servidor. Revisá tu conexión.' : fallback;
+  if (!isProblem(error)) return error instanceof TypeError ? 'No pudimos conectar con el servidor. Revisa tu conexión.' : fallback;
   const reason = typeof error.reason === 'string' ? error.reason : null;
   if (reason && reasons[reason]) return reasons[reason];
   if (reasons[error.code]) return reasons[error.code];
@@ -83,7 +83,7 @@ export const MB = 1024 * 1024;
 /** Client-side check before uploading; returns the Spanish error or null when the file is OK. */
 export function checkFile(file: File, rules: { types: readonly string[]; maxBytes: number }): string | null {
   if (!rules.types.includes(file.type)) {
-    return rules.types.includes('application/pdf') ? 'Formato no admitido. Usá PDF, PNG, JPG o WebP.' : 'Formato no admitido. Usá PNG, JPG o WebP.';
+    return rules.types.includes('application/pdf') ? 'Formato no admitido. Usa PDF, PNG, JPG o WebP.' : 'Formato no admitido. Usa PNG, JPG o WebP.';
   }
   if (file.size > rules.maxBytes) return `El archivo supera el máximo de ${Math.round(rules.maxBytes / MB)} MB.`;
   if (file.size === 0) return 'El archivo está vacío.';

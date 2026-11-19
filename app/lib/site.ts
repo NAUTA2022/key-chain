@@ -5,11 +5,11 @@
  */
 export const SITE_URL: string = (import.meta.env.VITE_SITE_URL ?? 'http://localhost:5173').replace(/\/+$/, '');
 
-export const SITE_NAME = 'KEY CHAIN';
-export const SITE_LOCALE = 'es_AR';
+export const SITE_NAME = 'BRIKME';
+export const SITE_LOCALE = 'es_LA';
 export const SITE_LANG = 'es';
 export const DEFAULT_DESCRIPTION =
-  'Plataforma de tokenización de activos reales (RWA) en Polygon: invertí en autos, campos, drones, inmuebles y edificios tokenizados desde cualquier monto, con rendimientos mensuales en USDC.';
+  'Brikme, Real World Tokenization: marketplace de activos del mundo real (RWA) tokenizados. Invierte en real estate, energía, minería, agricultura, transporte y activos de lujo desde $200 USD. Registrada y licenciada en Dubái (VARA).';
 export const DEFAULT_OG_IMAGE = '/og-image.jpg';
 
 export function absoluteUrl(path: string): string {

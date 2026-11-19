@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useAnimationControls, type PanInfo, type Varia
 import { PCard, PBtn, PSection, PTag, PStat, PImg, Icons, CompanyTag } from '~/components/ui';
 import { RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD, type AssetIssuer } from '~/data';
 import AssetCard from '~/components/AssetCard';
+import CategoryCarousel from '~/components/CategoryCarousel';
 import type { NavFn } from '~/lib/navigation';
 import { useCatalog, type CatalogAsset } from '~/lib/catalog';
 import { useSession } from '~/lib/session';
@@ -15,7 +16,7 @@ import FeaturedDemoCard from '~/features/demo-flow/FeaturedDemoCard';
 type FilterOptions = { cats: readonly string[]; countries: readonly string[]; companies: readonly string[]; issuers: readonly string[] };
 
 const ISSUER_ORDER: readonly AssetIssuer[] = ['keychain', 'verified', 'community'];
-const ISSUER_LABEL: Record<'Todos' | AssetIssuer, string> = { Todos: 'Todos', keychain: 'KEYCHAIN', verified: 'Verificado', community: 'Comunidad' };
+const ISSUER_LABEL: Record<'Todos' | AssetIssuer, string> = { Todos: 'Todos', keychain: 'BRIKME', verified: 'Verificado', community: 'Comunidad' };
 const DEMO_OPTIONS: FilterOptions = { cats: RWA_CATS, countries: RWA_COUNTRIES, companies: RWA_COMPANIES, issuers: ['Todos', ...ISSUER_ORDER] };
 
 const uniqueSorted = (values: string[]) => [...new Set(values.filter(Boolean))].sort((x, y) => x.localeCompare(y, 'es'));
@@ -154,12 +155,12 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
         return a.name.toLowerCase().includes(q) || a.company?.toLowerCase().includes(q) || a.cat.toLowerCase().includes(q) || a.location.toLowerCase().includes(q);
       }
       return true;
-    // KEYCHAIN's own tokenizations always show first, then everyone else —
+    // Brikme's own tokenizations always show first, then everyone else —
     // stable sort keeps each group's original relative order intact.
     }).sort((a, b) => (a.issuer === 'keychain' ? 0 : 1) - (b.issuer === 'keychain' ? 0 : 1));
   }, [assets, search, cat, country, company, issuer, rubro, locked]);
 
-  // Hero carousel — rotates through the top results (KEYCHAIN's own listings
+  // Hero carousel — rotates through the top results (Brikme's own listings
   // sort first, see `filtered` above), auto-advancing every 5s and resetting
   // whenever the active filters change the result set. Index + direction are
   // tracked together so the slide animation knows which way to travel.
@@ -262,7 +263,7 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
     <div className="g-page" style={{ padding:'28px 32px 40px', maxWidth:1200, margin:'0 auto' }}>
       <PSection
         title="Mercado Primario"
-        sub="Proyectos tokenizados en el ecosistema KEYCHAIN. Invertí desde la emisión."
+        sub="Proyectos tokenizados en el ecosistema Brikme. Invierte desde la emisión."
         help={<GuideButton tour="tokenizations" />}
         action={mobile ? null : heroCounter}
       />
@@ -332,7 +333,7 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
                     </div>
                     <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:26, color:'var(--text)', letterSpacing:'-0.03em', lineHeight:1.15, marginBottom:8, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{featured.name}</div>
                     {featured.company && (
-                      <CompanyTag company={featured.issuer === 'keychain' ? 'KEYCHAIN' : featured.company} cat={featured.cat} style={{ marginBottom:12 }} />
+                      <CompanyTag company={featured.issuer === 'keychain' ? 'BRIKME' : featured.company} cat={featured.cat} style={{ marginBottom:12 }} />
                     )}
                     <div style={{ fontFamily:'var(--font-b)', fontSize:14, color:'var(--sec)', lineHeight:1.55, maxWidth:480, display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{featured.desc}</div>
                   </div>
@@ -364,6 +365,8 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
         </div>
       )}
 
+      {!locked && <CategoryCarousel categories={options.cats} value={cat} onChange={setCat} />}
+
       {/* Filters */}
       {locked ? (
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:22 }}>
@@ -393,12 +396,12 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
       </div>
 
       {/* Grid */}
-      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20 }}>
+      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:20 }}>
         {filtered.map(a => <AssetCard key={a.id} asset={a} nav={nav} />)}
       </div>
 
       {waiting && (
-        <div className="g-market-grid" aria-hidden="true" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20 }}>
+        <div className="g-market-grid" aria-hidden="true" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:20 }}>
           {[0, 1, 2].map(i => <PCard key={i} className="market-card" style={{ background:'var(--surface2)', boxShadow:'none' }} />)}
         </div>
       )}
@@ -406,7 +409,7 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
       {!waiting && filtered.length === 0 && (
         <div style={{ textAlign:'center', padding:'60px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:14 }}>
           {live && assets.length === 0
-            ? 'Todavía no hay proyectos publicados. Volvé pronto.'
+            ? 'Todavía no hay proyectos publicados. Vuelve pronto.'
             : 'No se encontraron proyectos con los filtros seleccionados.'}
         </div>
       )}

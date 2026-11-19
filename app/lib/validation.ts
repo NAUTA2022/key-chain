@@ -12,7 +12,7 @@ export const usdAmount = z
   .refine(n => Number.isInteger(Math.round(n * 1e6)) && Math.abs(n * 1e6 - Math.round(n * 1e6)) < 1e-6, 'Máximo 6 decimales');
 
 export const transferSchema = z.object({
-  to: z.string().trim().min(1, 'Elegí un destinatario').max(128),
+  to: z.string().trim().min(1, 'Elige un destinatario').max(128),
   amount: usdAmount,
 });
 

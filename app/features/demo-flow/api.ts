@@ -34,14 +34,14 @@ async function settle(p: Promise<{ data?: unknown; error?: unknown }>): Promise<
     const r = await p;
     if (r.data) return { ok: true };
     const reason = isProblem(r.error) ? r.error.reason : undefined;
-    if (reason === 'binance_failed') return { ok: false, message: 'Binance no respondió. Probá de nuevo o elegí otra opción.' };
-    if (reason === 'demo_flow_busy') return { ok: false, message: 'Hay muchas demos esperando pago. Probá de nuevo en unos minutos.' };
+    if (reason === 'binance_failed') return { ok: false, message: 'Binance no respondió. Prueba de nuevo o elige otra opción.' };
+    if (reason === 'demo_flow_busy') return { ok: false, message: 'Hay muchas demos esperando pago. Prueba de nuevo en unos minutos.' };
     if (reason === 'demo_flow_unavailable') return { ok: false, message: 'La demo no está disponible en esta red.' };
     if (reason === 'demo_flow_state') return { ok: false, message: 'La demo ya avanzó a otro paso. Actualizamos la pantalla.' };
-    if (isProblem(r.error) && r.error.status === 429) return { ok: false, message: 'Hiciste muchos intentos seguidos. Esperá unos minutos.' };
-    return { ok: false, message: 'No se pudo completar la acción. Probá de nuevo.' };
+    if (isProblem(r.error) && r.error.status === 429) return { ok: false, message: 'Hiciste muchos intentos seguidos. Espera unos minutos.' };
+    return { ok: false, message: 'No se pudo completar la acción. Prueba de nuevo.' };
   } catch {
-    return { ok: false, message: 'No se pudo contactar al servidor. Revisá tu conexión.' };
+    return { ok: false, message: 'No se pudo contactar al servidor. Revisa tu conexión.' };
   }
 }
 

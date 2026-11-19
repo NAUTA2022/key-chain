@@ -99,23 +99,23 @@ const STRATEGIES: Strategy[] = [
     icon: CROWD_ICON,
     color: '#34d399',
     badge: 'Fraccionada clásica',
-    tagline: 'Dividís el activo en tokens y muchos inversores compran una parte',
+    tagline: 'Divides el activo en tokens y muchos inversores compran una parte',
     desc: 'El activo se fracciona en tokens con precio fijo. Cada inversor compra los que quiere y recibe rendimientos mensuales proporcionales (alquiler, producción, cosecha). Es el modelo más simple y el más fácil de explicar.',
     best: ['Inmuebles', 'Maquinaria agrícola', 'Flotas y vehículos'],
     complexity: 'Baja',
     duration: '6–60 meses',
     params: [
       { id: 'goal',      label: 'Valuación del activo',        unit: 'USD',    type: 'number', min: 50000, max: 10000000, step: 10000, default: 300000,
-        help: 'El valor de mercado del activo que querés tokenizar. Es la base para el precio por token y el retorno esperado.' },
+        help: 'El valor de mercado del activo que quieres tokenizar. Es la base para el precio por token y el retorno esperado.' },
       { id: 'tokens',    label: 'Cantidad de tokens a emitir', unit: 'tokens', type: 'number', min: 100,   max: 1000000,  step: 100,   default: 10000,
         help: 'Cada token es una fracción del activo. Más tokens = precio unitario más bajo = más inversores pequeños pueden entrar.' },
       { id: 'apy',       label: 'Rendimiento anual ofrecido',  unit: '%',      type: 'range',  min: 3,     max: 20,       step: 0.5,   default: 9.8,
-        help: 'El retorno anual que reciben los holders. Calculalo sobre el ingreso real del activo (alquiler, producción, etc.).' },
+        help: 'El retorno anual que reciben los holders. Calcúlalo sobre el ingreso real del activo (alquiler, producción, etc.).' },
       { id: 'duration',  label: 'Plazo del proyecto',          unit: 'meses',  type: 'range',  min: 6,     max: 60,       step: 3,     default: 24,
         help: 'Período en que los tokens generan rendimientos. Al vencimiento los holders pueden revender o renovar.' },
       { id: 'minticket', label: 'Ticket mínimo por inversor',  unit: 'USD',    type: 'range',  min: 1,     max: 5000,     step: 1,     default: 500,
         help: 'Inversión mínima por persona. Un ticket bajo amplía la base de inversores; uno alto atrae perfiles institucionales.' },
-      FEE_PARAM(2.5, 'Comisión de KEY CHAIN por tokenización, custodia del activo y distribución de rendimientos on-chain.'),
+      FEE_PARAM(2.5, 'Comisión de Brikme por tokenización, custodia del activo y distribución de rendimientos on-chain.'),
     ],
   },
   {
@@ -125,7 +125,7 @@ const STRATEGIES: Strategy[] = [
     color: '#fbbf24',
     badge: 'Mejoras con dilución',
     tagline: 'Los holders proponen mejoras y el activo crece ronda a ronda',
-    desc: 'El activo arranca tokenizado al 100%. Cualquier holder puede proponer una mejora (ampliar, reformar, equipar). Si se financia, se emiten tokens nuevos: quien pone plata en la mejora mantiene su porcentaje y quien no participa se diluye, aunque su parte puede valer más porque el activo creció.',
+    desc: 'El activo arranca tokenizado al 100%. Cualquier holder puede proponer una mejora (ampliar, reformar, equipar). Si se financia, se emiten tokens nuevos: quien pone dinero en la mejora mantiene su porcentaje y quien no participa se diluye, aunque su parte puede valer más porque el activo creció.',
     best: ['Inmuebles en desarrollo', 'Campos y viñedos', 'Hoteles y locales'],
     complexity: 'Media',
     duration: '24–120 meses',
@@ -135,12 +135,12 @@ const STRATEGIES: Strategy[] = [
       { id: 'improve', label: 'Costo de cada mejora',         unit: 'USD',    type: 'number', min: 5000,  max: 5000000,  step: 5000,  default: 100000,
         help: 'Cuánto cuesta cada mejora propuesta. Se financia emitiendo tokens nuevos al precio vigente del activo.' },
       { id: 'uplift',  label: 'Revalorización por mejora',    unit: '%',      type: 'range',  min: 0,     max: 80,       step: 5,     default: 30,
-        help: 'Cuánto valor extra genera la mejora por encima de lo que costó. Ej: invertís $100K en una pileta y el activo sube $130K → 30%.' },
+        help: 'Cuánto valor extra genera la mejora por encima de lo que costó. Ej: inviertes $100K en una piscina y el activo sube $130K → 30%.' },
       { id: 'rounds',  label: 'Rondas de mejora',             unit: 'rondas', type: 'range',  min: 1,     max: 8,        step: 1,     default: 4,
         help: 'Cuántas mejoras se aprueban durante la vida del proyecto. Cada una es votada por los holders.' },
       { id: 'stake',   label: 'Tu participación inicial',     unit: '%',      type: 'range',  min: 1,     max: 50,       step: 1,     default: 10,
         help: 'El porcentaje del activo que tiene un holder de ejemplo. Vas a ver cómo evoluciona si acompaña las mejoras o si no.' },
-      FEE_PARAM(2, 'Comisión de KEY CHAIN por cada ronda de emisión, votación on-chain y actualización de la valuación.'),
+      FEE_PARAM(2, 'Comisión de Brikme por cada ronda de emisión, votación on-chain y actualización de la valuación.'),
     ],
   },
   {
@@ -165,7 +165,7 @@ const STRATEGIES: Strategy[] = [
         help: 'Lo que paga el operador por usar la parte del activo que todavía es de los inversores. Baja a medida que recompra.' },
       { id: 'recycle', label: 'Capital que se reinvierte en el ciclo', unit: '%',    type: 'range',  min: 0,     max: 100,     step: 10,   default: 80,
         help: 'Qué parte del capital recomprado vuelve a entrar en nuevos activos de la cartera en vez de retirarse.' },
-      FEE_PARAM(2, 'Comisión de KEY CHAIN por contratos de opción, cobro de cuotas y recompra automática de tokens.'),
+      FEE_PARAM(2, 'Comisión de Brikme por contratos de opción, cobro de cuotas y recompra automática de tokens.'),
     ],
   },
   {
@@ -175,13 +175,13 @@ const STRATEGIES: Strategy[] = [
     color: '#c084fc',
     badge: 'Ingresos futuros',
     tagline: 'Los holders cobran un % de las ventas hasta un tope y el negocio sigue siendo tuyo',
-    desc: 'En vez de vender una parte del activo, tokenizás sus ingresos futuros. Los holders reciben un porcentaje de la facturación mensual hasta cobrar un múltiplo pactado (por ejemplo 1.6x). Al llegar al tope los tokens se queman solos: no cedés propiedad y el inversor sabe exactamente cuánto va a cobrar.',
+    desc: 'En vez de vender una parte del activo, tokenizas sus ingresos futuros. Los holders reciben un porcentaje de la facturación mensual hasta cobrar un múltiplo pactado (por ejemplo 1.6x). Al llegar al tope los tokens se queman solos: no cedes propiedad y el inversor sabe exactamente cuánto va a cobrar.',
     best: ['Restaurantes y franquicias', 'E-commerce', 'Parques solares'],
     complexity: 'Baja',
     duration: '12–60 meses',
     params: [
       { id: 'goal',    label: 'Capital a levantar',            unit: 'USD', type: 'number', min: 10000, max: 5000000, step: 5000, default: 150000,
-        help: 'Lo que necesitás para crecer: abrir un local, comprar stock, instalar paneles.' },
+        help: 'Lo que necesitas para crecer: abrir un local, comprar stock, instalar paneles.' },
       { id: 'revenue', label: 'Facturación mensual actual',    unit: 'USD', type: 'number', min: 5000,  max: 5000000, step: 1000, default: 60000,
         help: 'Lo que factura el negocio hoy por mes. Es la base sobre la que se calcula el pago a los holders.' },
       { id: 'share',   label: '% de ingresos para holders',    unit: '%',   type: 'range',  min: 2,     max: 20,      step: 0.5,  default: 8,
@@ -190,7 +190,7 @@ const STRATEGIES: Strategy[] = [
         help: 'Múltiplo del capital que cobra el inversor antes de que los tokens se quemen. 1.6x = por cada $100 recibe $160.' },
       { id: 'growth',  label: 'Crecimiento mensual de ventas', unit: '%',   type: 'range',  min: 0,     max: 6,       step: 0.5,  default: 1.5,
         help: 'Cuánto crecen las ventas cada mes gracias al capital. Más crecimiento = se llega antes al tope.' },
-      FEE_PARAM(2, 'Comisión de KEY CHAIN por emisión, conciliación de ventas y pagos automáticos en USDC.'),
+      FEE_PARAM(2, 'Comisión de Brikme por emisión, conciliación de ventas y pagos automáticos en USDC.'),
     ],
   },
 ];
@@ -226,13 +226,13 @@ function useProjection(strategy: Strategy | undefined, params: SimParams): Proje
       });
       const totalReturns = p.goal * ((p.apy || 9.8) / 100) * ((p.duration || 24) / 12);
       return {
-        summary: `Tokenizás tu activo de ${fmt(p.goal)} y abrís inversión desde $${p.minticket || 500}. Con ${investors.toLocaleString()} inversores al ${p.apy || 9.8}% anual, distribuís ${fmt(totalReturns)} en rendimientos durante ${p.duration || 24} meses.`,
+        summary: `Tokenizas tu activo de ${fmt(p.goal)} y abres inversión desde $${p.minticket || 500}. Con ${investors.toLocaleString()} inversores al ${p.apy || 9.8}% anual, distribuyes ${fmt(totalReturns)} en rendimientos durante ${p.duration || 24} meses.`,
         stats: [
-          { key: 'net',          label: 'Capital neto para vos',     value: fmt(net),                    icon: 'money',    highlight: true, note: 'Lo que recibís al completar la ronda, descontada la comisión.' },
+          { key: 'net',          label: 'Capital neto para ti',     value: fmt(net),                    icon: 'money',    highlight: true, note: 'Lo que recibes al completar la ronda, descontada la comisión.' },
           { key: 'investors',    label: 'Inversores estimados',      value: investors.toLocaleString(),  icon: 'people',   note: `Con ticket mínimo de $${p.minticket || 500} por participante.` },
           { key: 'tokenPrice',   label: 'Precio por token',          value: `$${tokenPrice.toFixed(2)}`, icon: 'token',    note: 'Cada token representa una fracción igual del activo.' },
-          { key: 'totalReturns', label: 'Rendimientos a distribuir', value: fmt(totalReturns),           icon: 'yield',    note: 'Total que pagás a los holders durante el proyecto.' },
-          { key: 'fee',          label: 'Comisión de KEY CHAIN',     value: fmt(p.goal * fee),           icon: 'fee',      note: 'Tokenización, custodia del activo y distribución de rendimientos.' },
+          { key: 'totalReturns', label: 'Rendimientos a distribuir', value: fmt(totalReturns),           icon: 'yield',    note: 'Total que pagas a los holders durante el proyecto.' },
+          { key: 'fee',          label: 'Comisión de Brikme',     value: fmt(p.goal * fee),           icon: 'fee',      note: 'Tokenización, custodia del activo y distribución de rendimientos.' },
           { key: 'duration',     label: 'Plazo del proyecto',        value: `${p.duration || 24} meses`, icon: 'calendar', note: 'Los tokens se pueden revender en el mercado secundario.' },
         ],
         charts: [
@@ -261,13 +261,13 @@ function useProjection(strategy: Strategy | undefined, params: SimParams): Proje
         stats: [
           { key: 'value',  label: 'Valor final del activo',     value: fmt(V),                       icon: 'chart',  highlight: true, note: `Arranca en ${fmt(p.goal)} y suma ${fmt(C * (1 + u))} por mejora.` },
           { key: 'raised', label: 'Capital levantado en mejoras', value: fmt(C * rounds),            icon: 'money',  note: `${rounds} rondas de ${fmt(C)}, votadas por los holders.` },
-          { key: 'yes',    label: 'Si acompañás las mejoras',   value: `${(s0 * 100).toFixed(1)}%`,  icon: 'token',  note: `Tu parte vale ${fmt(valYes)} y aportaste ${fmt(extra)} extra.` },
-          { key: 'no',     label: 'Si no invertís',             value: `${(sNo * 100).toFixed(1)}%`, icon: 'people', note: `Te diluís, pero tu parte vale ${fmt(valNo)} (empezó en ${fmt(start)}).` },
+          { key: 'yes',    label: 'Si acompañas las mejoras',   value: `${(s0 * 100).toFixed(1)}%`,  icon: 'token',  note: `Tu parte vale ${fmt(valYes)} y aportaste ${fmt(extra)} extra.` },
+          { key: 'no',     label: 'Si no inviertes',             value: `${(sNo * 100).toFixed(1)}%`, icon: 'people', note: `Te diluyes, pero tu parte vale ${fmt(valNo)} (empezó en ${fmt(start)}).` },
           { key: 'gain',   label: 'Ganancia por acompañar',     value: fmt(valYes - valNo - extra),  icon: 'yield',  note: 'Valor extra de seguir las rondas, ya descontado lo que aportaste.' },
-          { key: 'fee',    label: 'Comisión de KEY CHAIN',      value: fmt(C * rounds * fee),        icon: 'fee',    note: 'Se cobra sobre cada ronda de mejora emitida.' },
+          { key: 'fee',    label: 'Comisión de Brikme',      value: fmt(C * rounds * fee),        icon: 'fee',    note: 'Se cobra sobre cada ronda de mejora emitida.' },
         ],
         charts: [
-          { data: series, key: 'yes', compare: 'no', fmt: 'pct', label: 'Tu porcentaje del activo', subtitle: 'Línea llena: acompañás cada mejora. Punteada: no invertís y te diluís.', legend: ['Acompañás', 'No invertís'] },
+          { data: series, key: 'yes', compare: 'no', fmt: 'pct', label: 'Tu porcentaje del activo', subtitle: 'Línea llena: acompañas cada mejora. Punteada: no inviertes y te diluyes.', legend: ['Acompañas', 'No inviertes'] },
           { data: series, key: 'value', label: 'Valor del activo (USD)', subtitle: 'Cada mejora aprobada y financiada por la comunidad suma valor al activo.' },
         ],
         timeline: { title: 'Rondas de mejora — cuánto entra y cómo se diluye quien no participa', items },
@@ -296,7 +296,7 @@ function useProjection(strategy: Strategy | undefined, params: SimParams): Proje
           { key: 'back',    label: 'Capital recuperado',          value: fmt(F),                      icon: 'money',    note: 'Vuelve completo a los holders vía recompra de tokens.' },
           { key: 'roi',     label: 'Retorno total del inversor',  value: `${(((F + rentTotal) / F - 1) * 100).toFixed(1)}%`, icon: 'chart', note: 'Renta cobrada sobre el capital invertido, sin depender de vender.' },
           { key: 'cycle',   label: 'Capital que sigue en el ciclo', value: fmt(F * rec),             icon: 'token',    note: `Alcanza para financiar el ${((F * rec) / p.goal * 100).toFixed(0)}% de un activo igual en la próxima vuelta.` },
-          { key: 'fee',     label: 'Comisión de KEY CHAIN',       value: fmt(F * fee),                icon: 'fee',      note: 'Contratos de opción, cobro de cuotas y recompras automáticas.' },
+          { key: 'fee',     label: 'Comisión de Brikme',       value: fmt(F * fee),                icon: 'fee',      note: 'Contratos de opción, cobro de cuotas y recompras automáticas.' },
         ],
         charts: [
           { data: months, key: 'own',      fmt: 'pct', label: 'Propiedad del operador (%)',            subtitle: 'Cada cuota recompra tokens: el operador pasa de usuario a dueño.' },
@@ -320,15 +320,15 @@ function useProjection(strategy: Strategy | undefined, params: SimParams): Proje
       const firstPay = (p.revenue || 60000) * sh;
       return {
         summary: done
-          ? `Levantás ${fmt(p.goal)} sin ceder propiedad. Pagás el ${p.share || 8}% de tus ventas (${fmt(firstPay)} el primer mes) y en ${m} meses los holders cobran ${fmt(cap)}: ahí los tokens se queman y el negocio vuelve a ser 100% tuyo.`
-          : `Con estas ventas no se llega al tope de ${fmt(cap)} en 10 años. Subí el % de ingresos, bajá el tope o el capital a levantar.`,
+          ? `Levantas ${fmt(p.goal)} sin ceder propiedad. Pagas el ${p.share || 8}% de tus ventas (${fmt(firstPay)} el primer mes) y en ${m} meses los holders cobran ${fmt(cap)}: ahí los tokens se queman y el negocio vuelve a ser 100% tuyo.`
+          : `Con estas ventas no se llega al tope de ${fmt(cap)} en 10 años. Sube el % de ingresos, baja el tope o el capital a levantar.`,
         stats: [
-          { key: 'net',   label: 'Capital neto para vos',   value: fmt(net),                     icon: 'money',    highlight: true, note: 'Sin ceder un solo % de propiedad del negocio.' },
+          { key: 'net',   label: 'Capital neto para ti',   value: fmt(net),                     icon: 'money',    highlight: true, note: 'Sin ceder un solo % de propiedad del negocio.' },
           { key: 'pay',   label: 'Pago del primer mes',     value: fmt(firstPay),                icon: 'calendar', note: `${p.share || 8}% de ${fmt(p.revenue || 60000)} de facturación.` },
-          { key: 'time',  label: 'Meses hasta el tope',     value: done ? `${m} meses` : '+120', icon: 'chart',    note: 'Si vendés más, llegás antes y pagás menos intereses implícitos.' },
+          { key: 'time',  label: 'Meses hasta el tope',     value: done ? `${m} meses` : '+120', icon: 'chart',    note: 'Si vendes más, llegas antes y pagas menos intereses implícitos.' },
           { key: 'total', label: 'Total a devolver',        value: fmt(cap),                     icon: 'yield',    note: `${p.cap || 1.6}x el capital. Después no se paga nada más.` },
           { key: 'irr',   label: 'Retorno anual inversor',  value: irr ? `${irr.toFixed(1)}%` : '—', icon: 'token', note: 'Equivalente anual del múltiplo según el tiempo que tarda en cobrarse.' },
-          { key: 'fee',   label: 'Comisión de KEY CHAIN',   value: fmt(p.goal * fee),            icon: 'fee',      note: 'Emisión, conciliación de ventas y pagos automáticos.' },
+          { key: 'fee',   label: 'Comisión de Brikme',   value: fmt(p.goal * fee),            icon: 'fee',      note: 'Emisión, conciliación de ventas y pagos automáticos.' },
         ],
         charts: [
           { data: months, key: 'paid',  label: 'Pagado a holders (USD)', subtitle: 'Crece con tus ventas y se detiene al llegar al tope pactado.' },
@@ -444,9 +444,9 @@ function ParamField({ p, value, onChange, color }: ParamFieldProps) {
 }
 
 const STEPS = [
-  { label: 'Modelo',     desc: 'Elegí tu estructura' },
-  { label: 'Proyecto',   desc: 'Configurá los parámetros' },
-  { label: 'Proyección', desc: 'Mirá los resultados' },
+  { label: 'Modelo',     desc: 'Elige tu estructura' },
+  { label: 'Proyecto',   desc: 'Configura los parámetros' },
+  { label: 'Proyección', desc: 'Mira los resultados' },
 ];
 
 // `head` replaces the default title block (the landing passes its animated one).
@@ -487,7 +487,7 @@ export default function StrategySimulator({ head }: StrategySimulatorProps) {
       {head || (
       <div style={{ textAlign: 'center', marginBottom: 56 }}>
         <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 40, color: 'rgba(255,255,255,0.93)', margin: 0, lineHeight: 1.15 }}>
-          Simulá la tokenización<br/>de tu proyecto
+          Simula la tokenización<br/>de tu proyecto
         </h2>
       </div>
       )}
@@ -500,7 +500,7 @@ export default function StrategySimulator({ head }: StrategySimulatorProps) {
               style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: i < step ? 'pointer' : 'default' }}>
               <div style={{
                 width: 30, height: 30, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: i === step ? `0 0 18px ${strategy?.color || '#7fb2ff'}88` : 'none',
+                boxShadow: i === step ? `0 0 18px ${strategy?.color || '#1EC6D9'}88` : 'none',
                 fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 12, flexShrink: 0,
                 background: i === step ? (strategy?.color || '#fff') : i < step ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
                 color: i === step ? '#050505' : i < step ? 'rgba(255,255,255,0.70)' : 'rgba(255,255,255,0.20)',
@@ -515,7 +515,7 @@ export default function StrategySimulator({ head }: StrategySimulatorProps) {
             {i < STEPS.length - 1 && (
               <div style={{ width: 54, height: 2, borderRadius: 2, background: 'rgba(255,255,255,0.07)', margin: '0 16px', overflow: 'hidden' }}>
                 <motion.div initial={false} animate={{ width: i < step ? '100%' : '0%' }} transition={{ duration: 0.5 }}
-                  style={{ height: '100%', background: `linear-gradient(90deg, #7fb2ff, ${strategy?.color || '#a78bfa'})`, boxShadow: '0 0 10px rgba(127,178,255,0.8)' }} />
+                  style={{ height: '100%', background: `linear-gradient(90deg, #1EC6D9, ${strategy?.color || '#F0900F'})`, boxShadow: '0 0 10px rgba(30,198,217,0.8)' }} />
               </div>
             )}
           </div>
@@ -539,7 +539,7 @@ export default function StrategySimulator({ head }: StrategySimulatorProps) {
             <motion.div key="s0" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
               className="sim-pane" style={{ padding: '40px 40px 28px' }}>
               <div style={{ marginBottom: 28 }}>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'rgba(255,255,255,0.88)', marginBottom: 6 }}>¿Cómo querés tokenizar tu activo?</div>
+                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'rgba(255,255,255,0.88)', marginBottom: 6 }}>¿Cómo quieres tokenizar tu activo?</div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.34)', lineHeight: 1.55 }}>Cada modelo define cómo entra el capital, cómo cobran los inversores y quién termina siendo dueño del activo.</div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }} className="sim-grid">
@@ -608,7 +608,7 @@ export default function StrategySimulator({ head }: StrategySimulatorProps) {
                 <div>
                   <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, color: strategy.color }}>{strategy.label}</div>
                   <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'rgba(255,255,255,0.34)', marginTop: 4, lineHeight: 1.5 }}>
-                    Configurá los parámetros de tu proyecto. Cada campo tiene una explicación para ayudarte a elegir el valor correcto.
+                    Configura los parámetros de tu proyecto. Cada campo tiene una explicación para ayudarte a elegir el valor correcto.
                   </div>
                 </div>
               </div>

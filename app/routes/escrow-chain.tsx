@@ -7,7 +7,7 @@ import { productAppJsonLd } from '~/lib/structured-data';
 
 export const handle: RouteHandle = { theme: 'dark' };
 
-const DESCRIPTION = 'Gestioná importaciones y exportaciones con escrow on-chain: fondos protegidos hasta que se cumplen las condiciones de la operación.';
+const DESCRIPTION = 'Gestiona importaciones y exportaciones con escrow on-chain: fondos protegidos hasta que se cumplen las condiciones de la operación.';
 
 export const meta: Route.MetaFunction = () =>
   seo({

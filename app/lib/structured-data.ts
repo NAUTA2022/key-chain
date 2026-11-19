@@ -16,6 +16,16 @@ export function organizationJsonLd(): JsonLd {
     url: SITE_URL,
     logo: absoluteUrl('/icon-512.png'),
     description: DEFAULT_DESCRIPTION,
+    slogan: 'Real World Tokenization',
+    email: 'hello@brikme.com',
+    sameAs: ['https://www.brikme.com'],
+    founder: { '@type': 'Person', name: 'Andrés Ortiz', jobTitle: 'CEO & Founder' },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Zlafa Building, Al Garhoud Office M02, Business Bay Bridge',
+      addressLocality: 'Dubái',
+      addressCountry: 'AE',
+    },
   };
 }
 

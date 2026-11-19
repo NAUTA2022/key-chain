@@ -6,11 +6,11 @@ import type { AssetCategory, AssetStage, BroadcastAudience, DocumentKind, Issuer
 
 const text = (min: number, max: number) =>
   z
-    .string({ error: 'Completá este campo.' })
+    .string({ error: 'Completa este campo.' })
     .trim()
-    .min(min, min <= 1 ? 'Completá este campo.' : `Mínimo ${min} caracteres.`)
+    .min(min, min <= 1 ? 'Completa este campo.' : `Mínimo ${min} caracteres.`)
     .max(max, `Máximo ${max} caracteres.`);
-const num = () => z.number({ error: 'Ingresá un número válido.' });
+const num = () => z.number({ error: 'Ingresa un número válido.' });
 
 /** Field path → first message. */
 export type FieldErrors = Record<string, string>;
@@ -37,7 +37,7 @@ export const ROLES = ['investor', 'issuer', 'admin'] as const satisfies readonly
 
 const assetFields = {
   name: text(3, 120),
-  category: z.enum(ASSET_CATEGORIES, { error: 'Elegí una categoría.' }),
+  category: z.enum(ASSET_CATEGORIES, { error: 'Elige una categoría.' }),
   country: text(2, 80),
   location: text(2, 160),
   description: text(10, 5000),
@@ -45,7 +45,7 @@ const assetFields = {
   tokenPrice: num().min(0.000001, 'Debe ser mayor a 0.').max(1e9, 'Valor demasiado alto.'),
   totalTokens: num().int('Debe ser un número entero.').min(1, 'Mínimo 1 token.').max(2_000_000_000, 'Máximo 2.000.000.000 tokens.'),
   apy: num().min(0, 'No puede ser negativo.').max(100, 'Máximo 100%.'),
-  stage: z.enum(ASSET_STAGES, { error: 'Elegí una etapa.' }),
+  stage: z.enum(ASSET_STAGES, { error: 'Elige una etapa.' }),
   lifespan: text(1, 60),
   feedEnabled: z.boolean(),
   distributionFrequency: text(2, 40),
@@ -55,18 +55,18 @@ export const createAssetSchema = z
   .object({
     ...assetFields,
     status: z.enum(['draft', 'published']),
-    issuerId: z.uuid('Elegí un emisor.').optional(),
+    issuerId: z.uuid('Elige un emisor.').optional(),
     newIssuer: z.object({ name: text(2, 120), kind: z.enum(ISSUER_KINDS) }).optional(),
   })
-  .refine(b => Boolean(b.issuerId) !== Boolean(b.newIssuer), { message: 'Elegí un emisor existente o creá uno nuevo.', path: ['issuerId'] });
+  .refine(b => Boolean(b.issuerId) !== Boolean(b.newIssuer), { message: 'Elige un emisor existente o crea uno nuevo.', path: ['issuerId'] });
 
-export const updateAssetSchema = z.object({ ...assetFields, issuerId: z.uuid('Elegí un emisor.') }).partial();
+export const updateAssetSchema = z.object({ ...assetFields, issuerId: z.uuid('Elige un emisor.') }).partial();
 
 export const documentSchema = z.object({ title: text(2, 160), kind: z.enum(DOC_KINDS) });
 
 export const distributionSchema = z.object({
   nextDistributionAt: z.iso
-    .datetime({ offset: true, error: 'Elegí una fecha válida.' })
+    .datetime({ offset: true, error: 'Elige una fecha válida.' })
     .nullable()
     .refine(v => v === null || Date.parse(v) > Date.now(), 'La fecha debe ser futura.'),
   distributionFrequency: text(2, 40).optional(),
@@ -79,7 +79,7 @@ const DOC_TYPES = [...IMAGE_TYPES, 'application/pdf'];
 export function checkFile(file: File, kind: 'image' | 'document'): string | null {
   const types = kind === 'image' ? IMAGE_TYPES : DOC_TYPES;
   const max = kind === 'image' ? 5 : 10;
-  if (!types.includes(file.type)) return kind === 'image' ? 'Formato no admitido: usá PNG, JPG o WebP.' : 'Formato no admitido: usá PDF, PNG, JPG o WebP.';
+  if (!types.includes(file.type)) return kind === 'image' ? 'Formato no admitido: usa PNG, JPG o WebP.' : 'Formato no admitido: usa PDF, PNG, JPG o WebP.';
   if (file.size > max * 1024 * 1024) return `El archivo supera ${max} MB.`;
   return null;
 }
@@ -93,7 +93,7 @@ export const replySchema = z.object({ body: text(1, 5000) });
 export const reviewSchema = z
   .object({ status: z.enum(['in_review', 'changes_requested', 'rejected']), note: text(3, 1000).optional() })
   .superRefine((b, ctx) => {
-    if (b.status !== 'in_review' && !b.note) ctx.addIssue({ code: 'custom', path: ['note'], message: 'Escribí una nota para el solicitante: la va a ver en su solicitud.' });
+    if (b.status !== 'in_review' && !b.note) ctx.addIssue({ code: 'custom', path: ['note'], message: 'Escribe una nota para el solicitante: la va a ver en su solicitud.' });
   });
 
 // ─── Broadcast ───────────────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ export const broadcastSchema = z.object({
     .string()
     .trim()
     .max(300, 'Máximo 300 caracteres.')
-    .regex(/^\/(?![/\\])[^\s]*$/, 'Usá una ruta interna que empiece con "/" (por ejemplo /pertenencias).')
+    .regex(/^\/(?![/\\])[^\s]*$/, 'Usa una ruta interna que empiece con "/" (por ejemplo /pertenencias).')
     .optional(),
   audience: z.enum(AUDIENCES),
 });
@@ -119,7 +119,7 @@ const imageUrlField = z
   .string()
   .trim()
   .max(500, 'Máximo 500 caracteres.')
-  .regex(/^(\/[^/\\]|https:\/\/)/, 'Usá una ruta relativa (/…) o una URL https.');
+  .regex(/^(\/[^/\\]|https:\/\/)/, 'Usa una ruta relativa (/…) o una URL https.');
 
 const postFields = {
   slug: slugField,
@@ -131,7 +131,7 @@ const postFields = {
   readMinutes: num().int('Debe ser un número entero.').min(1, 'Mínimo 1 minuto.').max(240, 'Máximo 240 minutos.'),
   featured: z.boolean(),
   status: z.enum(PUBLICATION_STATUSES),
-  publishedAt: z.iso.datetime({ offset: true, error: 'Elegí una fecha válida.' }),
+  publishedAt: z.iso.datetime({ offset: true, error: 'Elige una fecha válida.' }),
 };
 
 export const createPostSchema = z.object({
@@ -154,7 +154,7 @@ const shortText = text(1, 60);
 const colorField = z
   .string()
   .trim()
-  .regex(/^(#[0-9a-fA-F]{3,8}|var\(--[a-zA-Z0-9-]{1,40}\))$/, 'Usá un color hex (#8247E5) o var(--nombre).');
+  .regex(/^(#[0-9a-fA-F]{3,8}|var\(--[a-zA-Z0-9-]{1,40}\))$/, 'Usa un color hex (#8247E5) o var(--nombre).');
 
 export const tokenSchema = z
   .object({
@@ -182,7 +182,7 @@ export const tokenSchema = z
       .max(20, 'Máximo 20 rondas.'),
     allocations: z
       .array(z.object({ label: shortText, percent: num().positive('Debe ser mayor a 0.').max(100, 'Máximo 100%.'), color: colorField }))
-      .min(1, 'Agregá al menos una asignación.')
+      .min(1, 'Agrega al menos una asignación.')
       .max(20, 'Máximo 20 asignaciones.'),
   })
   .refine(t => Math.abs(t.allocations.reduce((sum, a) => sum + a.percent, 0) - 100) <= 0.01, {

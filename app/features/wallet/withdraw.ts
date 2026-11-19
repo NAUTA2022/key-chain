@@ -19,15 +19,15 @@ export function validateWithdraw(
   ctx: { from: string; balanceWei: bigint | null; decimals: number },
 ): WithdrawCheck {
   const to = input.to.trim();
-  if (!isAddress(to) || to.toLowerCase() === ZERO) return { ok: false, field: 'to', message: 'Ingresá una dirección de wallet válida (0x…).' };
+  if (!isAddress(to) || to.toLowerCase() === ZERO) return { ok: false, field: 'to', message: 'Ingresa una dirección de wallet válida (0x…).' };
   if (to.toLowerCase() === ctx.from.toLowerCase()) return { ok: false, field: 'to', message: 'La dirección de destino no puede ser tu propia wallet.' };
 
   const amount = input.amount.trim().replace(',', '.');
   const pattern = new RegExp(`^\\d+(\\.\\d{1,${ctx.decimals}})?$`);
-  if (!pattern.test(amount)) return { ok: false, field: 'amount', message: `Ingresá un monto válido (hasta ${ctx.decimals} decimales).` };
+  if (!pattern.test(amount)) return { ok: false, field: 'amount', message: `Ingresa un monto válido (hasta ${ctx.decimals} decimales).` };
   const amountWei = toUnits(amount, ctx.decimals);
   if (amountWei <= 0n) return { ok: false, field: 'amount', message: 'El monto tiene que ser mayor a 0.' };
-  if (ctx.balanceWei === null) return { ok: false, field: 'amount', message: 'Esperá a que cargue tu saldo de USDC.' };
+  if (ctx.balanceWei === null) return { ok: false, field: 'amount', message: 'Espera a que cargue tu saldo de USDC.' };
   if (amountWei > ctx.balanceWei) return { ok: false, field: 'amount', message: 'El monto supera tu saldo de USDC.' };
   return { ok: true, to, amount, amountWei };
 }
@@ -35,7 +35,7 @@ export function validateWithdraw(
 function walletError(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
   if (/reject|denied|cancel/i.test(msg)) return 'Operación cancelada en la wallet.';
-  if (/insufficient funds|gas/i.test(msg)) return 'No tenés saldo suficiente para pagar el gas de la red.';
+  if (/insufficient funds|gas/i.test(msg)) return 'No tienes saldo suficiente para pagar el gas de la red.';
   return 'La transferencia no se pudo completar.';
 }
 

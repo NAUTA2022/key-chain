@@ -1,6 +1,8 @@
-# KEY CHAIN — Frontend
+# BRIKME — Frontend
 
-Plataforma de tokenización de activos reales (RWA) en Polygon: mercado primario y secundario de tokens, token de la plataforma, academia, ecosistema y productos asociados (Bookey, Key Go, Key Jobs, Key Rural, Escrow Chain, Tracker GPS y Key Pay).
+**Brikme — Real World Tokenization.** Marketplace DeFi de activos del mundo real (RWA): inversión fraccionada desde $200 USD en real estate, energía, minería, agricultura, transporte y activos de lujo, y tokenización de activos para desarrolladores (B2B). Sede en Dubái, registrada y licenciada ante VARA.
+
+Esta rama (`Brikme`) adapta la plataforma KEY CHAIN a la identidad de Brikme: logo, colores y tipografía del manual de marca, y textos de la presentación del proyecto.
 
 ## Requisitos
 - Node.js 22.22 o superior

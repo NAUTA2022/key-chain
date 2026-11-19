@@ -1,8 +1,9 @@
 import { useState, useMemo, useRef, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
-import { PCard, PBtn, PSection, PTag, PChip, PAvatar, PImg, Icons, CompanyTag } from '~/components/ui';
+import { PCard, PBtn, PSection, PChip } from '~/components/ui';
 import { SECONDARY_LISTINGS, RWA_ASSETS, RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD2, type RwaAsset, type SecondaryListing } from '~/data';
 import { goCheckout } from '~/lib/checkout';
+import CategoryCarousel from '~/components/CategoryCarousel';
 import type { NavFn } from '~/lib/navigation';
 import { useMobile } from '~/hooks/useMobile';
 import { useMagnetScroll } from '~/hooks/useMagnetScroll';
@@ -96,80 +97,63 @@ function FilterGroup({ label, value, onChange, options }: FilterGroupProps) {
 }
 
 // ─── Listing card (shared by the demo page and the live market) ──────────────
+// Photo-led card: issuer and price vs. primary on top; asset, seller and the key
+// numbers over the photo. The whole card opens the asset; the actions show on
+// hover/focus with a mouse and are always visible on touch screens.
 type ListingCardProps = {
   seller: string;
-  /** Line under the seller's name (rating, verification). */
-  sellerNote: ReactNode;
   /** Opens the seller's profile (demo); live sellers are wallets without a profile. */
   onSeller?: () => void;
-  listed: string;
   asset: RwaAsset;
   qty: number | string;
   askPrice: number;
-  realPrice: number;
-  /** Ask vs. real price, in percent (negative = discount). */
+  /** Ask vs. primary (reference) price, in percent (negative = below primary). */
   diff: number;
-  tokenLife: string;
   onView: () => void;
   actions: ReactNode;
 };
 
-export function ListingCard({ seller, sellerNote, onSeller, listed, asset, qty, askPrice, realPrice, diff, tokenLife, onView, actions }: ListingCardProps) {
-  const isDiscount = diff < 0;
+const issuerInitials = (name: string): string => {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  return (words.length > 1 ? words[0][0] + words[1][0] : name.slice(0, 2)).toUpperCase();
+};
+const fmtCompactUSD = (n: number): string =>
+  n >= 1e6 ? `$${(n / 1e6).toFixed(1).replace(/\.0$/, '')}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}K` : fmtUSD2(n);
+
+export function ListingCard({ seller, onSeller, asset, qty, askPrice, diff, onView, actions }: ListingCardProps) {
+  const below = diff < 0;
+  const pct = Math.abs(diff);
+  const vsPrimary = pct < 0.05 ? 'Precio primario' : `${pct.toFixed(pct < 10 ? 1 : 0)}% ${below ? 'bajo' : 'sobre'} primario`;
+  const issuer = asset.company || 'BRIKME';
   return (
-    <PCard style={{ padding:'18px 20px' }}>
-      {/* Seller */}
-      <div onClick={onSeller} role={onSeller ? 'button' : undefined} title={onSeller ? `Ver perfil de ${seller}` : undefined}
-        style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14, ...(onSeller && { cursor:'pointer' }) }}>
-        <PAvatar name={seller} size={32} />
-        <div style={{ flex:1 }}>
-          <div style={{ fontFamily:'var(--font-b)', fontWeight:600, fontSize:13, color:'var(--text)' }}>{seller}</div>
-          <div style={{ display:'flex', alignItems:'center', gap:4, color:'#F5A623' }}>
-            {sellerNote}
-          </div>
-        </div>
-        <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'var(--ter)' }}>{listed}</span>
-      </div>
-
-      {/* Asset */}
-      <div onClick={onView} style={{ display:'flex', gap:12, alignItems:'center', marginBottom:14, cursor:'pointer' }}>
-        <PImg src={asset.img} height={56} style={{ width:78, borderRadius:12, flexShrink:0 }} />
-        <div style={{ flex:1 }}>
-          <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:14.5, color:'var(--text)' }}>{asset.name}</div>
-          <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:4, flexWrap:'wrap' }}>
-            <PTag label={`${qty} tokens`} color="neutral" />
-            {asset.company && <CompanyTag company={asset.company} cat={asset.cat} size="sm" />}
-          </div>
-        </div>
-      </div>
-
-      {/* Price comparison */}
-      <div style={{ background:'var(--surface2)', borderRadius:14, padding:'12px 16px', marginBottom:12 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <div>
-            <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.05em' }}>Pedido</div>
-            <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:22, color:'var(--text)', letterSpacing:'-0.03em' }}>{fmtUSD2(askPrice)}</div>
-          </div>
-          <PTag label={`${isDiscount ? '' : '+'}${diff.toFixed(1)}%`} color={isDiscount ? 'green' : 'red'} />
-          <div style={{ textAlign:'right' }}>
-            <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.05em' }}>Real</div>
-            <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:17, color:'var(--sec)', textDecoration:isDiscount ? 'line-through' : 'none' }}>{fmtUSD2(realPrice)}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Token life */}
-      <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:14, color:'var(--ter)' }}>
-        {Icons.clock}
-        <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>
-          Vida útil: <strong style={{ color:'var(--text)' }}>{tokenLife}</strong>
+    <article className="sm-card">
+      <img className="sm-card-img" src={asset.img} alt="" loading="lazy" decoding="async" draggable={false} />
+      <span className="sm-card-shade" aria-hidden="true" />
+      <button type="button" className="sm-card-hit" onClick={onView} aria-label={`Ver ${asset.name}`} />
+      <header className="sm-card-top">
+        <span className="sm-card-logo" aria-hidden="true">{issuerInitials(issuer)}</span>
+        <span className="sm-card-issuer"><strong>{issuer}</strong><em>{asset.cat}</em></span>
+        <span className="sm-chip sm-chip-trade">En venta</span>
+        <span className={`sm-chip ${below ? 'sm-chip-below' : 'sm-chip-above'}`} title={vsPrimary}>
+          <span className="sm-chip-long">{vsPrimary}</span>
+          <span className="sm-chip-short">{pct < 0.05 ? '0%' : `${below ? '−' : '+'}${pct.toFixed(pct < 10 ? 1 : 0)}%`}</span>
         </span>
+      </header>
+      <div className="sm-card-body">
+        <h3>{asset.name}</h3>
+        <p>
+          Vende {onSeller
+            ? <button type="button" className="sm-card-seller" onClick={onSeller} title={`Ver perfil de ${seller}`}>{seller}</button>
+            : seller} · {qty} tokens
+        </p>
+        <dl className="sm-card-stats">
+          <div><dt>Precio</dt><dd>{fmtUSD2(askPrice)}</dd></div>
+          <div><dt>APY est.</dt><dd>{asset.apy.toFixed(1)}%</dd></div>
+          <div><dt>Valoración</dt><dd>{fmtCompactUSD(asset.valuation)}</dd></div>
+        </dl>
+        <div className="sm-card-actions">{actions}</div>
       </div>
-
-      <div style={{ display:'flex', gap:10 }}>
-        {actions}
-      </div>
-    </PCard>
+    </article>
   );
 }
 
@@ -205,7 +189,7 @@ export function MobileMarketHeader({ onPublish, disabled, help }: { onPublish?: 
     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginBottom:14 }}>
       <div style={{ minWidth:0 }}>
         <h1 data-guide="secondary-title" style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:22, letterSpacing:'-0.03em', color:'var(--text)' }}>Mercado Secundario</h1>
-        <p style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginTop:2 }}>Comprá y vendé tokens entre inversores{help}</p>
+        <p style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginTop:2 }}>Compra y vende tokens entre inversores{help}</p>
       </div>
       <button aria-label="Publicar venta" title="Publicar venta" data-guide="secondary-sell" onClick={onPublish} disabled={disabled}
         style={{ width:44, height:44, flexShrink:0, borderRadius:14, border:'none', cursor:'pointer', background:'var(--accent)', color:'var(--accent-fg)', fontSize:24, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center' }}>+</button>
@@ -232,87 +216,6 @@ export function MagnetToolbar({ children }: { children: (pinned: boolean) => Rea
         </motion.div>
       </div>
     </>
-  );
-}
-
-// Photo-led listing card: the deal (discount, price vs real) on top of the
-// project photo, seller and actions underneath.
-type MobileListingCardProps = {
-  asset: RwaAsset;
-  /** Tokens on sale (the "N tokens" badge). */
-  qty: number | string;
-  /** What the buyer saves vs. the real price, in USD (shown on discounts). */
-  saving: number;
-  askPrice: number;
-  realPrice: number;
-  diff: number;
-  tokenLife: string;
-  seller: string;
-  /** Line under the seller's name (rating · when it was listed). */
-  sellerNote: ReactNode;
-  onSeller?: () => void;
-  onView: () => void;
-  action: ReactNode;
-  idx: number;
-};
-
-export function MobileListingCard({ asset, qty, saving, askPrice, realPrice, diff, tokenLife, seller, sellerNote, onSeller, onView, action, idx }: MobileListingCardProps) {
-  const isDiscount = diff < 0;
-  return (
-    <motion.div data-guide="listing-card" initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:Math.min(idx, 10)*0.05 }}>
-      <PCard style={{ padding:0 }}>
-        <div onClick={onView} style={{ position:'relative', cursor:'pointer' }}>
-          <PImg src={asset.img} alt={asset.name} height={190}>
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.78) 100%)' }} />
-            <div style={{ position:'absolute', top:12, left:12, right:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-              <span style={{ padding:'5px 10px', borderRadius:999, fontFamily:'var(--font-h)', fontWeight:800, fontSize:13,
-                background: isDiscount ? '#4ade80' : '#f87171', color: '#06130a' }}>
-                {isDiscount ? '' : '+'}{diff.toFixed(1)}%
-              </span>
-              <span style={{ padding:'5px 10px', borderRadius:999, fontFamily:'var(--font-b)', fontWeight:700, fontSize:12, background:'rgba(0,0,0,0.45)', color:'#fff', backdropFilter:'blur(6px)' }}>
-                {qty} tokens
-              </span>
-            </div>
-            <div style={{ position:'absolute', left:14, right:14, bottom:12, color:'#fff' }}>
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:19, letterSpacing:'-0.02em', lineHeight:1.15 }}>{asset.name}</div>
-              <div style={{ fontFamily:'var(--font-b)', fontSize:12, color:'rgba(255,255,255,0.75)', marginTop:3 }}>
-                {asset.company || 'KEYCHAIN'} · {asset.cat} · {tokenLife}
-              </div>
-            </div>
-          </PImg>
-        </div>
-
-        <div style={{ padding:'14px 16px 16px' }}>
-          <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:10, marginBottom:12 }}>
-            <div>
-              <div style={{ fontFamily:'var(--font-b)', fontSize:10.5, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em' }}>Precio por token</div>
-              <div style={{ display:'flex', alignItems:'baseline', gap:8 }}>
-                <span style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:26, color:'var(--text)', letterSpacing:'-0.03em' }}>{fmtUSD2(askPrice)}</span>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--ter)', textDecoration: isDiscount ? 'line-through' : 'none' }}>{fmtUSD2(realPrice)}</span>
-              </div>
-            </div>
-            {isDiscount && (
-              <div style={{ textAlign:'right' }}>
-                <div style={{ fontFamily:'var(--font-b)', fontSize:10.5, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em' }}>Ahorrás</div>
-                <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:15, color:'var(--pos)' }}>{fmtUSD2(saving)}</div>
-              </div>
-            )}
-          </div>
-
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <div onClick={onSeller} role={onSeller ? 'button' : undefined} title={onSeller ? `Ver perfil de ${seller}` : undefined}
-              style={{ display:'flex', alignItems:'center', gap:8, flex:1, minWidth:0, ...(onSeller && { cursor:'pointer' }) }}>
-              <PAvatar name={seller} size={30} />
-              <div style={{ minWidth:0 }}>
-                <div style={{ fontFamily:'var(--font-b)', fontWeight:600, fontSize:12.5, color:'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{seller}</div>
-                <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>{sellerNote}</div>
-              </div>
-            </div>
-            {action}
-          </div>
-        </div>
-      </PCard>
-    </motion.div>
   );
 }
 
@@ -378,7 +281,7 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
       {mobile ? <MobileMarketHeader /> : (
       <PSection
         title="Mercado Secundario"
-        sub="Compra y venta P2P entre inversores. Compará precio pedido vs. precio real del token."
+        sub="Compra y venta P2P entre inversores. Compara precio pedido vs. precio real del token."
         action={<PBtn variant="primary">+ Publicar venta</PBtn>}
       />
       )}
@@ -397,6 +300,8 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
       </div>
       )}
 
+      <CategoryCarousel categories={RWA_CATS} value={cat} onChange={setCat} />
+
       {mobile ? <MagnetToolbar>{filterBar}</MagnetToolbar> : filterBar(false)}
 
       <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:16 }}>
@@ -404,60 +309,30 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
       </div>
 
       {/* Listings */}
-      {mobile ? (
-        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-          {sorted.map((l, idx) => {
-            const isDiscount = l.diff < 0;
-            return (
-              <MobileListingCard key={l.id} idx={idx}
-                asset={l.asset} qty={l.qty} saving={(l.realPrice - l.askPrice) * l.qty}
-                askPrice={l.askPrice} realPrice={l.realPrice} diff={l.diff} tokenLife={l.tokenLife}
-                seller={l.seller}
-                sellerNote={<><span style={{ color:'#F5A623' }}>★</span> {l.sellerRep} · {l.listed}</>}
-                onSeller={() => nav('usuario', l.seller)}
-                onView={() => nav('detalle', l.asset)}
-                action={
-                  <PBtn variant={isDiscount ? 'accent' : 'secondary'} small onClick={isDiscount ? () => buy(l) : undefined} style={{ flexShrink:0, padding:'9px 18px' }}>
-                    {isDiscount ? 'Comprar' : 'Ofertar'}
-                  </PBtn>
-                } />
-            );
-          })}
-        </div>
-      ) : (
-      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:20 }}>
+      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns: mobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(auto-fill,minmax(260px,1fr))', gap: mobile ? 10 : 20 }}>
         {sorted.map((l, idx) => {
           const isDiscount = l.diff < 0;
           return (
-            <motion.div key={l.id} initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:idx*0.06 }}>
+            <motion.div key={l.id} data-guide="listing-card" initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:Math.min(idx, 10)*0.06 }}>
               <ListingCard
                 seller={l.seller}
-                sellerNote={<>
-                  {Icons.star}
-                  <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'var(--sec)' }}>{l.sellerRep} · verificado</span>
-                </>}
                 onSeller={() => nav('usuario', l.seller)}
-                listed={l.listed}
                 asset={l.asset}
                 qty={l.qty}
                 askPrice={l.askPrice}
-                realPrice={l.realPrice}
                 diff={l.diff}
-                tokenLife={l.tokenLife}
                 onView={() => nav('detalle', l.asset)}
-                actions={<>
+                actions={
                   <PBtn variant={isDiscount ? 'accent' : 'secondary'} style={{ flex:1 }} small
                     onClick={isDiscount ? () => buy(l) : undefined}>
                     {isDiscount ? 'Comprar' : 'Hacer oferta'}
                   </PBtn>
-                  <PBtn variant="ghost" small onClick={() => nav('detalle', l.asset)}>Ver</PBtn>
-                </>}
+                }
               />
             </motion.div>
           );
         })}
       </div>
-      )}
 
       {sorted.length === 0 && (
         <div style={{ textAlign:'center', padding:'60px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:14 }}>

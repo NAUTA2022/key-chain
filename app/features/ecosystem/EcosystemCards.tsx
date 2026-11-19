@@ -206,14 +206,14 @@ export function CoreCard() {
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           <span style={{ fontSize:28 }}>🔗</span>
           <div>
-            <div style={{ fontSize:18, fontWeight:800, color:'#0f172a', letterSpacing:-0.5 }}>KEYCHAIN</div>
-            <div style={{ fontSize:9, color:GOLD, opacity:0.6 }}>Token KYCN · Polygon Layer 2</div>
+            <div style={{ fontSize:18, fontWeight:800, color:'#0f172a', letterSpacing:-0.5 }}>Brikme</div>
+            <div style={{ fontSize:9, color:GOLD, opacity:0.6 }}>Token BRIK · Polygon Layer 2</div>
           </div>
         </div>
       </div>
       <CBody>
         <div style={{ color:'#64748b', fontSize:9.5, lineHeight:1.75, marginBottom:14 }}>Plataforma de tokenización RWA para Latinoamérica. Conecta inversores con activos reales verificados a través de blockchain.</div>
-        <CRow label="Token" value="KYCN · ERC-20" vc={GOLD}/>
+        <CRow label="Token" value="BRIK · ERC-20" vc={GOLD}/>
         <CRow label="Red" value="Polygon · Layer 2" vc={GOLD}/>
         <CRow label="Protocolo" value="ERC-4626 + EIP-3525" vc={GOLD}/>
         <CRow label="Custodia" value="Multi-sig 3/5" vc={GOLD}/>
@@ -226,7 +226,7 @@ export function CoreCard() {
           ))}
         </div>
       </CBody>
-      <CFoot><CBtn color={GOLD} onClick={()=>{}}><FaExternalLinkAlt size={8}/> Ver token KYCN</CBtn><CBtn color={GOLD} onClick={()=>{}}><FaCoins size={8}/> Tokenómica</CBtn></CFoot>
+      <CFoot><CBtn color={GOLD} onClick={()=>{}}><FaExternalLinkAlt size={8}/> Ver token BRIK</CBtn><CBtn color={GOLD} onClick={()=>{}}><FaCoins size={8}/> Tokenómica</CBtn></CFoot>
     </>
   );
 }

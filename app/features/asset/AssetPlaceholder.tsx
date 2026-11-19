@@ -17,7 +17,7 @@ export default function AssetPlaceholder({ state, nav, onRetry }: AssetPlacehold
         ) : (
           <>
             <h1 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 22, color: 'var(--text)', margin: '0 0 8px' }}>No pudimos cargar el proyecto</h1>
-            <p style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--sec)', margin: '0 0 20px' }}>Revisá tu conexión e intentá de nuevo.</p>
+            <p style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--sec)', margin: '0 0 20px' }}>Revisa tu conexión e intenta de nuevo.</p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
               <PBtn variant="accent" small onClick={onRetry}>Reintentar</PBtn>
               <PBtn variant="secondary" small onClick={() => nav('primario')}>Ver tokenizaciones</PBtn>

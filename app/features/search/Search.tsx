@@ -277,7 +277,7 @@ function SearchOverlay({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => 
           <ResultsList listId={listId} query={query} groups={groups} flat={flat} active={keys.active} loading={loading} onHover={keys.setActive} onPick={pick} />
         ) : (
           <p style={{ margin: 0, padding: '22px 20px', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', textAlign: 'center', lineHeight: 1.5 }}>
-            Buscá proyectos, artículos de la Academia o secciones de la plataforma.
+            Busca proyectos, artículos de la Academia o secciones de la plataforma.
           </p>
         )}
       </div>

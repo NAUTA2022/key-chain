@@ -63,7 +63,7 @@ function WizardDemo({ nav }: WizardProps) {
         {Icons.back} Volver al Admin
       </button>
 
-      <PSection title="Tokenizar activo" sub="Creá un nuevo proyecto de inversión en 5 pasos." />
+      <PSection title="Tokenizar activo" sub="Crea un nuevo proyecto de inversión en 5 pasos." />
 
       {/* Stepper */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: isMobile ? 12 : 36, gap: 0 }}>
@@ -92,7 +92,7 @@ function WizardDemo({ nav }: WizardProps) {
         {/* Step 0: Tipo */}
         {step === 0 && (
           <motion.div key="s0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, color: 'var(--text)', marginBottom: 6 }}>¿Qué tipo de activo querés tokenizar?</div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, color: 'var(--text)', marginBottom: 6 }}>¿Qué tipo de activo quieres tokenizar?</div>
             <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', marginBottom: 24 }}>El tipo determina la estructura legal y los campos requeridos.</div>
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 14, marginBottom: 32 }}>
               {ASSET_TYPES.map(a => (

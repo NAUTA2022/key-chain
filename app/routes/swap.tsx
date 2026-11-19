@@ -15,8 +15,8 @@ export default function Page() {
       <ComingSoon
         nav={nav}
         title="Swap de tokens"
-        description="Muy pronto vas a poder intercambiar USDC y otros tokens sin salir de KEY CHAIN, con cotización en tiempo real."
-        highlights={['Cotización y ruta óptima antes de confirmar', 'Firmás desde tu propia wallet', 'Historial de intercambios en tu cuenta']}
+        description="Muy pronto vas a poder intercambiar USDC y otros tokens sin salir de Brikme, con cotización en tiempo real."
+        highlights={['Cotización y ruta óptima antes de confirmar', 'Firmas desde tu propia wallet', 'Historial de intercambios en tu cuenta']}
         cta={{ label: 'Ir a Mis pertenencias', route: 'pertenencias' }}
       />
     );

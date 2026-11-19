@@ -76,7 +76,7 @@ function TicketBody({ ticket: t, onUpdated }: { ticket: TicketDetail; onUpdated:
 
   async function send() {
     const v = validate(replySchema, { body: reply });
-    if (!v.ok) return setReplyError(v.errors.body ?? 'Escribí una respuesta.');
+    if (!v.ok) return setReplyError(v.errors.body ?? 'Escribe una respuesta.');
     setReplyError(null);
     setBusy(true);
     setNote(null);
@@ -127,7 +127,7 @@ function TicketBody({ ticket: t, onUpdated }: { ticket: TicketDetail; onUpdated:
               }}>
                 {m.body}
               </div>
-              <div style={{ ...sub, fontSize: 11, marginTop: 4, textAlign: m.fromStaff ? 'right' : 'left' }}>{m.fromStaff ? 'Soporte KEY CHAIN' : userName(t.user)} · {fmtDateTime(m.createdAt)}</div>
+              <div style={{ ...sub, fontSize: 11, marginTop: 4, textAlign: m.fromStaff ? 'right' : 'left' }}>{m.fromStaff ? 'Soporte Brikme' : userName(t.user)} · {fmtDateTime(m.createdAt)}</div>
             </div>
           ))}
         </div>
@@ -151,7 +151,7 @@ function TicketBody({ ticket: t, onUpdated }: { ticket: TicketDetail; onUpdated:
         <Panel title="Responder">
           <form onSubmit={e => { e.preventDefault(); void send(); }} style={{ display: 'flex', flexDirection: 'column', gap: 12 }} noValidate>
             <Field label="Respuesta" error={replyError ?? undefined}>
-              <TextArea value={reply} onChange={e => setReply(e.target.value)} maxLength={5000} rows={4} placeholder="Escribí la respuesta para el usuario" invalid={Boolean(replyError)} />
+              <TextArea value={reply} onChange={e => setReply(e.target.value)} maxLength={5000} rows={4} placeholder="Escribe la respuesta para el usuario" invalid={Boolean(replyError)} />
             </Field>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <Btn small variant="accent" type="submit" disabled={busy}>{busy ? 'Enviando…' : 'Enviar respuesta'}</Btn>

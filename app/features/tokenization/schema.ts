@@ -132,47 +132,47 @@ function decimals(n: number): number {
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
-const REQUIRED = 'Completá este campo.';
+const REQUIRED = 'Completa este campo.';
 
 const amount = () =>
-  z.number({ error: iss => (iss.input === undefined ? REQUIRED : 'Ingresá un número válido (por ejemplo 1.500.000 o 12,5).') });
+  z.number({ error: iss => (iss.input === undefined ? REQUIRED : 'Ingresa un número válido (por ejemplo 1.500.000 o 12,5).') });
 
-const text = (min: number, max: number, empty = REQUIRED, short = `Usá al menos ${min} caracteres.`) => {
+const text = (min: number, max: number, empty = REQUIRED, short = `Usa al menos ${min} caracteres.`) => {
   const base = z.string().trim().min(1, empty);
-  return (min > 1 ? base.min(min, short) : base).max(max, `Usá como máximo ${max} caracteres.`);
+  return (min > 1 ? base.min(min, short) : base).max(max, `Usa como máximo ${max} caracteres.`);
 };
 
 export const requestSchema = z.object({
-  category: z.enum(CATEGORIES, { error: 'Elegí el tipo de activo.' }),
-  otherType: text(OTHER_TYPE_MIN, OTHER_TYPE_MAX, 'Contanos qué tipo de activo es.').optional(),
-  assetName: text(3, 120, 'Completá el nombre del activo.'),
-  country: text(2, 60, 'Elegí el país donde está el activo.'),
-  location: text(2, 120, 'Completá la ubicación.'),
-  lifespan: text(1, 60, 'Indicá la duración estimada (por ejemplo, "5 años").'),
-  description: text(DESCRIPTION_MIN, DESCRIPTION_MAX, 'Describí el activo.', `Contá un poco más: mínimo ${DESCRIPTION_MIN} caracteres.`),
+  category: z.enum(CATEGORIES, { error: 'Elige el tipo de activo.' }),
+  otherType: text(OTHER_TYPE_MIN, OTHER_TYPE_MAX, 'Cuéntanos qué tipo de activo es.').optional(),
+  assetName: text(3, 120, 'Completa el nombre del activo.'),
+  country: text(2, 60, 'Elige el país donde está el activo.'),
+  location: text(2, 120, 'Completa la ubicación.'),
+  lifespan: text(1, 60, 'Indica la duración estimada (por ejemplo, "5 años").'),
+  description: text(DESCRIPTION_MIN, DESCRIPTION_MAX, 'Describe el activo.', `Cuenta un poco más: mínimo ${DESCRIPTION_MIN} caracteres.`),
   valuation: amount()
     .positive('La valuación tiene que ser mayor a 0.')
     .max(1e14, 'La valuación supera el máximo permitido.')
-    .refine(n => decimals(n) <= 2, 'Usá como máximo 2 decimales.'),
+    .refine(n => decimals(n) <= 2, 'Usa como máximo 2 decimales.'),
   tokenPrice: amount()
     .positive('El precio tiene que ser mayor a 0.')
     .max(1e9, 'El precio por token no puede superar US$ 1.000.000.000.')
-    .refine(n => decimals(n) <= 6, 'Usá como máximo 6 decimales.'),
+    .refine(n => decimals(n) <= 6, 'Usa como máximo 6 decimales.'),
   totalTokens: amount()
     .int('Tiene que ser un número entero, sin decimales.')
-    .min(1, 'Emití al menos 1 token.')
+    .min(1, 'Emite al menos 1 token.')
     .max(100_000_000, 'El máximo es 100.000.000 de tokens.'),
   expectedApy: amount()
     .min(0, 'El rendimiento no puede ser negativo.')
     .max(100, 'El rendimiento no puede superar el 100 %.'),
-  contactName: text(2, 120, 'Completá tu nombre.'),
-  contactEmail: z.email({ error: 'Ingresá un email válido.' }).max(200, 'Usá como máximo 200 caracteres.'),
+  contactName: text(2, 120, 'Completa tu nombre.'),
+  contactEmail: z.email({ error: 'Ingresa un email válido.' }).max(200, 'Usa como máximo 200 caracteres.'),
   contactPhone: z
     .string()
     .trim()
     .min(6, 'El teléfono tiene que tener al menos 6 caracteres.')
-    .max(30, 'Usá como máximo 30 caracteres.')
-    .regex(PHONE_RE, 'Usá solo números, espacios y los signos + ( ) . -')
+    .max(30, 'Usa como máximo 30 caracteres.')
+    .regex(PHONE_RE, 'Usa solo números, espacios y los signos + ( ) . -')
     .optional(),
 });
 
@@ -208,7 +208,7 @@ export function parseDraft(d: Draft): { ok: true; body: RequestBody } | { ok: fa
     return { ok: true, body: { ...rest, ...(otherType ? { otherType } : {}), ...(contactPhone ? { contactPhone } : {}) } };
   }
   const errors: FieldErrors = {};
-  if (otherMissing) errors.otherType = 'Contanos qué tipo de activo es.';
+  if (otherMissing) errors.otherType = 'Cuéntanos qué tipo de activo es.';
   for (const issue of result.success ? [] : result.error.issues) {
     const key = issue.path[0];
     if (isDraftField(key) && !errors[key]) errors[key] = issue.message;

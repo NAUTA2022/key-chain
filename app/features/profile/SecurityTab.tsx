@@ -49,7 +49,7 @@ export default function SecurityTab() {
       .catch(() => false);
     setBusy(false);
     setTarget(null);
-    if (!ok) return setNotice({ tone: 'error', text: 'No pudimos cerrar esa sesión. Probá de nuevo.' });
+    if (!ok) return setNotice({ tone: 'error', text: 'No pudimos cerrar esa sesión. Prueba de nuevo.' });
     if (row.current) {
       // Closing this device's session signs the user out here too.
       await logout();
@@ -97,7 +97,7 @@ export default function SecurityTab() {
 
       <Section title="Cómo protegemos tu cuenta">
         <p style={bodyStyle}>
-          Entrás firmando con tu wallet: no usamos contraseñas ni códigos por SMS. Si ves una sesión que no reconocés, cerrala y revisá la seguridad de tu wallet. Cerrar la sesión de este dispositivo te pide volver a firmar.
+          Entras firmando con tu wallet: no usamos contraseñas ni códigos por SMS. Si ves una sesión que no reconoces, ciérrala y revisa la seguridad de tu wallet. Cerrar la sesión de este dispositivo te pide volver a firmar.
         </p>
       </Section>
 

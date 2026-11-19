@@ -75,9 +75,9 @@ export async function requestFaucet(): Promise<FaucetResult> {
     const reason = isProblem(error) ? error.reason : undefined;
     if (reason === 'faucet_cooldown') return { ok: false, message: 'Ya pediste fondos de prueba en las últimas 24 horas.' };
     if (reason === 'faucet_disabled') return { ok: false, message: 'Los fondos de prueba no están disponibles en esta red.' };
-    return { ok: false, message: 'No se pudieron enviar los fondos de prueba. Probá de nuevo en unos minutos.' };
+    return { ok: false, message: 'No se pudieron enviar los fondos de prueba. Prueba de nuevo en unos minutos.' };
   } catch {
-    return { ok: false, message: 'No se pudo contactar al servidor. Revisá tu conexión.' };
+    return { ok: false, message: 'No se pudo contactar al servidor. Revisa tu conexión.' };
   }
 }
 

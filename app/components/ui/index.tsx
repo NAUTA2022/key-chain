@@ -308,7 +308,7 @@ export function PLogo({ size = 15 }: PLogoProps) {
         <img
           key={src}
           src={src}
-          alt="KEY CHAIN"
+          alt="Brikme"
           style={{ height: h, width: 'auto', objectFit: 'contain' }}
           onError={() => setLoaded(null)}
         />
@@ -319,7 +319,7 @@ export function PLogo({ size = 15 }: PLogoProps) {
             onLoad={() => setLoaded(src)} onError={() => setLoaded(null)}
           />
           <span style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: size, letterSpacing: '-0.04em', color: 'var(--text)', whiteSpace: 'nowrap' }}>
-            KEY CHAIN
+            Brikme
           </span>
         </>
       )}
@@ -406,7 +406,7 @@ export function PImg({ src, alt, height = 180, style = {}, className, children, 
 }
 
 // ─── Company identity (avatar + name + category) ───────────────────────────
-// Replaces the old text-only issuer badges ("KEYCHAIN"/"Verificado"/
+// Replaces the old text-only issuer badges ("Brikme"/"Verificado"/
 // "Comunidad") across market cards — no real company logos in this data set,
 // so each company gets a stable placeholder avatar (first letter, color
 // hashed from its name so the same company always gets the same color).
@@ -420,7 +420,7 @@ function hashStr(s: string = ''): number {
 // Companies are hexagons everywhere (people — users, sellers — are circles).
 export const HEX_CLIP = 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)';
 
-// KEYCHAIN itself (asset.issuer === 'keychain') isn't just another company —
+// Brikme itself (asset.issuer === 'keychain') isn't just another company —
 // it gets its own logo mark instead of a lettered avatar. Solid black (not
 // the silver/black gradient used elsewhere) so the light-colored logo image
 // reads clearly instead of washing out against the gradient's lighter end.
@@ -431,7 +431,7 @@ export type CompanyAvatarProps = {
 };
 
 export function CompanyAvatar({ company, size = 28, style = {} }: CompanyAvatarProps) {
-  const isKeychain = company === 'KEYCHAIN';
+  const isKeychain = company === 'BRIKME';
   const initial = (company || '?').trim().slice(0, 1).toUpperCase();
   const bg = isKeychain ? '#000' : COMPANY_COLORS[hashStr(company) % COMPANY_COLORS.length];
   return (
@@ -441,7 +441,7 @@ export function CompanyAvatar({ company, size = 28, style = {} }: CompanyAvatarP
       fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: size * 0.42, ...style,
     }}>
       {isKeychain
-        ? <img src="/iconow.png" alt="KEYCHAIN" style={{ width: size * 0.62, height: size * 0.62, objectFit: 'contain' }} />
+        ? <img src="/iconow.png" alt="Brikme" style={{ width: size * 0.62, height: size * 0.62, objectFit: 'contain' }} />
         : initial}
     </div>
   );

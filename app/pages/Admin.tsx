@@ -40,7 +40,7 @@ function AdminDemo({ nav }: AdminProps) {
     <div style={{ padding: '28px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
       <PSection
         title="Panel Admin"
-        sub="Control total de la plataforma KEY CHAIN."
+        sub="Control total de la plataforma Brikme."
         action={<PBtn variant="accent" onClick={() => nav('config')}>{Icons.settings} Configuración</PBtn>}
       />
 
@@ -198,7 +198,7 @@ function AdminDemo({ nav }: AdminProps) {
               { title: '¿Qué es la tokenización de activos reales?', cat: 'Tokenización', status: 'Publicado', views: '2,340' },
               { title: 'Cómo invertir en tu primer proyecto',         cat: 'Guías',        status: 'Publicado', views: '1,890' },
               { title: 'Campos agrícolas: el RWA más demandado',      cat: 'RWA',          status: 'Borrador',  views: '—'     },
-              { title: 'Vesting y cliffs: entendé tu token',          cat: 'DeFi',         status: 'Publicado', views: '1,120' },
+              { title: 'Vesting y cliffs: entiende tu token',          cat: 'DeFi',         status: 'Publicado', views: '1,120' },
             ].map((a, i, arr) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 8px', borderBottom: i < arr.length - 1 ? '1px solid var(--border-l)' : 'none' }}>
                 <div style={{ flex: 1 }}>

@@ -6,8 +6,8 @@ import { breadcrumbs, seo } from '~/lib/seo';
 
 export const meta: Route.MetaFunction = () =>
   seo({
-    title: 'Tokenizaciones: invertí en activos reales',
-    description: 'Explorá proyectos de activos reales tokenizados en Polygon: autos, campos, drones, inmuebles y edificios. Compará valuación, precio por token y rendimiento anual.',
+    title: 'Tokenizaciones: invierte en activos reales',
+    description: 'Explora proyectos de activos reales tokenizados en Polygon: autos, campos, drones, inmuebles y edificios. Compara valuación, precio por token y rendimiento anual.',
     path: '/tokenizaciones',
     jsonLd: [breadcrumbs([{ name: 'Inicio', path: '/' }, { name: 'Tokenizaciones', path: '/tokenizaciones' }])],
   });

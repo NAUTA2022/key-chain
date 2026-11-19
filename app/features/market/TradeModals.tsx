@@ -35,12 +35,12 @@ type Gate = { text: string; cta: string; action: () => void } | null;
 function useTradeGate(nav: NavFn, verb: string): Gate {
   const { status, user } = useSession();
   const account = useActiveAccount();
-  if (status !== 'authenticated' || !user || !account) return { text: `Conectá tu wallet para ${verb}.`, cta: 'Conectar wallet', action: () => nav('login') };
-  if (!user.onboarded) return { text: `Completá tu perfil para ${verb}.`, cta: 'Completar mi perfil', action: () => nav('perfil') };
+  if (status !== 'authenticated' || !user || !account) return { text: `Conecta tu wallet para ${verb}.`, cta: 'Conectar wallet', action: () => nav('login') };
+  if (!user.onboarded) return { text: `Completa tu perfil para ${verb}.`, cta: 'Completar mi perfil', action: () => nav('perfil') };
   if (user.kycStatus !== 'verified') {
     const pending = user.kycStatus === 'pending';
     return {
-      text: pending ? 'Tu verificación (KYC) está en revisión. Te avisamos cuando puedas operar.' : `Para ${verb} necesitás verificar tu identidad (KYC): los tokens solo se transfieren entre wallets verificadas.`,
+      text: pending ? 'Tu verificación (KYC) está en revisión. Te avisamos cuando puedas operar.' : `Para ${verb} necesitas verificar tu identidad (KYC): los tokens solo se transfieren entre wallets verificadas.`,
       cta: pending ? 'Ver estado del KYC' : 'Verificar mi identidad',
       action: () => nav('perfil'),
     };
@@ -58,8 +58,8 @@ function GateNote({ gate }: { gate: NonNullable<Gate> }) {
 }
 
 const STEP_COPY: Record<'buy' | 'sell', Record<Exclude<TradeStep, 'done'>, string>> = {
-  buy: { approve: 'Aprobá el pago en USDC en tu wallet…', confirm: 'Confirmá la compra en tu wallet…', sync: 'Actualizando el mercado…' },
-  sell: { approve: 'Autorizá tus tokens en tu wallet…', confirm: 'Confirmá la publicación en tu wallet…', sync: 'Actualizando el mercado…' },
+  buy: { approve: 'Aprueba el pago en USDC en tu wallet…', confirm: 'Confirma la compra en tu wallet…', sync: 'Actualizando el mercado…' },
+  sell: { approve: 'Autoriza tus tokens en tu wallet…', confirm: 'Confirma la publicación en tu wallet…', sync: 'Actualizando el mercado…' },
 };
 
 const wholeTokens = (raw: string) => {
@@ -122,12 +122,12 @@ export function BuyModal({ nav, info, listing, assetName, onClose, onDone }: Buy
             <Row k="Total a pagar (USDC)" v={valid ? fmtUSD2(total) : '—'} strong />
           </Summary>
           <p style={{ ...note, margin: '0 0 14px' }}>
-            Pagás exactamente el total: la comisión del mercado ({feePercent(info).toLocaleString('es-AR')}%) la cubre el vendedor. Los tokens y el USDC se intercambian en una sola transacción.
+            Pagas exactamente el total: la comisión del mercado ({feePercent(info).toLocaleString('es-AR')}%) la cubre el vendedor. Los tokens y el USDC se intercambian en una sola transacción.
           </p>
           <ErrorNote text={error} />
           {busy && <div aria-live="polite" style={{ ...note, marginBottom: 12 }}>{STEP_COPY.buy[step]}</div>}
           <PBtn variant="accent" style={{ width: '100%' }} disabled={!valid || busy} onClick={() => void submit()}>
-            {busy ? 'Procesando…' : valid ? `Comprar por ${fmtUSD2(total)}` : 'Elegí una cantidad válida'}
+            {busy ? 'Procesando…' : valid ? `Comprar por ${fmtUSD2(total)}` : 'Elige una cantidad válida'}
           </PBtn>
         </div>
       )}
@@ -196,7 +196,7 @@ export function SellModal({ nav, info, initialAssetId, onClose, onDone }: SellMo
   if (step === 'done') {
     body = (
       <div>
-        <p style={{ ...note, margin: '0 0 16px' }}>Tu oferta de {quantity} token{quantity !== 1 ? 's' : ''} de {holding?.assetName} a {fmtUSD2(unit)} c/u ya está publicada. Los tokens siguen en tu wallet hasta que alguien compre; podés retirarla cuando quieras.{!synced && ' Va a aparecer en el mercado en unos segundos.'}</p>
+        <p style={{ ...note, margin: '0 0 16px' }}>Tu oferta de {quantity} token{quantity !== 1 ? 's' : ''} de {holding?.assetName} a {fmtUSD2(unit)} c/u ya está publicada. Los tokens siguen en tu wallet hasta que alguien compre; puedes retirarla cuando quieras.{!synced && ' Va a aparecer en el mercado en unos segundos.'}</p>
         <PBtn variant="accent" style={{ width: '100%' }} onClick={onClose}>Listo</PBtn>
       </div>
     );
@@ -207,7 +207,7 @@ export function SellModal({ nav, info, initialAssetId, onClose, onDone }: SellMo
   } else if (!holding) {
     body = (
       <div>
-        <p style={{ ...note, margin: '0 0 16px' }}>No tenés tokens que se puedan vender todavía. Invertí en una tokenización y vas a poder revenderlos acá.</p>
+        <p style={{ ...note, margin: '0 0 16px' }}>No tienes tokens que se puedan vender todavía. Invierte en una tokenización y vas a poder revenderlos aquí.</p>
         <PBtn variant="accent" style={{ width: '100%' }} onClick={() => nav('primario')}>Ver tokenizaciones</PBtn>
       </div>
     );
@@ -236,17 +236,17 @@ export function SellModal({ nav, info, initialAssetId, onClose, onDone }: SellMo
           <Row k="Recibirás (USDC)" v={valid ? fmtUSD2(netOfFee(total, info)) : '—'} strong />
         </Summary>
         <p style={{ ...note, margin: '0 0 14px' }}>
-          Tus tokens no salen de tu wallet al publicar: solo autorizás al contrato del mercado a entregarlos cuando un inversor verificado pague el precio.
+          Tus tokens no salen de tu wallet al publicar: solo autorizas al contrato del mercado a entregarlos cuando un inversor verificado pague el precio.
         </p>
         {openOffers.length > 0 && (
           <p style={{ ...note, margin: '0 0 14px', color: 'var(--text)' }}>
-            Ya tenés {openOffers.length === 1 ? 'una oferta activa' : `${openOffers.length} ofertas activas`} de este activo ({openOffers.map(l => `${l.remaining.toLocaleString('es-AR')} a ${fmtUSD2(l.pricePerToken)}`).join(', ')}). Siguen vigentes a ese precio: si no querés venderlas así, retiralas antes en «Mis publicaciones».
+            Ya tienes {openOffers.length === 1 ? 'una oferta activa' : `${openOffers.length} ofertas activas`} de este activo ({openOffers.map(l => `${l.remaining.toLocaleString('es-AR')} a ${fmtUSD2(l.pricePerToken)}`).join(', ')}). Siguen vigentes a ese precio: si no quieres venderlas así, retíralas antes en «Mis publicaciones».
           </p>
         )}
         <ErrorNote text={error} />
         {busy && <div aria-live="polite" style={{ ...note, marginBottom: 12 }}>{STEP_COPY.sell[step]}</div>}
         <PBtn variant="accent" style={{ width: '100%' }} disabled={!valid || busy} onClick={() => void submit()}>
-          {busy ? 'Procesando…' : valid ? 'Publicar venta' : !validPrice ? 'Elegí un precio válido' : 'Elegí una cantidad válida'}
+          {busy ? 'Procesando…' : valid ? 'Publicar venta' : !validPrice ? 'Elige un precio válido' : 'Elige una cantidad válida'}
         </PBtn>
       </div>
     );

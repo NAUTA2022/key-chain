@@ -15,7 +15,7 @@ type TogglePref = { [K in keyof Preferences]: Preferences[K] extends boolean ? K
 
 const PREFS: ReadonlyArray<readonly [TogglePref, string, string]> = [
   ['investmentAlerts', 'Alertas de inversión', 'Avisos sobre tus inversiones: dividendos, liquidaciones y novedades de tus activos'],
-  ['productUpdates', 'Novedades de la plataforma', 'Cambios importantes y nuevas funciones de KEY CHAIN'],
+  ['productUpdates', 'Novedades de la plataforma', 'Cambios importantes y nuevas funciones de Brikme'],
   ['marketingEmails', 'Comunicaciones de marketing', 'Noticias, lanzamientos y promociones por email'],
   ['publicProfile', 'Perfil público', 'Mostrar tu nombre y foto a otros inversores'],
   ['showInvestments', 'Mostrar mis inversiones en mi perfil público', 'Otros inversores ven en qué proyectos invertiste (nunca los montos)'],
@@ -41,7 +41,7 @@ export default function PrivacyTab() {
     if (data) mutate(data);
     else {
       mutate(previous);
-      setPrefError(errorText(e, 'No pudimos guardar tu preferencia. Probá de nuevo.'));
+      setPrefError(errorText(e, 'No pudimos guardar tu preferencia. Prueba de nuevo.'));
     }
   }
 
@@ -51,9 +51,9 @@ export default function PrivacyTab() {
     try {
       const res = await fetch(apiUrl('/v1/me/export'), { credentials: 'include', headers: authHeaders() });
       if (!res.ok) throw new Error(String(res.status));
-      saveBlob(await res.blob(), 'keychain-datos.json');
+      saveBlob(await res.blob(), 'brikme-datos.json');
     } catch {
-      setExportError('No pudimos generar la descarga. Probá de nuevo en unos minutos.');
+      setExportError('No pudimos generar la descarga. Prueba de nuevo en unos minutos.');
     }
     setExporting(false);
   }
@@ -86,7 +86,7 @@ export default function PrivacyTab() {
 
       <PCard style={{ padding: '22px 24px', border: '1.5px solid var(--neg)' }}>
         <h3 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--neg)', marginBottom: 6 }}>Zona de peligro</h3>
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 16 }}>Descargá una copia de tus datos o pedí el cierre de tu cuenta. El cierre no se puede deshacer una vez procesado.</div>
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 16 }}>Descarga una copia de tus datos o pide el cierre de tu cuenta. El cierre no se puede deshacer una vez procesado.</div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <PBtn variant="secondary" small disabled={exporting} style={{ borderColor: 'var(--neg)', color: 'var(--neg)' }} onClick={() => void exportData()}>{exporting ? 'Preparando…' : 'Descargar mis datos'}</PBtn>
           <PBtn variant="secondary" small disabled={!me || Boolean(requestedAt)} style={{ borderColor: 'var(--neg)', color: 'var(--neg)' }} onClick={() => setClosing(true)}>
@@ -133,19 +133,19 @@ function DeletionForm({ onCancel, onDone }: { onCancel: () => void; onDone: (not
     setError(null);
     const { data, error: e } = await call(api.POST('/v1/me/deletion-request', { body: parsed.data ? { reason: parsed.data } : {} }));
     setBusy(false);
-    if (!data) return setError(errorText(e, 'No pudimos registrar tu solicitud. Probá de nuevo.'));
+    if (!data) return setError(errorText(e, 'No pudimos registrar tu solicitud. Prueba de nuevo.'));
     onDone(data.notice, data.requestedAt);
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <p style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--sec)', lineHeight: 1.6 }}>
-        El equipo va a revisar tu pedido y cerrar la cuenta. Antes de pedirlo, cobrá tus dividendos pendientes y descargá tus resúmenes: tus tokens siguen en tu wallet.
+        El equipo va a revisar tu pedido y cerrar la cuenta. Antes de pedirlo, cobra tus dividendos pendientes y descarga tus resúmenes: tus tokens siguen en tu wallet.
       </p>
       <Field label="Motivo (opcional)" htmlFor={id} error={parsed.success ? null : parsed.error.issues[0]?.message} hint={`${reason.length}/500`}>
-        <TextArea id={id} rows={3} maxLength={500} value={reason} onChange={e => setReason(e.target.value)} placeholder="Contanos por qué te vas (nos ayuda a mejorar)" />
+        <TextArea id={id} rows={3} maxLength={500} value={reason} onChange={e => setReason(e.target.value)} placeholder="Cuéntanos por qué te vas (nos ayuda a mejorar)" />
       </Field>
-      <Field label={<>Escribí <strong>CERRAR</strong> para confirmar</>} htmlFor={confirmId}>
+      <Field label={<>Escribe <strong>CERRAR</strong> para confirmar</>} htmlFor={confirmId}>
         <TextInput id={confirmId} value={confirmText} onChange={e => setConfirmText(e.target.value)} autoComplete="off" />
       </Field>
       {error && <Notice tone="error">{error}</Notice>}

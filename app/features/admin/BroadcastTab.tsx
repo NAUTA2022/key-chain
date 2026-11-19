@@ -73,7 +73,7 @@ export function BroadcastTab() {
       <Panel title="Vista previa">
         <PCard style={{ padding: '14px 16px', boxShadow: 'none' }}>
           <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)', overflowWrap: 'anywhere' }}>{f.title.trim() || 'Título de la notificación'}</div>
-          <div style={{ ...body, fontSize: 12.5, marginTop: 4, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{f.body.trim() || 'El mensaje aparece acá.'}</div>
+          <div style={{ ...body, fontSize: 12.5, marginTop: 4, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{f.body.trim() || 'El mensaje aparece aquí.'}</div>
           {f.link.trim() && <div style={{ ...sub, marginTop: 8 }}>Abre {f.link.trim()}</div>}
         </PCard>
         <div style={{ ...sub, marginTop: 12, lineHeight: 1.5 }}>Los usuarios bloqueados nunca reciben notificaciones. “Inversores” son quienes tienen al menos una inversión acreditada on-chain.</div>

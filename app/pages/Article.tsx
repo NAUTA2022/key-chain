@@ -40,7 +40,7 @@ function ArticleHeader({ article, isMobile, badge }: { article: AcademyPost; isM
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
         <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>F</div>
         <div>
-          <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)' }}>KEY CHAIN Editorial</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)' }}>Brikme Editorial</div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{article.date} · {article.read} de lectura</div>
         </div>
       </div>
@@ -54,7 +54,7 @@ function ArticleCta({ nav }: { nav: NavFn }) {
   return (
     <PCard style={{ padding: '24px 28px', marginBottom: 36, textAlign: 'center' }}>
       <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>¿Listo para invertir?</div>
-      <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', marginBottom: 18 }}>Explorá proyectos disponibles en el Mercado Primario.</div>
+      <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', marginBottom: 18 }}>Explora proyectos disponibles en el Mercado Primario.</div>
       <PBtn variant="accent" onClick={() => nav('primario')} style={{ padding: '13px 28px' }}>Ver proyectos</PBtn>
     </PCard>
   );
@@ -63,7 +63,7 @@ function ArticleCta({ nav }: { nav: NavFn }) {
 function Related({ nav, posts, isMobile }: { nav: NavFn; posts: AcademyPost[]; isMobile: boolean }) {
   return (
     <>
-      <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'var(--text)', marginBottom: 18 }}>Seguí leyendo</h2>
+      <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'var(--text)', marginBottom: 18 }}>Sigue leyendo</h2>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(3, 1fr)', gap: 16 }}>
         {posts.map(p => (
           <PCard key={p.id} onClick={() => nav('articulo', { slug: p.slug })} style={{ cursor: 'pointer' }}>
@@ -192,7 +192,7 @@ function ArticleLive({ nav, slug, preview }: { nav: NavFn; slug: string; preview
           </>
         ) : detail.error ? (
           <Notice tone="error" style={{ marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span>{errorText(detail.error, 'No pudimos cargar el artículo. Probá de nuevo en unos minutos.')}</span>
+            <span>{errorText(detail.error, 'No pudimos cargar el artículo. Prueba de nuevo en unos minutos.')}</span>
             <PBtn variant="secondary" small onClick={detail.reload}>Reintentar</PBtn>
           </Notice>
         ) : (

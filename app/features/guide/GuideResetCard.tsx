@@ -26,7 +26,7 @@ export default function GuideResetCard() {
         <div style={{ flex: '1 1 260px' }}>
           <h3 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 4 }}>Guías de la plataforma</h3>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>
-            Volvé a ver los recorridos que explican cada sección, como la primera vez. Se aplica en todos tus dispositivos.
+            Vuelve a ver los recorridos que explican cada sección, como la primera vez. Se aplica en todos tus dispositivos.
           </div>
         </div>
         <PBtn variant="secondary" small disabled={busy} onClick={() => void reset()}>
@@ -34,7 +34,7 @@ export default function GuideResetCard() {
         </PBtn>
       </div>
       {result === 'ok' && <Notice tone="success" style={{ marginTop: 12 }}>Listo: cada sección te va a mostrar su guía la próxima vez que entres.</Notice>}
-      {result === 'error' && <Notice tone="error" style={{ marginTop: 12 }}>No pudimos guardar el cambio. Probá de nuevo.</Notice>}
+      {result === 'error' && <Notice tone="error" style={{ marginTop: 12 }}>No pudimos guardar el cambio. Prueba de nuevo.</Notice>}
     </PCard>
   );
 }

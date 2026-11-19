@@ -52,7 +52,7 @@ export default function CompanyFields({ form, errors, onChange, logoUrl }: Props
           <select id={countryId} name="companyCountry" value={form.country}
             onChange={e => onChange('country', e.target.value in COUNTRY_NAMES ? (e.target.value as CountryCode) : '')}
             style={{ ...fieldBox, cursor: 'pointer', color: form.country ? 'var(--text)' : 'var(--ter)' }}>
-            <option value="" disabled>Seleccioná el país</option>
+            <option value="" disabled>Selecciona el país</option>
             {COUNTRY_OPTIONS.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
           </select>
           {err('country')}
@@ -66,7 +66,7 @@ export default function CompanyFields({ form, errors, onChange, logoUrl }: Props
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label htmlFor={bioId} style={labelText}>Descripción corta</label>
-        <textarea id={bioId} name="bio" rows={4} maxLength={BIO_MAX} value={form.bio} placeholder="Qué hace tu empresa y qué activos querés tokenizar."
+        <textarea id={bioId} name="bio" rows={4} maxLength={BIO_MAX} value={form.bio} placeholder="Qué hace tu empresa y qué activos quieres tokenizar."
           onChange={e => onChange('bio', e.target.value)} style={{ ...fieldBox, resize: 'vertical', lineHeight: 1.5 }} />
         <span style={{ ...hintText, alignSelf: 'flex-end' }}>{form.bio.length}/{BIO_MAX}</span>
         {err('bio')}

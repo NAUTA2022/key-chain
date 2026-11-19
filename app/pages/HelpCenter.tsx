@@ -8,21 +8,21 @@ export type Faq = { q: string; a: string };
 
 // eslint-disable-next-line react-refresh/only-export-components -- FAQS also feeds the FAQPage JSON-LD in app/routes/ayuda.tsx
 export const FAQS: Faq[] = [
-  { q: "¿Cómo funciona la tokenización de activos?", a: "Cada activo real se representa con un token de seguridad ERC-3643. Al invertir recibís tokens en proporción a tu aporte en USDC y solo las wallets con identidad verificada pueden tenerlos o recibirlos." },
-  { q: "¿Cómo recibo los rendimientos?", a: "Cuando un proyecto distribuye dividendos, la plataforma publica el reparto on-chain con una prueba Merkle. Te avisamos y lo cobrás en USDC desde Mis pertenencias, directo a tu wallet." },
-  { q: "¿Cómo puedo vender mis tokens?", a: "El mercado secundario entre inversores está en desarrollo. Si un activo se liquida, cobrás tu capital desde Mis pertenencias al precio de liquidación." },
-  { q: "¿Qué es el proceso KYC?", a: "Es la verificación de identidad que exigen las normas de prevención de lavado de dinero. Completás tus datos en Perfil → KYC, el equipo los revisa y, al aprobarlos, registramos tu identidad on-chain para habilitar tus inversiones." },
+  { q: "¿Cómo funciona la tokenización de activos?", a: "Cada activo real se representa con un token de seguridad ERC-3643. Al invertir recibes tokens en proporción a tu aporte en USDC y solo las wallets con identidad verificada pueden tenerlos o recibirlos." },
+  { q: "¿Cómo recibo los rendimientos?", a: "Cuando un proyecto distribuye dividendos, la plataforma publica el reparto on-chain con una prueba Merkle. Te avisamos y lo cobras en USDC desde Mis pertenencias, directo a tu wallet." },
+  { q: "¿Cómo puedo vender mis tokens?", a: "El mercado secundario entre inversores está en desarrollo. Si un activo se liquida, cobras tu capital desde Mis pertenencias al precio de liquidación." },
+  { q: "¿Qué es el proceso KYC?", a: "Es la verificación de identidad que exigen las normas de prevención de lavado de dinero. Completas tus datos en Perfil → KYC, el equipo los revisa y, al aprobarlos, registramos tu identidad on-chain para habilitar tus inversiones." },
   { q: "¿Cuál es la inversión mínima?", a: "Un token. El precio de cada token figura en la ficha de cada proyecto, junto con la cantidad disponible." },
-  { q: "¿Qué riesgos tiene invertir?", a: "Toda inversión en activos reales puede perder valor y los rendimientos estimados no están garantizados. Revisá los documentos de cada proyecto antes de invertir y diversificá." },
-  { q: "¿Qué es el token KYCN?", a: "KYCN es el token de utilidad de KEY CHAIN. Su preventa todavía no abrió; los beneficios previstos son descuentos en comisiones, acceso anticipado a proyectos y participación en la gobernanza." },
-  { q: "¿Estoy usando dinero real?", a: "No mientras la plataforma esté en su entorno de pruebas: los USDC y POL son de prueba y no tienen valor. Podés pedir fondos de prueba desde Mis pertenencias." },
+  { q: "¿Qué riesgos tiene invertir?", a: "Toda inversión en activos reales puede perder valor y los rendimientos estimados no están garantizados. Revisa los documentos de cada proyecto antes de invertir y diversifica." },
+  { q: "¿Qué es el token BRIK?", a: "BRIK es el token de utilidad de Brikme. Su preventa todavía no abrió; los beneficios previstos son descuentos en comisiones, acceso anticipado a proyectos y participación en la gobernanza." },
+  { q: "¿Estoy usando dinero real?", a: "No mientras la plataforma esté en su entorno de pruebas: los USDC y POL son de prueba y no tienen valor. Puedes pedir fondos de prueba desde Mis pertenencias." },
 ];
 
 const CATEGORIES = [
   { icon: Icons.primary,    title: 'Cómo invertir',      desc: '5 artículos'  },
   { icon: Icons.wallet,     title: 'Wallet y fondos',    desc: '8 artículos'  },
   { icon: Icons.shield,     title: 'KYC y seguridad',    desc: '4 artículos'  },
-  { icon: Icons.token,      title: 'Token KYCN',          desc: '6 artículos'  },
+  { icon: Icons.token,      title: 'Token BRIK',          desc: '6 artículos'  },
   { icon: Icons.swap,       title: 'Swap y DeFi',         desc: '3 artículos'  },
   { icon: Icons.secondary,  title: 'Mercado secundario',  desc: '4 artículos'  },
 ];
@@ -38,7 +38,7 @@ function HelpCenterDemo() {
 
   return (
     <div style={{ padding: '28px 32px 40px', maxWidth: 900, margin: '0 auto' }}>
-      <PSection title="Centro de Ayuda" sub="Encontrá respuestas a las preguntas más frecuentes." />
+      <PSection title="Centro de Ayuda" sub="Encuentra respuestas a las preguntas más frecuentes." />
 
       {/* Search */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--surface)', borderRadius: 16, padding: '14px 20px', border: '1.5px solid var(--border)', marginBottom: 32, boxShadow: 'var(--sh-sm)' }}>

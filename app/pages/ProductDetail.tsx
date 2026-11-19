@@ -23,10 +23,10 @@ import GuideButton from '~/features/guide/GuideButton';
 /** Why a signed-in user can't invest yet (completed on the profile page). */
 type InvestGate = 'onboarding' | 'none' | 'pending' | 'rejected';
 const GATE_COPY: Record<InvestGate, { cta: string; note: string }> = {
-  onboarding: { cta: 'Completar mi perfil', note: 'Completá tu perfil para poder invertir.' },
-  none: { cta: 'Verificar mi identidad', note: 'Para invertir necesitás verificar tu identidad (KYC).' },
+  onboarding: { cta: 'Completar mi perfil', note: 'Completa tu perfil para poder invertir.' },
+  none: { cta: 'Verificar mi identidad', note: 'Para invertir necesitas verificar tu identidad (KYC).' },
   pending: { cta: 'Ver estado del KYC', note: 'Tu verificación está en revisión. Te avisamos cuando puedas invertir.' },
-  rejected: { cta: 'Revisar mi KYC', note: 'Tu verificación fue rechazada. Revisá tus datos en el perfil.' },
+  rejected: { cta: 'Revisar mi KYC', note: 'Tu verificación fue rechazada. Revisa tus datos en el perfil.' },
 };
 
 const DEMO_TRUST = [['Contrato auditado por CertiK', Icons.shield], ['Activo asegurado · cobertura total', Icons.check], ['Custodia institucional regulada', Icons.lock]] as const;
@@ -230,7 +230,7 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
           <CompanyAvatar company={issuerName} size={36} />
           <div style={{ flex:1, minWidth:0 }}>
             <textarea value={text} onChange={e => setText(e.target.value)} rows={3} aria-label="Actualización para tus inversores"
-              placeholder="Escribí una actualización para tus inversores..."
+              placeholder="Escribe una actualización para tus inversores..."
               style={{ width:'100%', resize:'vertical', border:'1px solid var(--border-l)', borderRadius:12, padding:'10px 12px', fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--text)', background:'var(--surface)', outline:'none', boxSizing:'border-box' }} />
             {imageChoices.length > 1 && (
               <div style={{ display:'flex', gap:8, marginTop:10 }}>
@@ -352,7 +352,7 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
 // Developer-only (DEV_MODE, demo mode): spells out which state a project is in
 // and what the page should show because of it, so every asset is
 // self-explanatory while testing.
-const ISSUER_LABEL: Record<RwaAsset['issuer'], string> = { keychain: 'KEYCHAIN', verified: 'Verificado', community: 'Comunidad' };
+const ISSUER_LABEL: Record<RwaAsset['issuer'], string> = { keychain: 'BRIKME', verified: 'Verificado', community: 'Comunidad' };
 
 function projectState(a: RwaAsset, { isLive, holding }: { isLive: boolean; holding: { tokens: number } | null | undefined }): Array<readonly [string, string]> {
   const funding = a.sold <= 0 ? 'Nuevo · sin financiamiento'
@@ -553,14 +553,14 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
       liveBlock = {
         label: 'Todavía no disponible',
         note: pool?.status === 'deploying' || pool?.status === 'granting_roles'
-          ? 'El activo se está desplegando on-chain. Volvé en unos minutos.'
+          ? 'El activo se está desplegando on-chain. Vuelve en unos minutos.'
           : 'Este activo todavía no está tokenizado on-chain.',
         action: null,
       };
     } else if (gate) liveBlock = { label: GATE_COPY[gate].cta, note: GATE_COPY[gate].note, action: () => nav('perfil') };
-    else if (tokens > left) liveBlock = { label: `Quedan ${left.toLocaleString()} tokens`, note: 'Elegí una cantidad menor o igual a los tokens disponibles.', action: null };
+    else if (tokens > left) liveBlock = { label: `Quedan ${left.toLocaleString()} tokens`, note: 'Elige una cantidad menor o igual a los tokens disponibles.', action: null };
   }
-  // Every "Invertir" goes through KEYCHAIN's checkout. Live: the checkout runs
+  // Every "Invertir" goes through Brikme's checkout. Live: the checkout runs
   // the on-chain investment (the API prices it; the fee is inside the price).
   const invest = () => {
     if (liveBlock) return liveBlock.action?.();

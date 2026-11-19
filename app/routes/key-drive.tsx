@@ -6,7 +6,7 @@ import { productAppJsonLd } from '~/lib/structured-data';
 
 export const handle: RouteHandle = { theme: 'dark' };
 
-const DESCRIPTION = 'Pedí viajes en autos tokenizados y seguí tu recorrido en tiempo real, con pagos integrados en KEY CHAIN.';
+const DESCRIPTION = 'Pide viajes en autos tokenizados y sigue tu recorrido en tiempo real, con pagos integrados en Brikme.';
 
 export const meta: Route.MetaFunction = () =>
   seo({

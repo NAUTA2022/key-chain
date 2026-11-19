@@ -68,11 +68,11 @@ function CompanyEditor({ initial, existing, onSaved, onCancel }: { initial: Comp
 }
 
 function statusText(c: MyCompany): string {
-  if (c.status === 'verified') return 'Tu empresa está verificada: su página es pública y podés tokenizar activos a su nombre.';
-  if (c.status === 'rejected') return 'Corregí los datos y completá la verificación de empresa (KYB) para enviarla de nuevo.';
+  if (c.status === 'verified') return 'Tu empresa está verificada: su página es pública y puedes tokenizar activos a su nombre.';
+  if (c.status === 'rejected') return 'Corrige los datos y completa la verificación de empresa (KYB) para enviarla de nuevo.';
   return c.kyb.status === 'pending' || c.kyb.status === 'verified'
     ? 'Estamos revisando tu empresa y su verificación (KYB). Te avisamos cuando esté lista.'
-    : 'Para aprobarla necesitamos la verificación de tu empresa (KYB). Completala abajo.';
+    : 'Para aprobarla necesitamos la verificación de tu empresa (KYB). Complétala abajo.';
 }
 
 export default function MyCompanySection({ nav }: { nav: NavFn }) {
@@ -97,7 +97,7 @@ export default function MyCompanySection({ nav }: { nav: NavFn }) {
       <PCard style={{ padding: isMobile ? '20px 18px' : '24px 26px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: registering ? 18 : 0 }}>
           <h2 style={{ ...cardTitle, margin: 0 }}>Registrar mi empresa</h2>
-          <p style={cardSub}>Creá la cuenta de tu empresa para tokenizar sus activos. La revisamos junto con la verificación de empresa (KYB) y, una vez aprobada, su página se vuelve pública.</p>
+          <p style={cardSub}>Crea la cuenta de tu empresa para tokenizar sus activos. La revisamos junto con la verificación de empresa (KYB) y, una vez aprobada, su página se vuelve pública.</p>
           {!registering && (
             <div style={{ marginTop: 8 }}>
               <PBtn variant="accent" onClick={() => setRegistering(true)}>Registrar mi empresa</PBtn>
@@ -168,7 +168,7 @@ export default function MyCompanySection({ nav }: { nav: NavFn }) {
             <h3 style={{ ...cardTitle, margin: 0 }}>Verificación de empresa (KYB)</h3>
             <p style={{ ...cardSub, fontSize: 13 }}>
               {company.kyb.status === 'none' || company.kyb.status === 'rejected'
-                ? 'Completá la verificación con los datos legales de la empresa: es lo que revisamos para aprobarla.'
+                ? 'Completa la verificación con los datos legales de la empresa: es lo que revisamos para aprobarla.'
                 : 'La verificación de tu cuenta ya fue enviada.'}
             </p>
           </div>

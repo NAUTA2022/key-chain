@@ -23,7 +23,7 @@ export type ApiDividend = Ok<'/v1/me/dividends', 'get'>[number];
 export type ApiOrder = Ok<'/v1/market/orders/{id}', 'get'>;
 export type KycStatus = Ok<'/v1/kyc', 'get'>;
 
-/** KEY CHAIN Devnet: the private test network (its gas token is shown as POL, like Polygon). */
+/** Brikme Devnet: the private test network (its gas token is shown as POL, like Polygon). */
 export const DEVNET_CHAIN_ID = 202610;
 
 /** thirdweb chain for a chain id returned by the API. */
@@ -33,7 +33,7 @@ export function chainFor(chainId: number): Chain {
   const devnet = chainId === DEVNET_CHAIN_ID;
   return defineChain({
     id: chainId,
-    name: devnet ? 'KEY CHAIN Devnet' : chainId === 31337 ? 'Local (anvil)' : `Chain ${chainId}`,
+    name: devnet ? 'Brikme Devnet' : chainId === 31337 ? 'Local (anvil)' : `Chain ${chainId}`,
     rpc: import.meta.env.VITE_CHAIN_RPC_URL || 'http://127.0.0.1:8545',
     nativeCurrency: devnet ? { name: 'POL (pruebas)', symbol: 'POL', decimals: 18 } : { name: 'Ether', symbol: 'ETH', decimals: 18 },
     testnet: true,
@@ -57,8 +57,8 @@ export const appChain: Chain | undefined = import.meta.env.VITE_CHAIN_ID ? chain
 export function problemMessage(error: unknown, fallback: string): string {
   if (!isProblem(error)) return fallback;
   switch (error.reason) {
-    case 'not_verified': return 'Tu wallet todavía no está verificada. Completá el KYC en tu perfil.';
-    case 'insufficient_balance': return 'No tenés USDC suficiente en tu wallet.';
+    case 'not_verified': return 'Tu wallet todavía no está verificada. Completa el KYC en tu perfil.';
+    case 'insufficient_balance': return 'No tienes USDC suficiente en tu wallet.';
     case 'insufficient_allowance': return 'Falta autorizar el USDC para esta inversión.';
     default: return error.title || fallback;
   }
@@ -198,7 +198,7 @@ export async function investOnchain(opts: {
     if (r.data?.status === 'failed') throw new Error(r.data.error ? 'La inversión fue rechazada on-chain.' : 'La inversión falló.');
     await new Promise(res => setTimeout(res, 1500));
   }
-  throw new Error('La inversión sigue en proceso. Revisá tus pertenencias en unos minutos.');
+  throw new Error('La inversión sigue en proceso. Revisa tus pertenencias en unos minutos.');
 }
 
 /** Claims a sealed dividend with its Merkle proof, from the investor's wallet. */

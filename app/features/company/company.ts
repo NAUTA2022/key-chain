@@ -45,15 +45,15 @@ const isHttps = (v: string): boolean => {
 };
 
 const companySchema = z.object({
-  name: z.string().trim().min(2, 'Ingresá la razón social.').max(120, 'Usá como máximo 120 caracteres.'),
+  name: z.string().trim().min(2, 'Ingresa la razón social.').max(120, 'Usa como máximo 120 caracteres.'),
   taxId: z.string().trim()
-    .min(4, 'Ingresá la identificación tributaria.')
-    .max(40, 'Usá como máximo 40 caracteres.')
-    .regex(/^[A-Za-z0-9][A-Za-z0-9.\-/ ]*$/, 'Usá solo letras, números, puntos, guiones o barras.')
+    .min(4, 'Ingresa la identificación tributaria.')
+    .max(40, 'Usa como máximo 40 caracteres.')
+    .regex(/^[A-Za-z0-9][A-Za-z0-9.\-/ ]*$/, 'Usa solo letras, números, puntos, guiones o barras.')
     .refine(v => /\d/.test(v), 'La identificación debe incluir números.'),
-  country: z.string().refine(v => v in COUNTRY_NAMES, 'Elegí el país de la empresa.').transform(v => v as CountryCode),
-  website: z.string().trim().max(200, 'El enlace es demasiado largo.').refine(v => v === '' || isHttps(v), 'Usá un enlace que empiece con https://'),
-  bio: z.string().trim().min(10, 'Contá en al menos 10 caracteres qué hace tu empresa.').max(BIO_MAX, `Usá como máximo ${BIO_MAX} caracteres.`),
+  country: z.string().refine(v => v in COUNTRY_NAMES, 'Elige el país de la empresa.').transform(v => v as CountryCode),
+  website: z.string().trim().max(200, 'El enlace es demasiado largo.').refine(v => v === '' || isHttps(v), 'Usa un enlace que empiece con https://'),
+  bio: z.string().trim().min(10, 'Cuenta en al menos 10 caracteres qué hace tu empresa.').max(BIO_MAX, `Usa como máximo ${BIO_MAX} caracteres.`),
 });
 
 export type CompanyErrors = Partial<Record<CompanyField, string>>;
@@ -77,12 +77,12 @@ export function parseCompanyForm(form: CompanyForm): { body: CreateBody; errors:
 
 const COMPANY_ERRORS: Record<string, string> = {
   company_exists: 'Tu cuenta ya tiene una empresa registrada.',
-  company_verified: 'Tu empresa ya está verificada: editá su perfil desde la página de la empresa.',
-  validation_failed: 'Revisá los datos de la empresa.',
-  not_found: 'No encontramos tu empresa. Recargá la página.',
+  company_verified: 'Tu empresa ya está verificada: edita su perfil desde la página de la empresa.',
+  validation_failed: 'Revisa los datos de la empresa.',
+  not_found: 'No encontramos tu empresa. Recarga la página.',
 };
 
-export const companyErrorText = (error: unknown): string => errorText(error, 'No pudimos guardar la empresa. Probá de nuevo.', COMPANY_ERRORS);
+export const companyErrorText = (error: unknown): string => errorText(error, 'No pudimos guardar la empresa. Prueba de nuevo.', COMPANY_ERRORS);
 
 export function loadMyCompany(): Promise<ApiResult<MyCompany | null>> {
   return call(api.GET('/v1/me/company')).then(r => ({ data: r.data ? r.data.company : null, error: r.error }));

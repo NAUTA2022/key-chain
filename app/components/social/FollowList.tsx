@@ -109,7 +109,7 @@ export default function FollowListModal({ title, tabs, initialTab, onClose, onOp
         </div>
         <div style={{ overflowY: 'auto', padding: '6px 18px 14px' }}>
           {current && current.items.length === 0 && (
-            <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{current.loading ? 'Cargando…' : 'Nadie por acá todavía.'}</div>
+            <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{current.loading ? 'Cargando…' : 'Nadie por aquí todavía.'}</div>
           )}
           {current?.items.map(it => (
             <div key={it.kind === 'company' ? `company-${it.slug}` : `person-${it.id}`} onClick={() => open(it)} role="button" tabIndex={0}
@@ -121,7 +121,7 @@ export default function FollowListModal({ title, tabs, initialTab, onClose, onOp
                   ? <UserAvatar size={40} user={it} />
                   : <div style={{ width: 40, height: 40, borderRadius: '50%', background: it.gradient, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, flexShrink: 0 }}>{it.initial}</div>}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.kind === 'person' && it.isSelf ? `${it.name} (vos)` : it.name}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.kind === 'person' && it.isSelf ? `${it.name} (tú)` : it.name}</div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{it.kind === 'company' ? 'Empresa' : it.companyName ? `Dueño de ${it.companyName}` : it.handle ? `@${it.handle}` : it.anonymous ? 'Perfil privado' : 'Inversor'}</div>
               </div>
               {!(it.kind === 'person' && it.isSelf) && !(it.kind === 'company' && it.isMine) && <FollowButton following={it.isFollowing} onToggle={() => onToggleFollow(it)} small />}

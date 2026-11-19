@@ -15,9 +15,9 @@ function subscribeTheme(onChange: () => void) {
 const currentTheme = (): 'light' | 'dark' => (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
 
 const LIGHT_THEME = lightTheme({
-  colors: { primaryText: '#0f1219', secondaryText: '#5b6270', accentText: '#0f1219', primaryButtonBg: '#1c1f26', primaryButtonText: '#ffffff', modalBg: '#ffffff', borderColor: '#e2e4e9' },
+  colors: { primaryText: '#0d0b33', secondaryText: '#5b5f7a', accentText: '#A85A00', primaryButtonBg: '#F0900F', primaryButtonText: '#0d0b33', modalBg: '#ffffff', borderColor: '#e2e4ee' },
 });
-const DARK_THEME = darkTheme({ colors: { modalBg: '#0e1014', borderColor: 'rgba(255,255,255,0.12)' } });
+const DARK_THEME = darkTheme({ colors: { modalBg: '#171d27', borderColor: 'rgba(255,255,255,0.12)', accentText: '#F7A733', primaryButtonBg: '#F0900F', primaryButtonText: '#06051c' } });
 
 /**
  * thirdweb ConnectButton wired to the backend session: when the API is enabled,

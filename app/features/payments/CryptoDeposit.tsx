@@ -29,7 +29,7 @@ type CryptoDepositProps = {
 
 const TITLES = (sym: string): Record<Step, string> => ({ pick: 'Depositar cripto', address: `Depositar ${sym}`, tracking: 'Recibiendo depósito', done: 'Depósito acreditado' });
 
-// Crypto deposit into the KEYCHAIN balance: pick token + network, get the
+// Crypto deposit into the Brikme balance: pick token + network, get the
 // personal deposit address (QR + copy) and track the deposit until it's
 // credited. Steps: pick → address → tracking → done.
 export default function CryptoDeposit({ live, ...props }: CryptoDepositProps) {
@@ -76,7 +76,7 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
     <PayModal open={open} onClose={close} title={TITLES(sym)[step]} onBack={step === 'address' ? () => setStep('pick') : undefined} footer={footer}>
       {step === 'pick' && (
         <>
-          <p style={{ ...T.body, margin: '0 0 18px' }}>Elegí qué moneda vas a enviar y por qué red. Te damos tu dirección personal de depósito.</p>
+          <p style={{ ...T.body, margin: '0 0 18px' }}>Elige qué moneda vas a enviar y por qué red. Te damos tu dirección personal de depósito.</p>
           <TokenNetworkPicker tokens={TOKENS} sym={sym} setSym={setSym} net={net} setNet={setNet} balances={balances} />
         </>
       )}
@@ -94,7 +94,7 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
             <KV k="Confirmaciones" v={network.confirmations} />
           </div>
           <div style={{ marginTop: 12 }}>
-            <Notice>Enviá solo <b>{sym}</b> por la red <b>{network.name}</b>. Si usás otra moneda o red, los fondos pueden perderse.</Notice>
+            <Notice>Envía solo <b>{sym}</b> por la red <b>{network.name}</b>. Si usas otra moneda o red, los fondos pueden perderse.</Notice>
           </div>
         </motion.div>
       )}
@@ -118,7 +118,7 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
         <div style={{ textAlign: 'center', paddingTop: 6 }}>
           <SuccessMark />
           <div role="status" style={{ ...T.title, fontSize: 24 }}>+{fmtToken(received, sym)}</div>
-          <div style={{ ...T.body, marginBottom: 16 }}>Ya está disponible en tu saldo KEYCHAIN.</div>
+          <div style={{ ...T.body, marginBottom: 16 }}>Ya está disponible en tu saldo Brikme.</div>
           <div style={{ textAlign: 'left', padding: '6px 14px', borderRadius: 14, background: 'var(--surface2)' }}>
             <KV k="Red" v={network.name} />
             <KV k="Hash" v={shortAddr(hash)} mono />
@@ -174,7 +174,7 @@ function LiveDepositFlow({ open, onClose, live }: Omit<CryptoDepositProps, 'live
     <PayModal open={open} onClose={close} title={TITLES('USDC')[view]} onBack={view === 'address' ? () => setStep('pick') : undefined} footer={footer}>
       {view === 'pick' && (
         <>
-          <p style={{ ...T.body, margin: '0 0 18px' }}>Depositá USDC en tu wallet por la red de la plataforma. Te mostramos tu dirección para recibirlos.</p>
+          <p style={{ ...T.body, margin: '0 0 18px' }}>Deposita USDC en tu wallet por la red de la plataforma. Te mostramos tu dirección para recibirlos.</p>
           <TokenNetworkPicker tokens={[LIVE_USDC]} networks={networks} sym="USDC" setSym={() => undefined} net={PLATFORM_NET} setNet={() => undefined} balances={{ USDC: live.usdc ?? 0 }} />
         </>
       )}
@@ -192,7 +192,7 @@ function LiveDepositFlow({ open, onClose, live }: Omit<CryptoDepositProps, 'live
             <KV k="Saldo actual" v={live.usdc === null ? '…' : fmtToken(live.usdc, 'USDC')} />
           </div>
           <div style={{ marginTop: 12 }}>
-            <Notice>Enviá solo <b>USDC</b> por la red <b>{network.name}</b>. Si usás otra moneda o red, los fondos pueden perderse.</Notice>
+            <Notice>Envía solo <b>USDC</b> por la red <b>{network.name}</b>. Si usas otra moneda o red, los fondos pueden perderse.</Notice>
           </div>
           <div style={{ marginTop: 12 }}>
             <FaucetCard onFunded={live.refresh} />
@@ -211,7 +211,7 @@ function LiveDepositFlow({ open, onClose, live }: Omit<CryptoDepositProps, 'live
             { label: `Confirmando en ${network.name}` },
             { label: 'Acreditando en tu saldo' },
           ]} />
-          <div style={{ marginTop: 10, textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Podés cerrar esta ventana: tu saldo se actualiza solo.</div>
+          <div style={{ marginTop: 10, textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Puedes cerrar esta ventana: tu saldo se actualiza solo.</div>
         </div>
       )}
 

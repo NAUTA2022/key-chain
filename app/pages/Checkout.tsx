@@ -23,8 +23,8 @@ import { InvestError, investOnchain, problemMessage, useKyc, type ApiAsset, type
 import { useSession } from '~/lib/session';
 import { PAY_TOKENS, tokenBySym, networkById, useWallet, debit, logPayment, fmtToken, shortAddr, fakeTxHash, DEPOSIT_ADDRESS } from '~/lib/wallet';
 
-// KEYCHAIN checkout: order summary + payment method, then processing and a
-// receipt. Demo: KEYCHAIN balance, connected wallet or a crypto transfer to a
+// Brikme checkout: order summary + payment method, then processing and a
+// receipt. Demo: Brikme balance, connected wallet or a crypto transfer to a
 // one-time address (the design's simulated flows). Live: the single place
 // that executes purchases, from the connected wallet in USDC on the platform
 // network: `action` 'primary' invests on-chain (order → USDC approval →
@@ -143,7 +143,7 @@ function CheckoutFrame({ isMobile, order, stage, onBack, backDisabled, summary, 
                 <div data-guide="checkout-summary" style={{ position: 'sticky', top: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {summary}
                   <PrimaryBtn disabled={!canPay} onClick={onPay}>{payLabel}</PrimaryBtn>
-                  <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Al pagar aceptás los términos de la emisión.</div>
+                  <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Al pagar aceptas los términos de la emisión.</div>
                 </div>
               )}
             </div>
@@ -200,7 +200,7 @@ const goBackTo = (nav: NavFn, order: CheckoutOrder) => () => (order.back ? nav(o
 // ─── Demo ─────────────────────────────────────────────────────────────────────
 
 const METHODS = [
-  { id: 'balance', title: 'Saldo KEYCHAIN', icon: Ico.wallet },
+  { id: 'balance', title: 'Saldo Brikme', icon: Ico.wallet },
   { id: 'wallet', title: 'Wallet conectada', icon: Ico.link },
   { id: 'transfer', title: 'Transferencia cripto', icon: Ico.qr },
 ] as const;
@@ -278,7 +278,7 @@ function DemoCheckout({ nav, order }: { nav: NavFn; order: CheckoutOrder }) {
         {method !== 'balance' && <FilterSelect label="Red" value={net} onChange={setNet} options={netOpts} allValue={net} block={isMobile} align="right" />}
       </div>
       {method === 'balance' && (short ? (
-        <Notice>Te faltan <b>{fmtToken(grand - bal, sym)}</b>. Depositá cripto o elegí otro método.
+        <Notice>Te faltan <b>{fmtToken(grand - bal, sym)}</b>. Deposita cripto o elige otro método.
           <button type="button" onClick={() => setDepositOpen(true)} style={noticeBtn}>{Ico.down} Depositar {sym}</button>
         </Notice>
       ) : (
@@ -321,7 +321,7 @@ function DemoCheckout({ nav, order }: { nav: NavFn; order: CheckoutOrder }) {
   const token = tokenBySym(sym);
   const transfer = (
     <>
-      <div style={{ ...T.title, fontSize: 20, textAlign: 'center' }}>Enviá exactamente</div>
+      <div style={{ ...T.title, fontSize: 20, textAlign: 'center' }}>Envía exactamente</div>
       <div style={{ textAlign: 'center', margin: '6px 0 16px' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 30, color: 'var(--text)', letterSpacing: '-0.03em' }}>
           <TokenIcon src={token.icon} badge={network.icon} size={30} /> {fmtToken(grand, sym)}
@@ -331,7 +331,7 @@ function DemoCheckout({ nav, order }: { nav: NavFn; order: CheckoutOrder }) {
       <CopyField label={`Dirección (${network.name})`} value={DEPOSIT_ADDRESS} />
       <div style={{ marginTop: 10 }}><CopyField label="Monto exacto" value={grand.toFixed(2)} mono={false} /></div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '14px 0', fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{Ico.clock} La orden se reserva por 15 minutos</div>
-      <Notice>Enviá solo <b>{sym}</b> por <b>{network.name}</b>. Un monto distinto demora la acreditación.</Notice>
+      <Notice>Envía solo <b>{sym}</b> por <b>{network.name}</b>. Un monto distinto demora la acreditación.</Notice>
       <div style={{ marginTop: 14 }}><PrimaryBtn onClick={() => setStage('processing')}>Ya envié el pago</PrimaryBtn></div>
     </>
   );
@@ -393,11 +393,11 @@ type LiveEngine = {
 /** Why a signed-in user can't buy yet (completed on the profile page). */
 type BuyGate = 'login' | 'onboarding' | 'none' | 'pending' | 'rejected';
 const GATE_COPY: Record<BuyGate, { cta: string; note: string }> = {
-  login: { cta: 'Iniciar sesión', note: 'Iniciá sesión con tu wallet para pagar.' },
-  onboarding: { cta: 'Completar mi perfil', note: 'Completá tu perfil para poder invertir.' },
-  none: { cta: 'Verificar mi identidad', note: 'Para invertir necesitás verificar tu identidad (KYC).' },
+  login: { cta: 'Iniciar sesión', note: 'Inicia sesión con tu wallet para pagar.' },
+  onboarding: { cta: 'Completar mi perfil', note: 'Completa tu perfil para poder invertir.' },
+  none: { cta: 'Verificar mi identidad', note: 'Para invertir necesitas verificar tu identidad (KYC).' },
   pending: { cta: 'Ver estado del KYC', note: 'Tu verificación está en revisión. Te avisamos cuando puedas invertir.' },
-  rejected: { cta: 'Revisar mi KYC', note: 'Tu verificación fue rechazada. Revisá tus datos en el perfil.' },
+  rejected: { cta: 'Revisar mi KYC', note: 'Tu verificación fue rechazada. Revisa tus datos en el perfil.' },
 };
 
 function useBuyGate(nav: NavFn): { gate: BuyGate | null; blocker: LiveBlocker } {
@@ -414,7 +414,7 @@ function useBuyGate(nav: NavFn): { gate: BuyGate | null; blocker: LiveBlocker } 
 const INVEST_INDEX: Record<InvestStep, number> = { order: 0, approve: 1, execute: 2, minting: 3, done: 4 };
 const INVEST_STEPS: ProgressStep[] = [
   { label: 'Creando la orden', sub: 'La plataforma fija el precio' },
-  { label: 'Autorizá el USDC en tu wallet', sub: 'Aprobación exacta al vault del activo' },
+  { label: 'Autoriza el USDC en tu wallet', sub: 'Aprobación exacta al vault del activo' },
   { label: 'Ejecutando la inversión' },
   { label: 'Emitiendo tus tokens', sub: 'Se acreditan en tu wallet' },
 ];
@@ -443,7 +443,7 @@ function LivePrimaryCheckout({ nav, order, action }: { nav: NavFn; order: Checko
   else if (settings.data?.investmentsPaused) blocker = { note: pauseNote };
   else if (!asset.data) blocker = asset.loading ? { note: 'Cargando el activo…', tone: 'info' } : { note: 'No encontramos este activo.', cta: { label: 'Explorar proyectos', onClick: () => nav('primario') } };
   else if (pool?.status !== 'active') {
-    blocker = { note: pool?.status === 'deploying' || pool?.status === 'granting_roles' ? 'El activo se está desplegando on-chain. Volvé en unos minutos.' : 'Este activo todavía no está tokenizado on-chain.' };
+    blocker = { note: pool?.status === 'deploying' || pool?.status === 'granting_roles' ? 'El activo se está desplegando on-chain. Vuelve en unos minutos.' : 'Este activo todavía no está tokenizado on-chain.' };
   } else if (gate) blocker = gateBlocker;
 
   const engine: LiveEngine = {
@@ -475,8 +475,8 @@ function LivePrimaryCheckout({ nav, order, action }: { nav: NavFn; order: Checko
 
 const TRADE_INDEX: Record<TradeStep, number> = { approve: 0, confirm: 1, sync: 2, done: 3 };
 const TRADE_STEPS: ProgressStep[] = [
-  { label: 'Aprobá el pago en USDC en tu wallet', sub: 'Aprobación exacta al mercado' },
-  { label: 'Confirmá la compra en tu wallet' },
+  { label: 'Aprueba el pago en USDC en tu wallet', sub: 'Aprobación exacta al mercado' },
+  { label: 'Confirma la compra en tu wallet' },
   { label: 'Actualizando el mercado' },
 ];
 
@@ -495,12 +495,12 @@ function LiveSecondaryCheckout({ nav, order, action }: { nav: NavFn; order: Chec
   let blocker: LiveBlocker = null;
   if (gate === 'login') blocker = gateBlocker;
   else if (!listings.data || !market) {
-    blocker = listings.loading || info.loading ? { note: 'Cargando la oferta…', tone: 'info' } : { note: 'No pudimos cargar el mercado secundario. Probá de nuevo en unos minutos.' };
+    blocker = listings.loading || info.loading ? { note: 'Cargando la oferta…', tone: 'info' } : { note: 'No pudimos cargar el mercado secundario. Prueba de nuevo en unos minutos.' };
   } else if (!market.enabled) blocker = { note: 'El mercado secundario no está disponible en esta red.' };
   else if (market.paused) blocker = { note: 'El mercado secundario está pausado en este momento.' };
   else if (!listing || listing.status !== 'active' || Math.floor(listing.available) < action.quantity) {
     blocker = { note: 'Esta oferta ya no está disponible en esa cantidad.', cta: { label: 'Volver al mercado', onClick: () => nav('secundario') } };
-  } else if (account && sameAddress(listing.sellerWallet, account.address)) blocker = { note: 'No podés comprar tu propia oferta.' };
+  } else if (account && sameAddress(listing.sellerWallet, account.address)) blocker = { note: 'No puedes comprar tu propia oferta.' };
   else if (gate) blocker = gateBlocker;
 
   const engine: LiveEngine = {
@@ -584,13 +584,13 @@ function LiveCheckoutView({ nav, order, engine, trust }: { nav: NavFn; order: Ch
           {blocker.cta && <button type="button" onClick={blocker.cta.onClick} style={noticeBtn}>{blocker.cta.label}</button>}
         </Notice>
       ) : short && usdc !== null ? (
-        <Notice>Te faltan <b>{fmtToken(total - usdc, 'USDC')}</b> en tu wallet. Depositá USDC en la red {network} para pagar.
+        <Notice>Te faltan <b>{fmtToken(total - usdc, 'USDC')}</b> en tu wallet. Deposita USDC en la red {network} para pagar.
           <button type="button" onClick={() => setDepositOpen(true)} style={noticeBtn}>{Ico.down} Depositar USDC</button>
         </Notice>
       ) : (
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>
           {usdc === null
-            ? (account ? 'Cargando tu saldo de USDC…' : 'Conectá tu wallet para pagar con USDC.')
+            ? (account ? 'Cargando tu saldo de USDC…' : 'Conecta tu wallet para pagar con USDC.')
             : <>Después del pago te quedan <b style={{ color: 'var(--text)' }}>{fmtToken(usdc - total, 'USDC')}</b>. El gas de la red se paga en {gasSymbol}.</>}
         </div>
       )}

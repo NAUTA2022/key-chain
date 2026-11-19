@@ -170,7 +170,7 @@ function WaveFill({ pct, label, sub }: { pct: number; label: string; sub: string
       <div style={{ marginTop: 'auto', position: 'relative', zIndex: 2, pointerEvents: 'none' }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 26, color: '#fff', letterSpacing: '-0.02em', textShadow: '0 1px 2px rgba(0,0,0,0.12)' }}>{label}</div>
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'rgba(255,255,255,0.9)' }}>{sub}</div>
-        {tilt.needsTap && <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Tocá para mover el agua con el teléfono</div>}
+        {tilt.needsTap && <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Toca para mover el agua con el teléfono</div>}
       </div>
     </>
   );
@@ -291,7 +291,7 @@ function SeniorityTimeline({ months, since }: { months: number; since: string })
   return (
     <div style={{ marginTop: 'auto' }}>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 18 }}>
-        <b style={{ color: 'var(--text)', fontSize: 22, fontFamily: 'var(--font-h)' }}>{months}</b> meses en KEYCHAIN
+        <b style={{ color: 'var(--text)', fontSize: 22, fontFamily: 'var(--font-h)' }}>{months}</b> meses en Brikme
         {nextStop && <span style={{ color: 'var(--ter)' }}> · próxima insignia: {nextStop.label} en {nextStop.m - months} {nextStop.m - months === 1 ? 'mes' : 'meses'}</span>}
       </div>
       <div style={{ position: 'relative', height: 26, margin: '0 22px' }}>

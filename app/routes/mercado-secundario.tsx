@@ -9,7 +9,7 @@ import { breadcrumbs, seo } from '~/lib/seo';
 export const meta: Route.MetaFunction = () =>
   seo({
     title: 'Mercado secundario P2P de tokens',
-    description: 'Comprá y vendé tokens de activos reales entre inversores. Compará el precio pedido con el valor real de cada token y encontrá oportunidades con descuento.',
+    description: 'Compra y vende tokens de activos reales entre inversores. Compara el precio pedido con el valor real de cada token y encuentra oportunidades con descuento.',
     path: '/mercado-secundario',
     jsonLd: [breadcrumbs([{ name: 'Inicio', path: '/' }, { name: 'Mercado secundario', path: '/mercado-secundario' }])],
   });

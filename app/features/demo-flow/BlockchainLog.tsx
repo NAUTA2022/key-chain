@@ -62,11 +62,11 @@ export default function BlockchainLog({ run, rpcUrl, networkName }: { run: DemoR
       <div>
         <h2 id="df-chain" style={{ margin: '0 0 4px', fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16, color: 'var(--text)', letterSpacing: '-0.01em' }}>La blockchain lo registra todo</h2>
         <p style={{ margin: 0, fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.55, maxWidth: '70ch' }}>
-          Cada movimiento es una transacción que queda guardada en un bloque, encadenado al anterior. Nadie la puede borrar ni cambiar. Tocá un bloque para ver la prueba leída directo de la red ({networkName}).
+          Cada movimiento es una transacción que queda guardada en un bloque, encadenado al anterior. Nadie la puede borrar ni cambiar. Toca un bloque para ver la prueba leída directo de la red ({networkName}).
         </p>
       </div>
       {txs.length === 0 ? (
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '14px 0' }}>Los bloques aparecen acá apenas empieza la demo.</div>
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '14px 0' }}>Los bloques aparecen aquí apenas empieza la demo.</div>
       ) : (
         <div ref={rail} style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', padding: '4px 2px 10px', scrollbarWidth: 'thin' }}>
           <AnimatePresence initial={false}>
@@ -96,7 +96,7 @@ export default function BlockchainLog({ run, rpcUrl, networkName }: { run: DemoR
           <div style={{ color: 'var(--text)', fontWeight: 700 }}>{selected.text}</div>
           {!rpcUrl ? <span>No hay acceso a la red para leer la prueba.</span>
             : receipt?.hash !== selected.hash || (!receipt.data && !receipt.error) ? <span>Leyendo la prueba de la red…</span>
-              : receipt.error || !receipt.data ? <span>No se pudo leer la transacción de la red. Probá de nuevo.</span>
+              : receipt.error || !receipt.data ? <span>No se pudo leer la transacción de la red. Prueba de nuevo.</span>
                 : (
                   <dl style={{ margin: 0, display: 'grid', gridTemplateColumns: 'max-content minmax(0,1fr)', gap: '4px 14px', fontVariantNumeric: 'tabular-nums' }}>
                     <dt>Bloque</dt><dd style={{ margin: 0, color: 'var(--text)', fontWeight: 700 }}>#{receipt.data.blockNumber.toLocaleString('es-AR')}</dd>

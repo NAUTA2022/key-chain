@@ -66,7 +66,7 @@ export default function KycLive({ initial, onSubmitted }: KycLiveProps = {}) {
     setError(null);
     const { data, error: e }: { data?: KycStatus; error?: unknown } = await api.PUT('/v1/kyc', { body: form });
     setSending(false);
-    if (!data) return setError(errorText(e, 'No se pudo enviar la verificación. Revisá los datos.', { conflict: 'Tu verificación ya fue enviada o aprobada. Recargá la página.' }));
+    if (!data) return setError(errorText(e, 'No se pudo enviar la verificación. Revisa los datos.', { conflict: 'Tu verificación ya fue enviada o aprobada. Recarga la página.' }));
     reload();
     await refresh();
     onSubmitted?.();
@@ -93,12 +93,12 @@ export default function KycLive({ initial, onSubmitted }: KycLiveProps = {}) {
           })}
         </ol>
         <div role="status" style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: kyc?.onchain?.status === 'failed' ? 'var(--neg)' : 'var(--ter)', marginTop: 14 }}>
-          {kyc?.status === 'rejected' && kyc.rejectionReason ? `Rechazado: ${kyc.rejectionReason}` : kyc?.onchain ? ONCHAIN_LABEL[kyc.onchain.status] : kyc?.status === 'pending' ? 'Tu verificación está en revisión.' : 'Completá tus datos para habilitar la inversión on-chain.'}
+          {kyc?.status === 'rejected' && kyc.rejectionReason ? `Rechazado: ${kyc.rejectionReason}` : kyc?.onchain ? ONCHAIN_LABEL[kyc.onchain.status] : kyc?.status === 'pending' ? 'Tu verificación está en revisión.' : 'Completa tus datos para habilitar la inversión on-chain.'}
         </div>
       </PCard>
 
       <PCard style={{ padding: '22px 24px' }}>
-        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>{canSubmit ? 'Verificá tu identidad' : 'Información personal'}</div>
+        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>{canSubmit ? 'Verifica tu identidad' : 'Información personal'}</div>
         {canSubmit ? (
           <form onSubmit={e => { e.preventDefault(); void submit(); }} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <select aria-label="Tipo de verificación" value={form.type} onChange={e => setForm({ ...form, type: e.target.value === 'business' ? 'business' : 'individual' })} style={selectStyle}>

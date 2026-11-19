@@ -79,19 +79,19 @@ function TabNav<T extends string>({ tabs, tab, onChange }: TabNavProps<T>) {
 /** Demo mode (no backend): the original static configuration screen. */
 function ConfigDemo() {
   const [tab, setTab] = useState<TabId>('general');
-  const [g, setG] = useState({ platformName: 'KEY CHAIN', supportEmail: 'soporte@factoract.io', maxUsers: '10000', maintenanceMode: false, registrationOpen: true, emailNotif: true });
+  const [g, setG] = useState({ platformName: 'Brikme', supportEmail: 'hello@brikme.com', maxUsers: '10000', maintenanceMode: false, registrationOpen: true, emailNotif: true });
   const [fin, setFin] = useState({ platformFee: '1.5', minInvestment: '38', maxInvestment: '500000', autoDistribution: true, distributionDay: '15', usdcOnly: true });
   const [feat, setFeat] = useState({ academy: true, swap: true, secondaryMarket: true, staking: false, governance: false, referrals: true, demoMode: true });
   const [bc, setBc] = useState({ network: 'Polygon Mainnet', chainId: '137', rpcUrl: 'https://polygon-rpc.com', explorerUrl: 'https://polygonscan.com', contractRegistry: '0x4a9f…d82c', autoAudit: true });
   const [banners, setBanners] = useState([
     { id: 1, title: 'Nueva propiedad tokenizada en Miami', active: true, url: '' },
-    { id: 2, title: 'ICO KYCN Token — Ronda Pública abierta', active: true, url: '' },
+    { id: 2, title: 'ICO BRIK Token — Ronda Pública abierta', active: true, url: '' },
     { id: 3, title: 'Rendimientos Q2 2026 distribuidos', active: false, url: '' },
   ]);
 
   return (
     <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 960, margin: '0 auto' }}>
-      <PSection title="Configuración" sub="Ajustes globales de la plataforma KEY CHAIN." />
+      <PSection title="Configuración" sub="Ajustes globales de la plataforma Brikme." />
 
       {/* Tab nav */}
       <TabNav tabs={TABS} tab={tab} onChange={setTab} />
@@ -165,8 +165,8 @@ function ConfigDemo() {
               ['academy',         'Academia',           'Módulo educativo con artículos y guías'],
               ['swap',            'Swap DeFi',          'Intercambio de tokens via QuickSwap/Uniswap'],
               ['secondaryMarket', 'Mercado Secundario', 'P2P trading entre inversores'],
-              ['staking',         'Staking KYCN',       'APY 9-14% en token KYCN'],
-              ['governance',      'Gobernanza DAO',     'Votaciones on-chain para holders de KYCN'],
+              ['staking',         'Staking BRIK',       'APY 9-14% en token BRIK'],
+              ['governance',      'Gobernanza DAO',     'Votaciones on-chain para holders de BRIK'],
               ['referrals',       'Programa referidos',  'Comisiones por referidos activos'],
               ['demoMode',        'Modo demo',          'Acceso sin wallet para explorar la plataforma'],
             ] as const).map(([key, label, sub]) => (
@@ -294,12 +294,12 @@ const textareaStyle: CSSProperties = {
 
 const generalSchema = z.object({
   platformName: z.string().trim().min(2, 'El nombre de la plataforma necesita al menos 2 caracteres.').max(60, 'El nombre admite hasta 60 caracteres.'),
-  supportEmail: z.string().trim().max(200, 'El email es demasiado largo.').pipe(z.email('Ingresá un email de soporte válido.')),
+  supportEmail: z.string().trim().max(200, 'El email es demasiado largo.').pipe(z.email('Ingresa un email de soporte válido.')),
   displayFeePercent: z.number('El fee tiene que ser un número.').min(0, 'El fee no puede ser negativo.').max(10, 'El fee máximo es 10%.'),
 });
 
 const bannerSchema = z.object({
-  text: z.string().trim().min(1, 'Escribí el texto del banner.').max(200, 'El texto admite hasta 200 caracteres.'),
+  text: z.string().trim().min(1, 'Escribe el texto del banner.').max(200, 'El texto admite hasta 200 caracteres.'),
   href: z.string().trim().max(300, 'El enlace admite hasta 300 caracteres.')
     .refine(h => h === '' || safeBannerHref(h) !== null, 'El enlace tiene que empezar con "/" (página interna) o con "https://".'),
 });
@@ -333,12 +333,12 @@ function shortAddress(a: string): string {
 }
 
 function settingsError(e: unknown): string {
-  if (!isProblem(e)) return 'No pudimos conectar con el servidor. Revisá tu conexión y probá de nuevo.';
-  if (e.status === 401) return 'Tu sesión expiró. Volvé a ingresar para guardar los cambios.';
-  if (e.status === 403) return 'Necesitás permisos de administrador para cambiar la configuración.';
-  if (e.status === 429) return 'Demasiados cambios seguidos. Esperá un momento y probá de nuevo.';
-  if (e.code === 'validation_failed') return 'El servidor rechazó algunos valores. Revisá los datos e intentá de nuevo.';
-  return 'No se pudieron guardar los cambios. Probá de nuevo en unos minutos.';
+  if (!isProblem(e)) return 'No pudimos conectar con el servidor. Revisa tu conexión y prueba de nuevo.';
+  if (e.status === 401) return 'Tu sesión expiró. Vuelve a ingresar para guardar los cambios.';
+  if (e.status === 403) return 'Necesitas permisos de administrador para cambiar la configuración.';
+  if (e.status === 429) return 'Demasiados cambios seguidos. Espera un momento y prueba de nuevo.';
+  if (e.code === 'validation_failed') return 'El servidor rechazó algunos valores. Revisa los datos e intenta de nuevo.';
+  return 'No se pudieron guardar los cambios. Prueba de nuevo en unos minutos.';
 }
 
 function FeedbackLine({ feedback, section }: { feedback: Feedback; section: Section }) {
@@ -530,7 +530,7 @@ function ConfigLive() {
   function saveGeneral() {
     const parsed = generalSchema.safeParse({ ...general, displayFeePercent: general.displayFeePercent.trim() === '' ? Number.NaN : Number(general.displayFeePercent.replace(',', '.')) });
     if (!parsed.success) {
-      setFeedback({ section: 'general', kind: 'error', text: parsed.error.issues[0]?.message ?? 'Revisá los datos.' });
+      setFeedback({ section: 'general', kind: 'error', text: parsed.error.issues[0]?.message ?? 'Revisa los datos.' });
       return;
     }
     void save('general', { general: parsed.data });
@@ -549,7 +549,7 @@ function ConfigLive() {
     if (!edit) return;
     const parsed = bannerSchema.safeParse({ text: edit.text, href: edit.href });
     if (!parsed.success) {
-      setEdit({ ...edit, error: parsed.error.issues[0]?.message ?? 'Revisá el banner.' });
+      setEdit({ ...edit, error: parsed.error.issues[0]?.message ?? 'Revisa el banner.' });
       return;
     }
     const href = parsed.data.href || null;
@@ -561,7 +561,7 @@ function ConfigLive() {
   if (!settings) {
     return (
       <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 960, margin: '0 auto' }}>
-        <PSection title="Configuración" sub="Ajustes globales de la plataforma KEY CHAIN." />
+        <PSection title="Configuración" sub="Ajustes globales de la plataforma Brikme." />
         <PCard style={{ padding: '22px 24px' }}>
           {loadError ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
@@ -582,7 +582,7 @@ function ConfigLive() {
 
   return (
     <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 960, margin: '0 auto' }}>
-      <PSection title="Configuración" sub="Ajustes globales de la plataforma KEY CHAIN." />
+      <PSection title="Configuración" sub="Ajustes globales de la plataforma Brikme." />
 
       <TabNav tabs={LIVE_TABS} tab={tab} onChange={id => { setTab(id); setFeedback(null); }} />
 
@@ -645,7 +645,7 @@ function ConfigLive() {
               <PBtn variant="accent" small disabled={banners.length >= MAX_BANNERS || edit !== null} onClick={() => setEdit({ id: NEW_BANNER, text: '', href: '', error: null })}>+ Nuevo banner</PBtn>
             </div>
             {banners.length === 0 && edit?.id !== NEW_BANNER && (
-              <div style={{ ...cardSub, padding: '14px 0 4px' }}>No hay banners. Creá uno para destacar una novedad o un aviso.</div>
+              <div style={{ ...cardSub, padding: '14px 0 4px' }}>No hay banners. Crea uno para destacar una novedad o un aviso.</div>
             )}
             {banners.map((b, i) => (
               edit?.id === b.id ? (

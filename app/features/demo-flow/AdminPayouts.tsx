@@ -23,7 +23,7 @@ export default function AdminPayouts() {
     <section aria-labelledby="df-payouts" style={{ marginTop: 28, background: 'var(--surface)', border: '1px solid var(--border-l)', borderRadius: 20, padding: '18px 20px' }}>
       <h2 id="df-payouts" style={{ margin: '0 0 4px', fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 17, color: 'var(--text)' }}>Devoluciones pendientes</h2>
       <p style={{ margin: '0 0 14px', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>
-        Solo admins. Enviá el monto desde tu Binance (Pay → Enviar al Binance ID, o Retirar USDT a la dirección y red indicadas) y marcalo como enviado.
+        Solo admins. Envía el monto desde tu Binance (Pay → Enviar al Binance ID, o Retirar USDT a la dirección y red indicadas) y márcalo como enviado.
       </p>
       {list.loading && !list.data ? (
         <div role="status" style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>Cargando…</div>
@@ -39,7 +39,7 @@ export default function AdminPayouts() {
                 </div>
                 {r.method === 'crypto' && r.refundAddress
                   ? <CopyField label={`Dirección ${r.network ?? ''} (retiro de USDT por esa red)`} value={r.refundAddress} />
-                  : r.payerId ? <CopyField label="Binance ID (Pay → Enviar)" value={r.payerId} /> : <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)' }}>Binance no informó el ID del pagador: buscalo en tu historial de Pay.</div>}
+                  : r.payerId ? <CopyField label="Binance ID (Pay → Enviar)" value={r.payerId} /> : <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)' }}>Binance no informó el ID del pagador: búscalo en tu historial de Pay.</div>}
               </div>
               <PBtn variant="accent" small disabled={busy !== null} onClick={() => void mark(r.runId)}>{busy === r.runId ? 'Guardando…' : 'Marcar enviado'}</PBtn>
             </div>

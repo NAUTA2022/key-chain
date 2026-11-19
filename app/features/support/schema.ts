@@ -50,13 +50,13 @@ export const newTicketSchema = z.object({
   subject: z
     .string()
     .trim()
-    .min(4, 'Escribí un asunto de al menos 4 caracteres.')
+    .min(4, 'Escribe un asunto de al menos 4 caracteres.')
     .max(SUBJECT_MAX, `El asunto puede tener hasta ${SUBJECT_MAX} caracteres.`),
-  category: z.enum(TICKET_CATEGORIES, { error: 'Elegí una categoría.' }),
+  category: z.enum(TICKET_CATEGORIES, { error: 'Elige una categoría.' }),
   message: z
     .string()
     .trim()
-    .min(10, 'Contanos un poco más: el mensaje necesita al menos 10 caracteres.')
+    .min(10, 'Cuéntanos un poco más: el mensaje necesita al menos 10 caracteres.')
     .max(MESSAGE_MAX, `El mensaje puede tener hasta ${MESSAGE_MAX} caracteres.`),
 });
 export type NewTicketInput = z.infer<typeof newTicketSchema>;
@@ -64,7 +64,7 @@ export type NewTicketField = keyof NewTicketInput;
 export type NewTicketErrors = Partial<Record<NewTicketField, string>>;
 
 export const replySchema = z.object({
-  body: z.string().trim().min(1, 'Escribí un mensaje.').max(MESSAGE_MAX, `El mensaje puede tener hasta ${MESSAGE_MAX} caracteres.`),
+  body: z.string().trim().min(1, 'Escribe un mensaje.').max(MESSAGE_MAX, `El mensaje puede tener hasta ${MESSAGE_MAX} caracteres.`),
 });
 
 const NEW_TICKET_FIELDS: readonly NewTicketField[] = ['subject', 'category', 'message'];
@@ -90,7 +90,7 @@ export function validateNewTicket(input: { subject: string; category: string; me
 /** Validates a reply; returns the trimmed body or the Spanish error. */
 export function validateReply(body: string): { ok: true; body: string } | { ok: false; error: string } {
   const r = replySchema.safeParse({ body });
-  return r.success ? { ok: true, body: r.data.body } : { ok: false, error: r.error.issues[0]?.message ?? 'Revisá el mensaje.' };
+  return r.success ? { ok: true, body: r.data.body } : { ok: false, error: r.error.issues[0]?.message ?? 'Revisa el mensaje.' };
 }
 
 /**
@@ -101,12 +101,12 @@ export function ticketErrorText(error: unknown, fallback: string, kind: 'write' 
   if (isProblem(error) && error.code === 'conflict') {
     return 'max' in error
       ? `Este ticket ya tiene el máximo de ${MAX_ATTACHMENTS} archivos adjuntos.`
-      : 'Este ticket está cerrado. Si necesitás más ayuda, abrí uno nuevo.';
+      : 'Este ticket está cerrado. Si necesitas más ayuda, abre uno nuevo.';
   }
   const notFound = 'No encontramos este ticket.';
   const reasons: Record<string, string> =
     kind === 'upload'
-      ? { not_found: notFound, bad_request: 'No pudimos procesar el archivo. Usá PDF, PNG, JPG o WebP.', payload_too_large: 'El archivo supera el máximo de 10 MB.' }
+      ? { not_found: notFound, bad_request: 'No pudimos procesar el archivo. Usa PDF, PNG, JPG o WebP.', payload_too_large: 'El archivo supera el máximo de 10 MB.' }
       : kind === 'load'
         ? { not_found: notFound, http_error: notFound, bad_request: notFound }
         : { not_found: notFound };

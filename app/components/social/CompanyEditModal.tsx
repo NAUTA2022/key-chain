@@ -97,7 +97,7 @@ function EditForm({ profile, source, onClose }: { profile: CompanyProfile; sourc
         <TextInput id={ids.name} value={name} onChange={e => setName(e.target.value)} maxLength={120} required />
       </Field>
       <Field label="Descripción" htmlFor={ids.bio} hint={`${bio.length}/${BIO_MAX} caracteres`}>
-        <TextArea id={ids.bio} value={bio} onChange={e => setBio(e.target.value)} rows={4} maxLength={BIO_MAX} placeholder="Contá a qué se dedica la empresa." />
+        <TextArea id={ids.bio} value={bio} onChange={e => setBio(e.target.value)} rows={4} maxLength={BIO_MAX} placeholder="Cuenta a qué se dedica la empresa." />
       </Field>
 
       {error && <Notice tone="error">{error}</Notice>}

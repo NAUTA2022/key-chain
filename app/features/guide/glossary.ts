@@ -22,13 +22,13 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     term: 'Wallet',
     aka: 'Billetera',
     definition:
-      'Es tu cuenta y tu billetera a la vez: con ella entrás a KEY CHAIN (sin contraseña) y en ella guardás tus USDC y tus tokens. Solo vos podés autorizar movimientos desde tu wallet.',
+      'Es tu cuenta y tu billetera a la vez: con ella entras a Brikme (sin contraseña) y en ella guardas tus USDC y tus tokens. Solo tú puedes autorizar movimientos desde tu wallet.',
   },
   {
     id: 'direccion',
     term: 'Dirección de wallet',
     definition:
-      'El "número de cuenta" de tu wallet: un código que empieza con 0x. Compartila para recibir fondos; nunca compartas tu frase secreta ni tu clave privada.',
+      'El "número de cuenta" de tu wallet: un código que empieza con 0x. Compártela para recibir fondos; nunca compartas tu frase secreta ni tu clave privada.',
   },
   {
     id: 'firma',
@@ -41,7 +41,7 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     term: 'USDC',
     aka: 'Dólar digital',
     definition:
-      'Un dólar digital: cada USDC vale 1 dólar estadounidense y está respaldado 1 a 1. Es la moneda con la que invertís y con la que recibís dividendos en KEY CHAIN.',
+      'Un dólar digital: cada USDC vale 1 dólar estadounidense y está respaldado 1 a 1. Es la moneda con la que inviertes y con la que recibes dividendos en Brikme.',
   },
   {
     id: 'token',
@@ -60,7 +60,7 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     term: 'Contrato inteligente',
     aka: 'Smart contract',
     definition:
-      'Un programa que vive en la blockchain y cumple reglas automáticamente, sin intermediarios: por ejemplo, entregar tus tokens cuando pagás o repartir dividendos entre los inversores.',
+      'Un programa que vive en la blockchain y cumple reglas automáticamente, sin intermediarios: por ejemplo, entregar tus tokens cuando pagas o repartir dividendos entre los inversores.',
   },
   {
     id: 'red',
@@ -74,14 +74,14 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     term: 'Gas',
     aka: 'Comisión de red',
     definition:
-      'Una pequeña comisión que cobra la red por registrar una transacción. No la cobra KEY CHAIN; tu wallet te muestra el monto antes de confirmar.',
+      'Una pequeña comisión que cobra la red por registrar una transacción. No la cobra Brikme; tu wallet te muestra el monto antes de confirmar.',
   },
   {
     id: 'kyc',
     term: 'KYC / KYB',
     aka: 'Verificación de identidad',
     definition:
-      'KYC ("conocé a tu cliente") es verificar quién sos; KYB es lo mismo para empresas. La ley lo exige para invertir en activos reales y protege a todos de fraudes.',
+      'KYC ("conoce a tu cliente") es verificar quién eres; KYB es lo mismo para empresas. La ley lo exige para invertir en activos reales y protege a todos de fraudes.',
   },
   {
     id: 'identidad',
@@ -106,7 +106,7 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     id: 'dividendo',
     term: 'Dividendo',
     definition:
-      'La parte de las ganancias del activo que te corresponde según tus tokens. Se paga en USDC y lo cobrás desde Mis Pertenencias.',
+      'La parte de las ganancias del activo que te corresponde según tus tokens. Se paga en USDC y lo cobras desde Mis Pertenencias.',
   },
   {
     id: 'liquidacion',
@@ -117,7 +117,7 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
   {
     id: 'primario',
     term: 'Mercado primario',
-    definition: 'Donde comprás tokens directamente al proyecto cuando sale a financiarse (Tokenizaciones).',
+    definition: 'Donde compras tokens directamente al proyecto cuando sale a financiarse (Tokenizaciones).',
   },
   {
     id: 'secundario',

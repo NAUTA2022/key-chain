@@ -41,7 +41,7 @@ export default function FaucetCard({ onFunded }: FaucetCardProps) {
         <PTag label="Red de pruebas" color="purple" />
       </div>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)', lineHeight: 1.5 }}>
-        Recibí {faucet.usdcAmount.toLocaleString('es-AR')} USDC y {faucet.gasAmount.toLocaleString('es-AR')} {gasSymbol} para probar inversiones. No tienen valor real.
+        Recibe {faucet.usdcAmount.toLocaleString('es-AR')} USDC y {faucet.gasAmount.toLocaleString('es-AR')} {gasSymbol} para probar inversiones. No tienen valor real.
       </div>
       <PBtn variant="accent" small disabled={busy || wait !== null} onClick={() => void claim()} style={{ marginTop: 10, width: '100%' }}>
         {busy ? 'Enviando fondos…' : wait ? `Disponible de nuevo en ${wait}` : 'Pedir fondos de prueba'}

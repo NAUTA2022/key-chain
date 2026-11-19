@@ -115,7 +115,7 @@ function PostDrawer({ post, categories, onClose, onSaved }: { post: AcademyPost 
       setErrors({});
       setBusy(true);
       try {
-        saved(await unwrap(api.POST('/v1/admin/academy/posts', { body: v.data }), 'No se pudo crear el artículo.'), 'Artículo creado. Ya podés subir la portada.');
+        saved(await unwrap(api.POST('/v1/admin/academy/posts', { body: v.data }), 'No se pudo crear el artículo.'), 'Artículo creado. Ya puedes subir la portada.');
       } catch (err) {
         setNote({ tone: 'error', text: errorText(err) });
       } finally {
@@ -219,13 +219,13 @@ function PostDrawer({ post, categories, onClose, onSaved }: { post: AcademyPost 
             <Field label="Minutos de lectura" error={errors.readMinutes}>
               <TextInput type="number" inputMode="numeric" min="1" max="240" step="1" value={f.readMinutes} onChange={e => set('readMinutes', e.target.value)} invalid={Boolean(errors.readMinutes)} />
             </Field>
-            <Field label="URL de portada" error={errors.coverUrl} hint="Ruta relativa (/…) o https. También podés subir una imagen.">
+            <Field label="URL de portada" error={errors.coverUrl} hint="Ruta relativa (/…) o https. También puedes subir una imagen.">
               <TextInput value={f.coverUrl} onChange={e => set('coverUrl', e.target.value)} maxLength={500} invalid={Boolean(errors.coverUrl)} />
             </Field>
           </FormGrid>
           <Check checked={f.featured} onChange={v => set('featured', v)} label="Destacado en la Academia" />
           <datalist id="admin-post-categories">{categories.map(c => <option key={c} value={c} />)}</datalist>
-          {Object.keys(errors).length > 0 && <Notice tone="error">Revisá los campos marcados.</Notice>}
+          {Object.keys(errors).length > 0 && <Notice tone="error">Revisa los campos marcados.</Notice>}
           {note && <Notice tone={note.tone}>{note.text}</Notice>}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <Btn variant="accent" type="submit" disabled={busy}>{busy ? 'Guardando…' : current ? 'Guardar cambios' : 'Crear artículo'}</Btn>

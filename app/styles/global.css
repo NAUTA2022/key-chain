@@ -2,15 +2,22 @@
    render-blocking @import chain. */
 
 :root, [data-theme="light"] {
-  --font-h: "DM Sans", sans-serif;
-  --font-b: "Inter", sans-serif;
+  --font-h: "Raleway", sans-serif;
+  --font-b: "Raleway", sans-serif;
+  /* Brikme brand colours (brand manual, section 02) */
+  --bk-primary: #F0900F;   /* isotype orange: the brand's primary colour (client decision 2026-11-19) */
+  --bk-turquesa: #1EC6D9;  /* azul bateria cargada (brand manual; no longer used in the UI) */
+  --bk-secondary: #F0900F; /* cerveza */
+  --bk-fondo: #1913B3;     /* azul neon */
+  --bk-magenta: #F01BDB;   /* magenta hot */
+  --bk-violeta: #6905C1;   /* violeta frances */
   --accent-fg: #ffffff;
-  --bg: oklch(0.972 0.004 240);
-  --surface: #ffffff;
+  --bg: #f1f2f5;
+  --surface: #fbfbfc;
   --surface2: oklch(0.955 0.004 240);
   --border: oklch(0.90 0.005 240);
   --border-l: oklch(0.937 0.004 240);
-  --text: oklch(0.13 0.01 250);
+  --text: #0d0b33;
   --sec: oklch(0.46 0.008 250);
   --ter: oklch(0.62 0.006 245);
   --accent: oklch(0.22 0 0);
@@ -41,14 +48,14 @@
   --gl-prd-ca: rgba(0,0,0,0.82);
   --gl-prd-ci: rgba(0,0,0,0.36);
   --gl-link:   rgba(0,0,0,0.44);
-  --gl-nav:    rgba(0,0,0,0.44);
+  --gl-nav:    rgba(13,11,51,0.78); /* nav icons and labels: strong line for contrast */
   --gl-nav-a:  rgba(0,0,0,0.88);
   --gl-panel:  rgba(255,255,255,0.82);
   --gl-panel-strong: rgba(255,255,255,0.95);
 }
 
 [data-theme="dark"] {
-  --bg:        #090909;
+  --bg:        #11161e; /* dark greyish navy: calmer than the brand indigo (client request 2026-11-19) */
   --surface:   rgba(0,0,0,0.50);
   --surface2:  rgba(0,0,0,0.55);
   --border:    rgba(255,255,255,0.10);
@@ -85,12 +92,16 @@
   --gl-prd-ca: rgba(255,255,255,0.90);
   --gl-prd-ci: rgba(255,255,255,0.32);
   --gl-link:   rgba(255,255,255,0.45);
-  --gl-nav:    rgba(255,255,255,0.42);
+  --gl-nav:    rgba(255,255,255,0.80); /* nav icons and labels: strong line for contrast */
   --gl-nav-a:  rgba(255,255,255,0.92);
-  --gl-panel:  rgba(18,18,18,0.82);
-  --gl-panel-strong: rgba(18,18,18,0.95);
+  --gl-panel:  rgba(23,29,39,0.86);
+  --gl-panel-strong: rgba(23,29,39,0.96);
 }
 
+/* Brikme accent: the isotype orange in both themes (client decision 2026-11-19: no turquoise).
+   Fills use #F0900F with dark text; small text on light uses a deeper orange for contrast (5:1). */
+[data-palette="brikme"] { --accent: #F0900F; --accent-bg: #fdf0dd; --accent-text: #A85A00; --accent-fg: #0d0b33; }
+[data-theme="dark"][data-palette="brikme"] { --accent: #F0900F; --accent-bg: rgba(240,144,15,0.14); --accent-text: #F7A733; --accent-fg: #06051c; }
 [data-palette="verde"] { --accent: oklch(0.72 0.20 145); --accent-bg: oklch(0.94 0.065 145); --accent-text: oklch(0.38 0.13 145); }
 [data-theme="dark"][data-palette="verde"] { --accent: oklch(0.78 0.21 145); --accent-bg: oklch(0.30 0.07 145); --accent-text: oklch(0.82 0.17 145); }
 [data-palette="rojo"] { --accent: oklch(0.58 0.20 27); --accent-bg: oklch(0.94 0.045 27); --accent-text: oklch(0.42 0.16 27); }
@@ -106,14 +117,11 @@
 html, body, #root { height: 100%; }
 body {
   background-color: var(--bg);
-  background-image: radial-gradient(circle, rgba(255,255,255,0.09) 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
-  background-attachment: fixed;
   color: var(--text); font-family: var(--font-b); -webkit-font-smoothing: antialiased;
+  /* Raleway ships old-style figures by default; prices and tables need lining ones. */
+  font-variant-numeric: lining-nums;
 }
-[data-theme="light"] body {
-  background-image: radial-gradient(circle, rgba(0,0,0,0.10) 1.5px, transparent 1.5px);
-}
+
 
 /* ═══════════════════════════════════════════════════════
    ANIMATED BORDER & GLOW EFFECTS
@@ -157,6 +165,10 @@ body {
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
   isolation: isolate;
 }
+/* Sidebar icons: the icon alone, without the glass box. */
+.nav-icon-bare { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; transition: color .2s ease; }
+[data-guide^="nav-"]:hover > .nav-icon-bare { color: var(--gl-nav-a) !important; }
+[data-guide^="nav-"][aria-current="page"]:hover > .nav-icon-bare { color: var(--accent) !important; }
 /* Travelling neon light — border arc */
 .nav-icon-glass::before {
   content: '';
@@ -370,19 +382,17 @@ body {
   background: rgba(0,0,0,0.50);
   backdrop-filter: blur(2px) saturate(140%);
   -webkit-backdrop-filter: blur(2px) saturate(140%);
-  border: 1px solid rgba(255,255,255,0.11);
+  /* Flat card: fine, quiet border and no drop shadow (client request 2026-11-19). */
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 20px;
   position: relative;
   overflow: hidden;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.18),
-    inset 0 -1px 0 rgba(0,0,0,0.28),
-    0 24px 70px rgba(0,0,0,0.75),
-    0 6px 20px rgba(0,0,0,0.55);
+  box-shadow: none;
 }
 
-/* Top-edge specular line */
+/* Top-edge specular line (off: cards are flat) */
 .lg::before, .glass-card::before {
+  display: none;
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; height: 1px;
@@ -397,8 +407,9 @@ body {
   z-index: 2;
 }
 
-/* Inner top-left reflection */
+/* Inner top-left reflection (off: cards are flat) */
 .lg::after, .glass-card::after {
+  display: none;
   content: '';
   position: absolute;
   top: 0; left: 0; width: 55%; height: 45%;
@@ -417,18 +428,17 @@ body {
   background: rgba(0,0,0,0.50);
   backdrop-filter: blur(2px) saturate(140%);
   -webkit-backdrop-filter: blur(2px) saturate(140%);
-  border: 1px solid rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 20px;
   position: relative;
   overflow: hidden;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.18),
-    0 24px 70px rgba(0,0,0,0.75);
-  transition: border-color 0.3s, box-shadow 0.3s ease-out, transform 0.3s ease-out;
+  box-shadow: none;
+  transition: border-color 0.3s;
 }
 
-/* Specular top line */
+/* Specular top line (off: cards are flat) */
 .glow-card::before {
+  display: none;
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; height: 1px;
@@ -443,15 +453,8 @@ body {
   z-index: 2;
 }
 
-/* Hover: lift + stronger border — global cursor light does the glow */
-.glow-card:hover {
-  border-color: rgba(255,255,255,0.22);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.22),
-    0 28px 80px rgba(0,0,0,0.75),
-    0 6px 24px rgba(0,0,0,0.55);
-  transform: translateY(-2px);
-}
+/* Hover: the border just gets a little clearer — global cursor light does the glow */
+.glow-card:hover { border-color: rgba(255,255,255,0.14); }
 .glow-card > * { position: relative; z-index: 3; }
 
 /* ── Light-mode overrides for glass cards ───────────────────── */
@@ -461,11 +464,8 @@ body {
   background: rgba(255,255,255,0.62);
   backdrop-filter: blur(56px) saturate(180%) brightness(1.06);
   -webkit-backdrop-filter: blur(56px) saturate(180%) brightness(1.06);
-  border-color: rgba(0,0,0,0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 2px 8px rgba(0,0,0,0.05),
-    0 8px 32px rgba(0,0,0,0.08);
+  border-color: rgba(13,11,51,0.07);
+  box-shadow: none;
 }
 [data-theme="light"] .lg::before,
 [data-theme="light"] .glass-card::before,
@@ -479,14 +479,7 @@ body {
 [data-theme="light"] .glass-card::after {
   background: radial-gradient(ellipse at 15% 0%, rgba(255,255,255,0.45) 0%, transparent 65%);
 }
-[data-theme="light"] .glow-card:hover {
-  border-color: rgba(0,0,0,0.14);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 4px 20px rgba(0,0,0,0.09),
-    0 12px 40px rgba(0,0,0,0.09);
-  transform: translateY(-2px);
-}
+[data-theme="light"] .glow-card:hover { border-color: rgba(13,11,51,0.14); }
 [data-theme="light"] .glow-text,
 [data-theme="light"] .lg-stat { color: var(--text); text-shadow: none; }
 [data-theme="light"] .nav-icon-glass {
@@ -583,9 +576,9 @@ body {
   background: rgba(255,255,255,0.06);
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 12px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 6px 20px rgba(0,0,0,0.50);
+  box-shadow: none;
 }
 
 /* ── Primary stat text (bright white) ────────────────────── */
@@ -643,18 +636,6 @@ body {
 }
 
 /* ──────────────────────────────────────────────────────── */
-
-@keyframes navBlobExpand {
-  0%   { border-radius: 50%; width: 42px; opacity: 0.7; transform: scale(0.85); }
-  30%  { border-radius: 22px 40px 40px 22px; width: max(80px, calc(var(--pill-w, 200px) * 0.4)); transform: scale(1.04); }
-  60%  { border-radius: 20px 30px 30px 20px; width: max(110px, calc(var(--pill-w, 200px) * 0.7)); }
-  100% { border-radius: 14px; width: var(--pill-w, 200px); opacity: 1; transform: scale(1); }
-}
-@keyframes navTextIn {
-  0%   { opacity: 0; transform: translateX(-6px); }
-  60%  { opacity: 0; }
-  100% { opacity: 1; transform: translateX(0); }
-}
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -783,20 +764,18 @@ body {
   .g-dash-main > *, .g-dash-bot > * { min-width: 0; }
 }
 
-/* Project cards: KEYCHAIN (full-bleed photo) and company cards share one
+/* Project cards: Brikme (full-bleed photo) and company cards share one
    fixed size so grids line up regardless of the mix. */
 .market-card { height: 376px; }
 
 /* Mobile bottom bar: icon-only, larger glyphs */
 .mnav-ico svg, .mnav-ico img { width: 26px !important; height: 26px !important; }
 
-/* Phones: the full-bleed project card needs the whole width (two per row
-   overflowed the screen and squeezed the stats). */
+/* Phones: two cards per row (client request); the photo cards switch to their
+   compact layout through the container query further down (.sm-card). */
 @media (max-width: 560px) {
-  .g-market-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; }
-  /* One card per row: give them more height so they don't look squashed */
-  .market-card { height: 460px !important; }
-  .market-card-img  { height: 250px !important; }
+  .g-market-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+  .g-market-grid .sm-card { min-height: 250px; }
 }
 
 /* Accessible-only text: read by screen readers and crawlers, never painted. */
@@ -826,4 +805,149 @@ body {
   .kc-login-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .kc-login-benefits { display: none !important; }
   .kc-login-head { margin-bottom: 14px !important; }
+}
+
+/* ═══ Brikme: square, institutional geometry ═══════════════════════════
+   Every corner is square (cards, buttons, inputs, tags, panels). Elements
+   drawn as true circles with an inline border-radius of 50% keep it. */
+:where(#root) *:where(:not([style*="border-radius: 50%"]):not([style*="border-radius:50%"])),
+:where(#root) *::before, :where(#root) *::after {
+  border-radius: 0 !important;
+}
+
+/* No dotted textures in the Brikme platform (cursor glow and logo wave were dot grids). */
+.dot-cursor-glow, .dot-logo-wave, .cursor-light { display: none !important; }
+
+/* ── Secondary market listing card (photo-led) ───────────────────────────── */
+.sm-card { position: relative; display: flex; flex-direction: column; min-height: 400px; overflow: hidden;
+  background: #11161e; color: #fff; border: 1px solid var(--border-l); }
+.sm-card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.2,.7,.2,1); }
+.sm-card-shade { position: absolute; inset: 0; background: rgba(10, 13, 20, 0.52); transition: background .3s ease; }
+.sm-card:hover .sm-card-img { transform: scale(1.04); }
+.sm-card:hover .sm-card-shade { background: rgba(10, 13, 20, 0.6); }
+/* The whole card opens the asset; text sits above it without catching clicks. */
+.sm-card-hit { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; background: none; cursor: pointer; }
+.sm-card-hit:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sm-card-top, .sm-card-body { position: relative; z-index: 2; pointer-events: none; }
+.sm-card-seller, .sm-card-actions { pointer-events: auto; }
+
+.sm-card-top { display: flex; align-items: center; gap: 10px; padding: 18px 18px 0; }
+.sm-card-logo { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; background: #fff; color: #0d0b33;
+  font-family: var(--font-h); font-weight: 700; font-size: 13px; letter-spacing: 0.02em; }
+.sm-card-issuer { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.sm-card-issuer strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-b); font-weight: 600; font-size: 14.5px; }
+.sm-card-issuer em { font-style: normal; font-family: var(--font-b); font-size: 12.5px; color: rgba(255,255,255,0.75); }
+.sm-chip { flex-shrink: 0; padding: 4px 9px; font-family: var(--font-b); font-weight: 600; font-size: 11.5px; line-height: 1.3; white-space: nowrap; }
+.sm-chip-trade { background: #1913B3; color: #fff; }
+.sm-chip-above { background: #F0900F; color: #0d0b33; }
+.sm-chip-below { background: #15803d; color: #fff; }
+
+.sm-card-body { margin-top: auto; padding: 0 22px 20px; }
+.sm-card-body h3 { margin: 0; font-family: var(--font-h); font-weight: 800; font-size: 22px; line-height: 1.15; letter-spacing: -0.02em; }
+.sm-card-body p { margin: 6px 0 18px; font-family: var(--font-b); font-size: 14px; color: rgba(255,255,255,0.8); }
+.sm-card-seller { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; transition: text-decoration-color .2s; }
+.sm-card-seller:hover, .sm-card-seller:focus-visible { text-decoration-color: currentColor; }
+.sm-card-stats { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 12px; margin: 0; }
+.sm-card-stats div:nth-child(2) { text-align: center; }
+.sm-card-stats div:last-child { text-align: right; }
+.sm-card-stats dt { font-family: var(--font-b); font-weight: 600; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.75); }
+.sm-card-stats dd { margin: 4px 0 0; font-family: var(--font-h); font-weight: 700; font-size: 26px; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; }
+.sm-card-actions { display: flex; gap: 10px; margin-top: 16px; }
+/* With a mouse the actions slide in on hover/focus; touch screens always show them. */
+@media (hover: hover) {
+  .sm-card-actions { max-height: 0; margin-top: 0; opacity: 0; overflow: hidden; transition: max-height .3s ease, margin-top .3s ease, opacity .25s ease; }
+  .sm-card:hover .sm-card-actions, .sm-card:focus-within .sm-card-actions { max-height: 64px; margin-top: 16px; opacity: 1; }
+}
+@media (max-width: 600px) {
+  .sm-card { min-height: 360px; }
+  .sm-card-stats dd { font-size: 22px; }
+}
+
+/* ── Top bar, right side: theme · notifications · wallet ─────────────────── */
+.topbar-btn { position: relative; width: 46px; height: 46px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  padding: 0; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer;
+  transition: border-color .2s ease, background-color .2s ease; }
+.topbar-btn:hover, .topbar-btn.is-active { border-color: var(--ter); }
+.topbar-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.topbar-badge { position: absolute; top: -9px; right: -9px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; background: var(--text); color: var(--bg);
+  font-family: var(--font-b); font-weight: 700; font-size: 12px; line-height: 1; border: 2px solid var(--bg); }
+.topbar-wallet { display: flex; align-items: center; }
+
+/* Project card (primary market): extra pieces on top of .sm-card */
+.sm-card-body h3 { display: flex; align-items: center; gap: 8px; }
+.sm-card-body p.sm-card-loc { display: flex; align-items: center; gap: 6px; }
+.sm-chip-live { display: inline-flex; align-items: center; gap: 6px; background: #15803d; color: #fff; }
+.sm-chip-live i { display: block; width: 6px; height: 6px; background: #fff; }
+.sm-chip-dark { background: rgba(10, 13, 20, 0.88); color: #fff; }
+.sm-chip-onchain { background: #6905C1; color: #fff; }
+.sm-card-funded { margin-top: 16px; }
+.sm-card-funded > div { display: flex; justify-content: space-between; margin-bottom: 7px; font-family: var(--font-b); font-weight: 600; font-size: 12.5px; color: rgba(255,255,255,0.88); }
+.sm-card-bar { display: block; height: 4px; background: rgba(255,255,255,0.22); }
+.sm-card-bar i { display: block; height: 100%; background: #fff; }
+
+/* ── Category carousel (primary and secondary market) ────────────────────── */
+.cat-carousel { margin-bottom: 24px; }
+.cat-carousel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.cat-carousel-head h2 { margin: 0; font-family: var(--font-h); font-weight: 800; font-size: 18px; letter-spacing: -0.02em; color: var(--text); }
+.cat-carousel-nav { display: flex; gap: 6px; }
+.cat-carousel-nav button { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: border-color .2s ease, opacity .2s ease; }
+.cat-carousel-nav button:hover:not(:disabled) { border-color: var(--ter); }
+.cat-carousel-nav button:disabled { opacity: 0.35; cursor: default; }
+.cat-carousel-track { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; padding-bottom: 2px; }
+.cat-carousel-track::-webkit-scrollbar { display: none; }
+.cat-tile { flex: 1 0 170px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 16px 18px 18px;
+  border: 1px solid var(--border-l); background: var(--surface); color: var(--text); cursor: pointer; text-align: left;
+  font-family: var(--font-b); font-weight: 600; font-size: 14.5px; transition: border-color .2s ease, background-color .2s ease; }
+.cat-tile:hover { border-color: var(--border); }
+.cat-tile-ico { width: 40px; height: 40px; display: grid; place-items: center; background: var(--surface2); color: var(--text); transition: background-color .2s ease, color .2s ease; }
+.cat-tile.is-on { border-color: var(--accent); }
+.cat-tile.is-on .cat-tile-ico { background: var(--accent-bg); color: var(--accent-text); }
+.cat-tile:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+@media (max-width: 600px) {
+  .cat-tile { flex: 0 0 132px; padding: 14px 14px 16px; font-size: 13.5px; }
+}
+
+/* Narrow cards (4 per row): the numbers shrink with the card instead of colliding. */
+.sm-card { container-type: inline-size; }
+.sm-card-stats dt { white-space: nowrap; }
+@container (max-width: 320px) {
+  .sm-card-body { padding: 0 16px 16px; }
+  .sm-card-top { padding: 14px 14px 0; }
+  .sm-card-body h3 { font-size: 19px; }
+  .sm-card-stats { gap: 8px; }
+  .sm-card-stats dt { font-size: 10px; letter-spacing: 0.08em; }
+  .sm-card-stats dd { font-size: 20px; }
+  /* Room for the issuer name: in the secondary market every card is for sale anyway. */
+  .sm-card:not(.sm-card-asset) .sm-chip-trade { display: none; }
+  .sm-card-issuer { min-width: 64px; }
+}
+
+/* Compact photo card (two per row on phones, ~170 px wide): smaller type, two
+   numbers instead of three, short price chip, no category or seller line. */
+.sm-chip-short { display: none; }
+@container (max-width: 230px) {
+  .sm-card-top { gap: 7px; padding: 10px 10px 0; }
+  .sm-card-logo { width: 26px; height: 26px; font-size: 10.5px; }
+  .sm-card-issuer { min-width: 0; }
+  .sm-card-issuer strong { font-size: 12px; }
+  .sm-card-issuer em { display: none; }
+  .sm-chip { padding: 3px 6px; font-size: 10.5px; }
+  .sm-chip-onchain { display: none; }
+  .sm-chip-long { display: none; }
+  .sm-chip-short { display: inline; }
+  .sm-card-body { padding: 0 11px 11px; }
+  .sm-card-body h3 { font-size: 15px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .sm-card-body p { margin: 4px 0 10px; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sm-card-body p.sm-card-loc svg { flex-shrink: 0; width: 11px; height: 11px; }
+  .sm-card-stats { grid-template-columns: repeat(2, auto); gap: 6px; }
+  .sm-card-stats div:nth-child(2) { text-align: right; }
+  .sm-card-stats div:last-child { display: none; }
+  .sm-card-stats dt { font-size: 9px; letter-spacing: 0.06em; }
+  .sm-card-stats dd { margin-top: 2px; font-size: 16px; }
+  .sm-card-funded { margin-top: 10px; }
+  .sm-card-funded > div { margin-bottom: 5px; font-size: 10.5px; }
+  .sm-card-bar { height: 3px; }
+  .sm-card-actions { margin-top: 10px; }
+  .sm-card-actions > * { min-width: 0; padding-left: 8px !important; padding-right: 8px !important; font-size: 12px !important; }
 }

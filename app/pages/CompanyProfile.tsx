@@ -178,7 +178,7 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
             {profile.verified && <VerifiedBadge size={isMobile ? 18 : 20} guide="company-verified" />}
           </div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--ter)', marginBottom: 12 }}>@{profile.handle}<GuideButton tour="companies" /></div>
-          <p style={{ margin: '0 0 16px', fontFamily: 'var(--font-b)', fontSize: 14, color: profile.bio ? 'var(--sec)' : 'var(--ter)', lineHeight: 1.55, maxWidth: 680 }}>{profile.bio || (canEdit ? 'Agregá una descripción de la empresa desde "Editar perfil".' : '')}</p>
+          <p style={{ margin: '0 0 16px', fontFamily: 'var(--font-b)', fontSize: 14, color: profile.bio ? 'var(--sec)' : 'var(--ter)', lineHeight: 1.55, maxWidth: 680 }}>{profile.bio || (canEdit ? 'Agrega una descripción de la empresa desde "Editar perfil".' : '')}</p>
           <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', fontFamily: 'var(--font-b)', fontSize: 14 }}>
             <span><b style={{ color: 'var(--text)' }}>{profile.allAssets.length}</b> <span style={{ color: 'var(--ter)' }}>Proyectos</span></span>
             <button onClick={() => setShowFollowers(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>

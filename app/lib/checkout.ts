@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { PATHS, type NavFn, type NavPayload, type RouteKey } from '~/lib/navigation';
 
-// Every "buy / invest / pay" CTA in the platform opens KEYCHAIN's own
+// Every "buy / invest / pay" CTA in the platform opens Brikme's own
 // checkout through this helper.
 //
 // The order travels in memory and in sessionStorage under a short id that

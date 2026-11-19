@@ -43,7 +43,7 @@ export function requestCategory(data: { category: RequestCategory; otherType?: s
 
 export const STAGE: Record<AssetStage, string> = { recaudacion: 'Recaudación', operativo: 'Operativo' };
 
-export const ISSUER_KIND: Record<IssuerKind, string> = { keychain: 'KEYCHAIN', verified: 'Verificado', community: 'Comunidad' };
+export const ISSUER_KIND: Record<IssuerKind, string> = { keychain: 'BRIKME', verified: 'Verificado', community: 'Comunidad' };
 
 export const DOC_KIND: Record<DocumentKind, string> = {
   legal: 'Legal', financial: 'Financiero', technical: 'Técnico', insurance: 'Seguro', other: 'Otro',
@@ -125,7 +125,7 @@ export const AUDIT_ENTITIES: Array<[value: string, label: string]> = [
   ['support_ticket', 'Ticket de soporte'],
   ['academy_post', 'Artículo de academia'],
   ['faq', 'FAQ'],
-  ['platform_token', 'Token KYCN'],
+  ['platform_token', 'Token BRIK'],
   ['notification', 'Notificación'],
   ['settings', 'Configuración'],
 ];
@@ -170,7 +170,7 @@ const AUDIT_ACTION: Record<string, string> = {
   'faq.update': 'FAQ editada',
   'faq.delete': 'FAQ eliminada',
   'faq.reorder': 'FAQ reordenadas',
-  'token.update': 'Token KYCN editado',
+  'token.update': 'Token BRIK editado',
   'notification.broadcast': 'Notificación masiva',
   'settings.update': 'Configuración editada',
 };

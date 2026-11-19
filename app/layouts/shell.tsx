@@ -15,8 +15,6 @@ import { routeKeyFromPath, useNav } from '~/lib/navigation';
 import { usePreferences } from '~/lib/preferences';
 import { useSession } from '~/lib/session';
 
-const BLOB1: CSSProperties = { position: 'fixed', top: '-15%', right: '10%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(70,70,70,0.10) 0%, transparent 70%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0, animation: 'float-slow 12s ease-in-out infinite' };
-const BLOB2: CSSProperties = { position: 'fixed', bottom: '5%', left: '5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(50,50,50,0.08) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0, animation: 'float-slow 16s ease-in-out infinite reverse' };
 const SHELL_WRAP: CSSProperties = { display: 'flex', height: '100vh', overflow: 'clip', position: 'relative' };
 const MAIN_STYLE: CSSProperties = { flex: 1, overflowY: 'auto', marginTop: 64 };
 
@@ -123,8 +121,6 @@ export default function AppShell() {
     <GuideProvider>
     <div style={SHELL_WRAP}>
       <div className="dot-cursor-glow" />
-      <div style={BLOB1} />
-      <div style={BLOB2} />
       <div className="cursor-light" />
       <div className="kc-shell-sidebar">
         <Sidebar

@@ -7,19 +7,19 @@ import type { NavFn } from '~/lib/navigation';
 const TOKENS = [
   { sym: 'USDC', name: 'USD Coin',        bal: 12450.80, color: '#2775CA' },
   { sym: 'MATIC', name: 'Polygon',         bal: 4856.70,  color: '#8247E5' },
-  { sym: 'KYCN',  name: 'KEY CHAIN Token', bal: 3825.00,  color: 'var(--accent)' },
+  { sym: 'BRIK',  name: 'Brikme Token', bal: 3825.00,  color: 'var(--accent)' },
   { sym: 'ETH',   name: 'Ethereum',        bal: 2940.00,  color: '#627EEA' },
 ];
 
 type Opportunity = { from: string; to: string; reason: string; badge: string; badgeColor: PTagColor };
 
 const OPPORTUNITIES: Opportunity[] = [
-  { from: 'USDC', to: 'KYCN', reason: 'KYCN cotiza 12% bajo promedio 30d', badge: 'Oportunidad', badgeColor: 'green' },
+  { from: 'USDC', to: 'BRIK', reason: 'BRIK cotiza 12% bajo promedio 30d', badge: 'Oportunidad', badgeColor: 'green' },
   { from: 'MATIC', to: 'USDC', reason: 'MATIC en máximo semanal, buena toma de ganancias', badge: 'Toma ganancias', badgeColor: 'red' },
 ];
 
 const HISTORY = [
-  { from: 'USDC', to: 'KYCN',  amt: 500,  received: 5882, date: '11 Jun 2026', pnl: '+$68' },
+  { from: 'USDC', to: 'BRIK',  amt: 500,  received: 5882, date: '11 Jun 2026', pnl: '+$68' },
   { from: 'MATIC', to: 'USDC', amt: 1200, received: 1248, date: '03 Jun 2026', pnl: '+$41' },
   { from: 'USDC', to: 'ETH',   amt: 800,  received: 0.226, date: '28 May 2026', pnl: '+$22' },
 ];
@@ -28,19 +28,19 @@ type SwapProps = { nav: NavFn };
 
 export default function Swap({ nav: _nav }: SwapProps) {
   const [from, setFrom] = useState('USDC');
-  const [to, setTo] = useState('KYCN');
+  const [to, setTo] = useState('BRIK');
   const [amt, setAmt] = useState('100');
   const [slippage, _setSlippage] = useState('0.5');
 
   const fromToken = TOKENS.find(t => t.sym === from);
-  const rate = from === 'USDC' && to === 'KYCN' ? 11.76 : from === 'USDC' && to === 'ETH' ? 0.000280 : from === 'MATIC' && to === 'USDC' ? 0.59 : 1;
+  const rate = from === 'USDC' && to === 'BRIK' ? 11.76 : from === 'USDC' && to === 'ETH' ? 0.000280 : from === 'MATIC' && to === 'USDC' ? 0.59 : 1;
   const received = (parseFloat(amt) || 0) * rate;
 
   const swapPair = () => { const tmp = from; setFrom(to); setTo(tmp); };
 
   return (
     <div style={{ padding: '28px 32px 40px', maxWidth: 1100, margin: '0 auto' }}>
-      <PSection title="Swap" sub="Intercambiá tokens con liquidez de QuickSwap y Uniswap en Polygon." />
+      <PSection title="Swap" sub="Intercambia tokens con liquidez de QuickSwap y Uniswap en Polygon." />
 
       <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: 24 }}>
         {/* Swap panel */}
@@ -77,7 +77,7 @@ export default function Swap({ nav: _nav }: SwapProps) {
                   {TOKENS.map(t => <option key={t.sym} value={t.sym}>{t.sym}</option>)}
                 </select>
               </div>
-              <button onClick={() => setAmt(String(fromToken?.bal || 0))} style={{ marginTop: 6, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>MAX</button>
+              <button onClick={() => setAmt(String(fromToken?.bal || 0))} style={{ marginTop: 6, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', fontWeight: 600 }}>MAX</button>
             </div>
 
             {/* Swap arrow */}

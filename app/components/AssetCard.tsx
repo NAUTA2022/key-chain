@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { PCard, PTag, PStat, PProgress, PImg, Icons, CompanyTag } from '~/components/ui';
+import { Icons } from '~/components/ui';
 import { ProjectCode } from '~/components/social/FeedPostCard';
 import { fmtUSD } from '~/data';
 import type { NavFn } from '~/lib/navigation';
@@ -13,6 +13,10 @@ import type { SocialAsset } from '~/lib/social/types';
 // that person's position in the project, plus optional `actions` buttons.
 // `asset` is a demo RwaAsset or a live CatalogAsset (its pool adds the
 // "On-chain" tag).
+//
+// Photo-led, same family as the secondary market card (`.sm-card` styles in
+// global.css): issuer and status on top; name, place, key numbers and the
+// funding bar over the photo. The whole card opens the project.
 
 /** A person's position in the project, shown under the card. */
 export type AssetCardHolding = { tokens: number; current: number; invested: number; yieldEarned?: number };
@@ -27,146 +31,64 @@ export type AssetCardProps = {
   priority?: boolean;
 };
 
-const OnchainTag = () => <PTag label="On-chain" color="purple" style={{ background:'rgba(130,71,229,0.92)', color:'#fff' }} />;
+const initials = (name: string): string => {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  return (words.length > 1 ? words[0][0] + words[1][0] : name.slice(0, 2)).toUpperCase();
+};
 
-// ─── Asset card ───────────────────────────────────────────────────────────────
-// PStat hardcodes its own label/value colors (var(--ter)/var(--text)), which
-// flip dark in light theme — unreadable over a photo scrim that's always
-// dark regardless of the app's theme. This is the same stat shape with
-// colors fixed to white so it stays legible either way.
-type OverlayStatProps = { label: string; value: string; align?: CSSProperties['alignItems']; guide?: string };
-
-function OverlayStat({ label, value, align = 'flex-start', guide }: OverlayStatProps) {
-  return (
-    <div data-guide={guide} style={{ display:'flex', flexDirection:'column', gap:3, alignItems:align }}>
-      <div style={{ fontSize:11, fontFamily:'var(--font-b)', color:'rgba(255,255,255,0.65)', letterSpacing:'0.05em', textTransform:'uppercase' }}>{label}</div>
-      <div style={{ fontSize:18, fontFamily:'var(--font-h)', fontWeight:700, color:'#fff', letterSpacing:'-0.02em' }}>{value}</div>
-    </div>
-  );
-}
-
-type CardBodyProps = Omit<AssetCardProps, 'asset'> & { a: SocialAsset; left: number };
-
-// KEYCHAIN's own tokenizations get a distinct full-bleed photo treatment
-// (name/stats readable directly over the image, dark scrim at the bottom)
-// instead of just a glowing border — makes "this one is ours" obvious at a
-// glance rather than something you notice only up close.
-function KeychainAssetCard({ a, left, nav, showCode, holding, actions, priority }: CardBodyProps) {
-  const onchain = a.pool?.status === 'active';
-  return (
-    // With a holding strip below, the wrapper is taller than the card: only
-    // lift it on hover — a shadow here would draw a box around card + strip.
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={holding ? { y:-4 } : { y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
-      <PCard guide="asset-card" className="market-card market-card-full" onClick={() => nav('detalle', a)} style={{ position:'relative' }}>
-        <PImg src={a.img} alt={a.name} height="100%" style={{ position:'absolute', inset:0 }} priority={priority}>
-          <div style={{ position:'absolute', top:0, left:0, right:0, height:84, background:'linear-gradient(to bottom, rgba(6,8,14,0.62) 0%, rgba(6,8,14,0) 100%)', pointerEvents:'none' }} />
-          <div style={{ position:'absolute', top:14, left:14 }}>
-            {/* This card only renders for issuer === 'keychain' — it's a
-                KEYCHAIN tokenization, not AutoMax/AgroToken/etc.'s own
-                listing, even though one of those companies operates it
-                day-to-day. */}
-            <CompanyTag company="KEYCHAIN" cat={a.cat} variant="overlay" />
-          </div>
-          <div style={{ position:'absolute', top:14, right:14, ...(onchain && { display:'flex', gap:6 }) }}>
-            {onchain && <OnchainTag />}
-            <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
-          </div>
-
-          <div style={{
-            position:'absolute', left:0, right:0, bottom:0, height:'66%',
-            background:'linear-gradient(to top, rgba(6,8,14,0.92) 0%, rgba(6,8,14,0.65) 48%, transparent 100%)',
-            display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:'18px 18px 16px',
-          }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              {showCode && <ProjectCode asset={a} overlay />}
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18, color:'#fff', letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', minWidth:0 }}>{a.name}</div>
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'rgba(255,255,255,0.7)' }}>
-              {Icons.location}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12 }}>{a.location}</span>
-            </div>
-
-            <div style={{ display:'flex', justifyContent:'space-between', marginTop:14 }}>
-              <OverlayStat label="Token" value={fmtUSD(a.tokenPrice)} />
-              <OverlayStat guide="asset-apy" label="APY est." value={`${a.apy}%`} />
-              <OverlayStat label="Disponibles" value={left.toLocaleString()} align="flex-end" />
-            </div>
-
-            <div data-guide="asset-funded" style={{ marginTop:10 }}>
-              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'rgba(255,255,255,0.65)' }}>Financiado</span>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, fontWeight:700, color:'#fff' }}>{a.sold}%</span>
-              </div>
-              <PProgress value={a.sold} style={{ background:'rgba(255,255,255,0.22)' }} color="#fff" />
-            </div>
-          </div>
-        </PImg>
-      </PCard>
-      {holding && <HoldingStrip holding={holding} actions={actions} />}
-    </motion.div>
-  );
+/** Status chip: open for investment (live), operating, or anything else as given. */
+function StatusChip({ stage }: { stage: string }) {
+  if (stage === 'Recaudación') {
+    return <span className="sm-chip sm-chip-live"><i style={{ borderRadius: '50%' }} aria-hidden="true" />En vivo</span>;
+  }
+  return <span className={`sm-chip ${stage === 'Operativo' ? 'sm-chip-dark' : 'sm-chip-trade'}`}>{stage}</span>;
 }
 
 export default function AssetCard({ asset: a, nav, showCode, holding, actions, priority }: AssetCardProps) {
   const left = a.totalTokens - Math.round(a.totalTokens * a.sold / 100);
-  if (a.issuer === 'keychain') return <KeychainAssetCard a={a} left={left} nav={nav} showCode={showCode} holding={holding} actions={actions} priority={priority} />;
-
+  // Brikme's own tokenizations carry the Brikme name even when a partner operates the asset.
+  const issuer = a.issuer === 'keychain' ? 'BRIKME' : (a.company || 'BRIKME');
+  const onchain = a.pool?.status === 'active';
+  const open = () => nav('detalle', a);
   return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={holding ? { y:-4 } : { y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
-      <PCard guide="asset-card" className="market-card" onClick={() => nav('detalle', a)} style={{ display:'flex', flexDirection:'column', position:'relative' }}>
-        <PImg src={a.img} alt={a.name} height={168} className="market-card-img" priority={priority}>
-          <div style={{ position:'absolute', top:12, left:12, display:'flex', gap:6, flexWrap:'wrap' }}>
-            <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
-            {a.pool?.status === 'active' && <OnchainTag />}
-          </div>
-        </PImg>
-
-        <div style={{ padding:'15px 17px 17px', display:'flex', flexDirection:'column', gap:12, flex:1 }}>
-          <div>
-            <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:8, minWidth:0 }}>
-                {showCode && <ProjectCode asset={a} />}
-                <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)', letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', minWidth:0 }}>{a.name}</div>
-              </div>
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'var(--ter)' }}>
-              {Icons.location}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)' }}>{a.location}</span>
-            </div>
-            {a.company && (
-              <CompanyTag company={a.company} cat={a.cat} size="sm" style={{ marginTop:8 }} />
-            )}
-          </div>
-
-          <div style={{ display:'flex', justifyContent:'space-between' }}>
-            <PStat label="Token" value={fmtUSD(a.tokenPrice)} />
-            <PStat guide="asset-apy" label="APY est." value={`${a.apy}%`} accent />
-            <PStat label="Disponibles" value={left.toLocaleString()} style={{ alignItems:'flex-end' }} />
-          </div>
-
-          <div data-guide="asset-funded">
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)' }}>Financiado</span>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, fontWeight:700, color:'var(--accent-text)' }}>{a.sold}%</span>
-            </div>
-            <PProgress value={a.sold} />
+    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.3 }}>
+      <article className="sm-card sm-card-asset" data-guide="asset-card">
+        <img className="sm-card-img" src={a.img} alt="" loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : undefined} decoding="async" draggable={false} />
+        <span className="sm-card-shade" aria-hidden="true" />
+        <button type="button" className="sm-card-hit" onClick={open} aria-label={`Ver ${a.name}`} />
+        <header className="sm-card-top">
+          <span className="sm-card-logo" aria-hidden="true">{initials(issuer)}</span>
+          <span className="sm-card-issuer"><strong>{issuer}</strong><em>{a.cat}</em></span>
+          {onchain && <span className="sm-chip sm-chip-onchain">On-chain</span>}
+          <StatusChip stage={a.stage} />
+        </header>
+        <div className="sm-card-body">
+          <h3>{showCode && <ProjectCode asset={a} overlay />}{a.name}</h3>
+          <p className="sm-card-loc">{Icons.location}<span>{a.location}</span></p>
+          <dl className="sm-card-stats">
+            <div><dt>Token</dt><dd>{fmtUSD(a.tokenPrice)}</dd></div>
+            <div data-guide="asset-apy"><dt>APY est.</dt><dd>{a.apy}%</dd></div>
+            <div><dt>Disponibles</dt><dd>{left > 0 ? left.toLocaleString('en-US') : 'Agotado'}</dd></div>
+          </dl>
+          <div className="sm-card-funded" data-guide="asset-funded">
+            <div><span>Financiado</span><span>{a.sold}%</span></div>
+            <span className="sm-card-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, Math.max(0, a.sold))}%` }} /></span>
           </div>
         </div>
-      </PCard>
+      </article>
       {holding && <HoldingStrip holding={holding} actions={actions} />}
     </motion.div>
   );
 }
 
-// The person's position, as a strip under the card (same for both card types
-// so the cards themselves keep identical sizes).
+// The person's position, as a strip under the card.
 function HoldingStrip({ holding: h, actions }: { holding: AssetCardHolding; actions?: ReactNode }) {
   const diff = h.invested ? ((h.current - h.invested) / h.invested) * 100 : 0;
   return (
     <div style={{
       display:'flex', justifyContent:'space-between', alignItems:'center', gap:10, padding:'11px 17px',
       fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)',
-      marginTop:8, borderRadius:14, border:'1px solid var(--border-l)', background:'var(--surface)',
+      marginTop:8, border:'1px solid var(--border-l)', background:'var(--surface)',
     }}>
       <span><b style={{ color:'var(--text)' }}>{h.tokens}</b> tokens</span>
       <span>Valor <b style={{ color:'var(--text)' }}>{fmtUSD(h.current)}</b></span>

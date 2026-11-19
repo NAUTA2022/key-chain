@@ -197,7 +197,7 @@ export const COMPANY_META: MetaMap<CompanyMeta> = {
       { year: '2022', label: 'Fundación · Seed $500k' },
       { year: '2023 Q1', label: 'Primera tokenización de flota (10 vehículos)' },
       { year: '2023 Q4', label: '$1M TVL · 200 inversores' },
-      { year: '2024', label: '$2M TVL · Integración KEYCHAIN' },
+      { year: '2024', label: '$2M TVL · Integración Brikme' },
     ],
     bannerBg: `linear-gradient(135deg,#1a0f00,#2a1500)`,
     bannerEmoji: '🚗',

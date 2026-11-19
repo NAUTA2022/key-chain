@@ -40,7 +40,7 @@ export const EXAMPLES: Record<ExampleKey, AssetExamples> = {
     totalTokens: '2.400',
     expectedApy: '9',
     yieldSource: 'por el alquiler o la explotación del vehículo',
-    symbol: 'KYCN-AUTO1',
+    symbol: 'BRIK-AUTO1',
   },
   campos: {
     noun: 'el campo',
@@ -55,7 +55,7 @@ export const EXAMPLES: Record<ExampleKey, AssetExamples> = {
     totalTokens: '32.000',
     expectedApy: '7,5',
     yieldSource: 'por el arrendamiento o la venta de la cosecha',
-    symbol: 'KYCN-CAMPO1',
+    symbol: 'BRIK-CAMPO1',
   },
   drones: {
     noun: 'el equipo',
@@ -70,7 +70,7 @@ export const EXAMPLES: Record<ExampleKey, AssetExamples> = {
     totalTokens: '3.400',
     expectedApy: '14',
     yieldSource: 'por los servicios que presta el equipo',
-    symbol: 'KYCN-DRONE1',
+    symbol: 'BRIK-DRONE1',
   },
   inmuebles: {
     noun: 'el inmueble',
@@ -85,7 +85,7 @@ export const EXAMPLES: Record<ExampleKey, AssetExamples> = {
     totalTokens: '3.600',
     expectedApy: '6',
     yieldSource: 'por el alquiler del inmueble',
-    symbol: 'KYCN-INMU1',
+    symbol: 'BRIK-INMU1',
   },
   edificios: {
     noun: 'el edificio',
@@ -100,7 +100,7 @@ export const EXAMPLES: Record<ExampleKey, AssetExamples> = {
     totalTokens: '15.000',
     expectedApy: '8,5',
     yieldSource: 'por los alquileres de las unidades',
-    symbol: 'KYCN-EDIF1',
+    symbol: 'BRIK-EDIF1',
   },
   bodega: {
     noun: 'la bodega',
@@ -115,7 +115,7 @@ export const EXAMPLES: Record<ExampleKey, AssetExamples> = {
     totalTokens: '20.000',
     expectedApy: '9',
     yieldSource: 'por la venta de la producción',
-    symbol: 'KYCN-BODEGA1',
+    symbol: 'BRIK-BODEGA1',
   },
   otro: {
     noun: 'el activo',
@@ -130,7 +130,7 @@ export const EXAMPLES: Record<ExampleKey, AssetExamples> = {
     totalTokens: '5.000',
     expectedApy: '8',
     yieldSource: 'por lo que genere el activo',
-    symbol: 'KYCN-ACTIVO1',
+    symbol: 'BRIK-ACTIVO1',
   },
   generic: {
     noun: 'el activo',
@@ -145,7 +145,7 @@ export const EXAMPLES: Record<ExampleKey, AssetExamples> = {
     totalTokens: '5.000',
     expectedApy: '8',
     yieldSource: 'por alquileres, producción o servicios',
-    symbol: 'KYCN-ACTIVO1',
+    symbol: 'BRIK-ACTIVO1',
   },
 };
 

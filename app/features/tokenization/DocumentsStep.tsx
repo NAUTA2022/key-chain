@@ -61,11 +61,11 @@ export default function DocumentsStep({ request, onFinish, isMobile }: { request
     <>
       <PCard style={{ padding: isMobile ? '18px 16px' : '24px', marginBottom: 16 }}>
         <Notice tone="success" style={{ marginBottom: 18 }}>
-          Enviamos tu solicitud. Ahora subí la documentación del activo para que el equipo pueda revisarla.
+          Enviamos tu solicitud. Ahora sube la documentación del activo para que el equipo pueda revisarla.
         </Notice>
         <h2 data-step-title tabIndex={-1} style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 6, outline: 'none' }}>Documentación del activo</h2>
         <p style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.5, marginBottom: 8 }}>
-          Cada archivo se sube al instante. PDF, PNG, JPG o WebP de hasta 10 MB, con un máximo de {MAX_DOCUMENTS} por solicitud. Usá nombres claros (por ejemplo, escritura.pdf): el equipo ve el nombre original del archivo.
+          Cada archivo se sube al instante. PDF, PNG, JPG o WebP de hasta 10 MB, con un máximo de {MAX_DOCUMENTS} por solicitud. Usa nombres claros (por ejemplo, escritura.pdf): el equipo ve el nombre original del archivo.
         </p>
 
         <ul style={{ listStyle: 'none' }}>
@@ -137,7 +137,7 @@ export default function DocumentsStep({ request, onFinish, isMobile }: { request
 
       {uploaded === 0 && !busy && (
         <Notice tone="info" style={{ marginBottom: 16 }}>
-          Si ahora no tenés los documentos a mano, podés finalizar y subirlos después desde Mis solicitudes.
+          Si ahora no tienes los documentos a mano, puedes finalizar y subirlos después desde Mis solicitudes.
         </Notice>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

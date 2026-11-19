@@ -20,7 +20,7 @@ export const meta: Route.MetaFunction = ({ params }) => {
     if (apiEnabled) {
       return seo({
         title: 'Proyecto tokenizado',
-        description: 'Activo real tokenizado en KEY CHAIN: valuación, precio por token, rendimiento estimado y documentos del proyecto.',
+        description: 'Activo real tokenizado en Brikme: valuación, precio por token, rendimiento estimado y documentos del proyecto.',
         path: `/tokenizaciones/${encodeURIComponent(params.assetId)}`,
         noindex: true,
       });

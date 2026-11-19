@@ -360,7 +360,7 @@ export default function FlowDiagram({ mobile, status, p, wallets, image, simulat
           <Card at={l.company} w={236} h={110} caption="Dueña del proyecto" title="Empresa" sub={p.deposit ? '+5 USD cargados' : 'Carga la ganancia'} active={step === 3} />
         </g>
         <g style={dim('account')}>
-          <Card at={l.account} w={236} h={110} caption="Tu wallet" title="Tu cuenta" sub={p.swept ? `+${p.swept} USD recibidos` : 'Acá se junta todo'} active={step === 5 || done} />
+          <Card at={l.account} w={236} h={110} caption="Tu wallet" title="Tu cuenta" sub={p.swept ? `+${p.swept} USD recibidos` : 'Aquí se junta todo'} active={step === 5 || done} />
         </g>
 
         <g transform={`translate(${l.project.x},${l.project.y})`} style={dim('project')}>

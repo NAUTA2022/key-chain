@@ -29,11 +29,11 @@ export function uploadErrorText(error: unknown): string {
       ? `Llegaste al máximo de ${MAX_DOCUMENTS} documentos para esta solicitud.`
       : 'La solicitud ya fue resuelta y no admite más documentos.';
   }
-  return errorText(error, 'No pudimos subir el archivo. Probá de nuevo.', {
-    bad_request: 'El archivo no es válido. Usá PDF, PNG, JPG o WebP.',
+  return errorText(error, 'No pudimos subir el archivo. Prueba de nuevo.', {
+    bad_request: 'El archivo no es válido. Usa PDF, PNG, JPG o WebP.',
     payload_too_large: 'El archivo supera el máximo de 10 MB.',
     not_found: 'No encontramos la solicitud.',
-    rate_limited: 'Subiste muchos archivos seguidos. Esperá un rato y volvé a probar.',
+    rate_limited: 'Subiste muchos archivos seguidos. Espera un rato y vuelve a probar.',
   });
 }
 
@@ -44,9 +44,9 @@ export function isClosedConflict(error: unknown): boolean {
 
 /** Spanish message for a failed POST /v1/tokenization-requests. */
 export function submitErrorText(error: unknown): string {
-  return errorText(error, 'No pudimos enviar la solicitud. Probá de nuevo en unos minutos.', {
-    validation_failed: 'Hay datos que el servidor no aceptó. Revisá los campos marcados.',
-    rate_limited: 'Llegaste al límite de solicitudes por hoy. Probá de nuevo mañana.',
+  return errorText(error, 'No pudimos enviar la solicitud. Prueba de nuevo en unos minutos.', {
+    validation_failed: 'Hay datos que el servidor no aceptó. Revisa los campos marcados.',
+    rate_limited: 'Llegaste al límite de solicitudes por hoy. Prueba de nuevo mañana.',
   });
 }
 

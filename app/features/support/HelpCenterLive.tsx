@@ -59,15 +59,15 @@ export default function HelpCenterLive() {
     tickets.reload();
     setFlash(
       attachmentError
-        ? { id, tone: 'warn', text: `Creamos tu ticket, pero no pudimos adjuntar el archivo: ${attachmentError} Podés volver a intentarlo desde acá.` }
-        : { id, tone: 'success', text: 'Creamos tu ticket. Te vamos a responder por acá y vas a ver la respuesta en Mis tickets.' },
+        ? { id, tone: 'warn', text: `Creamos tu ticket, pero no pudimos adjuntar el archivo: ${attachmentError} Puedes volver a intentarlo desde aquí.` }
+        : { id, tone: 'success', text: 'Creamos tu ticket. Te vamos a responder por aquí y vas a ver la respuesta en Mis tickets.' },
     );
     openTicket(id);
   };
 
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 900, margin: '0 auto' }}>
-      <PSection title="Centro de Ayuda" sub="Encontrá respuestas a las preguntas más frecuentes." />
+      <PSection title="Centro de Ayuda" sub="Encuentra respuestas a las preguntas más frecuentes." />
 
       <FaqLive onAsk={() => startTicket()} />
 
@@ -77,7 +77,7 @@ export default function HelpCenterLive() {
       {/* Contact */}
       <PCard style={{ padding: isMobile ? '22px 18px' : '24px 28px', marginTop: 32, textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, color: 'var(--text)', marginBottom: 8 }}>¿No encontraste lo que buscabas?</div>
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', marginBottom: 18 }}>Escribinos y te respondemos por acá; vas a ver la respuesta en Mis tickets.</div>
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', marginBottom: 18 }}>Escríbenos y te respondemos por aquí; vas a ver la respuesta en Mis tickets.</div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button type="button" onClick={() => startTicket()} style={{ ...contactBtn, border: '1.5px solid var(--border)', background: 'transparent', color: 'var(--text)' }}>Abrir un ticket</button>
           <button type="button" onClick={() => setChatOpen(true)} style={{ ...contactBtn, border: 'none', background: 'var(--accent)', color: 'var(--accent-fg)' }}>Chat en vivo</button>

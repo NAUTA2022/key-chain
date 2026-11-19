@@ -103,7 +103,7 @@ function CompanyReview({ company: c, onDone }: { company: AdminCompany; onDone: 
 
   async function reject() {
     const text = reason.trim();
-    if (text.length < 3 || text.length > 300) return setReasonError('Escribí un motivo de 3 a 300 caracteres.');
+    if (text.length < 3 || text.length > 300) return setReasonError('Escribe un motivo de 3 a 300 caracteres.');
     setReasonError(null);
     const ok = await confirm({ title: `¿Rechazar ${c.name}?`, message: `Motivo: ${text}`, confirmLabel: 'Rechazar', danger: true });
     if (!ok) return;

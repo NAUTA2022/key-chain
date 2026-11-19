@@ -2,15 +2,15 @@ import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSearchParams } from 'react-router';
 import { useActiveAccount, useActiveWallet } from 'thirdweb/react';
-import { Icons, PBtn, PCard, PSection, PTag } from '~/components/ui';
-import { fmtUSD2 } from '~/data';
-import { timeAgo } from '~/features/notifications/time';
+import { PBtn, PCard, PSection, PTag } from '~/components/ui';
+import { RWA_CATS, fmtUSD2 } from '~/data';
+import CategoryCarousel from '~/components/CategoryCarousel';
 import { useMobile } from '~/hooks/useMobile';
 import { type CatalogAsset, useCatalog } from '~/lib/catalog';
 import { goCheckout } from '~/lib/checkout';
 import type { NavFn } from '~/lib/navigation';
 import { useSession } from '~/lib/session';
-import { FilterBar, ListingCard, MagnetToolbar, MobileListingCard, MobileMarketHeader, MobileSummary, type SortKey } from '~/pages/SecondaryMarket';
+import { FilterBar, ListingCard, MagnetToolbar, MobileMarketHeader, MobileSummary, type SortKey } from '~/pages/SecondaryMarket';
 import { type MarketListing, cancelOnchain, shortWallet, useMarketInfo, useMarketListings, useMarketStats, useMyListings } from './api';
 import { SellModal } from './TradeModals';
 import GuideButton from '~/features/guide/GuideButton';
@@ -145,7 +145,7 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
       {mobile ? <MobileMarketHeader onPublish={openSell} disabled={Boolean(unavailable)} help={<GuideButton tour="secondary" />} /> : (
       <PSection
         title={<span data-guide="secondary-title">Mercado Secundario</span>}
-        sub="Compra y venta P2P entre inversores. Compará precio pedido vs. precio real del token."
+        sub="Compra y venta P2P entre inversores. Compara precio pedido vs. precio real del token."
         help={<GuideButton tour="secondary" />}
         action={<PBtn guide="secondary-sell" variant="primary" onClick={openSell} disabled={Boolean(unavailable)}>+ Publicar venta</PBtn>}
       />
@@ -171,6 +171,8 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
         </PCard>
       )}
 
+      <CategoryCarousel categories={RWA_CATS} value={cat} onChange={setCat} />
+
       {mobile ? <MagnetToolbar>{filterBar}</MagnetToolbar> : filterBar(false)}
 
       <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:16 }}>
@@ -178,79 +180,42 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
       </div>
 
       {/* Listings */}
-      {mobile ? (
-        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-          {sorted.map((l, idx) => {
-            const isDiscount = l.diff < 0;
-            const own = sameWallet(l.sellerWallet, me);
-            const listed = listings.data ? timeAgo(l.listedAt, listings.data.at) : '';
-            return (
-              <MobileListingCard key={l.id} idx={idx}
-                asset={l.catalog} qty={fmtTokens(l.available)} saving={(l.referencePrice - l.pricePerToken) * l.available}
-                askPrice={l.pricePerToken} realPrice={l.referencePrice} diff={l.diff} tokenLife={l.asset.lifespan}
-                seller={own ? 'Tu oferta' : shortWallet(l.sellerWallet)}
-                sellerNote={<>Wallet verificada (KYC){listed && ` · ${listed}`}</>}
-                onView={() => nav('detalle', l.catalog)}
-                action={own ? (
-                  <PBtn guide="listing-withdraw" variant="secondary" small disabled={cancelling === l.id} onClick={() => void cancel(l)} style={{ flexShrink:0, padding:'9px 18px' }}>
-                    {cancelling === l.id ? 'Retirando…' : 'Retirar'}
-                  </PBtn>
-                ) : (
-                  <PBtn guide="listing-buy" variant={isDiscount ? 'accent' : 'secondary'} small disabled={Boolean(unavailable) || buyable(l) < 1} onClick={() => buy(l)} style={{ flexShrink:0, padding:'9px 18px' }}>
-                    Comprar
-                  </PBtn>
-                )} />
-            );
-          })}
-        </div>
-      ) : (
-      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:20 }}>
+      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns: mobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(auto-fill,minmax(260px,1fr))', gap: mobile ? 10 : 20 }}>
         {sorted.map((l, idx) => {
           const isDiscount = l.diff < 0;
           const own = sameWallet(l.sellerWallet, me);
           return (
             <motion.div key={l.id} data-guide="listing-card" initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:Math.min(idx, 10)*0.06 }}>
               <ListingCard
-                seller={own ? 'Tu oferta' : shortWallet(l.sellerWallet)}
-                sellerNote={<>
-                  {Icons.shield}
-                  <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'var(--sec)' }}>Wallet verificada (KYC)</span>
-                </>}
-                listed={listings.data ? timeAgo(l.listedAt, listings.data.at) : ''}
+                seller={own ? 'ti (tu oferta)' : shortWallet(l.sellerWallet)}
                 asset={l.catalog}
                 qty={fmtTokens(l.available)}
                 askPrice={l.pricePerToken}
-                realPrice={l.referencePrice}
                 diff={l.diff}
-                tokenLife={l.asset.lifespan}
                 onView={() => nav('detalle', l.catalog)}
-                actions={<>
-                  {own ? (
-                    <PBtn guide="listing-withdraw" variant="secondary" style={{ flex:1 }} small disabled={cancelling === l.id} onClick={() => void cancel(l)}>
-                      {cancelling === l.id ? 'Retirando…' : 'Retirar oferta'}
-                    </PBtn>
-                  ) : (
-                    <PBtn guide="listing-buy" variant={isDiscount ? 'accent' : 'secondary'} style={{ flex:1 }} small disabled={Boolean(unavailable) || buyable(l) < 1}
-                      onClick={() => buy(l)}>
-                      Comprar
-                    </PBtn>
-                  )}
-                  <PBtn variant="ghost" small onClick={() => nav('detalle', l.catalog)}>Ver</PBtn>
-                </>}
+                actions={own ? (
+                  <PBtn guide="listing-withdraw" variant="secondary" style={{ flex:1 }} small disabled={cancelling === l.id} onClick={() => void cancel(l)}>
+                    {cancelling === l.id ? 'Retirando…' : 'Retirar oferta'}
+                  </PBtn>
+                ) : (
+                  <PBtn guide="listing-buy" variant={isDiscount ? 'accent' : 'secondary'} style={{ flex:1 }} small disabled={Boolean(unavailable) || buyable(l) < 1}
+                    onClick={() => buy(l)}>
+                    Comprar
+                  </PBtn>
+                )}
               />
             </motion.div>
           );
         })}
       </div>
-      )}
 
       {!loading && sorted.length === 0 && (
         <div style={{ textAlign:'center', padding:'60px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:14 }}>
           {listings.failed
-            ? 'No pudimos cargar las ofertas. Intentá de nuevo en unos segundos.'
+            ? 'No pudimos cargar las ofertas. Intenta de nuevo en unos segundos.'
             : (listings.data?.items.length ?? 0) > 0
               ? 'No hay listados activos con esos filtros.'
-              : 'Todavía no hay ofertas publicadas. Publicá la primera con «+ Publicar venta» o desde Mis Pertenencias.'}
+              : 'Todavía no hay ofertas publicadas. Publica la primera con «+ Publicar venta» o desde Mis Pertenencias.'}
         </div>
       )}
 

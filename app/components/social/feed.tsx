@@ -134,8 +134,8 @@ export function PostComments({ comments, onAdd, issuerName, isOwner, onDelete, o
         {avatar(isOwner ? issuerName : 'Vos', isOwner)}
         <input value={draft} onChange={e => setDraft(e.target.value)} maxLength={500}
           onKeyDown={e => { if (e.key === 'Enter') send(); }}
-          aria-label={isOwner ? 'Responder como emisor' : 'Escribí un comentario'}
-          placeholder={isOwner ? 'Responder como emisor...' : 'Escribí un comentario...'}
+          aria-label={isOwner ? 'Responder como emisor' : 'Escribe un comentario'}
+          placeholder={isOwner ? 'Responder como emisor...' : 'Escribe un comentario...'}
           style={{ flex:1, minWidth:0, border:'1px solid var(--border-l)', borderRadius:999, padding:'8px 14px', fontFamily:'var(--font-b)', fontSize:13, color:'var(--text)', background:'var(--surface)', outline:'none' }} />
         <PBtn variant="accent" small disabled={!draft.trim()} onClick={send} style={{ opacity: draft.trim() ? 1 : 0.5 }}>Enviar</PBtn>
       </div>

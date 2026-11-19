@@ -14,7 +14,7 @@ import '~/styles/global.css';
 export type RouteHandle = { theme?: 'dark' | 'light' };
 
 const GOOGLE_FONTS =
-  'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Inter:wght@400;450;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap';
+  'https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Inter:wght@400;450;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -28,7 +28,7 @@ export const links: Route.LinksFunction = () => [
 
 // Restores the visitor's saved theme before first paint (no light/dark flash).
 // Only runs on routes that don't force their own theme.
-const THEME_BOOT = `try{var p=JSON.parse(localStorage.getItem('kc_prefs')||'{}'),r=document.documentElement;if(p.theme)r.setAttribute('data-theme',p.theme);if(p.palette)r.setAttribute('data-palette',p.palette)}catch(e){}`;
+const THEME_BOOT = `try{var p=JSON.parse(localStorage.getItem('bk_prefs')||'{}'),r=document.documentElement;if(p.theme)r.setAttribute('data-theme',p.theme);if(p.palette)r.setAttribute('data-palette',p.palette)}catch(e){}`;
 
 function useForcedTheme(): 'dark' | 'light' | undefined {
   const matches = useMatches();
@@ -42,11 +42,11 @@ function useForcedTheme(): 'dark' | 'light' | undefined {
 export function Layout({ children }: { children: ReactNode }) {
   const forced = useForcedTheme();
   return (
-    <html lang={SITE_LANG} data-theme={forced ?? 'light'} data-palette="mono" suppressHydrationWarning>
+    <html lang={SITE_LANG} data-theme={forced ?? 'light'} data-palette="brikme" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="theme-color" content="#090909" />
+        <meta name="theme-color" content="#ffffff" />
         <meta name="application-name" content={SITE_NAME} />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -91,8 +91,8 @@ export function HydrateFallback() {
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (isRouteErrorResponse(error) && error.status === 404) {
-    return <StatusPage code="404" title="Página no encontrada" message="La página que buscás no existe o fue movida." />;
+    return <StatusPage code="404" title="Página no encontrada" message="La página que buscas no existe o fue movida." />;
   }
   const detail = import.meta.env.DEV && error instanceof Error ? error.message : undefined;
-  return <StatusPage code="Error" title="Algo salió mal" message="Ocurrió un error inesperado. Probá recargar la página." detail={detail} />;
+  return <StatusPage code="Error" title="Algo salió mal" message="Ocurrió un error inesperado. Prueba recargar la página." detail={detail} />;
 }

@@ -4,7 +4,7 @@ import { useMobile } from '~/hooks/useMobile';
 import { networkById, type PayNetwork, type PayToken } from '~/lib/wallet';
 import { T, Ico } from './payTheme';
 
-// Shared building blocks for KEYCHAIN's own payment flows (deposit,
+// Shared building blocks for Brikme's own payment flows (deposit,
 // withdraw, checkout). Built on the platform's design tokens so they follow
 // light/dark themes like every other screen.
 

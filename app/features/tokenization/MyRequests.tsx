@@ -40,13 +40,13 @@ export default function MyRequests({ nav, onNew }: { nav: NavFn; onNew: () => vo
           <Skeleton rows={4} height={18} />
         ) : !data ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12 }}>
-            <Notice tone="error">{errorText(error, 'No pudimos cargar tus solicitudes. Probá de nuevo.')}</Notice>
+            <Notice tone="error">{errorText(error, 'No pudimos cargar tus solicitudes. Prueba de nuevo.')}</Notice>
             <PBtn variant="secondary" small onClick={reload}>Reintentar</PBtn>
           </div>
         ) : data.length === 0 ? (
           <EmptyState
             title="Todavía no enviaste solicitudes"
-            text="Cuando envíes una solicitud de tokenización, vas a ver acá su estado y las notas del equipo."
+            text="Cuando envíes una solicitud de tokenización, vas a ver aquí su estado y las notas del equipo."
             action={<PBtn variant="accent" small onClick={onNew}>Nueva solicitud</PBtn>}
           />
         ) : (

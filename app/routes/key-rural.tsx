@@ -6,7 +6,7 @@ import { productAppJsonLd } from '~/lib/structured-data';
 
 export const handle: RouteHandle = { theme: 'light' };
 
-const DESCRIPTION = 'Invertí en campos y activos agropecuarios tokenizados: tierras productivas, cultivos y maquinaria con rendimientos en USDC.';
+const DESCRIPTION = 'Invierte en campos y activos agropecuarios tokenizados: tierras productivas, cultivos y maquinaria con rendimientos en USDC.';
 
 export const meta: Route.MetaFunction = () =>
   seo({

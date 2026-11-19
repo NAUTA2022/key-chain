@@ -225,7 +225,7 @@ function AssetForm({ asset, issuers, onSaved }: { asset: AdminAssetDetail | null
         )}
         {f.issuerMode === 'existing' ? (
           <Select value={f.issuerId} onChange={e => set('issuerId', e.target.value)} aria-label="Emisor" invalid={Boolean(errors.issuerId)}>
-            <option value="">Elegí un emisor…</option>
+            <option value="">Elige un emisor…</option>
             {issuerOptions.map(i => <option key={i.id} value={i.id}>{i.name} · {ISSUER_KIND[i.kind]}</option>)}
           </Select>
         ) : (
@@ -250,7 +250,7 @@ function AssetForm({ asset, issuers, onSaved }: { asset: AdminAssetDetail | null
       <datalist id="admin-countries">{COUNTRY_OPTIONS.map(([code, name]) => <option key={code} value={name} />)}</datalist>
       <datalist id="admin-frequencies">{FREQUENCIES.map(v => <option key={v} value={v} />)}</datalist>
 
-      {Object.keys(errors).length > 0 && <Notice tone="error">Revisá los campos marcados.</Notice>}
+      {Object.keys(errors).length > 0 && <Notice tone="error">Revisa los campos marcados.</Notice>}
       {note && <Notice tone={note.tone}>{note.text}</Notice>}
       <div>
         <Btn variant="accent" type="submit" disabled={busy}>{busy ? 'Guardando…' : asset ? 'Guardar cambios' : 'Crear activo'}</Btn>
@@ -318,7 +318,7 @@ function DistributionPanel({ asset, onChanged }: { asset: AdminAssetDetail; onCh
   async function save(clear: boolean) {
     setNote(null);
     const iso = clear ? null : localInputToIso(date);
-    if (!clear && !iso) return setErrors({ nextDistributionAt: 'Elegí la fecha y hora de la próxima distribución.' });
+    if (!clear && !iso) return setErrors({ nextDistributionAt: 'Elige la fecha y hora de la próxima distribución.' });
     const v = validate(distributionSchema, { nextDistributionAt: iso, distributionFrequency: frequency });
     if (!v.ok) return setErrors(v.errors);
     setErrors({});

@@ -77,7 +77,7 @@ function ReportForm({ onSubmit }: ReportFormProps) {
       </div>
       <div style={{ marginBottom:14 }}>
         <label style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:6 }}>Descripción</label>
-        <textarea value={form.desc} onChange={e => set('desc',e.target.value)} rows={3} placeholder="Describí el problema con el mayor detalle posible..."
+        <textarea value={form.desc} onChange={e => set('desc',e.target.value)} rows={3} placeholder="Describe el problema con el mayor detalle posible..."
           style={{ width:'100%', padding:'10px 14px', borderRadius:10, border:'1.5px solid var(--border)', background:'var(--surface2)', color:'var(--text)', fontFamily:'var(--font-b)', fontSize:13.5, outline:'none', boxSizing:'border-box', resize:'vertical' }} />
       </div>
       {/* Photo upload UI (mock) */}

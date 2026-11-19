@@ -1,10 +1,10 @@
 // Shared "pending payment" inbox between the platform and KeyPay.
 //
-// When a user starts investing in the KYCN token (TokenUtility) or reserves
+// When a user starts investing in the BRIK token (TokenUtility) or reserves
 // a tokenization (PrimaryMarket/ProductDetail/Checkout), that page calls
 // addPendingPayment(...) instead of collecting payment itself. The item
 // shows up in KeyPay's Checkout, where it actually gets paid via thirdweb's
-// CheckoutWidget. This is what "KeyPay is connected to KEYCHAIN" means in
+// CheckoutWidget. This is what "KeyPay is connected to Brikme" means in
 // practice: one inbox, read/written from anywhere in the app.
 //
 // No backend here — this is an in-memory module singleton with a tiny
@@ -25,7 +25,7 @@ export type PendingPayment = {
 type Listener = (payments: PendingPayment[]) => void;
 
 let payments: PendingPayment[] = [
-  { id: 'seed-kycn-ico', name: 'Token KYCN — ICO Pública', qty: 100, unit: 0.085, fee: 0, source: 'Token KYCN', createdAt: Date.now() },
+  { id: 'seed-kycn-ico', name: 'Token BRIK — ICO Pública', qty: 100, unit: 0.085, fee: 0, source: 'Token BRIK', createdAt: Date.now() },
   { id: 'seed-palermo',  name: 'Tokenización — Edificio Corporativo Palermo', qty: 12, unit: 255, fee: 0, source: 'Tokenizaciones', createdAt: Date.now() },
 ];
 const listeners = new Set<Listener>();

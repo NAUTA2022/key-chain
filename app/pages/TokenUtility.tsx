@@ -22,22 +22,22 @@ function TokenDemo({ nav }: TokenUtilityProps) {
   const pct = Math.round(F.raised / F.goal * 100);
   const factAmt = Math.round(buyAmt / F.price);
 
-  // Buying opens KEYCHAIN's checkout (demo only: live renders TokenLive and the
-  // KYCN token has no contract yet). factAmt is rounded to a whole token
+  // Buying opens Brikme's checkout (demo only: live renders TokenLive and the
+  // BRIK token has no contract yet). factAmt is rounded to a whole token
   // count, so unit is derived back from buyAmt — qty*unit must equal exactly
-  // the USDC amount just quoted as "Pagás".
+  // the USDC amount just quoted as "Pagas".
   const handleBuy = () => {
     goCheckout(nav, {
-      title: 'ICO pública', source: 'Token KYCN',
-      items: [{ name: 'Token KYCN — ICO Pública', img: '/icono.png', qty: factAmt, unit: buyAmt / factAmt, meta: 'TGE 15% · vesting 12 meses' }],
-      back: { route: 'token' }, done: { route: 'token', label: 'Volver a Token KYCN' },
+      title: 'ICO pública', source: 'Token BRIK',
+      items: [{ name: 'Token BRIK — ICO Pública', img: '/icono.png', qty: factAmt, unit: buyAmt / factAmt, meta: 'TGE 15% · vesting 12 meses' }],
+      back: { route: 'token' }, done: { route: 'token', label: 'Volver a Token BRIK' },
     });
   };
 
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 1200, margin: '0 auto' }}>
       <PSection
-        title="Token de Utilidad — KYCN"
+        title="Token de Utilidad — BRIK"
         sub="ICO activa · Polygon ERC-20 · 1,000,000,000 supply total"
         action={<PScanLink contract={F.contract} />}
       />
@@ -135,7 +135,7 @@ function TokenDemo({ nav }: TokenUtilityProps) {
 
               {/* Vesting calendar */}
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)', marginBottom: 12 }}>Mi vesting (ICO Pública)</div>
-              {[['TGE (inmediato)','3,375 KYCN','15% desbloqueado'],['Jun 2026','1,406 KYCN / mes','Vesting lineal 12m'],['Jun 2027','22,500 KYCN','Total liberado']].map(([date,amt,note]) => (
+              {[['TGE (inmediato)','3,375 BRIK','15% desbloqueado'],['Jun 2026','1,406 BRIK / mes','Vesting lineal 12m'],['Jun 2027','22,500 BRIK','Total liberado']].map(([date,amt,note]) => (
                 <div key={date} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-l)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{date}</span>
@@ -151,7 +151,7 @@ function TokenDemo({ nav }: TokenUtilityProps) {
         {/* Buy panel */}
         <div style={{ position: isMobile ? 'static' : 'sticky', top: 88 }}>
           <PCard style={{ padding: '24px' }}>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, color: 'var(--text)', marginBottom: 20 }}>Comprar KYCN</div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, color: 'var(--text)', marginBottom: 20 }}>Comprar BRIK</div>
 
             <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Cantidad en USDC</div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
@@ -168,12 +168,12 @@ function TokenDemo({ nav }: TokenUtilityProps) {
 
             <div style={{ background: 'var(--surface2)', borderRadius: 13, padding: '16px', marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>Pagás</span>
+                <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>Pagas</span>
                 <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{fmtUSD2(buyAmt)} USDC</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>Recibís</span>
-                <span style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--accent-text)' }}>{factAmt.toLocaleString()} KYCN</span>
+                <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>Recibes</span>
+                <span style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--accent-text)' }}>{factAmt.toLocaleString()} BRIK</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>Precio por token</span>
@@ -183,7 +183,7 @@ function TokenDemo({ nav }: TokenUtilityProps) {
 
             <>
                 <PBtn variant="accent" style={{ width: '100%', padding: '14px', fontSize: 15, marginBottom: 10 }} onClick={handleBuy}>
-                  Comprar {factAmt.toLocaleString()} KYCN
+                  Comprar {factAmt.toLocaleString()} BRIK
                 </PBtn>
                 <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>
                   Pago con USDC · TGE: 15% inmediato · Vesting: 12 meses
@@ -193,7 +193,7 @@ function TokenDemo({ nav }: TokenUtilityProps) {
             <PDiv style={{ margin: '18px 0' }} />
 
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)', marginBottom: 12 }}>Mi posición actual</div>
-            {[['KYCN en wallet','45,000'],['Valor en USD',fmtUSD2(45000*F.price)],['Próximo desbloqueo','1,406 KYCN · 01 Jul 2026']].map(([k,v]) => (
+            {[['BRIK en wallet','45,000'],['Valor en USD',fmtUSD2(45000*F.price)],['Próximo desbloqueo','1,406 BRIK · 01 Jul 2026']].map(([k,v]) => (
               <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border-l)' }}>
                 <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{k}</span>
                 <span style={{ fontFamily: 'var(--font-h)', fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{v}</span>

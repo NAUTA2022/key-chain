@@ -2,7 +2,7 @@ import createClient, { type Middleware } from 'openapi-fetch';
 import type { paths } from './schema';
 
 /**
- * Base URL of the KEY CHAIN API (e.g. https://api.keychain.com). Empty = the
+ * Base URL of the Brikme API (e.g. https://api.brikme.com). Empty = the
  * frontend runs standalone on its demo data, exactly as before the backend.
  */
 export const API_URL: string = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');

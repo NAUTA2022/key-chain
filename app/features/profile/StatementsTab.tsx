@@ -65,10 +65,10 @@ export default function StatementsTab({ year, years, onYear }: { year: number; y
       {loading && !ready ? (
         <PCard style={{ padding: '22px 24px' }}><Skeleton rows={4} /></PCard>
       ) : error && !ready ? (
-        <Notice tone="error">No pudimos cargar el resumen de {year}. Probá de nuevo más tarde.</Notice>
+        <Notice tone="error">No pudimos cargar el resumen de {year}. Prueba de nuevo más tarde.</Notice>
       ) : ready && !ready.investments.length && !ready.dividends.length ? (
         <PCard style={{ padding: '10px 24px' }}>
-          <EmptyState title={`No hay movimientos en ${year}`} text="Cuando inviertas o recibas dividendos en el año, los vas a ver acá con su detalle." />
+          <EmptyState title={`No hay movimientos en ${year}`} text="Cuando inviertas o recibas dividendos en el año, los vas a ver aquí con su detalle." />
         </PCard>
       ) : ready ? (
         <>
@@ -106,7 +106,7 @@ export default function StatementsTab({ year, years, onYear }: { year: number; y
       ) : null}
 
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', lineHeight: 1.65, padding: '0 4px' }}>
-        El resumen incluye las inversiones confirmadas on-chain y los dividendos asignados en el año calendario (UTC). Es informativo: consultá a un asesor fiscal para tu situación particular.
+        El resumen incluye las inversiones confirmadas on-chain y los dividendos asignados en el año calendario (UTC). Es informativo: consulta a un asesor fiscal para tu situación particular.
       </div>
     </div>
   );

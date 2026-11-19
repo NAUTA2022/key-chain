@@ -26,7 +26,7 @@ const COLUMNS: ReadonlyArray<{ label: string; help?: { text: string; label: stri
   { label: 'Precio' },
   { label: 'Estado' },
   { label: 'Alloc.', help: { label: '¿Qué es Alloc.?', text: 'Allocation: qué porcentaje del total de tokens se ofrece en esa ronda.' } },
-  { label: 'TGE', help: { label: '¿Qué es el TGE?', text: 'Token Generation Event: el día en que se emite el token. El porcentaje indica qué parte de tu compra recibís ese mismo día.' } },
+  { label: 'TGE', help: { label: '¿Qué es el TGE?', text: 'Token Generation Event: el día en que se emite el token. El porcentaje indica qué parte de tu compra recibes ese mismo día.' } },
   { label: 'Cliff', help: { label: '¿Qué es el cliff?', text: 'Tiempo de espera después del TGE durante el cual no se libera nada más de tu compra.' } },
   { label: 'Vesting', help: { label: '¿Qué es el vesting?', text: 'Plazo en el que se libera, de a poco, el resto de tus tokens una vez terminado el cliff.' } },
 ];
@@ -43,7 +43,7 @@ export function TokenLive() {
   const tokens = t && t.price > 0 ? Math.round(buyAmt / t.price) : 0;
   const active = t?.rounds.find(r => r.status === 'Activa');
   const scan = t?.contractAddress ? explorerUrl('address', t.contractAddress, t.chainId ?? undefined) : null;
-  const noTokens = sym ? `Todavía no tenés ${sym}. La preventa abrirá próximamente.` : null;
+  const noTokens = sym ? `Todavía no tienes ${sym}. La preventa abrirá próximamente.` : null;
 
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 1200, margin: '0 auto' }}>
@@ -57,7 +57,7 @@ export function TokenLive() {
       {token.error && !t ? (
         <>
           <Notice tone="error" style={{ marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span>{errorText(token.error, 'No pudimos cargar los datos del token. Probá de nuevo en unos minutos.')}</span>
+            <span>{errorText(token.error, 'No pudimos cargar los datos del token. Prueba de nuevo en unos minutos.')}</span>
             <PBtn variant="secondary" small onClick={token.reload}>Reintentar</PBtn>
           </Notice>
           <Explainer sym={undefined} isMobile={isMobile} />
@@ -170,7 +170,7 @@ export function TokenLive() {
               </PCard>
 
               <PCard guide="token-utilities" style={{ padding: '20px 22px' }}>
-                <CardTitle help={<Hint size={13} label="¿Qué son las utilidades?" text={`Para qué podés usar ${sym ?? 'el token'} dentro de la plataforma.`} />}>
+                <CardTitle help={<Hint size={13} label="¿Qué son las utilidades?" text={`Para qué puedes usar ${sym ?? 'el token'} dentro de la plataforma.`} />}>
                   Utilidades del token
                 </CardTitle>
                 {!t ? (

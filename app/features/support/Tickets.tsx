@@ -47,8 +47,8 @@ export function TicketsSection({ status, tickets, onOpen, onNew, style }: {
   if (status === 'anonymous') {
     body = (
       <SignInCta
-        title="Iniciá sesión para ver tus tickets"
-        text="Con tu sesión podés abrir tickets, adjuntar archivos y seguir las respuestas del equipo."
+        title="Inicia sesión para ver tus tickets"
+        text="Con tu sesión puedes abrir tickets, adjuntar archivos y seguir las respuestas del equipo."
       />
     );
   } else if (status !== 'authenticated' || (!tickets.data && !tickets.error)) {
@@ -65,7 +65,7 @@ export function TicketsSection({ status, tickets, onOpen, onNew, style }: {
       <EmptyState
         icon={Icons.doc}
         title="Todavía no abriste tickets"
-        text="Cuando abras uno, vas a ver acá las respuestas del equipo."
+        text="Cuando abras uno, vas a ver aquí las respuestas del equipo."
         action={<PBtn variant="secondary" small onClick={onNew}>Abrir un ticket</PBtn>}
       />
     );
@@ -153,7 +153,7 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
     const created = await call(api.POST('/v1/support/tickets', { body: v.data }));
     if (!created.data) {
       setBusy(false);
-      setFormError(ticketErrorText(created.error, 'No pudimos crear el ticket. Probá de nuevo en unos minutos.'));
+      setFormError(ticketErrorText(created.error, 'No pudimos crear el ticket. Prueba de nuevo en unos minutos.'));
       return;
     }
     let attachmentError: string | null = null;
@@ -183,12 +183,12 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
       }
     >
       {status === 'anonymous' ? (
-        <SignInCta title="Iniciá sesión para abrir un ticket" text="Así podemos responderte y vas a ver la respuesta en Mis tickets." />
+        <SignInCta title="Inicia sesión para abrir un ticket" text="Así podemos responderte y vas a ver la respuesta en Mis tickets." />
       ) : !authed ? (
         <Skeleton rows={4} height={18} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <p style={{ ...bodyStyle, margin: 0 }}>Contanos qué pasó con el mayor detalle posible. Te respondemos por acá y vas a ver la respuesta en Mis tickets.</p>
+          <p style={{ ...bodyStyle, margin: 0 }}>Cuéntanos qué pasó con el mayor detalle posible. Te respondemos por aquí y vas a ver la respuesta en Mis tickets.</p>
           <Field label="Asunto" htmlFor={ids.subject} error={errors.subject}>
             <TextInput
               id={ids.subject}
@@ -215,7 +215,7 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
                 clearError('category');
               }}
             >
-              <option value="" disabled>Elegí una categoría</option>
+              <option value="" disabled>Elige una categoría</option>
               {TICKET_CATEGORIES.map(c => (
                 <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>
               ))}
@@ -229,7 +229,7 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
               maxLength={MESSAGE_MAX}
               disabled={busy}
               invalid={Boolean(errors.message)}
-              placeholder="Describí el problema, qué intentaste y, si aplica, el activo o la operación."
+              placeholder="Describe el problema, qué intentaste y, si aplica, el activo o la operación."
               onChange={e => {
                 setMessage(e.target.value);
                 clearError('message');
@@ -336,7 +336,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
       patch({ reply: '', feedback: { tone: 'success', text: 'Mensaje enviado. Te avisamos cuando el equipo responda.' } });
       onChanged();
     } else {
-      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos enviar el mensaje. Probá de nuevo.') } });
+      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos enviar el mensaje. Prueba de nuevo.') } });
       detail.reload();
     }
   };
@@ -352,7 +352,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
       patch({ reply: '', replyError: null, feedback: { tone: 'success', text: 'Cerraste el ticket.' } });
       onChanged();
     } else {
-      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos cerrar el ticket. Probá de nuevo.') } });
+      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos cerrar el ticket. Prueba de nuevo.') } });
     }
   };
 
@@ -368,7 +368,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
       patch({ feedback: { tone: 'success', text: `Adjuntamos ${r.data.filename}.` } });
       onChanged();
     } else {
-      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos subir el archivo. Probá de nuevo.', 'upload') } });
+      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos subir el archivo. Prueba de nuevo.', 'upload') } });
       detail.reload();
     }
   };
@@ -377,14 +377,14 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
     setDownloading(a.id);
     const ok = await downloadAuthed(a.url, a.filename);
     setDownloading(null);
-    if (!ok) patch({ feedback: { tone: 'error', text: `No pudimos descargar ${a.filename}. Probá de nuevo.` } });
+    if (!ok) patch({ feedback: { tone: 'error', text: `No pudimos descargar ${a.filename}. Prueba de nuevo.` } });
   };
 
   const notice = local.feedback ?? (flash && flash.id === id ? { tone: flash.tone, text: flash.text } : null);
 
   let body: ReactNode;
   if (status === 'anonymous') {
-    body = <SignInCta title="Iniciá sesión para ver este ticket" text="Los tickets son privados: solo vos y el equipo de soporte pueden verlos." />;
+    body = <SignInCta title="Inicia sesión para ver este ticket" text="Los tickets son privados: solo tú y el equipo de soporte pueden verlos." />;
   } else if (!ticket && detail.error) {
     body = (
       <Notice tone="error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
@@ -411,7 +411,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
             return (
               <li key={m.id} ref={i === ticket.messages.length - 1 ? lastRef : undefined} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
                 <div style={{ ...mutedStyle, fontSize: 11.5, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 600, color: mine ? 'var(--sec)' : 'var(--accent-text)' }}>{mine ? 'Vos' : 'Equipo KEY CHAIN'}</span>
+                  <span style={{ fontWeight: 600, color: mine ? 'var(--sec)' : 'var(--accent-text)' }}>{mine ? 'Tú' : 'Equipo Brikme'}</span>
                   {' · '}
                   <time dateTime={m.createdAt}>{fmtDateTime(m.createdAt)}</time>
                 </div>
@@ -451,7 +451,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
 
         {closed ? (
           <Notice tone="info" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span>Este ticket está cerrado y es de solo lectura. Si necesitás más ayuda, abrí uno nuevo.</span>
+            <span>Este ticket está cerrado y es de solo lectura. Si necesitas más ayuda, abre uno nuevo.</span>
             <PBtn variant="secondary" small onClick={onNewTicket}>Abrir un ticket nuevo</PBtn>
           </Notice>
         ) : (
@@ -459,7 +459,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
             label="Tu respuesta"
             htmlFor={replyId}
             error={local.replyError}
-            hint={limitReached ? `Llegaste al máximo de ${MAX_ATTACHMENTS} archivos en este ticket.` : 'Podés adjuntar PDF, PNG, JPG o WebP de hasta 10 MB.'}
+            hint={limitReached ? `Llegaste al máximo de ${MAX_ATTACHMENTS} archivos en este ticket.` : 'Puedes adjuntar PDF, PNG, JPG o WebP de hasta 10 MB.'}
           >
             <TextArea
               id={replyId}
@@ -468,7 +468,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
               maxLength={MESSAGE_MAX}
               disabled={busy !== null}
               invalid={Boolean(local.replyError)}
-              placeholder="Escribí tu mensaje…"
+              placeholder="Escribe tu mensaje…"
               onChange={e => patch({ reply: e.target.value, replyError: null })}
             />
           </Field>
@@ -515,7 +515,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
         onConfirm={() => void closeTicket()}
         onClose={() => setConfirming(false)}
       >
-        Vas a poder leerlo, pero ya no vas a poder responder ni adjuntar archivos. Si después necesitás ayuda, abrí un ticket nuevo.
+        Vas a poder leerlo, pero ya no vas a poder responder ni adjuntar archivos. Si después necesitas ayuda, abre un ticket nuevo.
       </ConfirmDialog>
     </>
   );

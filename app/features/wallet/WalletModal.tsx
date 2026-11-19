@@ -7,7 +7,7 @@ type WalletModalProps = {
   children: ReactNode;
 };
 
-/** Centered dialog over a blurred backdrop (same overlay as the Key Pay modal). */
+/** Centered dialog over a blurred backdrop (same overlay as the Brikme Pay modal). */
 export default function WalletModal({ title, onClose, children }: WalletModalProps) {
   const titleId = useId();
   useEffect(() => {

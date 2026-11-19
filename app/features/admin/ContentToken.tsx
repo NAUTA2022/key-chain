@@ -9,7 +9,7 @@ import { errText, sub } from './styles';
 import type { PlatformToken } from './types';
 import { Btn, Field, FormGrid, Notice, Panel, TextInput } from './ui';
 
-/** Token KYCN page content: scalar fields, sale rounds, allocations (must add up to 100) and utilities. */
+/** Token BRIK page content: scalar fields, sale rounds, allocations (must add up to 100) and utilities. */
 export function TokenAdmin() {
   const token = useApiData('token', () => unwrap(api.GET('/v1/admin/token'), 'No se pudo cargar el token.'));
   if (!token.data) {
@@ -168,7 +168,7 @@ function TokenForm({ token }: { token: PlatformToken }) {
         </div>
       </Panel>
 
-      {Object.keys(errors).length > 0 && <Notice tone="error">Revisá los campos marcados.</Notice>}
+      {Object.keys(errors).length > 0 && <Notice tone="error">Revisa los campos marcados.</Notice>}
       {note && <Notice tone={note.tone}>{note.text}</Notice>}
       <div><Btn variant="accent" type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar token'}</Btn></div>
     </form>

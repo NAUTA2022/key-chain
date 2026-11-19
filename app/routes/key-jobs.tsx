@@ -6,7 +6,7 @@ import { productAppJsonLd } from '~/lib/structured-data';
 
 export const handle: RouteHandle = { theme: 'light' };
 
-const DESCRIPTION = 'Encontrá empleos y talento en el ecosistema de tokenización: publicá búsquedas, postulate y gestioná tus oportunidades.';
+const DESCRIPTION = 'Encuentra empleos y talento en el ecosistema de tokenización: publica búsquedas, postulate y gestiona tus oportunidades.';
 
 export const meta: Route.MetaFunction = () =>
   seo({

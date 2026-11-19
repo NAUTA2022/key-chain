@@ -44,7 +44,7 @@ type Props = {
   emptyText?: string;
 };
 
-export default function NotificationsPanel({ onClose, items, mobile, onMarkAll, live, loading, emptyText = 'No tenés notificaciones por ahora.' }: Props) {
+export default function NotificationsPanel({ onClose, items, mobile, onMarkAll, live, loading, emptyText = 'No tienes notificaciones por ahora.' }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -95,9 +95,9 @@ export default function NotificationsPanel({ onClose, items, mobile, onMarkAll, 
         <div style={{ padding: '16px 18px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>Notificaciones</span>
           {onMarkAll ? (
-            <button type="button" onClick={onMarkAll} style={{ background: 'none', border: 'none', padding: 0, fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}>Marcar leídas</button>
+            <button type="button" onClick={onMarkAll} style={{ background: 'none', border: 'none', padding: 0, fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', cursor: 'pointer', fontWeight: 600 }}>Marcar leídas</button>
           ) : !live && (
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}>Marcar leídas</span>
+            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', cursor: 'pointer', fontWeight: 600 }}>Marcar leídas</span>
           )}
         </div>
         <PDiv />

@@ -24,7 +24,7 @@ function projectThumb(name: string): string | undefined {
 
 // Subscribes to the shared pending-payments inbox (app/lib/keypayInbox)
 // so KeyPay's Checkout always reflects what other parts of the platform
-// (investing in KYCN, reserving a tokenization) have handed off to it.
+// (investing in BRIK, reserving a tokenization) have handed off to it.
 function usePendingPayments(): PendingPayment[] {
   const [items, setItems] = useState<PendingPayment[]>(getPendingPayments());
   useEffect(() => subscribePendingPayments(setItems), []);
@@ -53,7 +53,7 @@ function txThumb(label: string): string | undefined {
 }
 
 // Full RWA_ASSETS entry by name — used to deep-link rows (holdings,
-// distributions, transactions) into KEYCHAIN's ProductDetail page via
+// distributions, transactions) into Brikme's ProductDetail page via
 // nav('detalle', asset), since that route expects the whole asset object.
 function projectByName(name: string) {
   return RWA_ASSETS.find(a => a.name === name);
@@ -71,7 +71,7 @@ function txProject(label: string) {
 // Reuses the same client as login (app/lib/thirdweb.ts) instead of a second
 // thirdweb project, so the whole app — connect wallet, Checkout, Swap —
 // runs through a single thirdweb client/API key.
-// Settled by the KEY CHAIN API (POST /v1/payments/transfers, key-chain-api
+// Settled by the Brikme API (POST /v1/payments/transfers, key-chain-api
 // repo), which then pays the recipient from the platform server wallet.
 const X402_TRANSFER_ENDPOINT: string = apiEnabled ? apiUrl('/v1/payments/transfers') : '';
 
@@ -506,7 +506,7 @@ function KProgress({ value, style = {}, color }: KProgressProps) {
   );
 }
 
-// Glowing glass chart card — same visual language as KEYCHAIN's dot-grid
+// Glowing glass chart card — same visual language as Brikme's dot-grid
 // background (radial-gradient dots, 24px pitch, see app/styles/global.css
 // .dot-pattern) reused locally since KeyPay doesn't depend on the host's
 // stylesheet, plus a glowing peak marker with a value tooltip.
@@ -686,7 +686,7 @@ type Wallet = { id: string; name: string; kind: string; balance: number; symbol:
 
 const WALLETS: Wallet[] = [
   { id:'usdc', name:'USDC', kind:'Cripto', balance:12480.32, symbol:'$', color:'#2775CA', history:[10800,11100,10950,11600,11900,12100,12480] },
-  { id:'kycn', name:'Token KYCN', kind:'Ecosistema', balance:3260, symbol:'', color:ACCENT, history:[2800,2900,2950,3040,3110,3190,3260] },
+  { id:'kycn', name:'Token BRIK', kind:'Ecosistema', balance:3260, symbol:'', color:ACCENT, history:[2800,2900,2950,3040,3110,3190,3260] },
 ];
 
 const ESCROWS = [
@@ -698,16 +698,16 @@ const ESCROWS = [
 const DISTRIBUTIONS = [
   { id:1, asset:'Campo Agrícola Pergamino', next:'01 Ago 2026', est:398, freq:'Mensual' },
   { id:2, asset:'Flota Tesla Model 3',       next:'28 Jul 2026', est:191, freq:'Mensual' },
-  { id:3, asset:'Token KYCN — Staking',      next:'15 Jul 2026', est:54,  freq:'Quincenal' },
+  { id:3, asset:'Token BRIK — Staking',      next:'15 Jul 2026', est:54,  freq:'Quincenal' },
 ];
 
 type KeyPayBenefit = { icon: KIconName; title: string; desc: string; active: boolean };
 
 const BENEFITS: KeyPayBenefit[] = [
-  { icon:'hex',    title:'Fees reducidos', desc:'-50% en comisiones de mercado secundario por holdear KYCN', active:true },
+  { icon:'hex',    title:'Fees reducidos', desc:'-50% en comisiones de mercado secundario por holdear BRIK', active:true },
   { icon:'bolt',   title:'Retiros prioritarios', desc:'Liquidación de fiat en <24h en vez de 3-5 días hábiles', active:true },
   { icon:'target', title:'Acceso anticipado', desc:'48h de ventana exclusiva antes del lanzamiento público de nuevos proyectos', active:true },
-  { icon:'shield', title:'Seguro extendido', desc:'Cobertura ampliada en activos con custodia KEYCHAIN', active:false },
+  { icon:'shield', title:'Seguro extendido', desc:'Cobertura ampliada en activos con custodia Brikme', active:false },
 ];
 
 type MovTab = 'fondos' | 'inversiones' | 'escrow' | 'beneficios' | 'movimientos';
@@ -763,7 +763,7 @@ function ReceiveModal({ onClose, myAddress = '0x00000000000000000000000000000000
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:16 }}>
           <div style={{ width:44, height:44, borderRadius:'50%', background:'linear-gradient(135deg,#7c5cff,#5b8cff)', marginBottom:8 }} />
           <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:14, color:'var(--kp-text)' }}>{myName}</div>
-          <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'var(--kp-ter)' }}>Perfil KeyPay</div>
+          <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'var(--kp-ter)' }}>Perfil Brikme Pay</div>
         </div>
 
         <div style={{ padding:16, borderRadius:16, background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:14 }}>
@@ -785,7 +785,7 @@ function ReceiveModal({ onClose, myAddress = '0x00000000000000000000000000000000
         </button>
 
         <KBtn variant="accent" style={{ width:'100%', justifyContent:'center' }} onClick={() => {
-          if (navigator.share) navigator.share({ title: 'Pagame por KeyPay', url: payload }).catch(() => {});
+          if (navigator.share) navigator.share({ title: 'Págame por Brikme Pay', url: payload }).catch(() => {});
           else copyAddr();
         }}>Compartir</KBtn>
       </motion.div>
@@ -1097,7 +1097,7 @@ function SendCheckout({ onClose, initialContact }: SendCheckoutProps) {
 // ─── CART CHECKOUT (thirdweb CheckoutWidget) ────────────────────────────────
 // A real shopping-cart checkout fed by the shared pending-payments inbox
 // (app/lib/keypayInbox): whatever the platform handed off — investing in
-// Token KYCN's ICO, reserving a tokenization — shows up here as a line item.
+// Token BRIK's ICO, reserving a tokenization — shows up here as a line item.
 // Left is the cart; thirdweb's own <CheckoutWidget /> owns the summary/fee/
 // total math and the pay button, instead of us reimplementing payment UI.
 const KEYCHAIN_TREASURY = '0x000000000000000000000000000000000000dead';
@@ -1127,9 +1127,9 @@ export function CartCheckout({ onClose, focusId }: CartCheckoutProps) {
         style={{ position:'absolute', inset:0, zIndex:300, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.75)', backdropFilter:'blur(4px)', padding:20 }}
       >
         <motion.div onClick={e => e.stopPropagation()} style={{ width:'100%', maxWidth:340, borderRadius:20, background:'var(--kp-surface)', border:'1px solid var(--kp-border-l)', padding:'32px 24px', textAlign:'center' }}>
-          <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:16, color:'var(--kp-text)', marginBottom:8 }}>No tenés pagos pendientes</div>
+          <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:16, color:'var(--kp-text)', marginBottom:8 }}>No tienes pagos pendientes</div>
           <div style={{ fontFamily:'var(--kp-font-b)', fontSize:13, color:'var(--kp-sec)', marginBottom:20 }}>
-            Cuando inviertas en el token KYCN o reserves una tokenización desde KEYCHAIN, aparecerán acá para pagar.
+            Cuando inviertas en el token BRIK o reserves una tokenización desde Brikme, aparecerán aquí para pagar.
           </div>
           <KBtn variant="accent" style={{ width:'100%', justifyContent:'center' }} onClick={onClose}>Cerrar</KBtn>
         </motion.div>
@@ -1150,7 +1150,7 @@ export function CartCheckout({ onClose, focusId }: CartCheckoutProps) {
         style={{ width:'100%', maxWidth:420, maxHeight:'88vh', overflowY:'auto', background:'var(--kp-surface)', border:'1px solid var(--kp-border-l)', borderRadius:22, boxShadow:'var(--kp-shadow)' }}
       >
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 20px', borderBottom:'1px solid var(--kp-border-l)' }}>
-          <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:16, color:'var(--kp-text)' }}>Checkout — Pendientes de KEYCHAIN</div>
+          <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:16, color:'var(--kp-text)' }}>Checkout — Pendientes de Brikme</div>
           <button onClick={onClose} style={{ width:32, height:32, borderRadius:9, border:'none', background:'var(--kp-surface2)', color:'var(--kp-sec)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>{KIcons.close}</button>
         </div>
 
@@ -1179,7 +1179,7 @@ export function CartCheckout({ onClose, focusId }: CartCheckoutProps) {
               tokenAddress={USDC_BASE}
               amount={total.toFixed(2)}
               seller={KEYCHAIN_TREASURY}
-              name="Pendientes de KEYCHAIN"
+              name="Pendientes de Brikme"
               description={`${pending.length} ítem${pending.length === 1 ? '' : 's'} pendiente${pending.length === 1 ? '' : 's'} de pago`}
               buttonLabel={`Pagar ${fmt(total)}`}
               style={{ flex:1 }}
@@ -1198,7 +1198,7 @@ export function CartCheckout({ onClose, focusId }: CartCheckoutProps) {
 
 // ─── SWAP (thirdweb SwapWidget) ─────────────────────────────────────────────
 // The third arista of KeyPay as an exchange: swapping between assets in the
-// ecosystem (USDC ↔ KYCN), via thirdweb's own <SwapWidget /> tool instead of
+// ecosystem (USDC ↔ BRIK), via thirdweb's own <SwapWidget /> tool instead of
 // a hand-built rate calculator.
 type ModalCloseProps = { onClose: () => void };
 
@@ -1216,7 +1216,7 @@ function SwapModal({ onClose }: ModalCloseProps) {
         style={{ width:'100%', maxWidth:380, display:'flex', flexDirection:'column', gap:16 }}
       >
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:17, color:'#fff' }}>Swap — USDC / KYCN</div>
+          <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:17, color:'#fff' }}>Swap — USDC / BRIK</div>
           <button onClick={onClose} style={{ width:32, height:32, borderRadius:9, border:'none', background:'#141416', color:'#8a8a92', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>{KIcons.close}</button>
         </div>
         <SwapWidget
@@ -1382,7 +1382,7 @@ function ScanQRModal({ onClose, onScanned, myAddress = '0x0000000000000000000000
                 <span style={{ color:ACCENT }}>{KIcons.shield}</span>
               </div>
               <div style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'#8a8a92', textAlign:'center', marginBottom:16 }}>
-                Escaneá el código QR que te comparta la empresa para vincular tu identidad verificada de forma segura.
+                Escanea el código QR que te comparta la empresa para vincular tu identidad verificada de forma segura.
               </div>
               <button onClick={() => setLinked(true)} style={{
                 width:'100%', padding:'13px', borderRadius:12, border:'none', cursor:'pointer',
@@ -1441,7 +1441,7 @@ function ScanQRModal({ onClose, onScanned, myAddress = '0x0000000000000000000000
               <span style={{ color:'#4a4a52' }}>{KIcons.card}</span>
             </div>
             <div style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'#8a8a92', textAlign:'center', marginBottom:16 }}>
-              Apuntá la cámara al código QR de la otra persona para completar el pago.
+              Apunta la cámara al código QR de la otra persona para completar el pago.
             </div>
             <button onClick={() => onScanned?.(CONTACTS[Math.floor(Math.random() * CONTACTS.length)])} style={{
               width:'100%', padding:'13px', borderRadius:12, border:'none', cursor:'pointer',
@@ -1532,15 +1532,15 @@ function P2PFiatModal({ onClose }: ModalCloseProps) {
           {screen === 'setup' && (
             <>
               <div style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'#8a8a92', marginBottom:18, lineHeight:1.5 }}>
-                Publicá una solicitud para vender USDC por pesos. Personas (no empresas) se postulan para comprarte; elegís una, tu cripto queda bloqueada, y solo se libera cuando ambos confirman la operación.
+                Publica una solicitud para vender USDC por pesos. Personas (no empresas) se postulan para comprarte; eliges una, tu cripto queda bloqueada, y solo se libera cuando ambos confirman la operación.
               </div>
-              <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'#6f6f7a', marginBottom:6 }}>Vendés (USDC)</div>
+              <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'#6f6f7a', marginBottom:6 }}>Vendes (USDC)</div>
               <input value={amount} onChange={e => setAmount(e.target.value)} type="number" style={{
                 width:'100%', boxSizing:'border-box', padding:'12px 14px', borderRadius:12, border:'1px solid rgba(255,255,255,0.12)',
                 background:'#141416', color:'#fff', fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:18, outline:'none', marginBottom:14,
               }} />
               <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', borderRadius:12, background:'#141416', marginBottom:18 }}>
-                <span style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'#8a8a92' }}>Recibís (ARS · {ARS_PER_USD}/USD)</span>
+                <span style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'#8a8a92' }}>Recibes (ARS · {ARS_PER_USD}/USD)</span>
                 <span style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:13.5, color:'#fff' }}>{fiatAmount.toLocaleString('es-AR')}</span>
               </div>
               <button onClick={publish} disabled={amountNum <= 0} style={{
@@ -1553,7 +1553,7 @@ function P2PFiatModal({ onClose }: ModalCloseProps) {
           {screen === 'matching' && (
             <>
               <div style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'#8a8a92', marginBottom:16, lineHeight:1.5 }}>
-                {applicants.length} persona{applicants.length === 1 ? '' : 's'} se postularon para pagarte {fiatAmount.toLocaleString('es-AR')} ARS por tus {fmt(amountNum)}. Elegí con quién operar.
+                {applicants.length} persona{applicants.length === 1 ? '' : 's'} se postularon para pagarte {fiatAmount.toLocaleString('es-AR')} ARS por tus {fmt(amountNum)}. Elige con quién operar.
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {applicants.map(c => (
@@ -1582,7 +1582,7 @@ function P2PFiatModal({ onClose }: ModalCloseProps) {
               </div>
 
               <div style={{ padding:'12px 14px', borderRadius:12, background:'#141416', marginBottom:14 }}>
-                <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11, color:'#6f6f7a', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Compartile tus datos para la transferencia</div>
+                <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11, color:'#6f6f7a', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Compártele tus datos para la transferencia</div>
                 <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
                   <span style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'#9a9aa2' }}>Alias</span>
                   <span style={{ fontFamily:'var(--kp-font-h)', fontWeight:600, fontSize:12.5, color:'#fff' }}>{MY_BANK.alias}</span>
@@ -1600,7 +1600,7 @@ function P2PFiatModal({ onClose }: ModalCloseProps) {
                 </div>
                 <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', borderRadius:11, background:'#141416' }}>
                   <span style={{ width:20, height:20, borderRadius:'50%', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', background: sellerConfirmed ? GREEN : 'rgba(255,255,255,0.1)', color: sellerConfirmed ? '#08130a' : '#6f6f7a' }}>{sellerConfirmed ? KIcons.check : '2'}</span>
-                  <span style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color: sellerConfirmed ? '#fff' : '#9a9aa2' }}>Vos confirmás que recibiste el dinero</span>
+                  <span style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color: sellerConfirmed ? '#fff' : '#9a9aa2' }}>Tú confirmas que recibiste el dinero</span>
                 </div>
               </div>
 
@@ -1636,7 +1636,7 @@ function P2PFiatModal({ onClose }: ModalCloseProps) {
               <div style={{ width:56, height:56, borderRadius:'50%', background:'rgba(255,120,120,0.14)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 14px', color:'#ff8a8a' }}>{KIcons.shield}</div>
               <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:17, color:'#fff', marginBottom:8 }}>En revisión</div>
               <div style={{ fontFamily:'var(--kp-font-b)', fontSize:13, color:'#8a8a92', lineHeight:1.5, marginBottom:20 }}>
-                Tu cripto sigue bloqueada. El equipo de soporte de KEYCHAIN va a revisar el caso y resolverá en 24–48h.
+                Tu cripto sigue bloqueada. El equipo de soporte de Brikme va a revisar el caso y resolverá en 24–48h.
               </div>
               <button onClick={onClose} style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', background:'#1e1e22', color:'#fff', fontFamily:'var(--kp-font-b)', fontWeight:600, fontSize:13.5, cursor:'pointer' }}>Cerrar</button>
             </div>
@@ -1698,7 +1698,7 @@ function KYCModal({ verification, onSubmit, onClose }: KYCModalProps) {
         {step === 0 && (
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             {([
-              ['individual', 'Persona (KYC)', 'Verificación de identidad individual — DNI/Pasaporte.'],
+              ['individual', 'Persona (KYC)', 'Verificación de identidad individual — Documento de identidad / Pasaporte.'],
               ['business',   'Empresa (KYB)', 'Verificación de la razón social — CUIT y datos legales.'],
             ] as const).map(([id, label, desc]) => (
               <button key={id} onClick={() => { setType(id); setStep(1); }} style={{
@@ -1719,7 +1719,7 @@ function KYCModal({ verification, onSubmit, onClose }: KYCModalProps) {
               <input value={legalName} onChange={e => setLegalName(e.target.value)} style={{ width:'100%', boxSizing:'border-box', padding:'11px 14px', borderRadius:11, border:'1px solid rgba(255,255,255,0.12)', background:'#141416', color:'#fff', fontFamily:'var(--kp-font-b)', fontSize:13.5, outline:'none' }} />
             </div>
             <div>
-              <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'#6f6f7a', marginBottom:6 }}>{type === 'business' ? 'CUIT' : 'DNI / Pasaporte'}</div>
+              <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'#6f6f7a', marginBottom:6 }}>{type === 'business' ? 'CUIT' : 'Documento / Pasaporte'}</div>
               <input value={docId} onChange={e => setDocId(e.target.value)} style={{ width:'100%', boxSizing:'border-box', padding:'11px 14px', borderRadius:11, border:'1px solid rgba(255,255,255,0.12)', background:'#141416', color:'#fff', fontFamily:'var(--kp-font-b)', fontSize:13.5, outline:'none' }} />
             </div>
             <div>
@@ -1739,7 +1739,7 @@ function KYCModal({ verification, onSubmit, onClose }: KYCModalProps) {
         {step === 2 && (
           <div>
             <div style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'#8a8a92', marginBottom:14, lineHeight:1.5 }}>
-              Subí una foto de tu {type === 'business' ? 'constancia de CUIT' : 'DNI o pasaporte'}. Esto queda listo para conectar un proveedor real de verificación (Sumsub, Veriff, etc.) más adelante.
+              Sube una foto de tu {type === 'business' ? 'constancia de CUIT' : 'documento de identidad o pasaporte'}. Esto queda listo para conectar un proveedor real de verificación (Sumsub, Veriff, etc.) más adelante.
             </div>
             <label style={{
               display:'flex', flexDirection:'column', alignItems:'center', gap:8, padding:'26px 16px',
@@ -1839,15 +1839,15 @@ function ResumenTab({ wallets, total, nav, onOpenWallets }: ResumenTabProps) {
 
 // Real coin artwork — same CDN (cryptocurrency-icons) already used by
 // app/features/landing/Landing.tsx's floating coin animation, so KeyPay stays visually
-// consistent with the rest of KEYCHAIN instead of inventing its own icon set.
-// KYCN (KEYCHAIN's own ecosystem token, shown as "Token KYCN") uses the
-// KEYCHAIN cube mark from /public instead of a third-party coin logo.
+// consistent with the rest of Brikme instead of inventing its own icon set.
+// BRIK (Brikme's own ecosystem token, shown as "Token BRIK") uses the
+// Brikme cube mark from /public instead of a third-party coin logo.
 // eslint-disable-next-line react-refresh/only-export-components -- shared coin artwork map imported by Bookey; moving it would touch other files
 export const COIN_ICON_URL: Readonly<Record<string, string | undefined>> = {
   USDC: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/usdc.svg',
   MATIC: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/matic.svg',
   ETH: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg',
-  KYCN: '/icono.png',
+  BRIK: '/icono.png',
 };
 
 type CoinIconProps = { sym: string; dot: string };
@@ -1864,12 +1864,12 @@ function CoinIcon({ sym, dot }: CoinIconProps) {
 }
 
 // MY_BALANCES (shared app/data/index.ts, also used by app/pages/Dashboard.tsx) still
-// calls this "KEY CHAIN Token" — KeyPay displays it as "Token KYCN" like
+// calls this "Brikme Token" — KeyPay displays it as "Token BRIK" like
 // everywhere else in KeyPay (WALLETS, sidebar) without renaming the shared
-// constant, since ICO branding elsewhere ("Token de Utilidad — KYCN") still
-// depends on the KYCN name.
+// constant, since ICO branding elsewhere ("Token de Utilidad — BRIK") still
+// depends on the BRIK name.
 function balanceDisplayName(b: Balance): string {
-  return b.sym === 'KYCN' ? 'Token KYCN' : b.name;
+  return b.sym === 'BRIK' ? 'Token BRIK' : b.name;
 }
 
 type TabNavProps = { nav?: NavFn; onOpenWallets?: () => void };
@@ -1882,7 +1882,7 @@ function FondosTab({ nav, onOpenWallets }: TabNavProps) {
         <KStat label="Fondos totales" value={fmt(totalUsd)} sub={`${MY_BALANCES.length} monedas`} />
         <KTag label="Multi-chain" color="blue" />
       </KCard>
-      <KSection title="Tus monedas" sub="Stablecoins, cripto y tokens del ecosistema que manejás en KeyPay" />
+      <KSection title="Tus monedas" sub="Stablecoins, cripto y tokens del ecosistema que manejas en Brikme Pay" />
       <KCard style={{ padding:'6px 14px' }}>
         {MY_BALANCES.map((b, i) => (
           <KListRow
@@ -1892,7 +1892,7 @@ function FondosTab({ nav, onOpenWallets }: TabNavProps) {
             title={balanceDisplayName(b)}
             subtitle={`${b.qty.toLocaleString('es-AR', { maximumFractionDigits: 4 })} ${b.sym}`}
             trailing={fmt(b.usd)}
-            onClick={b.sym === 'KYCN' ? () => nav?.('token') : () => onOpenWallets?.()}
+            onClick={b.sym === 'BRIK' ? () => nav?.('token') : () => onOpenWallets?.()}
           />
         ))}
       </KCard>
@@ -1902,7 +1902,7 @@ function FondosTab({ nav, onOpenWallets }: TabNavProps) {
 
 function InversionesTab({ nav }: TabNavProps) {
   const holdTotal = MY_HOLDINGS.reduce((s, h) => s + h.current, 0);
-  const factBalance = MY_BALANCES.find(b => b.sym === 'KYCN');
+  const factBalance = MY_BALANCES.find(b => b.sym === 'BRIK');
   const totalEst = DISTRIBUTIONS.reduce((s, d) => s + d.est, 0);
 
   return (
@@ -1912,7 +1912,7 @@ function InversionesTab({ nav }: TabNavProps) {
         <KTag label="RWA" color="green" />
       </KCard>
 
-      <KSection title="Proyectos tokenizados" sub="Activos del mundo real donde tenés tokens — tocá uno para ver el detalle" />
+      <KSection title="Proyectos tokenizados" sub="Activos del mundo real donde tienes tokens — toca uno para ver el detalle" />
       <KCard style={{ padding:'6px 14px', marginBottom:22 }}>
         {MY_HOLDINGS.map((h, i) => {
           const a = RWA_ASSETS.find(x => x.id === h.assetId);
@@ -1933,13 +1933,13 @@ function InversionesTab({ nav }: TabNavProps) {
         })}
       </KCard>
 
-      <KSection title="ICO" sub="Tokens de utilidad en oferta inicial donde participás" />
+      <KSection title="ICO" sub="Tokens de utilidad en oferta inicial donde participas" />
       <KCard onClick={() => nav?.('token')} style={{ padding:'20px', marginBottom:22 }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
             <div style={{ width:40, height:40, borderRadius:10, background:`${ACCENT}18`, display:'flex', alignItems:'center', justifyContent:'center', color:ACCENT }}>{KIcons.hex}</div>
             <div>
-              <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:14, color:'var(--kp-text)' }}>Token de Utilidad — KYCN</div>
+              <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:14, color:'var(--kp-text)' }}>Token de Utilidad — BRIK</div>
               <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'var(--kp-ter)' }}>Precio actual ${FACT_TOKEN.price} · {FACT_TOKEN.holders.toLocaleString('es-AR')} holders</div>
             </div>
           </div>
@@ -1948,7 +1948,7 @@ function InversionesTab({ nav }: TabNavProps) {
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
           <div style={{ background:'var(--kp-surface2)', borderRadius:12, padding:'10px 14px' }}>
             <div style={{ fontFamily:'var(--kp-font-b)', fontSize:10.5, color:'var(--kp-ter)', textTransform:'uppercase', letterSpacing:'0.04em', marginBottom:3 }}>Mi tenencia</div>
-            <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:14.5, color:'var(--kp-text)' }}>{factBalance ? factBalance.qty.toLocaleString('es-AR') : 0} KYCN</div>
+            <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:14.5, color:'var(--kp-text)' }}>{factBalance ? factBalance.qty.toLocaleString('es-AR') : 0} BRIK</div>
           </div>
           <div style={{ background:'var(--kp-surface2)', borderRadius:12, padding:'10px 14px' }}>
             <div style={{ fontFamily:'var(--kp-font-b)', fontSize:10.5, color:'var(--kp-ter)', textTransform:'uppercase', letterSpacing:'0.04em', marginBottom:3 }}>Valor estimado</div>
@@ -2009,7 +2009,7 @@ function MovimientosListTab({ nav }: TabNavProps) {
 function EscrowTab({ nav }: TabNavProps) {
   return (
     <div>
-      <KSection title="Fondos en custodia" sub="Garantías y depósitos gestionados por el escrow de KEYCHAIN — tocá uno para verlo en Escrow Chain" />
+      <KSection title="Fondos en custodia" sub="Garantías y depósitos gestionados por el escrow de Brikme — toca uno para verlo en Escrow Chain" />
       <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
         {ESCROWS.map(e => (
           <KCard key={e.id} onClick={() => nav?.('escrow')} style={{ padding:'18px 20px' }}>
@@ -2043,12 +2043,12 @@ function BeneficiosTab() {
           <div style={{ width:48, height:48, borderRadius:12, background:`${ACCENT}22`, display:'flex', alignItems:'center', justifyContent:'center', color:ACCENT }}>{KIcons.hex}</div>
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:16, color:'var(--kp-text)' }}>Nivel Holder: Gold</div>
-            <div style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'var(--kp-sec)' }}>3,260 KYCN en staking · faltan 1,740 KYCN para Platinum</div>
+            <div style={{ fontFamily:'var(--kp-font-b)', fontSize:12.5, color:'var(--kp-sec)' }}>3,260 BRIK en staking · faltan 1,740 BRIK para Platinum</div>
           </div>
         </div>
         <KProgress value={65} style={{ marginTop:14 }} color={ACCENT} />
       </KCard>
-      <KSection title="Beneficios activos" sub="Ventajas desbloqueadas por tu balance en KYCN" />
+      <KSection title="Beneficios activos" sub="Ventajas desbloqueadas por tu balance en BRIK" />
       <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
         {BENEFITS.map((b, i) => (
           <KCard key={i} style={{ padding:'18px 20px', opacity: b.active ? 1 : 0.5 }}>
@@ -2171,7 +2171,7 @@ function KycIdentityCard({ profile, verification, onOpenKYC, onOpenWallets, onVi
 
   const shortName = profile.name || 'Usuario';
   const legalName = verification.legalName || 'Maximiliano Andrés López';
-  const docType = verification.type === 'business' ? 'CUIT' : 'DNI';
+  const docType = verification.type === 'business' ? 'CUIT' : 'Doc.';
   const docNumber = verification.docId || '38.442.910';
   const nationality = verification.country || 'Argentina';
   const kycId = `KYC-${shortName.slice(0, 3).toUpperCase()}-${docNumber.replace(/\D/g, '').slice(-4) || '0000'}`;
@@ -2263,7 +2263,7 @@ function KycIdentityCard({ profile, verification, onOpenKYC, onOpenWallets, onVi
       }}>
         <span style={{ color:statusColor, flexShrink:0 }}>{KIcons.shield}</span>
         <span style={{ flex:1, fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'var(--kp-ter)' }}>
-          {isVerified ? 'Tu identidad está verificada y asegurada en blockchain.' : 'Completá tu verificación para acceder a límites más altos y P2P Fiat.'}
+          {isVerified ? 'Tu identidad está verificada y asegurada en blockchain.' : 'Completa tu verificación para acceder a límites más altos y P2P Fiat.'}
         </span>
         <button onClick={onOpenKYC} style={{
           display:'flex', alignItems:'center', gap:4, padding:'8px 13px', borderRadius:999, border:'none',
@@ -2289,7 +2289,7 @@ function LinkedCompaniesCard({ companies, onRevoke, containerRef }: LinkedCompan
     <div ref={containerRef} style={{ marginBottom:16 }}>
       <div style={{ marginBottom:12 }}>
         <h3 style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:16, color:'#fff', margin:0, marginBottom:4 }}>¿Quién está usando tu identidad?</h3>
-        <p style={{ fontFamily:'var(--kp-font-b)', fontSize:11, color:'rgba(255,255,255,0.5)', margin:0 }}>Empresas que han verificado tu identidad a través de Key Pay.</p>
+        <p style={{ fontFamily:'var(--kp-font-b)', fontSize:11, color:'rgba(255,255,255,0.5)', margin:0 }}>Empresas que han verificado tu identidad a través de Brikme Pay.</p>
       </div>
 
       <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
@@ -2494,7 +2494,7 @@ function BottomBar({ screen, setScreen, containerRef, profile }: BottomBarProps)
 
 const NOTIFICATIONS = [
   { id:1, text:'Distribución de renta acreditada — Campo Agrícola Pergamino', time:'hace 2h' },
-  { id:2, text:'Tu compra de Token KYCN quedó pendiente de pago', time:'hace 5h' },
+  { id:2, text:'Tu compra de Token BRIK quedó pendiente de pago', time:'hace 5h' },
 ];
 
 function NotificationsDropdown({ onClose }: ModalCloseProps) {
@@ -2596,7 +2596,7 @@ function ConfigScreen({ onBack, onOpenWallets, onOpenKYC, verification, notifOn,
           onClick={onOpenWallets}
           thumbNode={<span style={{ color:'var(--kp-text)' }}>{KIcons.card}</span>}
           title="Wallets conectadas"
-          subtitle="Gestioná las wallets vinculadas a KeyPay"
+          subtitle="Gestiona las wallets vinculadas a Brikme Pay"
         />
       </KCard>
 
@@ -2823,10 +2823,10 @@ export default function KeyPay({ nav, onClose, initialModal = null, cartFocusId 
   }, []);
 
   const TOUR_STEPS: TourStep[] = [
-    { ref: balanceRef, title: 'Tu balance total', desc: 'Acá ves el total combinado de todas tus billeteras del ecosistema, siempre actualizado.' },
-    { ref: actionsRef, title: 'Send & Request', desc: 'Enviá cripto a otra persona por x402, o generá un link/QR para que te paguen.' },
-    { ref: checkoutRef, title: 'Checkout', desc: 'Cuando invertís desde KEYCHAIN (token KYCN, tokenizaciones), el pago pendiente aparece acá para completarlo.' },
-    { ref: bottomBarRef, title: 'Navegación', desc: 'Volver a KEYCHAIN, ver todos tus Movimientos, Configuración y tu Perfil — siempre a un toque.' },
+    { ref: balanceRef, title: 'Tu balance total', desc: 'Aquí ves el total combinado de todas tus billeteras del ecosistema, siempre actualizado.' },
+    { ref: actionsRef, title: 'Send & Request', desc: 'Envía cripto a otra persona por x402, o genera un link/QR para que te paguen.' },
+    { ref: checkoutRef, title: 'Checkout', desc: 'Cuando inviertes desde Brikme (token BRIK, tokenizaciones), el pago pendiente aparece aquí para completarlo.' },
+    { ref: bottomBarRef, title: 'Navegación', desc: 'Volver a Brikme, ver todos tus Movimientos, Configuración y tu Perfil — siempre a un toque.' },
   ];
 
   const endTour = () => { setTourStep(-1); localStorage.setItem('keypay_tour_seen', '1'); };
@@ -2839,7 +2839,7 @@ export default function KeyPay({ nav, onClose, initialModal = null, cartFocusId 
     }
   }, []);
 
-  // First bottom-bar button: back to the main KEYCHAIN app, not another
+  // First bottom-bar button: back to the main Brikme app, not another
   // KeyPay screen.
   const goToMainApp = () => (onClose ? onClose() : nav?.('dashboard'));
 
@@ -2887,7 +2887,7 @@ export default function KeyPay({ nav, onClose, initialModal = null, cartFocusId 
               {/* ── Hero ── */}
               <div style={{ padding:'20px 20px 24px' }}>
                 <div style={{ marginBottom:20 }}>
-                  <img src="/Logo/keypay.png" alt="Key Pay" style={{ height:30, width:'auto', display:'block' }} />
+                  <img src="/Logo/keypay.png" alt="Brikme Pay" style={{ height:30, width:'auto', display:'block' }} />
                 </div>
 
                 <HexCard style={{ padding:'20px 20px 22px', marginBottom:16 }}>
@@ -2960,7 +2960,7 @@ export default function KeyPay({ nav, onClose, initialModal = null, cartFocusId 
                     <IconBadge color={ACCENT} size={42}>{KIcons.swapBig}</IconBadge>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:14.5, color:'var(--kp-text)', marginBottom:2 }}>Swap</div>
-                      <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'var(--kp-ter)' }}>Cambiá cripto al instante</div>
+                      <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'var(--kp-ter)' }}>Cambia cripto al instante</div>
                     </div>
                     <span style={{ color:'var(--kp-ter)', flexShrink:0 }}>{KIcons.chevR}</span>
                   </motion.button>

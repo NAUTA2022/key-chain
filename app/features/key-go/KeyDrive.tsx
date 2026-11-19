@@ -124,7 +124,7 @@ const QUICK_PLACES: QuickPlace[] = [
 const RIDE_TYPES: RideType[] = [
   { id:'keyx',     name:'KeyX',         sub:'Económico · autos tokenizados',    capacity:4, base:2.5, perKm:1.10, etaBase:3, discount:15, Icon:CarSVG, accent:WHITE },
   { id:'comfort',  name:'Key Comfort',  sub:'Más espacio · top rated',          capacity:4, base:4.0, perKm:1.60, etaBase:5, discount:15, Icon:CarSVG, accent:'#8ecbff' },
-  { id:'black',    name:'Key Black',    sub:'Lujo · flota premium KEYCHAIN',    capacity:4, base:8.0, perKm:2.80, etaBase:8, discount:20, Icon:CarSVG, accent:'#d9b25c' },
+  { id:'black',    name:'Key Black',    sub:'Lujo · flota premium Brikme',    capacity:4, base:8.0, perKm:2.80, etaBase:8, discount:20, Icon:CarSVG, accent:'#d9b25c' },
   { id:'xl',       name:'KeyXL',        sub:'Van/SUV · hasta 6 pasajeros',      capacity:6, base:5.0, perKm:1.90, etaBase:6, discount:15, Icon:VanSVG, accent:'#a7f3d0' },
 ];
 
@@ -371,7 +371,7 @@ function ConfirmRide({ pickup, dest, ride, distanceKm, onBack, onRequest }: Conf
 
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderRadius:12, background:GRAY2, marginBottom:16 }}>
         {KDIcons.wallet}
-        <span style={{ fontFamily:FONT_B, fontSize:13, color:WHITE }}>Saldo KEYCHAIN · USDC</span>
+        <span style={{ fontFamily:FONT_B, fontSize:13, color:WHITE }}>Saldo Brikme · USDC</span>
       </div>
       </div>
 
@@ -981,7 +981,7 @@ const SEED_HISTORY: TripRecord[] = [
   { id:2, from:'Recoleta', to:'Aeropuerto Ezeiza (EZE)', car:'Key Black', cost:'$41.50', date:'25 jun 2026' },
 ];
 
-// Key Go is a standalone product (its own route, outside KEYCHAIN's
+// Key Go is a standalone product (its own route, outside Brikme's
 // login-gated Shell — see app/routes.ts), same pattern as Bookey:
 // it owns its own login gate (useSessionAccount already reflects a wallet
 // connected anywhere else in the app, since everything sits under the same
@@ -1004,7 +1004,7 @@ export default function KeyDrive() {
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, padding:'14px 18px 10px' }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           <span style={{ fontFamily:FONT_H, fontWeight:900, fontSize:19, color:WHITE, letterSpacing:'-0.03em' }}>Key Go</span>
-          <span style={{ fontSize:10.5, padding:'3px 8px', borderRadius:999, background:`${GREEN}22`, color:GREEN, fontWeight:700, fontFamily:FONT_B }}>by KEYCHAIN</span>
+          <span style={{ fontSize:10.5, padding:'3px 8px', borderRadius:999, background:`${GREEN}22`, color:GREEN, fontWeight:700, fontFamily:FONT_B }}>by Brikme</span>
         </div>
         {!isMobile && <DesktopNav tab={tab} setTab={setTab} />}
       </div>

@@ -13,7 +13,7 @@ import type {
   SocialAsset, SocialSource, Viewer,
 } from '~/lib/social/types';
 
-// Live SocialSource: the social layer over the KEY CHAIN API (/v1/feed,
+// Live SocialSource: the social layer over the Brikme API (/v1/feed,
 // /v1/companies, /v1/users, /v1/reviews). Maps the API's DTOs to the shapes
 // the design's components already render. Fields the API does not provide
 // (trust score, on-time payments, reputation, other people's amounts) are
@@ -286,7 +286,7 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
 
   async function addComment(postId: string, text: string): Promise<PostComment> {
     const body = text.trim();
-    if (!body) throw new Error('Escribí un comentario.');
+    if (!body) throw new Error('Escribe un comentario.');
     const c = await must(api.POST('/v1/feed/posts/{id}/comments', { params: { path: { id: postId } }, body: { body: body.slice(0, 500) } }),
       'No pudimos publicar tu comentario.', { validation_failed: 'El comentario puede tener hasta 500 caracteres.', not_found: 'Esta publicación ya no existe.' });
     return toComment(c);
@@ -295,7 +295,7 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
   async function createPost(input: CreatePostInput): Promise<FeedItem> {
     const files = [...input.files];
     const text = input.text.trim();
-    if (!text && !files.length) throw new Error('Escribí algo o agregá una foto o un video para publicar.');
+    if (!text && !files.length) throw new Error('Escribe algo o agrega una foto o un video para publicar.');
     if (files.length > MAX_POST_MEDIA) throw new Error(`Máximo ${MAX_POST_MEDIA} archivos por publicación.`);
     for (const f of files) {
       const isImage = IMAGE_TYPES.includes(f.type);
@@ -308,14 +308,14 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
       if (!data) {
         throw new Error(errorText(error, `No pudimos subir "${f.name}".`, {
           forbidden: 'Solo el dueño de la empresa puede subir fotos o videos.',
-          validation_failed: 'Formato no admitido. Usá fotos PNG, JPG o WebP, o videos MP4 o WebM.',
-          bad_request: 'Formato no admitido. Usá fotos PNG, JPG o WebP, o videos MP4 o WebM.',
+          validation_failed: 'Formato no admitido. Usa fotos PNG, JPG o WebP, o videos MP4 o WebM.',
+          bad_request: 'Formato no admitido. Usa fotos PNG, JPG o WebP, o videos MP4 o WebM.',
         }));
       }
       mediaIds.push(data.id);
     }
     const post = await must(api.POST('/v1/feed/posts', { body: { assetId: input.assetId, body: text, milestone: input.milestone, mediaIds } }),
-      'No pudimos publicar. Probá de nuevo.', {
+      'No pudimos publicar. Prueba de nuevo.', {
         forbidden: 'Solo el emisor del proyecto o un administrador puede publicar en su feed.',
         conflict: 'El feed de este proyecto se abre cuando está operativo o financiado.',
         not_found: 'No encontramos este proyecto.',
@@ -386,7 +386,7 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
 
   async function updateCompany(slug: string, edit: CompanyEdit): Promise<CompanyProfile> {
     await must(api.PATCH('/v1/companies/{slug}', { params: { path: { slug } }, body: edit }), 'No pudimos guardar los cambios.', {
-      validation_failed: 'Revisá los datos: el nombre debe tener entre 2 y 120 caracteres y la descripción hasta 600.',
+      validation_failed: 'Revisa los datos: el nombre debe tener entre 2 y 120 caracteres y la descripción hasta 600.',
     });
     emit();
     const fresh = await getCompany(slug);
@@ -397,10 +397,10 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
   async function setCompanyImage(slug: string, kind: CompanyImageKind, file: File | null): Promise<CompanyProfile> {
     const label = kind === 'logo' ? 'el logo' : 'la portada';
     if (file) {
-      if (!IMAGE_TYPES.includes(file.type)) throw new Error('Formato no admitido. Usá PNG, JPG o WebP.');
+      if (!IMAGE_TYPES.includes(file.type)) throw new Error('Formato no admitido. Usa PNG, JPG o WebP.');
       if (file.size > 5 * MB) throw new Error('La imagen supera el máximo de 5 MB.');
       const { data, error } = await uploadFile<CompanyProfileDto>(`/v1/companies/${slug}/${kind}`, file);
-      if (!data) throw new Error(errorText(error, `No pudimos subir ${label}.`, { validation_failed: 'La imagen no es válida. Usá PNG, JPG o WebP de hasta 5 MB.', bad_request: 'La imagen no es válida. Usá PNG, JPG o WebP de hasta 5 MB.' }));
+      if (!data) throw new Error(errorText(error, `No pudimos subir ${label}.`, { validation_failed: 'La imagen no es válida. Usa PNG, JPG o WebP de hasta 5 MB.', bad_request: 'La imagen no es válida. Usa PNG, JPG o WebP de hasta 5 MB.' }));
     } else {
       const params = { params: { path: { slug } } };
       await must(kind === 'logo' ? api.DELETE('/v1/companies/{slug}/logo', params) : api.DELETE('/v1/companies/{slug}/banner', params),
@@ -442,7 +442,7 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
   }
 
   // ─── Follows ───────────────────────────────────────────────────────────────
-  const FOLLOW_REASONS: Reasons = { bad_request: 'No podés seguirte a vos mismo ni a tu propia empresa.', not_found: 'Este perfil ya no existe.' };
+  const FOLLOW_REASONS: Reasons = { bad_request: 'No puedes seguirte a ti mismo ni a tu propia empresa.', not_found: 'Este perfil ya no existe.' };
 
   async function setFollow(target: FollowTarget, on: boolean): Promise<FollowState> {
     const fallback = on ? 'No pudimos seguir este perfil.' : 'No pudimos dejar de seguir este perfil.';
@@ -513,11 +513,11 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
   });
 
   const REVIEW_REASONS: Reasons = {
-    already_reviewed: 'Ya publicaste una reseña de este proyecto. Podés editarla desde la lista.',
+    already_reviewed: 'Ya publicaste una reseña de este proyecto. Puedes editarla desde la lista.',
     forbidden: 'Solo los inversores de este proyecto pueden reseñarlo (y nunca su propia empresa).',
     not_found: 'No encontramos este proyecto.',
     bad_request: 'Ese proyecto no es de esta empresa.',
-    validation_failed: 'Revisá la reseña: una calificación de 1 a 5 y hasta 1000 caracteres.',
+    validation_failed: 'Revisa la reseña: una calificación de 1 a 5 y hasta 1000 caracteres.',
   };
 
   async function listReviews(slug: string): Promise<Review[]> {
@@ -537,7 +537,7 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
 
   async function addReview(slug: string, input: ReviewInput): Promise<Review> {
     const body = input.text.trim();
-    if (!body) throw new Error('Escribí tu reseña.');
+    if (!body) throw new Error('Escribe tu reseña.');
     const r = await must(api.POST('/v1/companies/{slug}/reviews', {
       params: { path: { slug } }, body: { assetId: input.assetId, rating: input.rating, body: body.slice(0, 1000) },
     }), 'No pudimos publicar tu reseña.', REVIEW_REASONS);
@@ -547,7 +547,7 @@ export function createLiveSocialSource({ user, assets }: LiveSocialContext): Soc
 
   async function updateReview(reviewId: string, input: Omit<ReviewInput, 'assetId'>): Promise<Review> {
     const body = input.text.trim();
-    if (!body) throw new Error('Escribí tu reseña.');
+    if (!body) throw new Error('Escribe tu reseña.');
     const r = await must(api.PUT('/v1/reviews/{id}', { params: { path: { id: reviewId } }, body: { rating: input.rating, body: body.slice(0, 1000) } }),
       'No pudimos guardar tu reseña.', REVIEW_REASONS);
     emit();

@@ -29,9 +29,9 @@ export function ActivityCardLive({ items, loading, error }: { items: ActivityIte
       {loading && !items ? (
         <Skeleton rows={4} />
       ) : error && !items ? (
-        <Notice tone="error">No pudimos cargar tu actividad. Probá recargar la página.</Notice>
+        <Notice tone="error">No pudimos cargar tu actividad. Prueba recargar la página.</Notice>
       ) : list.length === 0 ? (
-        <EmptyState title="Todavía no hay movimientos" text="Acá vas a ver tus inversiones, dividendos, verificaciones y consultas de soporte." />
+        <EmptyState title="Todavía no hay movimientos" text="Aquí vas a ver tus inversiones, dividendos, verificaciones y consultas de soporte." />
       ) : (
         <ul style={{ display: 'flex', flexDirection: 'column', listStyle: 'none', margin: 0, padding: 0 }}>
           {shown.map((a, i) => (
@@ -154,7 +154,7 @@ export function ReferralSoon() {
   return (
     <div className="shimmer-surface" style={{ borderRadius: 18, padding: '20px 22px', background: 'linear-gradient(135deg, oklch(0.20 0.03 265) 0%, oklch(0.28 0.08 270) 100%)', color: '#fff', position: 'relative', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
-        <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16 }}>Invitá un amigo</h2>
+        <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16 }}>Invita un amigo</h2>
         <PTag label="Próximamente" style={{ background: 'rgba(255,255,255,0.18)', color: '#fff' }} />
       </div>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, opacity: 0.7, lineHeight: 1.55 }}>

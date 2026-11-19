@@ -7,7 +7,7 @@ import { productAppJsonLd } from '~/lib/structured-data';
 
 export const handle: RouteHandle = { theme: 'dark' };
 
-const DESCRIPTION = 'Seguí en tiempo real la ubicación y el estado de tus activos tokenizados con rastreo GPS.';
+const DESCRIPTION = 'Sigue en tiempo real la ubicación y el estado de tus activos tokenizados con rastreo GPS.';
 
 export const meta: Route.MetaFunction = () =>
   seo({

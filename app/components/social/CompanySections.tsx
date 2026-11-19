@@ -37,7 +37,7 @@ type ViewMetrics = Omit<CompanyMetrics, 'apy' | 'payments' | 'late' | 'onTime' |
   transparency: number | null;
   verifiedScore: number | null;
   trust: number | null;
-  /** [label, value]: "Fundada" (demo) or the month it joined KEYCHAIN (live). */
+  /** [label, value]: "Fundada" (demo) or the month it joined Brikme (live). */
   since: readonly [string, string];
   raisedBy: (a: SocialAsset) => number;
   investorsBy: (a: SocialAsset) => number;
@@ -76,7 +76,7 @@ function liveMetrics(profile: CompanyProfile, live: CompanyLive, reviews: readon
     trust: null,
     countries: s.countries,
     cats: s.categories,
-    since: ['En KEYCHAIN desde', monthYear(live.createdAt)],
+    since: ['En Brikme desde', monthYear(live.createdAt)],
     raisedBy: a => perAsset.get(a.id)?.raised ?? 0,
     investorsBy: a => perAsset.get(a.id)?.investors ?? 0,
     ownerKyc: null,
@@ -380,7 +380,7 @@ export function CompanyTrust(props: SectionProps) {
   const round = (v: number | null) => (v === null ? null : Math.round(v));
   const posted = profile.live ? profile.live.stats.posts : posts.length;
   const factors: ReadonlyArray<readonly [string, number | null, string]> = [
-    ['Verificación de la empresa', m.verifiedScore, profile.verified ? 'KYB aprobado por KEYCHAIN' : 'Pendiente de verificación'],
+    ['Verificación de la empresa', m.verifiedScore, profile.verified ? 'KYB aprobado por Brikme' : 'Pendiente de verificación'],
     ['Pagos a tiempo', round(m.onTime), m.payments && m.late !== null ? `${m.payments - m.late} de ${m.payments} distribuciones en fecha` : 'Sin distribuciones todavía'],
     ['Financiamiento de proyectos', Math.round(m.funded), 'Promedio vendido de sus proyectos'],
     ['Reseñas de inversores', Math.round((m.rating / 5) * 100), `${m.rating.toFixed(1)} de 5 en ${reviews.length} reseñas`],
@@ -437,7 +437,7 @@ export function CompanyTrust(props: SectionProps) {
           ))}
           {profile.verified && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>
-              <VerifiedBadge /> Verificada por KEYCHAIN
+              <VerifiedBadge /> Verificada por Brikme
             </div>
           )}
         </PCard>
@@ -559,12 +559,12 @@ export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, i
 
         {!isMine && viewer && (
           <PCard style={{ padding: '20px 22px' }}>
-            <H sub="Contá tu experiencia como inversor">Escribir una reseña</H>
+            <H sub="Cuenta tu experiencia como inversor">Escribir una reseña</H>
             {options.length === 0 ? (
               <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', lineHeight: 1.5 }}>
                 {reviewable && reviewable.length === 0
-                  ? 'Podés reseñar los proyectos de esta empresa en los que invertiste.'
-                  : 'Ya reseñaste todos tus proyectos de esta empresa. Podés editar tus reseñas desde la lista.'}
+                  ? 'Puedes reseñar los proyectos de esta empresa en los que invertiste.'
+                  : 'Ya reseñaste todos tus proyectos de esta empresa. Puedes editar tus reseñas desde la lista.'}
               </div>
             ) : (
               <>

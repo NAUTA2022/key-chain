@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 // Each word is rasterised off-screen and sampled into target points; the
 // same particle pool flies between the targets of consecutive words.
 const EDGE_MASK = 'linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent), linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent)';
-const DEFAULT_COLORS: readonly string[] = ['#7fb2ff', '#a78bfa', '#f0abfc'];
+const DEFAULT_COLORS: readonly string[] = ['#1EC6D9', '#F0900F', '#F01BDB'];
 
 type Point = { x: number; y: number };
 type Particle = { x: number; y: number; vx: number; vy: number; tx: number; ty: number; hidden: boolean; c: string; a: number };

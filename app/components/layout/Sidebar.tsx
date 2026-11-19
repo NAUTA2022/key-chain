@@ -1,5 +1,5 @@
 import { useMenuFilter } from '~/lib/demoMenu';
-import { useState, useRef, useCallback, memo, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import { useState, useRef, memo, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PLogo } from '~/components/ui';
@@ -98,7 +98,7 @@ const SubsidiariesIcon = (
   </svg>
 );
 
-// Standalone products KEYCHAIN operates outside the main login-gated app,
+// Standalone products Brikme operates outside the main login-gated app,
 // opened in a new tab. Only Bookey is public; the others are admin-only
 // previews (see app/routes.ts) and are listed only for admins.
 const PUBLIC_SUBSIDIARIES: Subsidiary[] = [
@@ -117,7 +117,7 @@ const investorItems: MainNavItem[] = [
   { id: 'dashboard',    label: 'Mi dashboard',       labelMobile: 'Dashboard',     icon: Icons.dash      },
   { id: 'primario',     label: 'Tokenizaciones',     labelMobile: 'Tokens',        icon: HexIcon         },
   { id: 'secundario',   label: 'Mercado Secundario', labelMobile: 'Secundario',    icon: Icons.secondary },
-  { id: 'token',        label: 'Token KYCN',         labelMobile: 'Token KYCN',    icon: Token3dIcon     },
+  { id: 'token',        label: 'Token BRIK',         labelMobile: 'Token BRIK',    icon: Token3dIcon     },
   { id: 'pertenencias', label: 'Mis Pertenencias',   labelMobile: 'Pertenencias',  icon: Icons.wallet    },
   { id: 'ecosistema',   label: 'Ecosistema',         labelMobile: 'Ecosistema',    icon: EcoIcon         },
   { id: 'academia',     label: 'Academia',           labelMobile: 'Academia',      icon: Icons.academy   },
@@ -130,7 +130,7 @@ const adminItems: MainNavItem[] = [
   { id: 'admin',        label: 'Panel Admin',        labelMobile: 'Admin',         icon: Icons.admin     },
   { id: 'primario',     label: 'Tokenizaciones',     labelMobile: 'Tokens',        icon: HexIcon         },
   { id: 'secundario',   label: 'Mercado Secundario', labelMobile: 'Secundario',    icon: Icons.secondary },
-  { id: 'token',        label: 'Token KYCN',         labelMobile: 'Token KYCN',    icon: Token3dIcon     },
+  { id: 'token',        label: 'Token BRIK',         labelMobile: 'Token BRIK',    icon: Token3dIcon     },
   { id: 'pertenencias', label: 'Mis Pertenencias',   labelMobile: 'Pertenencias',  icon: Icons.wallet    },
   { id: 'ecosistema',   label: 'Ecosistema',         labelMobile: 'Ecosistema',    icon: EcoIcon         },
   { id: 'academia',     label: 'Academia',           labelMobile: 'Academia',      icon: Icons.academy   },
@@ -166,20 +166,8 @@ const LogoutIcon = (
   </svg>
 );
 
-// Sizes the hover pill's label text against the icon/gap/chevron chrome that
-// surrounds it (see the pill's paddingLeft/gap/paddingRight below), so short
-// labels ("Feed") get a snug pill instead of the longest label's width.
-let measureCtx: CanvasRenderingContext2D | null = null;
-function measurePillWidth(label: string): number {
-  if (!measureCtx) measureCtx = document.createElement('canvas').getContext('2d');
-  const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-h').trim() || 'sans-serif';
-  const ctx = measureCtx;
-  if (!ctx) return 110; // canvas unavailable: fall back to the minimum pill width
-  ctx.font = `600 13.5px ${fontFamily}`;
-  const textWidth = ctx.measureText(label).width;
-  const chrome = 10 /* padL */ + 18 /* icon */ + 16 /* gap */ + 8 /* label-chevron gap */ + 11 /* chevron */ + 20 /* padR */;
-  return Math.max(110, Math.round(chrome + textWidth));
-}
+const COLLAPSED_W = 58; // collapsed sidebar width (px)
+const LABEL_GAP = 14;  // hover label distance from the sidebar edge
 
 type NavItemProps<T extends SidebarItemId> = {
   item: SidebarNavItem<T>;
@@ -188,13 +176,10 @@ type NavItemProps<T extends SidebarItemId> = {
   onClick: (id: T) => void;
 };
 
-type PillStyle = CSSProperties & { '--pill-w': string };
-
 // `memo` drops the generic signature, so it is restored with the cast below.
 const NavItem = memo(function NavItem<T extends SidebarItemId>({ item, active, collapsed, onClick }: NavItemProps<T>) {
   const [hovered, setHovered] = useState(false);
   const [pillTop, setPillTop] = useState(0);
-  const [pillWidth, setPillWidth] = useState(200);
   const linkRef = useRef<HTMLAnchorElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   // Real links for pages (crawlable, open-in-new-tab); a button for actions.
@@ -206,24 +191,17 @@ const NavItem = memo(function NavItem<T extends SidebarItemId>({ item, active, c
     if (collapsed && el) {
       const r = el.getBoundingClientRect();
       setPillTop(r.top + r.height / 2);
-      setPillWidth(measurePillWidth(item.label));
     }
     setHovered(true);
   };
 
-  // Blob hover pill style; `--pill-w` feeds the navBlobExpand keyframes.
-  const pillStyle: PillStyle = {
-          position: 'fixed', left: 8, top: pillTop - 21, height: 42,
-          display: 'flex', alignItems: 'center',
-          background: 'var(--gl-panel)',
-          border: `1px solid ${active ? 'var(--gl-bd2)' : 'var(--gl-bd)'}`,
-          overflow: 'hidden', zIndex: 500, cursor: 'pointer',
-          pointerEvents: 'all',
-          animation: 'navBlobExpand 0.44s cubic-bezier(.34,1.18,.64,1) forwards',
-          '--pill-w': `${pillWidth}px`,
-          transformOrigin: 'left center',
-          paddingLeft: 10, paddingRight: 20, gap: 16, whiteSpace: 'nowrap',
-          boxShadow: 'var(--sh-md)',
+  // Collapsed sidebar: on hover the label appears beside it, text only (no box),
+  // a fixed gap from the sidebar edge and centred on the icon.
+  const labelStyle: CSSProperties = {
+    position: 'fixed', left: COLLAPSED_W + LABEL_GAP, top: pillTop,
+    zIndex: 500, pointerEvents: 'none', whiteSpace: 'nowrap',
+    fontFamily: 'var(--font-h)', fontWeight: 600, fontSize: 13.5, letterSpacing: '-0.005em',
+    color: active ? 'var(--accent-text)' : 'var(--gl-nav-a)',
   };
 
   // Shared by both renderings of the item (<a> for pages, <button> for actions).
@@ -259,10 +237,8 @@ const NavItem = memo(function NavItem<T extends SidebarItemId>({ item, active, c
         <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 2.5, borderRadius: 99, background: 'var(--accent)' }} />
       )}
 
-      {/* Liquid glass icon */}
-      <span className={`nav-icon-glass${active ? ' is-active' : ''}`}
-        style={{ color: active ? 'var(--gl-nav-a)' : 'var(--gl-nav)' }}
-      >
+      {/* The icon alone (no box); the page you are on is marked in the brand orange. */}
+      <span className="nav-icon-bare" style={{ color: active ? 'var(--accent)' : 'var(--gl-nav)' }}>
         {item.icon}
       </span>
 
@@ -280,28 +256,12 @@ const NavItem = memo(function NavItem<T extends SidebarItemId>({ item, active, c
         <button ref={btnRef} type="button" {...tagProps}>{content}</button>
       )}
 
-      {/* Blob hover pill — only on desktop collapsed sidebar */}
+      {/* Hover label beside the collapsed sidebar (desktop) */}
       <AnimatePresence>
         {collapsed && hovered && (
-          <div
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            onClick={() => { onClick(item.id); setHovered(false); }}
-            style={pillStyle}
-          >
-            <span style={{ display: 'flex', flexShrink: 0, color: active ? 'var(--gl-nav-a)' : 'var(--gl-nav)' }}>{item.icon}</span>
-            <span style={{
-              fontFamily: 'var(--font-h)', fontWeight: 600, fontSize: 13.5,
-              color: active ? 'var(--gl-nav-a)' : 'var(--gl-nav)',
-              animation: 'navTextIn 0.44s ease forwards',
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              {item.label}
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-          </div>
+          <motion.span style={labelStyle} initial={{ opacity: 0, x: -6, y: '-50%' }} animate={{ opacity: 1, x: 0, y: '-50%' }} exit={{ opacity: 0, x: -4, y: '-50%' }} transition={{ duration: 0.18, ease: 'easeOut' }}>
+            {item.label}
+          </motion.span>
         )}
       </AnimatePresence>
     </>
@@ -309,7 +269,7 @@ const NavItem = memo(function NavItem<T extends SidebarItemId>({ item, active, c
 }) as <T extends SidebarItemId>(props: NavItemProps<T>) => ReactNode;
 
 // ── Subsidiaries modal ─────────────────────────────────────────────────
-// Lists the standalone products KEYCHAIN runs outside the login-gated app
+// Lists the standalone products Brikme runs outside the login-gated app
 // (same pattern as /bookey — see app/routes.ts). Each opens in a
 // new tab since they're functionally separate companies/sites.
 type SubsidiariesModalProps = { onClose: () => void; isAdmin: boolean };
@@ -339,7 +299,7 @@ function SubsidiariesModal({ onClose, isAdmin }: SubsidiariesModalProps) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
           </button>
         </div>
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginBottom: 20 }}>Otros productos del ecosistema KEYCHAIN.</div>
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginBottom: 20 }}>Otros productos del ecosistema Brikme.</div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {items.map(s => (
@@ -437,15 +397,13 @@ function SidebarDrawer({ route, nav, role, canTokenize, onClose, onLogout }: Sid
             style={{
               display: 'flex', alignItems: 'center', gap: 10, width: '100%',
               padding: '6px 10px', borderRadius: 14, border: 'none', cursor: 'pointer',
-              background: 'transparent', color: 'rgba(255,100,100,0.65)',
+              background: 'transparent', color: 'var(--neg)',
               fontFamily: 'var(--font-b)', fontSize: 13.5, fontWeight: 500,
               transition: 'color 0.2s',
               marginTop: 4,
             }}
-            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,100,100,0.90)'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,100,100,0.65)'}
           >
-            <span style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span className="nav-icon-bare">
               {LogoutIcon}
             </span>
             Cerrar sesión
@@ -487,63 +445,12 @@ export default function Sidebar({ route, nav, role, canTokenize = false, theme, 
   const items = menu(mainItems(role, canTokenize));
   const logoIcon = theme === 'light' ? '/icono.png' : '/iconow.png';
   const logoFull = theme === 'light' ? '/logo-light.png' : '/logo-dark.png';
-  const logoRef = useRef<HTMLButtonElement>(null);
-  const waveElRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | null>(null);
-  const [logoHovered, setLogoHovered] = useState(false);
   const [subsOpen, setSubsOpen] = useState(false);
   const hydrated = useHydrated();
   const handleBottomClick = (id: SidebarItemId) => {
     if (id === 'subsidiarias') { setSubsOpen(true); return; }
     nav(id);
   };
-
-  const handleLogoEnter = useCallback(() => {
-    setLogoHovered(true);
-    if (!logoRef.current || !waveElRef.current) return;
-    const rect = logoRef.current.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const root = document.documentElement;
-    root.style.setProperty('--lx', `${cx}px`);
-    root.style.setProperty('--ly', `${cy}px`);
-    root.style.setProperty('--wr', '0px');
-    waveElRef.current.classList.add('active');
-
-    const start = performance.now();
-    const duration = 2200;
-    const maxR = 1800;
-    const ease = (t: number) => 1 - Math.pow(1 - t, 3); // cubic ease-out
-    const tick = (now: number) => {
-      const t = Math.min((now - start) / duration, 1);
-      root.style.setProperty('--wr', `${ease(t) * maxR}px`);
-      if (t < 1) rafRef.current = requestAnimationFrame(tick);
-    };
-    cancelAnimationFrame(rafRef.current ?? 0); // null → 0, same no-op as before
-    rafRef.current = requestAnimationFrame(tick);
-  }, []);
-
-  const handleLogoLeave = useCallback(() => {
-    setLogoHovered(false);
-    cancelAnimationFrame(rafRef.current ?? 0); // null → 0, same no-op as before
-    const root = document.documentElement;
-    const currentR = parseFloat(root.style.getPropertyValue('--wr') || '0');
-    if (currentR <= 0) { if (waveElRef.current) waveElRef.current.classList.remove('active'); return; }
-    const duration = 900;
-    const ease = (t: number) => t * t; // ease-in (collapse)
-    const start = performance.now();
-    const tick = (now: number) => {
-      const t = Math.min((now - start) / duration, 1);
-      root.style.setProperty('--wr', `${currentR * (1 - ease(t))}px`);
-      if (t < 1) {
-        rafRef.current = requestAnimationFrame(tick);
-      } else {
-        root.style.setProperty('--wr', '0px');
-        if (waveElRef.current) waveElRef.current.classList.remove('active');
-      }
-    };
-    rafRef.current = requestAnimationFrame(tick);
-  }, []);
 
   if (drawerMode) {
     return (
@@ -557,7 +464,7 @@ export default function Sidebar({ route, nav, role, canTokenize = false, theme, 
 
   return (
     <motion.div
-      animate={{ width: collapsed ? 58 : 232 }}
+      animate={{ width: collapsed ? COLLAPSED_W : 232 }}
       transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
       style={{
         position: 'fixed', left: 0, top: 0,
@@ -571,7 +478,7 @@ export default function Sidebar({ route, nav, role, canTokenize = false, theme, 
         zIndex: 10,
       }}
     >
-      {/* Logo + collapse */}
+      {/* Logo + collapse (the logo is static: no hover swap, no background wave) */}
       <div style={{
         display: 'flex', alignItems: 'center',
         flexDirection: collapsed ? 'column' : 'row',
@@ -580,25 +487,17 @@ export default function Sidebar({ route, nav, role, canTokenize = false, theme, 
       }}>
         {collapsed ? (
           <button
-            ref={logoRef}
-            onMouseEnter={handleLogoEnter}
-            onMouseLeave={handleLogoLeave}
             onClick={() => nav('feed')} title="Feed"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: 36, height: 36 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36 }}
           >
-            <img src={logoIcon} alt="Inicio" style={{ position: 'absolute', width: 36, height: 36, objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />
-            <img src="/logoblue.png" alt="" style={{ position: 'absolute', width: 36, height: 36, objectFit: 'contain', opacity: logoHovered ? 1 : 0, transition: 'opacity 0.5s ease' }} />
+            <img src={logoIcon} alt="Inicio" style={{ width: 36, height: 36, objectFit: 'contain' }} />
           </button>
         ) : (
           <button
-            ref={logoRef}
-            onMouseEnter={handleLogoEnter}
-            onMouseLeave={handleLogoLeave}
             onClick={() => nav('feed')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, position: 'relative', height: 42 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, height: 42 }}
           >
-            <img src={logoFull} alt="KEY CHAIN" style={{ height: 42, width: 'auto', objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />
-            <img src="/logoblue.png" alt="" style={{ position: 'absolute', left: 0, top: 0, height: 42, width: 'auto', objectFit: 'contain', opacity: logoHovered ? 1 : 0, transition: 'opacity 0.5s ease' }} />
+            <img src={logoFull} alt="Brikme" style={{ height: 42, width: 'auto', objectFit: 'contain' }} />
           </button>
         )}
         <button
@@ -651,25 +550,18 @@ export default function Sidebar({ route, nav, role, canTokenize = false, theme, 
             padding: collapsed ? '6px 0' : '6px 10px',
             justifyContent: collapsed ? 'center' : 'flex-start',
             borderRadius: 14, border: 'none', cursor: 'pointer',
-            background: 'transparent', color: 'rgba(255,100,100,0.60)',
+            background: 'transparent', color: 'var(--neg)',
             fontFamily: 'var(--font-b)', fontSize: 13.5, fontWeight: 500,
             transition: 'color 0.2s', marginTop: 4,
           }}
-          onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,100,100,0.90)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,100,100,0.60)'}
         >
-          <span style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(255,80,80,0.07)', border: '1px solid rgba(255,80,80,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span className="nav-icon-bare">
             {LogoutIcon}
           </span>
           {!collapsed && 'Cerrar sesión'}
         </button>
       </div>
       </div>
-
-      {hydrated && createPortal(
-        <div ref={waveElRef} className="dot-logo-wave" />,
-        document.body
-      )}
 
       {hydrated && createPortal(
         <AnimatePresence>

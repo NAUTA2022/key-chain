@@ -253,7 +253,7 @@ function RoadmapKYCN() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Roadmap KYCN</div>
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Roadmap BRIK</div>
           <div style={{ padding: '3px 10px', borderRadius: 6, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)' }}>
             <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: 'var(--pos)' }}>{doneCount}/{ROADMAP.length} completados</span>
           </div>
@@ -393,27 +393,27 @@ function RoadmapKYCN() {
   );
 }
 
-/* ── Live: KYCN rewards are not active yet (no fake claims) ── */
+/* ── Live: BRIK rewards are not active yet (no fake claims) ── */
 function RewardsSoon() {
   return (
     <div className="glow-card glass-card" style={{ padding: '24px 28px', borderRadius: 20, marginBottom: 16, minHeight: 120, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
-        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Recompensas KYCN</div>
+        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Recompensas BRIK</div>
         <PTag label="Próximamente" color="purple" />
       </div>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.6, maxWidth: 680 }}>
-        El programa de recompensas y airdrops del token KYCN todavía no está activo. Cuando se habilite vas a ver acá tus hitos y lo que te corresponda reclamar.
+        El programa de recompensas y airdrops del token BRIK todavía no está activo. Cuando se habilite vas a ver aquí tus hitos y lo que te corresponda reclamar.
       </div>
     </div>
   );
 }
 
 const ROADMAP = [
-  { q: 'Q4 2025', label: 'Seed Round',    done: true,  desc: 'Financiación inicial completada.', detail: 'Ronda seed cerrada con inversores estratégicos. Capital utilizado para desarrollo core y auditorías de smart contracts.', claim: 120.50, claimLabel: 'USDC de rendimiento', airdrop: { tokens: 500, symbol: 'KYCN', claimed: true } },
-  { q: 'Q1 2026', label: 'Ronda Privada', done: true,  desc: 'Emisión privada · $3M captados.', detail: 'Ronda privada oversubscribed en 2x. Se incorporaron 14 inversores institucionales de LATAM y España.', claim: 280.00, claimLabel: 'USDC pendiente de cobrar', airdrop: { tokens: 1200, symbol: 'KYCN', claimed: false } },
-  { q: 'Q2 2026', label: 'ICO Pública',   done: true,  desc: 'Venta pública activa · $5M goal.', detail: 'Token KYCN disponible al público general. Más de 4.200 wallets participantes en la primera semana.', claim: 0, claimLabel: null, airdrop: null },
-  { q: 'Q3 2026', label: 'DEX Listing',   done: false, desc: 'QuickSwap + Uniswap v3.', detail: 'Listado en los principales DEX de Polygon. Provisión de liquidez inicial de $2M. Farming incentivado con KYCN.', claim: 0, claimLabel: null, airdrop: { tokens: 800, symbol: 'KYCN', claimed: false, future: true } },
-  { q: 'Q4 2026', label: 'Gobernanza',    done: false, desc: 'DAO + votaciones on-chain.', detail: 'Lanzamiento del módulo de gobernanza descentralizada. Los holders de KYCN podrán votar proyectos, fees y upgrades.', claim: 0, claimLabel: null, airdrop: null },
+  { q: 'Q4 2025', label: 'Seed Round',    done: true,  desc: 'Financiación inicial completada.', detail: 'Ronda seed cerrada con inversores estratégicos. Capital utilizado para desarrollo core y auditorías de smart contracts.', claim: 120.50, claimLabel: 'USDC de rendimiento', airdrop: { tokens: 500, symbol: 'BRIK', claimed: true } },
+  { q: 'Q1 2026', label: 'Ronda Privada', done: true,  desc: 'Emisión privada · $3M captados.', detail: 'Ronda privada oversubscribed en 2x. Se incorporaron 14 inversores institucionales de LATAM y España.', claim: 280.00, claimLabel: 'USDC pendiente de cobrar', airdrop: { tokens: 1200, symbol: 'BRIK', claimed: false } },
+  { q: 'Q2 2026', label: 'ICO Pública',   done: true,  desc: 'Venta pública activa · $5M goal.', detail: 'Token BRIK disponible al público general. Más de 4.200 wallets participantes en la primera semana.', claim: 0, claimLabel: null, airdrop: null },
+  { q: 'Q3 2026', label: 'DEX Listing',   done: false, desc: 'QuickSwap + Uniswap v3.', detail: 'Listado en los principales DEX de Polygon. Provisión de liquidez inicial de $2M. Farming incentivado con BRIK.', claim: 0, claimLabel: null, airdrop: { tokens: 800, symbol: 'BRIK', claimed: false, future: true } },
+  { q: 'Q4 2026', label: 'Gobernanza',    done: false, desc: 'DAO + votaciones on-chain.', detail: 'Lanzamiento del módulo de gobernanza descentralizada. Los holders de BRIK podrán votar proyectos, fees y upgrades.', claim: 0, claimLabel: null, airdrop: null },
   { q: 'Q1 2027', label: 'V2 Platform',   done: false, desc: 'Multi-chain + nuevos RWA.', detail: 'Expansión a Ethereum mainnet y Arbitrum. Incorporación de nuevas categorías de activos reales: deuda corporativa y arte.', claim: 0, claimLabel: null, airdrop: null },
 ];
 const ACADEMY_ARTS = [
@@ -643,13 +643,13 @@ export default function Dashboard({ nav }: DashboardProps) {
     }));
 
     // Full portfolio breakdown
-    const kycn = balances.find(b => b.sym === 'KYCN') || { usd: 0, qty: 0 };
+    const kycn = balances.find(b => b.sym === 'BRIK') || { usd: 0, qty: 0 };
     const usdc = balances.find(b => b.sym === 'USDC') || { usd: 0 };
-    const cryptoAmt = balances.filter(b => b.sym !== 'KYCN' && b.sym !== 'USDC').reduce((s, b) => s + b.usd, 0);
+    const cryptoAmt = balances.filter(b => b.sym !== 'BRIK' && b.sym !== 'USDC').reduce((s, b) => s + b.usd, 0);
     const allocTotal = [
       { label: 'RWA Activos',   value: Math.round(holdTotal / nz(grand) * 100),  amount: holdTotal,  color: '#3078ff', sub: `${holdings.length} proyectos activos` },
       { label: 'USDC Líquido',  value: Math.round(usdc.usd / nz(grand) * 100),   amount: usdc.usd,   color: '#2775CA', sub: 'Disponible para invertir' },
-      { label: 'Token KYCN',    value: Math.round(kycn.usd / nz(grand) * 100),   amount: kycn.usd,   color: '#f5a623', sub: `${kycn.qty.toLocaleString()} tokens` },
+      { label: 'Token BRIK',    value: Math.round(kycn.usd / nz(grand) * 100),   amount: kycn.usd,   color: '#f5a623', sub: `${kycn.qty.toLocaleString()} tokens` },
       { label: 'Crypto',        value: Math.round(cryptoAmt / nz(grand) * 100),  amount: cryptoAmt,  color: '#8247E5', sub: 'MATIC + ETH' },
     ];
     return { allocRWA, allocTotal, grandTotal: grand, diversification: 7.4 };
@@ -890,7 +890,7 @@ export default function Dashboard({ nav }: DashboardProps) {
               estimate below, weighted by each holding's current value */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             {live && holdings.length === 0 && (
-              <div style={{ padding: '7px 0', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{holdingsLoading ? 'Cargando inversiones…' : 'Todavía no tenés inversiones.'}</div>
+              <div style={{ padding: '7px 0', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{holdingsLoading ? 'Cargando inversiones…' : 'Todavía no tienes inversiones.'}</div>
             )}
             {holdings.map((h, i, arr) => {
               const asset = assetOf(h.assetId);
@@ -932,7 +932,7 @@ export default function Dashboard({ nav }: DashboardProps) {
             )}
             {live && holdings.length === 0 && !holdingsLoading && (
               <div style={{ padding: '18px 0', textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 12 }}>Todavía no tenés inversiones.</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 12 }}>Todavía no tienes inversiones.</div>
                 <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => nav('primario')}
                   style={{ padding: '8px 14px', borderRadius: 8, border: 'none', background: 'var(--accent)', color: 'var(--accent-fg)', fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>
                   Explorar tokenizaciones
@@ -999,7 +999,7 @@ export default function Dashboard({ nav }: DashboardProps) {
                                 e.stopPropagation();
                                 // Live: tokenized assets are bought on-chain from the asset page.
                                 if (live) return nav('detalle', a);
-                                // KEYCHAIN's own checkout (Key Pay is no longer the payment step).
+                                // Brikme's own checkout (Brikme Pay is no longer the payment step).
                                 nav('checkout', { asset: a, qty: 10 });
                               }}
                               style={{ padding: '8px', borderRadius: 8, border: 'none', background: 'var(--accent)', color: 'var(--accent-fg)', fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
@@ -1117,7 +1117,7 @@ export default function Dashboard({ nav }: DashboardProps) {
         </div>
       </div>
 
-      {/* Fila 4: Roadmap KYCN — full width (live: rewards not active yet) */}
+      {/* Fila 4: Roadmap BRIK — full width (live: rewards not active yet) */}
       {live ? <RewardsSoon /> : <RoadmapKYCN />}
     </div>
 

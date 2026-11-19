@@ -250,7 +250,7 @@ function createPost(input: CreatePostInput): FeedItem {
   if (files.some(f => !f.type.startsWith('image/') && !f.type.startsWith('video/'))) throw new Error('Solo se pueden subir fotos o videos.');
   if (files.length > MAX_POST_MEDIA) throw new Error(`Máximo ${MAX_POST_MEDIA} archivos por publicación.`);
   const text = input.text.trim();
-  if (!text && !files.length) throw new Error('Escribí algo o agregá una foto o un video para publicar.');
+  if (!text && !files.length) throw new Error('Escribe algo o agrega una foto o un video para publicar.');
   const ts = Date.now();
   const post: ProjectPost = {
     id: nextId('p'), ts, date: 'Ahora', text, milestone: input.milestone,

@@ -12,7 +12,7 @@ export type Movement = {
   status: string;
   /** Asset the movement belongs to (its name), when there is one. */
   assetName: string | null;
-  /** Token the amount is in when it is not a dollar stablecoin (demo KYCN). */
+  /** Token the amount is in when it is not a dollar stablecoin (demo BRIK). */
   unit?: string;
 };
 

@@ -15,3 +15,10 @@ build
 .vercel
 .DS_Store
 *.log
+
+# Raw 3D exports (~360 MB); the site serves the packed copies in public/models/hq and bg
+models-src
+
+# Demo videos (large binaries; shared outside git)
+docs/video/*.mp4
+docs/video/*.mp3
