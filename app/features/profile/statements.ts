@@ -16,7 +16,7 @@ export function statementYears(memberSince: string | null | undefined, currentYe
 
 export function statementCsv(s: Statement): string {
   const rows: Array<Array<string | number | null>> = [
-    ['Resumen anual KEY CHAIN', s.year],
+    ['Resumen anual La 33', s.year],
     [],
     ['Inversiones'],
     ['Fecha', 'Activo', 'ID activo', 'Tokens', 'Monto (USD)', 'Transacción'],
@@ -66,7 +66,7 @@ export function printStatement(s: Statement, holder: { name: string; wallet: str
     parent?.appendChild(node);
     return node;
   };
-  doc.title = `Resumen ${s.year} — KEY CHAIN`;
+  doc.title = `Resumen ${s.year} — La 33`;
   const style = el('style', 'body{font-family:system-ui,-apple-system,sans-serif;color:#111;margin:32px}h1{font-size:20px;margin:0 0 4px}h2{font-size:15px;margin:24px 0 8px}p{margin:2px 0;font-size:12px;color:#444}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #ddd}th{background:#f4f4f4}.t{margin-top:20px;font-size:13px}.n{font-size:11px;color:#666;margin-top:24px}');
   doc.head.appendChild(style);
   const body = doc.body;

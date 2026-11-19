@@ -70,7 +70,7 @@ export function AdminConsole({ nav }: { nav: NavFn }) {
       <AdminFieldTheme />
       <PSection
         title="Panel Admin"
-        sub="Control total de la plataforma KEY CHAIN."
+        sub="Control total de la plataforma La 33."
         action={<PBtn variant="accent" onClick={() => nav('config')}>{Icons.settings} Configuración</PBtn>}
       />
 

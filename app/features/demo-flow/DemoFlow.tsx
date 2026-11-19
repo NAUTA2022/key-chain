@@ -449,7 +449,7 @@ export default function DemoFlow() {
               )}
             </AnimatePresence>
             {sheet === 'ledger' && <Sheet title="Tus ingresos y egresos" onClose={() => setSheet(null)}><Ledger s={s} run={run} p={p} hito={hito} /></Sheet>}
-            {sheet === 'chain' && <Sheet title="Blockchain" onClose={() => setSheet(null)}><BlockchainLog run={run} rpcUrl={chain?.rpcUrl ?? null} networkName={chain?.name ?? 'KEY CHAIN Devnet'} /></Sheet>}
+            {sheet === 'chain' && <Sheet title="Blockchain" onClose={() => setSheet(null)}><BlockchainLog run={run} rpcUrl={chain?.rpcUrl ?? null} networkName={chain?.name ?? 'La 33 Devnet'} /></Sheet>}
           </>
         )}
       </div>

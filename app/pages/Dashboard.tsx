@@ -101,8 +101,8 @@ function PortfolioChart({ data, period }: PortfolioChartProps) {
       >
         <defs>
           <linearGradient id="pchart-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3078ff" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#3078ff" stopOpacity="0" />
+            <stop offset="0%" stopColor="#F3B200" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="#F3B200" stopOpacity="0" />
           </linearGradient>
           <clipPath id="pchart-clip">
             <rect x={PAD_L} y={PAD_T} width={cW} height={cH} />
@@ -125,7 +125,7 @@ function PortfolioChart({ data, period }: PortfolioChartProps) {
         <path d={areaPath} fill="url(#pchart-grad)" clipPath="url(#pchart-clip)" />
 
         {/* Line */}
-        <path d={linePath} fill="none" stroke="#3078ff" strokeWidth="2.2"
+        <path d={linePath} fill="none" stroke="#F3B200" strokeWidth="2.2"
           strokeLinecap="round" strokeLinejoin="round" clipPath="url(#pchart-clip)" />
 
         {/* Crosshair */}
@@ -133,7 +133,7 @@ function PortfolioChart({ data, period }: PortfolioChartProps) {
           <>
             <line x1={hx} y1={PAD_T} x2={hx} y2={PAD_T + cH}
               stroke="var(--gl-bd2)" strokeWidth="1" strokeDasharray="3 3" />
-            <circle cx={hx} cy={hy} r={4} fill="#3078ff" stroke="white" strokeWidth="1.5" />
+            <circle cx={hx} cy={hy} r={4} fill="#F3B200" stroke="white" strokeWidth="1.5" />
             {/* Tooltip */}
             {(() => {
               const tw = 96, th = 36;
@@ -144,7 +144,7 @@ function PortfolioChart({ data, period }: PortfolioChartProps) {
               return (
                 <g>
                   <rect x={tx} y={ty} width={tw} height={th} rx="6"
-                    fill="rgba(15,20,40,0.92)" stroke="rgba(48,120,255,0.4)" strokeWidth="1" />
+                    fill="rgba(15,20,40,0.92)" stroke="rgba(243,178,0,0.4)" strokeWidth="1" />
                   <text x={tx + tw / 2} y={ty + 13} textAnchor="middle"
                     fill="rgba(255,255,255,0.55)" fontSize="9" fontFamily="var(--font-b)">{label}</text>
                   <text x={tx + tw / 2} y={ty + 27} textAnchor="middle"
@@ -223,8 +223,8 @@ function AirdropBox({ tokens, symbol, claimed, future, onClaim }: AirdropBoxProp
         style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '6px 14px', borderRadius: 10, cursor: done || future ? 'default' : 'pointer',
-          background: done ? 'rgba(74,222,128,0.12)' : future ? 'rgba(255,255,255,0.05)' : 'rgba(48,120,255,0.18)',
-          border: `1px solid ${done ? 'rgba(74,222,128,0.3)' : future ? 'rgba(255,255,255,0.08)' : 'rgba(48,120,255,0.35)'}`,
+          background: done ? 'rgba(74,222,128,0.12)' : future ? 'rgba(255,255,255,0.05)' : 'rgba(243,178,0,0.18)',
+          border: `1px solid ${done ? 'rgba(74,222,128,0.3)' : future ? 'rgba(255,255,255,0.08)' : 'rgba(243,178,0,0.35)'}`,
         }}
       >
         <span style={{ fontSize: 14 }}>{done ? '✅' : future ? '🔒' : '🎁'}</span>
@@ -262,7 +262,7 @@ function RoadmapKYCN() {
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Progreso global</div>
           <div style={{ width: 120, height: 5, background: 'var(--gl-bg3)', borderRadius: 3, overflow: 'hidden' }}>
             <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.4 }}
-              style={{ height: '100%', background: 'linear-gradient(90deg, #3078ff, #4ade80)', borderRadius: 3 }} />
+              style={{ height: '100%', background: 'linear-gradient(90deg, #F3B200, #4ade80)', borderRadius: 3 }} />
           </div>
           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13, color: 'var(--pos)' }}>{Math.round(pct)}%</div>
         </div>
@@ -274,7 +274,7 @@ function RoadmapKYCN() {
         {/* Track line */}
         <div style={{ position: 'absolute', top: 18, left: '4%', right: '4%', height: 3, background: 'var(--gl-bg3)', borderRadius: 2, zIndex: 0 }}>
           <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1.4, ease: 'easeOut', delay: 0.3 }}
-            style={{ height: '100%', background: 'linear-gradient(90deg, #3078ff, #4ade80)', borderRadius: 2 }} />
+            style={{ height: '100%', background: 'linear-gradient(90deg, #F3B200, #4ade80)', borderRadius: 2 }} />
         </div>
 
         {/* Nodes */}
@@ -288,15 +288,15 @@ function RoadmapKYCN() {
                 {/* Node circle */}
                 <motion.div
                   whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.92 }}
-                  animate={isCurrent ? { boxShadow: ['0 0 0 0 rgba(48,120,255,0.6)', '0 0 0 8px rgba(48,120,255,0)', '0 0 0 0 rgba(48,120,255,0)'] } : {}}
+                  animate={isCurrent ? { boxShadow: ['0 0 0 0 rgba(243,178,0,0.6)', '0 0 0 8px rgba(243,178,0,0)', '0 0 0 0 rgba(243,178,0,0)'] } : {}}
                   transition={isCurrent ? { duration: 1.8, repeat: Infinity } : {}}
                   style={{
                     width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: r.done ? 'linear-gradient(135deg, #22c55e, #4ade80)' : isCurrent ? '#3078ff' : 'var(--gl-bg3)',
-                    border: `2px solid ${r.done ? '#4ade80' : isCurrent ? '#3078ff' : 'var(--gl-bd)'}`,
-                    boxShadow: r.done ? '0 0 14px rgba(74,222,128,0.4)' : isCurrent ? '0 0 14px rgba(48,120,255,0.5)' : 'none',
+                    background: r.done ? 'linear-gradient(135deg, #22c55e, #4ade80)' : isCurrent ? '#F3B200' : 'var(--gl-bg3)',
+                    border: `2px solid ${r.done ? '#4ade80' : isCurrent ? '#F3B200' : 'var(--gl-bd)'}`,
+                    boxShadow: r.done ? '0 0 14px rgba(74,222,128,0.4)' : isCurrent ? '0 0 14px rgba(243,178,0,0.5)' : 'none',
                     transition: 'all 0.2s',
-                    outline: isActive ? `2px solid ${r.done ? '#4ade80' : '#3078ff'}` : 'none',
+                    outline: isActive ? `2px solid ${r.done ? '#4ade80' : '#F3B200'}` : 'none',
                     outlineOffset: 3,
                   }}
                 >
@@ -309,7 +309,7 @@ function RoadmapKYCN() {
                 </motion.div>
 
                 {/* Quarter label */}
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, fontWeight: 700, color: r.done ? 'var(--pos)' : isCurrent ? '#3078ff' : 'var(--ter)', marginTop: 8, letterSpacing: '0.04em' }}>{r.q}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, fontWeight: 700, color: r.done ? 'var(--pos)' : isCurrent ? '#F3B200' : 'var(--ter)', marginTop: 8, letterSpacing: '0.04em' }}>{r.q}</div>
                 <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 12, color: r.done || isCurrent ? 'var(--text)' : 'var(--sec)', marginTop: 2, textAlign: 'center', lineHeight: 1.2 }}>{r.label}</div>
               </div>
             );
@@ -332,7 +332,7 @@ function RoadmapKYCN() {
             {(() => {
               const r = ROADMAP[active];
               const isCurrent = !r.done && (active === 0 || ROADMAP[active-1].done);
-              const accentColor = r.done ? '#4ade80' : isCurrent ? '#3078ff' : 'rgba(255,255,255,0.25)';
+              const accentColor = r.done ? '#4ade80' : isCurrent ? '#F3B200' : 'rgba(255,255,255,0.25)';
               return (
                 <div style={{
                   padding: '20px 24px', borderRadius: 16,
@@ -343,7 +343,7 @@ function RoadmapKYCN() {
                   <div style={{ flex: '1 1 240px', minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                       <div style={{ padding: '3px 10px', borderRadius: 6, background: `${accentColor}20`, border: `1px solid ${accentColor}40` }}>
-                        <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: r.done ? 'var(--pos)' : isCurrent ? '#3078ff' : 'var(--ter)' }}>{r.q} · {r.done ? 'Completado' : isCurrent ? 'En curso' : 'Pendiente'}</span>
+                        <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: r.done ? 'var(--pos)' : isCurrent ? '#F3B200' : 'var(--ter)' }}>{r.q} · {r.done ? 'Completado' : isCurrent ? 'En curso' : 'Pendiente'}</span>
                       </div>
                     </div>
                     <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--text)', marginBottom: 6 }}>{r.label}</div>
@@ -351,7 +351,7 @@ function RoadmapKYCN() {
 
                     {/* Claim reward */}
                     {r.claim > 0 && (
-                      <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: claimed[active] ? 'rgba(74,222,128,0.08)' : 'rgba(48,120,255,0.1)', border: `1px solid ${claimed[active] ? 'rgba(74,222,128,0.25)' : 'rgba(48,120,255,0.25)'}` }}>
+                      <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: claimed[active] ? 'rgba(74,222,128,0.08)' : 'rgba(243,178,0,0.1)', border: `1px solid ${claimed[active] ? 'rgba(74,222,128,0.25)' : 'rgba(243,178,0,0.25)'}` }}>
                         <span style={{ fontSize: 20 }}>💰</span>
                         <div>
                           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16, color: claimed[active] ? 'var(--pos)' : 'var(--text)' }}>
@@ -363,7 +363,7 @@ function RoadmapKYCN() {
                           <motion.button
                             whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                             onClick={() => setClaimed(c => ({ ...c, [active]: true }))}
-                            style={{ marginLeft: 8, padding: '7px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', background: '#3078ff', color: '#fff', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 12 }}
+                            style={{ marginLeft: 8, padding: '7px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', background: '#F3B200', color: '#fff', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 12 }}
                           >Cobrar →</motion.button>
                         )}
                       </div>
@@ -624,7 +624,7 @@ export default function Dashboard({ nav }: DashboardProps) {
       const { slices, index } = allocationByCategory(items);
       return { allocRWA: slices, allocTotal: slices, grandTotal: holdTotal, diversification: index };
     }
-    const catColors: Record<string, string> = { Campos: '#4ade80', Autos: '#3078ff', Drones: '#f5a623', Edificios: '#8247E5', Inmuebles: '#2775CA' };
+    const catColors: Record<string, string> = { Campos: '#4ade80', Autos: '#F3B200', Drones: '#f5a623', Edificios: '#8247E5', Inmuebles: '#2775CA' };
     const byCat: Record<string, { val: number; apySum: number; count: number }> = {};
     holdings.forEach(h => {
       const a = RWA_ASSETS.find(x => x.id === h.assetId);
@@ -647,7 +647,7 @@ export default function Dashboard({ nav }: DashboardProps) {
     const usdc = balances.find(b => b.sym === 'USDC') || { usd: 0 };
     const cryptoAmt = balances.filter(b => b.sym !== 'KYCN' && b.sym !== 'USDC').reduce((s, b) => s + b.usd, 0);
     const allocTotal = [
-      { label: 'RWA Activos',   value: Math.round(holdTotal / nz(grand) * 100),  amount: holdTotal,  color: '#3078ff', sub: `${holdings.length} proyectos activos` },
+      { label: 'RWA Activos',   value: Math.round(holdTotal / nz(grand) * 100),  amount: holdTotal,  color: '#F3B200', sub: `${holdings.length} proyectos activos` },
       { label: 'USDC Líquido',  value: Math.round(usdc.usd / nz(grand) * 100),   amount: usdc.usd,   color: '#2775CA', sub: 'Disponible para invertir' },
       { label: 'Token KYCN',    value: Math.round(kycn.usd / nz(grand) * 100),   amount: kycn.usd,   color: '#f5a623', sub: `${kycn.qty.toLocaleString()} tokens` },
       { label: 'Crypto',        value: Math.round(cryptoAmt / nz(grand) * 100),  amount: cryptoAmt,  color: '#8247E5', sub: 'MATIC + ETH' },
@@ -763,7 +763,7 @@ export default function Dashboard({ nav }: DashboardProps) {
             padding: '11px 22px', borderRadius: 14, border: 'none', cursor: 'pointer', flexShrink: 0,
             background: 'var(--accent)', color: 'var(--accent-fg)',
             fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 13.5,
-            boxShadow: '0 0 20px rgba(48,120,255,0.35)',
+            boxShadow: '0 0 20px rgba(243,178,0,0.35)',
           }}
         >
           + Nueva inversión
@@ -1081,12 +1081,12 @@ export default function Dashboard({ nav }: DashboardProps) {
           <div style={{ padding: '10px 12px', background: 'var(--gl-bg4)', borderRadius: 10, border: '1px solid var(--gl-bd)', marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)' }}>Progreso general</span>
-              <span style={{ fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, color: '#3078ff' }}>{acadRead}/{acadTotal} leídos</span>
+              <span style={{ fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, color: '#F3B200' }}>{acadRead}/{acadTotal} leídos</span>
             </div>
             <div style={{ height: 5, background: 'var(--gl-div)', borderRadius: 3, overflow: 'hidden' }}>
               <motion.div initial={{ width: 0 }} animate={{ width: `${Math.round(acadRead / Math.max(acadTotal, 1) * 100)}%` }}
                 transition={{ duration: 1, delay: 0.3 }}
-                style={{ height: '100%', background: 'linear-gradient(90deg,#3078ff,#5b8cff)', borderRadius: 3 }} />
+                style={{ height: '100%', background: 'linear-gradient(90deg,#F3B200,#FFCC40)', borderRadius: 3 }} />
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1 }}>
@@ -1098,16 +1098,16 @@ export default function Dashboard({ nav }: DashboardProps) {
             {acadRows.map((art, i, arr) => (
               <div key={art.key} style={{ padding: '9px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--gl-div)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 10 }}
                 onClick={art.open}>
-                <div style={{ width: 28, height: 28, borderRadius: 7, background: art.done ? 'rgba(74,222,128,0.12)' : 'rgba(48,120,255,0.1)', border: `1px solid ${art.done ? 'rgba(74,222,128,0.3)' : 'rgba(48,120,255,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 7, background: art.done ? 'rgba(74,222,128,0.12)' : 'rgba(243,178,0,0.1)', border: `1px solid ${art.done ? 'rgba(74,222,128,0.3)' : 'rgba(243,178,0,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                   {art.done
                     ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="var(--pos)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    : <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="#3078ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="12" r="9" stroke="#3078ff" strokeWidth="2"/></svg>
+                    : <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="#F3B200" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="12" r="9" stroke="#F3B200" strokeWidth="2"/></svg>
                   }
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 11.5, color: art.done ? 'var(--ter)' : 'var(--text)', textDecoration: art.done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{art.title}</div>
                   <div style={{ display: 'flex', gap: 5, alignItems: 'center', marginTop: 3 }}>
-                    <span style={{ padding: '1px 6px', borderRadius: 3, background: 'rgba(48,120,255,0.12)', fontFamily: 'var(--font-b)', fontSize: 8.5, color: 'rgba(80,150,255,0.9)', fontWeight: 600 }}>{art.cat}</span>
+                    <span style={{ padding: '1px 6px', borderRadius: 3, background: 'rgba(243,178,0,0.12)', fontFamily: 'var(--font-b)', fontSize: 8.5, color: 'rgba(243,178,0,0.9)', fontWeight: 600 }}>{art.cat}</span>
                     <span style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, color: 'var(--ter)' }}>· {art.read} min lectura</span>
                   </div>
                 </div>

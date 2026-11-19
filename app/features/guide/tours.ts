@@ -43,19 +43,19 @@ const isTestNetwork = () => Number(import.meta.env.VITE_CHAIN_ID ?? 0) !== 137;
 
 const WELCOME: Tour = {
   id: 'welcome',
-  title: 'Bienvenida a KEY CHAIN',
-  summary: 'Qué es KEY CHAIN, tu wallet, el USDC, el KYC y dónde ver tus inversiones.',
+  title: 'Bienvenida a La 33',
+  summary: 'Qué es La 33, tu wallet, el USDC, el KYC y dónde ver tus inversiones.',
   path: '/panel',
   steps: [
     {
-      title: 'Te damos la bienvenida a KEY CHAIN',
+      title: 'Te damos la bienvenida a La 33',
       body: 'Acá podés invertir en activos reales —inmuebles, campos, energía— comprando pequeñas partes llamadas tokens. En un minuto te mostramos lo básico.',
     },
     {
       target: ['topbar-wallet', 'mnav-pertenencias'],
       fallback: 'center',
       title: 'Tu wallet: tu cuenta y tu billetera',
-      body: 'Con tu wallet entrás a KEY CHAIN sin contraseña y ahí guardás tu dinero y tus tokens. Nadie más puede moverlos: cada operación la autorizás vos con una firma.',
+      body: 'Con tu wallet entrás a La 33 sin contraseña y ahí guardás tu dinero y tus tokens. Nadie más puede moverlos: cada operación la autorizás vos con una firma.',
     },
     {
       title: 'USDC, el dólar digital',
@@ -215,7 +215,7 @@ const CHECKOUT: Tour = {
     },
     {
       title: '¿Qué es el gas?',
-      body: 'Cada operación en la blockchain paga una pequeña comisión de red, llamada gas. No la cobra KEY CHAIN: tu wallet te muestra el monto antes de confirmar.',
+      body: 'Cada operación en la blockchain paga una pequeña comisión de red, llamada gas. No la cobra La 33: tu wallet te muestra el monto antes de confirmar.',
     },
     {
       target: ['checkout-pay', 'checkout-summary'],
@@ -321,7 +321,7 @@ const TOKEN: Tour = {
       target: ['token-title'],
       fallback: 'center',
       title: 'KYCN, el token de la plataforma',
-      body: 'KYCN es un token de utilidad: no representa un activo real, sino beneficios dentro de KEY CHAIN.',
+      body: 'KYCN es un token de utilidad: no representa un activo real, sino beneficios dentro de La 33.',
     },
     {
       target: ['token-sale'],
@@ -421,7 +421,7 @@ const COMPANIES: Tour = {
     {
       target: ['company-verified'],
       title: 'Empresa verificada',
-      body: 'Este sello indica que KEY CHAIN revisó sus documentos legales (KYB, la verificación de empresas).',
+      body: 'Este sello indica que La 33 revisó sus documentos legales (KYB, la verificación de empresas).',
     },
     {
       target: ['company-follow'],

@@ -1,4 +1,4 @@
-import { useState, useMemo, type CSSProperties, type MouseEvent, type ReactElement, type ReactNode } from 'react';
+import { useState, useMemo, type CSSProperties, type ReactElement, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sHover, sWhoosh } from '~/lib/landingSound';
 
@@ -33,12 +33,6 @@ const REVENUE_ICON = (
     <path d="M15 3.5A9 9 0 0120.5 9H15V3.5z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/>
   </svg>
 );
-const CHECK_ICON = (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-    <path d="M5 12l5 5L20 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 /* ── Stat Icons ── */
 type StatIconType = 'money' | 'fee' | 'people' | 'token' | 'calendar' | 'chart' | 'lock' | 'vote' | 'yield';
 type StatIconProps = { type: StatIconType };
@@ -99,14 +93,14 @@ const STRATEGIES: Strategy[] = [
     icon: CROWD_ICON,
     color: '#34d399',
     badge: 'Fraccionada clásica',
-    tagline: 'Dividís el activo en tokens y muchos inversores compran una parte',
+    tagline: 'Divides el activo en tokens y muchos inversores compran una parte',
     desc: 'El activo se fracciona en tokens con precio fijo. Cada inversor compra los que quiere y recibe rendimientos mensuales proporcionales (alquiler, producción, cosecha). Es el modelo más simple y el más fácil de explicar.',
     best: ['Inmuebles', 'Maquinaria agrícola', 'Flotas y vehículos'],
     complexity: 'Baja',
     duration: '6–60 meses',
     params: [
       { id: 'goal',      label: 'Valuación del activo',        unit: 'USD',    type: 'number', min: 50000, max: 10000000, step: 10000, default: 300000,
-        help: 'El valor de mercado del activo que querés tokenizar. Es la base para el precio por token y el retorno esperado.' },
+        help: 'El valor de mercado del activo que quieres tokenizar. Es la base para el precio por token y el retorno esperado.' },
       { id: 'tokens',    label: 'Cantidad de tokens a emitir', unit: 'tokens', type: 'number', min: 100,   max: 1000000,  step: 100,   default: 10000,
         help: 'Cada token es una fracción del activo. Más tokens = precio unitario más bajo = más inversores pequeños pueden entrar.' },
       { id: 'apy',       label: 'Rendimiento anual ofrecido',  unit: '%',      type: 'range',  min: 3,     max: 20,       step: 0.5,   default: 9.8,
@@ -115,7 +109,7 @@ const STRATEGIES: Strategy[] = [
         help: 'Período en que los tokens generan rendimientos. Al vencimiento los holders pueden revender o renovar.' },
       { id: 'minticket', label: 'Ticket mínimo por inversor',  unit: 'USD',    type: 'range',  min: 1,     max: 5000,     step: 1,     default: 500,
         help: 'Inversión mínima por persona. Un ticket bajo amplía la base de inversores; uno alto atrae perfiles institucionales.' },
-      FEE_PARAM(2.5, 'Comisión de KEY CHAIN por tokenización, custodia del activo y distribución de rendimientos on-chain.'),
+      FEE_PARAM(2.5, 'Comisión de La 33 por tokenización, custodia del activo y distribución de rendimientos on-chain.'),
     ],
   },
   {
@@ -135,12 +129,12 @@ const STRATEGIES: Strategy[] = [
       { id: 'improve', label: 'Costo de cada mejora',         unit: 'USD',    type: 'number', min: 5000,  max: 5000000,  step: 5000,  default: 100000,
         help: 'Cuánto cuesta cada mejora propuesta. Se financia emitiendo tokens nuevos al precio vigente del activo.' },
       { id: 'uplift',  label: 'Revalorización por mejora',    unit: '%',      type: 'range',  min: 0,     max: 80,       step: 5,     default: 30,
-        help: 'Cuánto valor extra genera la mejora por encima de lo que costó. Ej: invertís $100K en una pileta y el activo sube $130K → 30%.' },
+        help: 'Cuánto valor extra genera la mejora por encima de lo que costó. Ej: inviertes $100K en una pileta y el activo sube $130K → 30%.' },
       { id: 'rounds',  label: 'Rondas de mejora',             unit: 'rondas', type: 'range',  min: 1,     max: 8,        step: 1,     default: 4,
         help: 'Cuántas mejoras se aprueban durante la vida del proyecto. Cada una es votada por los holders.' },
       { id: 'stake',   label: 'Tu participación inicial',     unit: '%',      type: 'range',  min: 1,     max: 50,       step: 1,     default: 10,
         help: 'El porcentaje del activo que tiene un holder de ejemplo. Vas a ver cómo evoluciona si acompaña las mejoras o si no.' },
-      FEE_PARAM(2, 'Comisión de KEY CHAIN por cada ronda de emisión, votación on-chain y actualización de la valuación.'),
+      FEE_PARAM(2, 'Comisión de La 33 por cada ronda de emisión, votación on-chain y actualización de la valuación.'),
     ],
   },
   {
@@ -165,7 +159,7 @@ const STRATEGIES: Strategy[] = [
         help: 'Lo que paga el operador por usar la parte del activo que todavía es de los inversores. Baja a medida que recompra.' },
       { id: 'recycle', label: 'Capital que se reinvierte en el ciclo', unit: '%',    type: 'range',  min: 0,     max: 100,     step: 10,   default: 80,
         help: 'Qué parte del capital recomprado vuelve a entrar en nuevos activos de la cartera en vez de retirarse.' },
-      FEE_PARAM(2, 'Comisión de KEY CHAIN por contratos de opción, cobro de cuotas y recompra automática de tokens.'),
+      FEE_PARAM(2, 'Comisión de La 33 por contratos de opción, cobro de cuotas y recompra automática de tokens.'),
     ],
   },
   {
@@ -175,13 +169,13 @@ const STRATEGIES: Strategy[] = [
     color: '#c084fc',
     badge: 'Ingresos futuros',
     tagline: 'Los holders cobran un % de las ventas hasta un tope y el negocio sigue siendo tuyo',
-    desc: 'En vez de vender una parte del activo, tokenizás sus ingresos futuros. Los holders reciben un porcentaje de la facturación mensual hasta cobrar un múltiplo pactado (por ejemplo 1.6x). Al llegar al tope los tokens se queman solos: no cedés propiedad y el inversor sabe exactamente cuánto va a cobrar.',
+    desc: 'En vez de vender una parte del activo, tokenizas sus ingresos futuros. Los holders reciben un porcentaje de la facturación mensual hasta cobrar un múltiplo pactado (por ejemplo 1.6x). Al llegar al tope los tokens se queman solos: no cedes propiedad y el inversor sabe exactamente cuánto va a cobrar.',
     best: ['Restaurantes y franquicias', 'E-commerce', 'Parques solares'],
     complexity: 'Baja',
     duration: '12–60 meses',
     params: [
       { id: 'goal',    label: 'Capital a levantar',            unit: 'USD', type: 'number', min: 10000, max: 5000000, step: 5000, default: 150000,
-        help: 'Lo que necesitás para crecer: abrir un local, comprar stock, instalar paneles.' },
+        help: 'Lo que necesitas para crecer: abrir un local, comprar stock, instalar paneles.' },
       { id: 'revenue', label: 'Facturación mensual actual',    unit: 'USD', type: 'number', min: 5000,  max: 5000000, step: 1000, default: 60000,
         help: 'Lo que factura el negocio hoy por mes. Es la base sobre la que se calcula el pago a los holders.' },
       { id: 'share',   label: '% de ingresos para holders',    unit: '%',   type: 'range',  min: 2,     max: 20,      step: 0.5,  default: 8,
@@ -190,7 +184,7 @@ const STRATEGIES: Strategy[] = [
         help: 'Múltiplo del capital que cobra el inversor antes de que los tokens se quemen. 1.6x = por cada $100 recibe $160.' },
       { id: 'growth',  label: 'Crecimiento mensual de ventas', unit: '%',   type: 'range',  min: 0,     max: 6,       step: 0.5,  default: 1.5,
         help: 'Cuánto crecen las ventas cada mes gracias al capital. Más crecimiento = se llega antes al tope.' },
-      FEE_PARAM(2, 'Comisión de KEY CHAIN por emisión, conciliación de ventas y pagos automáticos en USDC.'),
+      FEE_PARAM(2, 'Comisión de La 33 por emisión, conciliación de ventas y pagos automáticos en USDC.'),
     ],
   },
 ];
@@ -226,13 +220,13 @@ function useProjection(strategy: Strategy | undefined, params: SimParams): Proje
       });
       const totalReturns = p.goal * ((p.apy || 9.8) / 100) * ((p.duration || 24) / 12);
       return {
-        summary: `Tokenizás tu activo de ${fmt(p.goal)} y abrís inversión desde $${p.minticket || 500}. Con ${investors.toLocaleString()} inversores al ${p.apy || 9.8}% anual, distribuís ${fmt(totalReturns)} en rendimientos durante ${p.duration || 24} meses.`,
+        summary: `Tokenizas tu activo de ${fmt(p.goal)} y abres inversión desde $${p.minticket || 500}. Con ${investors.toLocaleString()} inversores al ${p.apy || 9.8}% anual, distribuyes ${fmt(totalReturns)} en rendimientos durante ${p.duration || 24} meses.`,
         stats: [
-          { key: 'net',          label: 'Capital neto para vos',     value: fmt(net),                    icon: 'money',    highlight: true, note: 'Lo que recibís al completar la ronda, descontada la comisión.' },
+          { key: 'net',          label: 'Capital neto para ti',     value: fmt(net),                    icon: 'money',    highlight: true, note: 'Lo que recibes al completar la ronda, descontada la comisión.' },
           { key: 'investors',    label: 'Inversores estimados',      value: investors.toLocaleString(),  icon: 'people',   note: `Con ticket mínimo de $${p.minticket || 500} por participante.` },
           { key: 'tokenPrice',   label: 'Precio por token',          value: `$${tokenPrice.toFixed(2)}`, icon: 'token',    note: 'Cada token representa una fracción igual del activo.' },
-          { key: 'totalReturns', label: 'Rendimientos a distribuir', value: fmt(totalReturns),           icon: 'yield',    note: 'Total que pagás a los holders durante el proyecto.' },
-          { key: 'fee',          label: 'Comisión de KEY CHAIN',     value: fmt(p.goal * fee),           icon: 'fee',      note: 'Tokenización, custodia del activo y distribución de rendimientos.' },
+          { key: 'totalReturns', label: 'Rendimientos a distribuir', value: fmt(totalReturns),           icon: 'yield',    note: 'Total que pagas a los holders durante el proyecto.' },
+          { key: 'fee',          label: 'Comisión de La 33',     value: fmt(p.goal * fee),           icon: 'fee',      note: 'Tokenización, custodia del activo y distribución de rendimientos.' },
           { key: 'duration',     label: 'Plazo del proyecto',        value: `${p.duration || 24} meses`, icon: 'calendar', note: 'Los tokens se pueden revender en el mercado secundario.' },
         ],
         charts: [
@@ -261,13 +255,13 @@ function useProjection(strategy: Strategy | undefined, params: SimParams): Proje
         stats: [
           { key: 'value',  label: 'Valor final del activo',     value: fmt(V),                       icon: 'chart',  highlight: true, note: `Arranca en ${fmt(p.goal)} y suma ${fmt(C * (1 + u))} por mejora.` },
           { key: 'raised', label: 'Capital levantado en mejoras', value: fmt(C * rounds),            icon: 'money',  note: `${rounds} rondas de ${fmt(C)}, votadas por los holders.` },
-          { key: 'yes',    label: 'Si acompañás las mejoras',   value: `${(s0 * 100).toFixed(1)}%`,  icon: 'token',  note: `Tu parte vale ${fmt(valYes)} y aportaste ${fmt(extra)} extra.` },
-          { key: 'no',     label: 'Si no invertís',             value: `${(sNo * 100).toFixed(1)}%`, icon: 'people', note: `Te diluís, pero tu parte vale ${fmt(valNo)} (empezó en ${fmt(start)}).` },
+          { key: 'yes',    label: 'Si acompañas las mejoras',   value: `${(s0 * 100).toFixed(1)}%`,  icon: 'token',  note: `Tu parte vale ${fmt(valYes)} y aportaste ${fmt(extra)} extra.` },
+          { key: 'no',     label: 'Si no inviertes',             value: `${(sNo * 100).toFixed(1)}%`, icon: 'people', note: `Te diluyes, pero tu parte vale ${fmt(valNo)} (empezó en ${fmt(start)}).` },
           { key: 'gain',   label: 'Ganancia por acompañar',     value: fmt(valYes - valNo - extra),  icon: 'yield',  note: 'Valor extra de seguir las rondas, ya descontado lo que aportaste.' },
-          { key: 'fee',    label: 'Comisión de KEY CHAIN',      value: fmt(C * rounds * fee),        icon: 'fee',    note: 'Se cobra sobre cada ronda de mejora emitida.' },
+          { key: 'fee',    label: 'Comisión de La 33',      value: fmt(C * rounds * fee),        icon: 'fee',    note: 'Se cobra sobre cada ronda de mejora emitida.' },
         ],
         charts: [
-          { data: series, key: 'yes', compare: 'no', fmt: 'pct', label: 'Tu porcentaje del activo', subtitle: 'Línea llena: acompañás cada mejora. Punteada: no invertís y te diluís.', legend: ['Acompañás', 'No invertís'] },
+          { data: series, key: 'yes', compare: 'no', fmt: 'pct', label: 'Tu porcentaje del activo', subtitle: 'Línea llena: acompañas cada mejora. Punteada: no inviertes y te diluyes.', legend: ['Acompañas', 'No inviertes'] },
           { data: series, key: 'value', label: 'Valor del activo (USD)', subtitle: 'Cada mejora aprobada y financiada por la comunidad suma valor al activo.' },
         ],
         timeline: { title: 'Rondas de mejora — cuánto entra y cómo se diluye quien no participa', items },
@@ -296,7 +290,7 @@ function useProjection(strategy: Strategy | undefined, params: SimParams): Proje
           { key: 'back',    label: 'Capital recuperado',          value: fmt(F),                      icon: 'money',    note: 'Vuelve completo a los holders vía recompra de tokens.' },
           { key: 'roi',     label: 'Retorno total del inversor',  value: `${(((F + rentTotal) / F - 1) * 100).toFixed(1)}%`, icon: 'chart', note: 'Renta cobrada sobre el capital invertido, sin depender de vender.' },
           { key: 'cycle',   label: 'Capital que sigue en el ciclo', value: fmt(F * rec),             icon: 'token',    note: `Alcanza para financiar el ${((F * rec) / p.goal * 100).toFixed(0)}% de un activo igual en la próxima vuelta.` },
-          { key: 'fee',     label: 'Comisión de KEY CHAIN',       value: fmt(F * fee),                icon: 'fee',      note: 'Contratos de opción, cobro de cuotas y recompras automáticas.' },
+          { key: 'fee',     label: 'Comisión de La 33',       value: fmt(F * fee),                icon: 'fee',      note: 'Contratos de opción, cobro de cuotas y recompras automáticas.' },
         ],
         charts: [
           { data: months, key: 'own',      fmt: 'pct', label: 'Propiedad del operador (%)',            subtitle: 'Cada cuota recompra tokens: el operador pasa de usuario a dueño.' },
@@ -320,15 +314,15 @@ function useProjection(strategy: Strategy | undefined, params: SimParams): Proje
       const firstPay = (p.revenue || 60000) * sh;
       return {
         summary: done
-          ? `Levantás ${fmt(p.goal)} sin ceder propiedad. Pagás el ${p.share || 8}% de tus ventas (${fmt(firstPay)} el primer mes) y en ${m} meses los holders cobran ${fmt(cap)}: ahí los tokens se queman y el negocio vuelve a ser 100% tuyo.`
+          ? `Levantas ${fmt(p.goal)} sin ceder propiedad. Pagas el ${p.share || 8}% de tus ventas (${fmt(firstPay)} el primer mes) y en ${m} meses los holders cobran ${fmt(cap)}: ahí los tokens se queman y el negocio vuelve a ser 100% tuyo.`
           : `Con estas ventas no se llega al tope de ${fmt(cap)} en 10 años. Subí el % de ingresos, bajá el tope o el capital a levantar.`,
         stats: [
-          { key: 'net',   label: 'Capital neto para vos',   value: fmt(net),                     icon: 'money',    highlight: true, note: 'Sin ceder un solo % de propiedad del negocio.' },
+          { key: 'net',   label: 'Capital neto para ti',   value: fmt(net),                     icon: 'money',    highlight: true, note: 'Sin ceder un solo % de propiedad del negocio.' },
           { key: 'pay',   label: 'Pago del primer mes',     value: fmt(firstPay),                icon: 'calendar', note: `${p.share || 8}% de ${fmt(p.revenue || 60000)} de facturación.` },
-          { key: 'time',  label: 'Meses hasta el tope',     value: done ? `${m} meses` : '+120', icon: 'chart',    note: 'Si vendés más, llegás antes y pagás menos intereses implícitos.' },
+          { key: 'time',  label: 'Meses hasta el tope',     value: done ? `${m} meses` : '+120', icon: 'chart',    note: 'Si vendes más, llegas antes y pagas menos intereses implícitos.' },
           { key: 'total', label: 'Total a devolver',        value: fmt(cap),                     icon: 'yield',    note: `${p.cap || 1.6}x el capital. Después no se paga nada más.` },
           { key: 'irr',   label: 'Retorno anual inversor',  value: irr ? `${irr.toFixed(1)}%` : '—', icon: 'token', note: 'Equivalente anual del múltiplo según el tiempo que tarda en cobrarse.' },
-          { key: 'fee',   label: 'Comisión de KEY CHAIN',   value: fmt(p.goal * fee),            icon: 'fee',      note: 'Emisión, conciliación de ventas y pagos automáticos.' },
+          { key: 'fee',   label: 'Comisión de La 33',   value: fmt(p.goal * fee),            icon: 'fee',      note: 'Emisión, conciliación de ventas y pagos automáticos.' },
         ],
         charts: [
           { data: months, key: 'paid',  label: 'Pagado a holders (USD)', subtitle: 'Crece con tus ventas y se detiene al llegar al tope pactado.' },
@@ -391,368 +385,127 @@ function MiniChart({ data, dataKey, compare, kind, color, height = 100 }: MiniCh
   );
 }
 
-/* ── Param field with help text ── */
-type ParamFieldProps = { p: StrategyParam; value: number; onChange: (v: number) => void; color: string };
+/* ── Param field: label + live value + slider (no boxes) ── */
+const BRAND = '#F3B200';
 
-function ParamField({ p, value, onChange, color }: ParamFieldProps) {
-  const [focused, setFocused] = useState(false);
+type ParamFieldProps = { p: StrategyParam; value: number; onChange: (v: number) => void };
+
+function ParamField({ p, value, onChange }: ParamFieldProps) {
+  const shown = p.unit === 'USD' ? '$' + Number(value).toLocaleString('en-US')
+    : p.type === 'number' ? `${fmtNum(value)} ${p.unit}` : `${value} ${p.unit}`;
+  const pct = ((value - p.min) / (p.max - p.min)) * 100;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 2 }}>
-        <label style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.52)' }}>
-          {p.label}
-        </label>
-        <span style={{ fontFamily: 'var(--font-b)', fontSize: 14, fontWeight: 800, color }}>
-          {p.type === 'number'
-            ? p.unit === 'USD' ? '$' + Number(value).toLocaleString() : `${fmtNum(value)} ${p.unit}`
-            : `${value} ${p.unit}`}
-        </span>
+    <div className="sim2-field">
+      <div className="sim2-field-head">
+        <label htmlFor={`sim-${p.id}`}>{p.label}</label>
+        <span>{shown}</span>
       </div>
-
-      {p.type === 'number' ? (
-        <input type="number" min={p.min} max={p.max} step={p.step} value={value}
-          onChange={e => onChange(Number(e.target.value))}
-          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-          style={{
-            width: '100%', padding: '10px 14px', borderRadius: 11, boxSizing: 'border-box',
-            background: focused ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.04)',
-            border: `1.5px solid ${focused ? color : 'rgba(255,255,255,0.08)'}`,
-            color: 'rgba(255,255,255,0.88)', fontFamily: 'var(--font-b)', fontSize: 14,
-            outline: 'none', transition: 'all 0.15s',
-          }}
-        />
-      ) : (
-        <div style={{ paddingTop: 2 }}>
-          <input type="range" min={p.min} max={p.max} step={p.step} value={value}
-            onChange={e => onChange(Number(e.target.value))}
-            className="sim-range" style={withVars({ width: '100%', accentColor: color, cursor: 'pointer', '--c': color, '--pct': `${((value - p.min) / (p.max - p.min)) * 100}%` })}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.18)' }}>{p.min} {p.unit}</span>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.18)' }}>{p.max} {p.unit}</span>
-          </div>
-        </div>
-      )}
-
-      {p.help && (
-        <p style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(255,255,255,0.28)', margin: 0, lineHeight: 1.55 }}>
-          {p.help}
-        </p>
-      )}
+      <input id={`sim-${p.id}`} type="range" min={p.min} max={p.max} step={p.step} value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="sim-range" style={withVars({ width: '100%', cursor: 'pointer', '--c': BRAND, '--pct': `${Math.max(0, Math.min(100, pct))}%` })} />
+      {p.help && <p className="sim2-help">{p.help}</p>}
     </div>
   );
 }
 
-const STEPS = [
-  { label: 'Modelo',     desc: 'Elegí tu estructura' },
-  { label: 'Proyecto',   desc: 'Configurá los parámetros' },
-  { label: 'Proyección', desc: 'Mirá los resultados' },
-];
+const SHORT_LABEL: Record<StrategyId, string> = {
+  crowdfunding: 'Crowdfunding', acumulativa: 'Acumulativa', opcion: 'Opción a compra', revenue: 'Revenue share',
+};
+const defaultsOf = (s: Strategy): SimParams => Object.fromEntries(s.params.map(p => [p.id, p.default]));
 
 // `head` replaces the default title block (the landing passes its animated one).
 export type StrategySimulatorProps = { head?: ReactNode };
 
+/**
+ * Live calculator: pick a model, move the sliders, and the projection updates
+ * next to them. No steps, no cards.
+ */
 export default function StrategySimulator({ head }: StrategySimulatorProps) {
-  const [step, setStep]             = useState(0);
-  const [selectedId, setSelectedId] = useState<StrategyId | null>(null);
-  const [params, setParams]         = useState<SimParams>({});
+  const [id, setId] = useState<StrategyId>(STRATEGIES[0].id);
+  const [params, setParams] = useState<SimParams>(() => defaultsOf(STRATEGIES[0]));
+  const strategy = STRATEGIES.find(s => s.id === id) ?? STRATEGIES[0];
+  const proj = useProjection(strategy, params);
 
-  const strategy = STRATEGIES.find(s => s.id === selectedId);
-  const proj     = useProjection(strategy, params);
-
-  const initParams = (s: Strategy) => {
-    const d: SimParams = {};
-    s.params.forEach(p => { d[p.id] = p.default; });
-    setParams(d);
-  };
-
-  const setP  = (id: string, val: number) => setParams(p => ({ ...p, [id]: val }));
-  const reset = () => { setStep(0); setSelectedId(null); setParams({}); };
-  const goNext = () => {
+  const pick = (s: Strategy) => {
+    if (s.id === id) return;
     sWhoosh();
-    if (step === 0 && strategy) { initParams(strategy); setStep(1); }
-    else if (step === 1) setStep(2);
+    setId(s.id);
+    setParams(defaultsOf(s));
   };
-  const spot = (e: MouseEvent<HTMLButtonElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
-  };
-  const canNext = step === 0 ? !!selectedId : step === 1;
+
+  const main = proj?.stats.find(st => st.highlight) ?? proj?.stats[0];
+  const rest = proj?.stats.filter(st => st !== main) ?? [];
+  const chart = proj?.charts[0];
 
   return (
     <section style={{ maxWidth: 1160, margin: '0 auto', padding: '88px 48px' }} className="land-section">
-
-      {/* Header */}
       {head || (
-      <div style={{ textAlign: 'center', marginBottom: 56 }}>
-        <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 40, color: 'rgba(255,255,255,0.93)', margin: 0, lineHeight: 1.15 }}>
-          Simulá la tokenización<br/>de tu proyecto
-        </h2>
-      </div>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 40, color: BRAND, margin: 0, lineHeight: 1.15 }}>Simula la tokenización de tu proyecto</h2>
+        </div>
       )}
 
-      {/* Stepper */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 36 }}>
-        {STEPS.map((s, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-            <div onClick={() => i < step && setStep(i)}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: i < step ? 'pointer' : 'default' }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: i === step ? `0 0 18px ${strategy?.color || '#7fb2ff'}88` : 'none',
-                fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 12, flexShrink: 0,
-                background: i === step ? (strategy?.color || '#fff') : i < step ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
-                color: i === step ? '#050505' : i < step ? 'rgba(255,255,255,0.70)' : 'rgba(255,255,255,0.20)',
-                border: `1.5px solid ${i === step ? (strategy?.color || '#fff') : i < step ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)'}`,
-                transition: 'all 0.25s',
-              }}>{i < step ? CHECK_ICON : i + 1}</div>
-              <div style={{ opacity: i > step ? 0.28 : 1, transition: 'opacity 0.2s' }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: i === step ? 700 : 500, color: i === step ? 'rgba(255,255,255,0.90)' : 'rgba(255,255,255,0.45)', lineHeight: 1.2 }}>{s.label}</div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'rgba(255,255,255,0.22)' }}>{s.desc}</div>
-              </div>
-            </div>
-            {i < STEPS.length - 1 && (
-              <div style={{ width: 54, height: 2, borderRadius: 2, background: 'rgba(255,255,255,0.07)', margin: '0 16px', overflow: 'hidden' }}>
-                <motion.div initial={false} animate={{ width: i < step ? '100%' : '0%' }} transition={{ duration: 0.5 }}
-                  style={{ height: '100%', background: `linear-gradient(90deg, #7fb2ff, ${strategy?.color || '#a78bfa'})`, boxShadow: '0 0 10px rgba(127,178,255,0.8)' }} />
-              </div>
-            )}
-          </div>
+      <div className="sim2-models" role="tablist" aria-label="Modelo de tokenización">
+        {STRATEGIES.map(s => (
+          <button key={s.id} role="tab" aria-selected={s.id === id} className={`sim2-model${s.id === id ? ' on' : ''}`}
+            onMouseEnter={sHover} onClick={e => { pick(s); e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }}>
+            <span className="sim2-model-ico" aria-hidden="true">{s.icon}</span>{SHORT_LABEL[s.id]}
+          </button>
         ))}
       </div>
 
-      {/* Main card */}
-      <div className="sim-main" style={{
-        background: 'rgba(255,255,255,0.030)',
-        backdropFilter: 'blur(52px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(52px) saturate(180%)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 28,
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 32px 80px rgba(0,0,0,0.70)',
-        overflow: 'hidden',
-      }}>
-        <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait">
+        <motion.p key={id} className="sim2-tagline" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
+          {strategy.tagline}
+          <span>Ideal para: {strategy.best.join(' · ')} — complejidad {strategy.complexity.toLowerCase()}, {strategy.duration}</span>
+        </motion.p>
+      </AnimatePresence>
 
-          {/* ── STEP 0: Elegir modelo ── */}
-          {step === 0 && (
-            <motion.div key="s0" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
-              <div style={{ marginBottom: 28 }}>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'rgba(255,255,255,0.88)', marginBottom: 6 }}>¿Cómo querés tokenizar tu activo?</div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.34)', lineHeight: 1.55 }}>Cada modelo define cómo entra el capital, cómo cobran los inversores y quién termina siendo dueño del activo.</div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }} className="sim-grid">
-                {STRATEGIES.map(s => {
-                  const sel = selectedId === s.id;
-                  return (
-                    <motion.button key={s.id} onClick={() => setSelectedId(sel ? null : s.id)}
-                      onMouseMove={spot} onMouseEnter={sHover} whileHover={{ y: -4 }} whileTap={{ scale: 0.985 }}
-                      className={`sim-card${sel ? ' sel' : ''}`}
-                      style={withVars({
-                      '--c': s.color,
-                      background: sel ? `${s.color}0e` : 'rgba(255,255,255,0.022)',
-                      border: `1.5px solid ${sel ? 'transparent' : 'rgba(255,255,255,0.07)'}`, overflow: 'hidden',
-                      borderRadius: 18, padding: '22px 22px 18px', cursor: 'pointer', textAlign: 'left',
-                      transition: 'all 0.18s', position: 'relative',
-                      boxShadow: sel ? `0 0 0 1px ${s.color}22, 0 8px 32px ${s.color}14` : 'none',
-                    })}>
-                      {sel && (
-                        <div className="sim-check" style={{ position: 'absolute', top: 16, right: 16, width: 22, height: 22, borderRadius: '50%', background: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#050505' }}>
-                          {CHECK_ICON}
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
-                        <div style={{ width: 46, height: 46, borderRadius: 13, background: `${s.color}14`, border: `1px solid ${s.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, flexShrink: 0 }}>
-                          {s.icon}
-                        </div>
-                        <div>
-                          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: sel ? s.color : 'rgba(255,255,255,0.88)', marginBottom: 3 }}>{s.label}</div>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: `${s.color}aa`, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{s.badge}</div>
-                        </div>
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'rgba(255,255,255,0.72)', fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>
-                        {s.tagline}
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'rgba(255,255,255,0.34)', lineHeight: 1.55, marginBottom: 14 }}>{s.desc}</div>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-                        {s.best.map(b => (
-                          <span key={b} style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: `${s.color}cc`, background: `${s.color}10`, border: `1px solid ${s.color}22`, borderRadius: 6, padding: '3px 9px' }}>{b}</span>
-                        ))}
-                      </div>
-                      <div style={{ display: 'flex', gap: 20, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 12 }}>
-                        <div>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.20)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Complejidad</div>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.52)', marginTop: 3 }}>{s.complexity}</div>
-                        </div>
-                        <div>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.20)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Duración típica</div>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.52)', marginTop: 3 }}>{s.duration}</div>
-                        </div>
-                      </div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </motion.div>
+      <div className="sim2-body">
+        <div className="sim2-params">
+          <div className="sim2-col-title">Tu proyecto</div>
+          {strategy.params.map(p => (
+            <ParamField key={`${id}-${p.id}`} p={p} value={params[p.id] ?? p.default} onChange={v => setParams(x => ({ ...x, [p.id]: v }))} />
+          ))}
+        </div>
+
+        <div className="sim2-results" aria-live="polite">
+          <div className="sim2-col-title">Proyección</div>
+          {main && (
+            <div className="sim2-main">
+              <div className="sim2-main-label">{main.label}</div>
+              <div className="sim2-main-value">{main.value}</div>
+              <div className="sim2-main-note">{main.note}</div>
+            </div>
           )}
-
-          {/* ── STEP 1: Parámetros ── */}
-          {step === 1 && strategy && (
-            <motion.div key="s1" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 28 }}>
-                <div style={{ width: 46, height: 46, borderRadius: 13, background: `${strategy.color}14`, border: `1px solid ${strategy.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: strategy.color, flexShrink: 0 }}>
-                  {strategy.icon}
-                </div>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, color: strategy.color }}>{strategy.label}</div>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'rgba(255,255,255,0.34)', marginTop: 4, lineHeight: 1.5 }}>
-                    Configurá los parámetros de tu proyecto. Cada campo tiene una explicación para ayudarte a elegir el valor correcto.
-                  </div>
-                </div>
+          <dl className="sim2-stats">
+            {rest.map(st => (
+              <div key={st.key} title={st.note}>
+                <dt><StatIcon type={st.icon} />{st.label}</dt>
+                <dd>{st.value}</dd>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 28 }} className="sim-grid">
-                {strategy.params.map(p => (
-                  <ParamField key={p.id} p={p} value={params[p.id] ?? p.default} onChange={v => setP(p.id, v)} color={strategy.color}/>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* ── STEP 2: Proyección ── */}
-          {step === 2 && strategy && proj && (
-            <motion.div key="s2" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.22 }}
-              className="sim-pane" style={{ padding: '40px 40px 28px' }}>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 22 }}>
-                <div style={{ width: 46, height: 46, borderRadius: 13, background: `${strategy.color}14`, border: `1px solid ${strategy.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: strategy.color, flexShrink: 0 }}>
-                  {strategy.icon}
-                </div>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, color: strategy.color }}>{strategy.label} — Proyección</div>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'rgba(255,255,255,0.28)', marginTop: 3 }}>Objetivo: {fmt(params.goal)} · {strategy.badge}</div>
-                </div>
-              </div>
-
-              {/* Summary */}
-              <div style={{ background: `${strategy.color}0b`, border: `1px solid ${strategy.color}28`, borderRadius: 16, padding: '16px 20px', marginBottom: 22 }}>
-                <p style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'rgba(255,255,255,0.70)', margin: 0, lineHeight: 1.65 }}>
-                  <span style={{ color: strategy.color, fontWeight: 700 }}>Resumen: </span>{proj.summary}
-                </p>
-              </div>
-
-              {/* Stats grid — 3 cols */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 22 }} className="proj-stat-grid">
-                {proj.stats.map(s => (
-                  <div key={s.key} style={{
-                    background: s.highlight ? `${strategy.color}0d` : 'rgba(255,255,255,0.030)',
-                    border: `1px solid ${s.highlight ? strategy.color + '35' : 'rgba(255,255,255,0.07)'}`,
-                    borderRadius: 14, padding: '14px 16px',
-                    boxShadow: s.highlight ? `0 4px 24px ${strategy.color}12` : 'none',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7, color: s.highlight ? strategy.color : 'rgba(255,255,255,0.28)' }}>
-                      <StatIcon type={s.icon}/>
-                      <span style={{ fontFamily: 'var(--font-b)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{s.label}</span>
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-h)', fontSize: 21, fontWeight: 800, color: s.highlight ? strategy.color : 'rgba(255,255,255,0.88)', marginBottom: 6 }}>
-                      {s.value}
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.28)', lineHeight: 1.5 }}>
-                      {s.note}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Charts */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 22 }}>
-                {proj.charts.map((c, i) => (
-                  <div key={i} style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '18px 20px 12px' }}>
-                    <div style={{ marginBottom: 12 }}>
-                      <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{c.label}</div>
-                      <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(255,255,255,0.28)', marginTop: 4, lineHeight: 1.5 }}>{c.subtitle}</div>
-                      {c.legend && (
-                        <div style={{ display: 'flex', gap: 16, marginTop: 8, fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 16, height: 2.5, borderRadius: 2, background: strategy.color }} />{c.legend[0]}</span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 16, height: 0, borderTop: '2px dashed rgba(255,255,255,0.45)' }} />{c.legend[1]}</span>
-                        </div>
-                      )}
-                    </div>
-                    <MiniChart data={c.data} dataKey={c.key} compare={c.compare} kind={c.fmt} color={strategy.color} height={90}/>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-                      <span style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.18)' }}>Inicio</span>
-                      <span style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'rgba(255,255,255,0.18)' }}>Fin del período</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Timeline */}
-              {proj.timeline && (
-                <div style={{ marginBottom: 22 }}>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>
-                    {proj.timeline.title}
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {proj.timeline.items.map(m => (
-                      <div key={m.top} style={{ flex: 1, minWidth: 110, background: `${strategy.color}0d`, border: `1px solid ${strategy.color}28`, borderRadius: 12, padding: '12px 14px', textAlign: 'center' }}>
-                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: `${strategy.color}bb`, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{m.top}</div>
-                        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 15, color: 'rgba(255,255,255,0.88)' }}>{m.value}</div>
-                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.30)', marginTop: 3 }}>{m.sub}</div>
-                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: `${strategy.color}99`, marginTop: 2 }}>{m.extra}</div>
-                      </div>
-                    ))}
-                  </div>
+            ))}
+          </dl>
+          {chart && (
+            <div className="sim2-chart">
+              <div className="sim2-chart-label">{chart.label}</div>
+              {chart.legend && (
+                <div className="sim2-legend">
+                  <span><i style={{ background: BRAND }} />{chart.legend[0]}</span>
+                  <span><i className="dash" />{chart.legend[1]}</span>
                 </div>
               )}
-
-              {/* Disclaimer */}
-              <div style={{ background: 'rgba(255,255,255,0.022)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: 'rgba(255,255,255,0.22)', flexShrink: 0, marginTop: 1 }}>
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7"/>
-                  <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-                </svg>
-                <p style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(255,255,255,0.28)', margin: 0, lineHeight: 1.55 }}>
-                  Proyección estimada con fines ilustrativos. Los resultados reales dependen del mercado, la demanda y la ejecución del proyecto. No constituye asesoramiento financiero.
-                </p>
-              </div>
-            </motion.div>
+              <MiniChart data={chart.data} dataKey={chart.key} compare={chart.compare} kind={chart.fmt} color={BRAND} height={110} />
+              <div className="sim2-chart-sub">{chart.subtitle}</div>
+            </div>
           )}
-
-        </AnimatePresence>
-
-        {/* Footer */}
-        <div className="sim-foot" style={{ padding: '16px 40px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.16)' }}>
-          <button onClick={() => step > 0 && setStep(s => s - 1)} disabled={step === 0}
-            style={{ padding: '9px 20px', borderRadius: 10, border: '1.5px solid rgba(255,255,255,0.09)', background: 'transparent', cursor: step === 0 ? 'default' : 'pointer', color: step === 0 ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.50)', fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, transition: 'all 0.15s' }}>
-            ← Atrás
-          </button>
-
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            {STEPS.map((_, i) => (
-              <div key={i} style={{ width: i === step ? 22 : 6, height: 6, borderRadius: 3, background: i === step ? (strategy?.color || 'rgba(255,255,255,0.75)') : 'rgba(255,255,255,0.10)', transition: 'all 0.3s' }}/>
-            ))}
-          </div>
-
-          {step < 2 ? (
-            <button onClick={goNext} disabled={!canNext} style={{
-              padding: '9px 24px', borderRadius: 10, border: 'none',
-              background: canNext ? (strategy?.color || 'rgba(255,255,255,0.88)') : 'rgba(255,255,255,0.06)',
-              cursor: canNext ? 'pointer' : 'default',
-              color: canNext ? '#050505' : 'rgba(255,255,255,0.18)',
-              boxShadow: canNext ? `0 0 26px ${strategy?.color || '#ffffff'}66` : 'none',
-              fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 700, transition: 'all 0.18s',
-            }}>
-              {step === 0 ? 'Configurar proyecto →' : 'Ver proyección →'}
-            </button>
-          ) : (
-            <button onClick={reset} style={{ padding: '9px 24px', borderRadius: 10, border: 'none', background: strategy?.color, cursor: 'pointer', color: '#050505', fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 700 }}>
-              Probar otro modelo →
-            </button>
-          )}
+          {proj && <p className="sim2-summary">{proj.summary}</p>}
         </div>
       </div>
+
+      <p className="sim2-disclaimer">
+        Proyección estimada con fines ilustrativos. Los resultados reales dependen del mercado, la demanda y la ejecución del proyecto. No constituye asesoramiento financiero.
+      </p>
     </section>
   );
 }

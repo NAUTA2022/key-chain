@@ -1,6 +1,6 @@
 import { useState, useRef, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { useActiveAccount, useActiveWallet, useWalletBalance } from 'thirdweb/react';
 import { polygon, type Chain } from 'thirdweb/chains';
 import type { Account } from 'thirdweb/wallets';
@@ -104,11 +104,6 @@ function ParallaxWalletCard({ info, onDeposit, onWithdraw }: ParallaxWalletCardP
   const rotY = useMotionValue(0);
   const sRotX = useSpring(rotX, { stiffness: 220, damping: 28 });
   const sRotY = useSpring(rotY, { stiffness: 220, damping: 28 });
-  const shine = useMotionValue(0);
-  const sShine = useSpring(shine, { stiffness: 200, damping: 30 });
-  const shineOpacity = useTransform(sShine, [0, 1], [0, 0.12]);
-  const orbRotX = useTransform(sRotX, v => -v * 1.5);
-  const orbRotY = useTransform(sRotY, v => -v * 1.5);
 
   const handleMove = (e: MouseEvent<HTMLDivElement>) => {
     const el = cardRef.current;
@@ -118,13 +113,11 @@ function ParallaxWalletCard({ info, onDeposit, onWithdraw }: ParallaxWalletCardP
     const y = (e.clientY - top)  / height - 0.5;
     rotX.set(-y * 14);
     rotY.set(x * 14);
-    shine.set(Math.sqrt(x * x + y * y) * 2);
   };
 
   const handleLeave = () => {
     rotX.set(0);
     rotY.set(0);
-    shine.set(0);
   };
 
   return (
@@ -147,28 +140,6 @@ function ParallaxWalletCard({ info, onDeposit, onWithdraw }: ParallaxWalletCardP
           cursor: 'default',
         }}
       >
-        {/* Specular shine layer */}
-        <motion.div style={{
-          position: 'absolute', inset: 0, borderRadius: 24, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.13) 0%, transparent 65%)',
-          opacity: shineOpacity,
-        }} />
-
-        {/* Dot grid texture */}
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: 24, pointerEvents: 'none', opacity: 0.18,
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px)',
-          backgroundSize: '22px 22px',
-        }} />
-
-        {/* Moving light orb */}
-        <motion.div style={{
-          position: 'absolute', top: '-60%', right: '-20%', width: 320, height: 320,
-          borderRadius: '50%', pointerEvents: 'none',
-          background: 'radial-gradient(circle, var(--gl-prd-i) 0%, transparent 70%)',
-          rotateX: orbRotX,
-          rotateY: orbRotY,
-        }} />
 
         {/* Content — raised layer */}
         <div style={{ position: 'relative', zIndex: 1 }}>
@@ -273,10 +244,10 @@ export default function Holdings({ nav }: HoldingsProps) {
     balance: !account ? '$0.00' : usdcBalance === null ? '…' : fmtUSD2(usdcBalance),
     sub: gasBalance === null ? `USDC en ${network}` : `USDC · ${gasBalance.toLocaleString('es-AR', { maximumFractionDigits: 4 })} ${gasSymbol} para gas`,
   } : {
-    addressLabel: 'Tu dirección KEYCHAIN',
+    addressLabel: 'Tu dirección La 33',
     address: `${DEPOSIT_ADDRESS.slice(0, 10)}…${DEPOSIT_ADDRESS.slice(-6)}`,
     network: 'Multi-red',
-    balanceLabel: 'Saldo KEYCHAIN',
+    balanceLabel: 'Saldo La 33',
     balance: fmtUSD2(balanceUSD),
     sub: 'Polygon · BNB Smart Chain · Celo',
   };

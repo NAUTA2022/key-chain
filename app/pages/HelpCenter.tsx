@@ -14,7 +14,7 @@ export const FAQS: Faq[] = [
   { q: "¿Qué es el proceso KYC?", a: "Es la verificación de identidad que exigen las normas de prevención de lavado de dinero. Completás tus datos en Perfil → KYC, el equipo los revisa y, al aprobarlos, registramos tu identidad on-chain para habilitar tus inversiones." },
   { q: "¿Cuál es la inversión mínima?", a: "Un token. El precio de cada token figura en la ficha de cada proyecto, junto con la cantidad disponible." },
   { q: "¿Qué riesgos tiene invertir?", a: "Toda inversión en activos reales puede perder valor y los rendimientos estimados no están garantizados. Revisá los documentos de cada proyecto antes de invertir y diversificá." },
-  { q: "¿Qué es el token KYCN?", a: "KYCN es el token de utilidad de KEY CHAIN. Su preventa todavía no abrió; los beneficios previstos son descuentos en comisiones, acceso anticipado a proyectos y participación en la gobernanza." },
+  { q: "¿Qué es el token KYCN?", a: "KYCN es el token de utilidad de La 33. Su preventa todavía no abrió; los beneficios previstos son descuentos en comisiones, acceso anticipado a proyectos y participación en la gobernanza." },
   { q: "¿Estoy usando dinero real?", a: "No mientras la plataforma esté en su entorno de pruebas: los USDC y POL son de prueba y no tienen valor. Podés pedir fondos de prueba desde Mis pertenencias." },
 ];
 

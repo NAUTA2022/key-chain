@@ -6,7 +6,7 @@ import { breadcrumbs, seo } from '~/lib/seo';
 export const meta: Route.MetaFunction = () =>
   seo({
     title: 'Política de privacidad',
-    description: 'Cómo KEY CHAIN trata tus datos personales, de verificación de identidad y de inversión.',
+    description: 'Cómo La 33 trata tus datos personales, de verificación de identidad y de inversión.',
     path: '/privacidad',
     jsonLd: [breadcrumbs([{ name: 'Inicio', path: '/' }, { name: 'Política de privacidad', path: '/privacidad' }])],
   });

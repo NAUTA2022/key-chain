@@ -82,16 +82,16 @@ function MsgBubble({ msg }: MsgBubbleProps) {
       style={{ display: 'flex', justifyContent: isAI ? 'flex-start' : 'flex-end', marginBottom: 12 }}
     >
       {isAI && (
-        <div style={{ width: 30, height: 30, borderRadius: 10, background: 'rgba(48,120,255,0.18)', border: '1px solid rgba(48,120,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginRight: 8, marginTop: 2 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="rgba(80,150,255,0.9)"/><circle cx="12" cy="12" r="10" stroke="rgba(80,150,255,0.6)" strokeWidth="1.5" fill="none"/><path d="M8 12h8M12 8v8" stroke="rgba(80,150,255,0.9)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        <div style={{ width: 30, height: 30, borderRadius: 10, background: 'rgba(243,178,0,0.18)', border: '1px solid rgba(243,178,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginRight: 8, marginTop: 2 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="rgba(243,178,0,0.9)"/><circle cx="12" cy="12" r="10" stroke="rgba(243,178,0,0.6)" strokeWidth="1.5" fill="none"/><path d="M8 12h8M12 8v8" stroke="rgba(243,178,0,0.9)" strokeWidth="1.5" strokeLinecap="round"/></svg>
         </div>
       )}
       <div style={{
         maxWidth: '78%',
         padding: '10px 14px',
         borderRadius: isAI ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
-        background: isAI ? 'rgba(48,120,255,0.12)' : 'rgba(255,255,255,0.09)',
-        border: `1px solid ${isAI ? 'rgba(48,120,255,0.25)' : 'rgba(255,255,255,0.12)'}`,
+        background: isAI ? 'rgba(243,178,0,0.12)' : 'rgba(255,255,255,0.09)',
+        border: `1px solid ${isAI ? 'rgba(243,178,0,0.25)' : 'rgba(255,255,255,0.12)'}`,
         fontFamily: 'var(--font-b)',
         fontSize: 13.5,
         color: 'rgba(255,255,255,0.90)',
@@ -114,7 +114,7 @@ function RecommendationCard({ asset, nav, onClose }: RecommendationCardProps) {
       style={{
         background: 'rgba(0,0,0,0.50)',
         backdropFilter: 'blur(2px)',
-        border: '1px solid rgba(48,120,255,0.25)',
+        border: '1px solid rgba(243,178,0,0.25)',
         borderRadius: 16,
         overflow: 'hidden',
         cursor: 'pointer',
@@ -150,7 +150,7 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
   // Greeting on mount
   useEffect(() => {
     const greeting = hasAdvisorBackend
-      ? '¡Hola! Soy tu asesor de inversiones de KEY CHAIN. 👋\n\n¿Qué tipo de activo te genera más interés? Por ejemplo: campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.'
+      ? '¡Hola! Soy tu asesor de inversiones de La 33. 👋\n\n¿Qué tipo de activo te genera más interés? Por ejemplo: campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.'
       : '¡Hola! Soy tu asesor de inversiones. 👋\n\n¿Qué tipo de activo te genera más interés? Podés elegir entre campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.';
     // eslint-disable-next-line react-hooks/set-state-in-effect -- pre-existing greeting-on-mount pattern; rewriting it would change behavior
     setMessages([{ role: 'assistant', content: greeting }]);
@@ -233,12 +233,12 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
       >
         {/* Header */}
         <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(48,120,255,0.15)', border: '1px solid rgba(48,120,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="rgba(80,150,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(243,178,0,0.15)', border: '1px solid rgba(243,178,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="rgba(243,178,0,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
           <div>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'rgba(255,255,255,0.95)' }}>Asesor de inversión</div>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(80,150,255,0.8)' }}>Powered by IA · KEY CHAIN</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(243,178,0,0.8)' }}>Powered by IA · La 33</div>
           </div>
           <button onClick={onClose} style={{ marginLeft: 'auto', width: 28, height: 28, borderRadius: 8, border: '1px solid rgba(255,255,255,0.10)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ter)' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
@@ -250,13 +250,13 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
           {messages.map((m, i) => <MsgBubble key={i} msg={m} />)}
           {loading && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <div style={{ width: 30, height: 30, borderRadius: 10, background: 'rgba(48,120,255,0.18)', border: '1px solid rgba(48,120,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 12h8M12 8v8" stroke="rgba(80,150,255,0.9)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              <div style={{ width: 30, height: 30, borderRadius: 10, background: 'rgba(243,178,0,0.18)', border: '1px solid rgba(243,178,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 12h8M12 8v8" stroke="rgba(243,178,0,0.9)" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </div>
-              <div style={{ display: 'flex', gap: 4, padding: '10px 14px', background: 'rgba(48,120,255,0.12)', border: '1px solid rgba(48,120,255,0.25)', borderRadius: '4px 16px 16px 16px' }}>
+              <div style={{ display: 'flex', gap: 4, padding: '10px 14px', background: 'rgba(243,178,0,0.12)', border: '1px solid rgba(243,178,0,0.25)', borderRadius: '4px 16px 16px 16px' }}>
                 {[0,1,2].map(i => (
                   <motion.div key={i} animate={{ opacity: [0.3,1,0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                    style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(80,150,255,0.8)' }} />
+                    style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(243,178,0,0.8)' }} />
                 ))}
               </div>
             </motion.div>

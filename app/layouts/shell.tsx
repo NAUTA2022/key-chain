@@ -122,7 +122,6 @@ export default function AppShell() {
   return (
     <GuideProvider>
     <div style={SHELL_WRAP}>
-      <div className="dot-cursor-glow" />
       <div style={BLOB1} />
       <div style={BLOB2} />
       <div className="cursor-light" />

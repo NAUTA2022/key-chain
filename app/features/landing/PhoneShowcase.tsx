@@ -6,7 +6,7 @@ import type { RwaAsset } from '~/data';
 // "Cómo funciona": a phone showing the actual app screens for each step —
 // ID scan, the real marketplace card, the buy sheet, and USDC payout
 // notifications on the lock screen.
-const ACCENT = '#7fb2ff';
+const ACCENT = '#F3B200';
 const font: CSSProperties = { fontFamily: 'var(--font-b)' };
 const noop = (): void => {};
 
@@ -42,8 +42,8 @@ function KycScreen() {
       <div style={{ padding: '0 18px', ...font }}>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}>Paso 1 de 3</div>
         <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.1)', marginBottom: 18 }}><div style={{ width: '33%', height: '100%', borderRadius: 2, background: ACCENT }} /></div>
-        <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 4 }}>Frente de tu DNI</div>
-        <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginBottom: 16, lineHeight: 1.45 }}>Ubicalo dentro del marco, con buena luz y sin reflejos.</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 4 }}>Frente de tu cédula</div>
+        <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginBottom: 16, lineHeight: 1.45 }}>Ubícala dentro del marco, con buena luz y sin reflejos.</div>
       </div>
       <div style={{ margin: '0 18px', height: 210, borderRadius: 18, background: 'radial-gradient(120% 90% at 50% 40%, #2a2f3a, #0d0f14)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: '28px 22px', borderRadius: 12, background: 'linear-gradient(135deg, #d9dde6, #b9c0cc)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', padding: 12, display: 'flex', gap: 10 }}>
@@ -128,14 +128,14 @@ function BuyScreen({ asset }: { asset: RwaAsset }) {
           </div>
         ))}
         <div style={{ marginTop: 14, height: 48, borderRadius: 14, background: '#fff', color: '#05060a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
-          Pagar con saldo KEYCHAIN
+          Pagar con saldo La 33
         </div>
       </motion.div>
     </div>
   );
 }
 
-const PAYOUTS: ReadonlyArray<readonly [project: string, usdc: string]> = [['Campo Agrícola Pergamino', '412,00'], ['Flota Tesla Model 3', '186,50'], ['Edificio Corporativo Palermo', '240,00']];
+const PAYOUTS: ReadonlyArray<readonly [project: string, usdc: string]> = [['Torre Costa del Este', '412,00'], ['Finca cafetalera Boquete', '186,50'], ['Centro logístico Colón', '240,00']];
 function LockScreen() {
   return (
     <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 70% at 30% 10%, #2b3d7a, #11162a 55%, #07080c)', display: 'flex', flexDirection: 'column' }}>
@@ -150,7 +150,7 @@ function LockScreen() {
             style={{ display: 'flex', gap: 10, padding: '11px 12px', borderRadius: 18, background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', ...font }}>
             <img src="/icono.png" alt="" style={{ width: 34, height: 34, borderRadius: 9, background: '#fff', padding: 3, boxSizing: 'border-box', flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 800, color: '#fff' }}><span>KEY CHAIN</span><span style={{ fontWeight: 500, opacity: 0.6 }}>{i === 0 ? 'ahora' : `hace ${i * 2} min`}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 800, color: '#fff' }}><span>La 33</span><span style={{ fontWeight: 500, opacity: 0.6 }}>{i === 0 ? 'ahora' : `hace ${i * 2} min`}</span></div>
               <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.88)', lineHeight: 1.35, marginTop: 1 }}>Recibiste <b>{v} USDC</b> de renta de {p}.</div>
             </div>
           </motion.div>

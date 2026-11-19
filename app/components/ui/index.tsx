@@ -308,7 +308,7 @@ export function PLogo({ size = 15 }: PLogoProps) {
         <img
           key={src}
           src={src}
-          alt="KEY CHAIN"
+          alt="La 33"
           style={{ height: h, width: 'auto', objectFit: 'contain' }}
           onError={() => setLoaded(null)}
         />
@@ -319,7 +319,7 @@ export function PLogo({ size = 15 }: PLogoProps) {
             onLoad={() => setLoaded(src)} onError={() => setLoaded(null)}
           />
           <span style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: size, letterSpacing: '-0.04em', color: 'var(--text)', whiteSpace: 'nowrap' }}>
-            KEY CHAIN
+            La 33
           </span>
         </>
       )}
@@ -431,7 +431,7 @@ export type CompanyAvatarProps = {
 };
 
 export function CompanyAvatar({ company, size = 28, style = {} }: CompanyAvatarProps) {
-  const isKeychain = company === 'KEYCHAIN';
+  const isKeychain = company === 'La 33';
   const initial = (company || '?').trim().slice(0, 1).toUpperCase();
   const bg = isKeychain ? '#000' : COMPANY_COLORS[hashStr(company) % COMPANY_COLORS.length];
   return (
@@ -441,7 +441,7 @@ export function CompanyAvatar({ company, size = 28, style = {} }: CompanyAvatarP
       fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: size * 0.42, ...style,
     }}>
       {isKeychain
-        ? <img src="/iconow.png" alt="KEYCHAIN" style={{ width: size * 0.62, height: size * 0.62, objectFit: 'contain' }} />
+        ? <img src="/iconow.png" alt="La 33" style={{ width: size * 0.62, height: size * 0.62, objectFit: 'contain' }} />
         : initial}
     </div>
   );

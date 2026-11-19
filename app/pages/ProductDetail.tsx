@@ -352,7 +352,7 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
 // Developer-only (DEV_MODE, demo mode): spells out which state a project is in
 // and what the page should show because of it, so every asset is
 // self-explanatory while testing.
-const ISSUER_LABEL: Record<RwaAsset['issuer'], string> = { keychain: 'KEYCHAIN', verified: 'Verificado', community: 'Comunidad' };
+const ISSUER_LABEL: Record<RwaAsset['issuer'], string> = { keychain: 'La 33', verified: 'Verificado', community: 'Comunidad' };
 
 function projectState(a: RwaAsset, { isLive, holding }: { isLive: boolean; holding: { tokens: number } | null | undefined }): Array<readonly [string, string]> {
   const funding = a.sold <= 0 ? 'Nuevo · sin financiamiento'

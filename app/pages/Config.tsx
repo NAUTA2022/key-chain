@@ -79,7 +79,7 @@ function TabNav<T extends string>({ tabs, tab, onChange }: TabNavProps<T>) {
 /** Demo mode (no backend): the original static configuration screen. */
 function ConfigDemo() {
   const [tab, setTab] = useState<TabId>('general');
-  const [g, setG] = useState({ platformName: 'KEY CHAIN', supportEmail: 'soporte@factoract.io', maxUsers: '10000', maintenanceMode: false, registrationOpen: true, emailNotif: true });
+  const [g, setG] = useState({ platformName: 'La 33', supportEmail: 'soporte@factoract.io', maxUsers: '10000', maintenanceMode: false, registrationOpen: true, emailNotif: true });
   const [fin, setFin] = useState({ platformFee: '1.5', minInvestment: '38', maxInvestment: '500000', autoDistribution: true, distributionDay: '15', usdcOnly: true });
   const [feat, setFeat] = useState({ academy: true, swap: true, secondaryMarket: true, staking: false, governance: false, referrals: true, demoMode: true });
   const [bc, setBc] = useState({ network: 'Polygon Mainnet', chainId: '137', rpcUrl: 'https://polygon-rpc.com', explorerUrl: 'https://polygonscan.com', contractRegistry: '0x4a9f…d82c', autoAudit: true });
@@ -91,7 +91,7 @@ function ConfigDemo() {
 
   return (
     <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 960, margin: '0 auto' }}>
-      <PSection title="Configuración" sub="Ajustes globales de la plataforma KEY CHAIN." />
+      <PSection title="Configuración" sub="Ajustes globales de la plataforma La 33." />
 
       {/* Tab nav */}
       <TabNav tabs={TABS} tab={tab} onChange={setTab} />
@@ -561,7 +561,7 @@ function ConfigLive() {
   if (!settings) {
     return (
       <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 960, margin: '0 auto' }}>
-        <PSection title="Configuración" sub="Ajustes globales de la plataforma KEY CHAIN." />
+        <PSection title="Configuración" sub="Ajustes globales de la plataforma La 33." />
         <PCard style={{ padding: '22px 24px' }}>
           {loadError ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
@@ -582,7 +582,7 @@ function ConfigLive() {
 
   return (
     <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 960, margin: '0 auto' }}>
-      <PSection title="Configuración" sub="Ajustes globales de la plataforma KEY CHAIN." />
+      <PSection title="Configuración" sub="Ajustes globales de la plataforma La 33." />
 
       <TabNav tabs={LIVE_TABS} tab={tab} onChange={id => { setTab(id); setFeedback(null); }} />
 

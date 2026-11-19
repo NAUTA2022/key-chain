@@ -127,7 +127,7 @@ function TicketBody({ ticket: t, onUpdated }: { ticket: TicketDetail; onUpdated:
               }}>
                 {m.body}
               </div>
-              <div style={{ ...sub, fontSize: 11, marginTop: 4, textAlign: m.fromStaff ? 'right' : 'left' }}>{m.fromStaff ? 'Soporte KEY CHAIN' : userName(t.user)} · {fmtDateTime(m.createdAt)}</div>
+              <div style={{ ...sub, fontSize: 11, marginTop: 4, textAlign: m.fromStaff ? 'right' : 'left' }}>{m.fromStaff ? 'Soporte La 33' : userName(t.user)} · {fmtDateTime(m.createdAt)}</div>
             </div>
           ))}
         </div>

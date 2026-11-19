@@ -98,7 +98,7 @@ function UsageChoice({ value, onChange }: { value: Usage; onChange: (u: Usage) =
   const isMobile = useMobile();
   return (
     <fieldset style={{ border: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
-      <legend style={{ ...labelText, padding: 0, marginBottom: 8 }}>¿Cómo vas a usar KEY CHAIN?</legend>
+      <legend style={{ ...labelText, padding: 0, marginBottom: 8 }}>¿Cómo vas a usar La 33?</legend>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
         {USAGES.map(([id, title, text]) => {
           const active = value === id;
@@ -524,7 +524,7 @@ export default function Onboarding({ user, onStarted, onFinished }: Props) {
   return (
     // data-guide-block: guided tours wait until the onboarding flow is over.
     <div className="g-page" data-guide-block="" style={{ padding: '28px 32px 40px', maxWidth: 640, margin: '0 auto' }}>
-      <PSection title="Bienvenido a KEY CHAIN" sub="Completá tu perfil para empezar a invertir en activos reales." />
+      <PSection title="Bienvenido a La 33" sub="Completá tu perfil para empezar a invertir en activos reales." />
       <Steps step={step} />
       <motion.div key={step} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
         <PCard style={{ padding: isMobile ? '22px 18px' : '28px 30px' }}>

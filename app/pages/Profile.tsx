@@ -769,7 +769,7 @@ function QuickLinks({ nav, live }: { nav: NavFn; live: boolean }) {
             {([
               ['Mis inversiones',   () => nav('pertenencias'), 'var(--accent-bg)', 'var(--accent-text)'],
               ['Panel principal',   () => nav('dashboard'),    'var(--surface2)',  'var(--sec)'         ],
-              ['Academia KEY CHAIN',() => nav('academia'),     'var(--surface2)',  'var(--sec)'         ],
+              ['Academia La 33',() => nav('academia'),     'var(--surface2)',  'var(--sec)'         ],
               ['Centro de ayuda',   () => nav('ayuda'),        'var(--surface2)',  'var(--sec)'         ],
             ] as const).map(([label, action, bg, color]) => (
               <button key={label} onClick={action} style={{
@@ -983,7 +983,7 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
                   <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>Privacidad y datos</div>
                   {[
                     ['Portafolio público',          'Otros inversores pueden ver el valor de tus posiciones'],
-                    ['Notificaciones de marketing', 'Recibir noticias, lanzamientos y promociones de KEY CHAIN'],
+                    ['Notificaciones de marketing', 'Recibir noticias, lanzamientos y promociones de La 33'],
                     ['Compartir datos con Sumsub',  'Necesario para mantener la verificación KYC activa'],
                     ['Analítica de uso',             'Ayudar a mejorar la plataforma con datos anónimos'],
                   ].map(([label, desc], i) => (

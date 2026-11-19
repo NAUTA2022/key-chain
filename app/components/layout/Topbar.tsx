@@ -1,20 +1,17 @@
-import { appChain } from '~/lib/onchain';
-import { useState, type CSSProperties, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useState, type CSSProperties, type Dispatch, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ConnectButton } from '~/components/ConnectButton';
-import { polygon } from 'thirdweb/chains';
 import { PDiv, Icons } from '~/components/ui';
 import { NOTIFICATIONS } from '~/data';
 import NotificationsPanel, { type PanelItem } from '~/features/notifications/NotificationsPanel';
 import { timeAgo } from '~/features/notifications/time';
 import { useNotifications } from '~/features/notifications/useNotifications';
 import { MobileSearch, SearchBox } from '~/features/search/Search';
-import { client } from '~/lib/thirdweb';
 import type { NavFn } from '~/lib/navigation';
 import { usePreferences, type FontPreset, type Palette, type Prefs, type PrefsUpdater, type Theme } from '~/lib/preferences';
 import { useSession } from '~/lib/session';
 import { isInternalPath } from '~/lib/links';
+import { WalletPill } from '~/components/layout/WalletPill';
 
 type FontOption = { id: FontPreset; label: string; sub: string; h: string; b: string };
 type PaletteOption = { id: Palette; label: string; swatch: string };
@@ -26,6 +23,7 @@ const FONT_OPTIONS: FontOption[] = [
   { id: 'tech',       label: 'Tech',       sub: 'Sora + Inter',             h: '"Sora", sans-serif',          b: '"Inter", sans-serif' },
 ];
 const PALETTE_OPTIONS: PaletteOption[] = [
+  { id: 'la33',   label: 'La 33',  swatch: 'linear-gradient(135deg,#F3B200 50%,#FF2D2D 50%)' },
   { id: 'verde',  label: 'Verde',  swatch: 'oklch(0.72 0.20 145)' },
   { id: 'rojo',   label: 'Rojo',   swatch: 'oklch(0.58 0.20 27)'  },
   { id: 'azul',   label: 'Azul',   swatch: 'oklch(0.55 0.18 255)' },
@@ -76,7 +74,7 @@ function PersonalizePanel({ open, onClose, prefs, setPrefs }: PersonalizePanelPr
       >
         <div style={{ padding: '16px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>Personalización</span>
-          <button onClick={() => setPrefs({ rubro: 'Todos', font: 'moderna', palette: 'mono' })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', fontWeight: 600 }}>Restablecer</button>
+          <button onClick={() => setPrefs({ rubro: 'Todos', font: 'moderna', palette: 'la33' })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', fontWeight: 600 }}>Restablecer</button>
         </div>
         <PDiv />
         <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 20, maxHeight: 500, overflowY: 'auto' }}>
@@ -191,13 +189,6 @@ export default function Topbar({ theme, setTheme, nav, prefs, setPrefs, sidebarC
     <NotificationsPanel mobile={mobile} onClose={() => setNotifOpen(false)} items={DEMO_ITEMS} />
   );
 
-  const iconBtn = (active: boolean, onClick: () => void, children: ReactNode, title: string) => (
-    <button onClick={onClick} title={title} aria-label={title}
-      className={`nav-icon-glass topbar-icon-btn${active ? ' is-active' : ''}`}
-      style={{ cursor: 'pointer', color: active ? 'var(--gl-nav-a)' : 'var(--gl-nav)', flexShrink: 0 }}
-    >{children}</button>
-  );
-
   // ── Mobile topbar ──────────────────────────────────────────────────
   if (isMobile) {
     const closeAll = () => { setMoreOpen(false); setPersOpen(false); setNotifOpen(false); };
@@ -223,7 +214,7 @@ export default function Topbar({ theme, setTheme, nav, prefs, setPrefs, sidebarC
 
         {/* Logo centered — link a inicio */}
         <button onClick={() => nav('feed')} aria-label="Ir al feed" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-          <img src={theme === 'dark' ? '/iconow.png' : '/icono.png'} alt="KEY CHAIN" style={{ height: 34, width: 'auto', objectFit: 'contain', display: 'block' }} />
+          <img src={theme === 'dark' ? '/iconow.png' : '/icono.png'} alt="La 33" style={{ height: 34, width: 'auto', objectFit: 'contain', display: 'block' }} />
         </button>
 
         <div style={{ flex: 1 }} />
@@ -301,68 +292,25 @@ export default function Topbar({ theme, setTheme, nav, prefs, setPrefs, sidebarC
       <div style={{ flex: 1 }} />
 
       {/* Theme */}
-      {iconBtn(false, () => setTheme(t => t === 'light' ? 'dark' : 'light'),
-        theme === 'light' ? Icons.moon : Icons.sun, 'Cambiar tema')}
-
-      {/* Personalization */}
-      <div style={{ position: 'relative' }}>
-        {iconBtn(persOpen, () => { setPersOpen(o => !o); setNotifOpen(false); },
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-            <line x1="4" y1="17" x2="20" y2="17" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-            <circle cx="9" cy="7" r="2.6" fill="var(--surface)" stroke="currentColor" strokeWidth="1.7"/>
-            <circle cx="15" cy="17" r="2.6" fill="var(--surface)" stroke="currentColor" strokeWidth="1.7"/>
-          </svg>, 'Personalización')}
-        <AnimatePresence>
-          {persOpen && <PersonalizePanel open={persOpen} onClose={() => setPersOpen(false)} prefs={prefs} setPrefs={setPrefs} />}
-        </AnimatePresence>
-      </div>
+      <button type="button" className="tb-btn" onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')} title="Cambiar tema" aria-label="Cambiar tema claro u oscuro">
+        {theme === 'light' ? Icons.moon : Icons.sun}
+      </button>
 
       {/* Notifications */}
       <div style={{ position: 'relative' }}>
-        <button onClick={() => { toggleNotif(); setPersOpen(false); }} aria-label={unread > 0 ? `${unread} notificaciones sin leer` : 'Notificaciones'} aria-expanded={notifOpen}
-          className={`nav-icon-glass topbar-icon-btn${notifOpen ? ' is-active' : ''}`}
-          style={{ cursor: 'pointer', color: notifOpen ? 'var(--gl-nav-a)' : 'var(--gl-nav)', position: 'relative', overflow: 'visible' }}
-        >
+        <button type="button" onClick={toggleNotif} aria-label={unread > 0 ? `${unread} notificaciones sin leer` : 'Notificaciones'} aria-expanded={notifOpen}
+          className={`tb-btn${notifOpen ? ' is-active' : ''}`}>
           {Icons.bell}
-          {unread > 0 && (
-            <span style={{
-              position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17,
-              borderRadius: 999, background: 'var(--accent)', color: 'var(--accent-fg)',
-              fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-b)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '0 4px', border: '2px solid var(--surface)',
-              zIndex: 10,
-            }}>{badge}</span>
-          )}
+          {unread > 0 && <span className="tb-badge">{badge}</span>}
         </button>
         <AnimatePresence>
           {notifOpen && notifPanel(false)}
         </AnimatePresence>
       </div>
 
-      {/* Wallet + Avatar — thirdweb's own ConnectButton already shows the
-          connected address (plus avatar and balance) once connected, so it's
-          the single source of truth here instead of duplicating it. */}
-      <div data-guide="topbar-wallet" style={{
-        display: 'flex', alignItems: 'center', gap: 0,
-        padding: '4px 4px 4px 4px', borderRadius: 999,
-        border: '1.5px solid var(--border-l)',
-      }}>
-        <ConnectButton
-          client={client}
-          chain={appChain ?? polygon}
-          connectButton={{ label: 'Conectar', style: {
-            padding: '4px 12px', fontSize: 12, fontFamily: 'var(--font-b)',
-            fontWeight: 700, borderRadius: 8, cursor: 'pointer', height: 30,
-            background: 'var(--accent)', color: '#fff', border: 'none',
-          }}}
-          detailsButton={{ style: {
-            height: 'auto', minHeight: 44, padding: '4px 10px', borderRadius: 999,
-            background: 'transparent', border: 'none', overflow: 'visible',
-          }}}
-          connectModal={{ title: 'Conectar a KEY CHAIN', titleIcon: '' }}
-        />
+      {/* Wallet: avatar, address and USDC balance */}
+      <div data-guide="topbar-wallet" style={{ display: 'flex' }}>
+        <WalletPill nav={nav} />
       </div>
     </div>
   );

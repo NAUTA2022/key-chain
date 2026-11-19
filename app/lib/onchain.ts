@@ -33,7 +33,7 @@ export function chainFor(chainId: number): Chain {
   const devnet = chainId === DEVNET_CHAIN_ID;
   return defineChain({
     id: chainId,
-    name: devnet ? 'KEY CHAIN Devnet' : chainId === 31337 ? 'Local (anvil)' : `Chain ${chainId}`,
+    name: devnet ? 'La 33 Devnet' : chainId === 31337 ? 'Local (anvil)' : `Chain ${chainId}`,
     rpc: import.meta.env.VITE_CHAIN_RPC_URL || 'http://127.0.0.1:8545',
     nativeCurrency: devnet ? { name: 'POL (pruebas)', symbol: 'POL', decimals: 18 } : { name: 'Ether', symbol: 'ETH', decimals: 18 },
     testnet: true,

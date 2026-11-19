@@ -206,7 +206,7 @@ export function CoreCard() {
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           <span style={{ fontSize:28 }}>🔗</span>
           <div>
-            <div style={{ fontSize:18, fontWeight:800, color:'#0f172a', letterSpacing:-0.5 }}>KEYCHAIN</div>
+            <div style={{ fontSize:18, fontWeight:800, color:'#0f172a', letterSpacing:-0.5 }}>La 33</div>
             <div style={{ fontSize:9, color:GOLD, opacity:0.6 }}>Token KYCN · Polygon Layer 2</div>
           </div>
         </div>

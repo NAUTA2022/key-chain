@@ -118,7 +118,7 @@ export default function EscrowChain({ nav: _nav }: EscrowChainProps) {
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
             <span style={{ fontSize:28 }}>🚢</span>
             <div style={{ fontFamily:'var(--font-h)', fontWeight:900, fontSize:30, color:'var(--text)', letterSpacing:'-0.03em' }}>Escrow Chain</div>
-            <span style={{ fontSize:11, padding:'3px 8px', borderRadius:999, background:`${ACCENT}20`, color:ACCENT, fontWeight:700 }}>by KEYCHAIN</span>
+            <span style={{ fontSize:11, padding:'3px 8px', borderRadius:999, background:`${ACCENT}20`, color:ACCENT, fontWeight:700 }}>by La 33</span>
           </div>
           <div style={{ fontFamily:'var(--font-b)', fontSize:14, color:'var(--sec)' }}>Mercado de importaciones y exportaciones protegido por contratos escrow on-chain.</div>
         </div>

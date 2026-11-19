@@ -149,10 +149,10 @@ function LandingScreen({ onStart, onExit }: LandingScreenProps) {
     'Trazabilidad on-chain de cada hectárea',
     'Rendimiento auditado por consultoras independientes',
     'Inversión fraccionada desde un token',
-    'Liquidez vía mercado secundario de KEYCHAIN',
+    'Liquidez vía mercado secundario de La 33',
   ];
 
-  const infra = ['KEYCHAIN', 'thirdweb', 'Base', 'USDC'];
+  const infra = ['La 33', 'thirdweb', 'Base', 'USDC'];
 
   return (
     <div style={{ background: BG }}>
@@ -209,7 +209,7 @@ function LandingScreen({ onStart, onExit }: LandingScreenProps) {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: FONT_B, fontSize: 13.5, color: SUB, lineHeight: 1.7, marginBottom: 12 }}>
-            Nuestra dedicación a ofrecer inversión rural transparente y respaldar a productores reales nos distingue dentro del ecosistema KEYCHAIN.
+            Nuestra dedicación a ofrecer inversión rural transparente y respaldar a productores reales nos distingue dentro del ecosistema La 33.
           </div>
           <div style={{ fontFamily: FONT_B, fontSize: 11.5, color: SUB, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700 }}>Excelencia reconocida en finanzas agrícolas</div>
         </div>
@@ -292,7 +292,7 @@ function LandingScreen({ onStart, onExit }: LandingScreenProps) {
           <span style={{ color: ACCENT, display: 'flex' }}>{KRIcons.leaf}</span>
           <span style={{ fontFamily: FONT_H, fontWeight: 700, fontSize: 14, color: INK }}>Key Rural</span>
         </div>
-        <div style={{ fontFamily: FONT_B, fontSize: 11.5, color: SUB }}>© 2026 KEYCHAIN. Todos los derechos reservados.</div>
+        <div style={{ fontFamily: FONT_B, fontSize: 11.5, color: SUB }}>© 2026 La 33. Todos los derechos reservados.</div>
       </div>
     </div>
   );
@@ -744,7 +744,7 @@ function ProfileScreen({ account, onSwitchAccount, holdings, isMobile }: Profile
       </div>
 
       <div style={{ fontFamily: FONT_B, fontSize: 12, color: SUB, marginBottom: 20, lineHeight: 1.6 }}>
-        Esta sesión se comparte con el resto del ecosistema KEYCHAIN (Bookey, Key Go, Key Jobs). Cambiar de cuenta acá cierra la sesión en toda la plataforma.
+        Esta sesión se comparte con el resto del ecosistema La 33 (Bookey, Key Go, Key Jobs). Cambiar de cuenta acá cierra la sesión en toda la plataforma.
       </div>
       <button onClick={onSwitchAccount} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: `1px solid ${BORDER}`, background: 'none', color: TERRA, fontFamily: FONT_B, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>
         {KRIcons.logout} Cambiar de cuenta
@@ -858,7 +858,7 @@ export default function KeyRural() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ color: ACCENT, display: 'flex' }}>{KRIcons.leaf}</span>
             <span style={{ fontFamily: FONT_H, fontWeight: 700, fontSize: 18, color: INK, letterSpacing: '-0.02em' }}>Key Rural</span>
-            <span style={{ fontSize: 10.5, padding: '3px 8px', borderRadius: 999, background: ACCENT_SOFT, color: ACCENT, fontWeight: 700, fontFamily: FONT_B }}>by KEYCHAIN</span>
+            <span style={{ fontSize: 10.5, padding: '3px 8px', borderRadius: 999, background: ACCENT_SOFT, color: ACCENT, fontWeight: 700, fontFamily: FONT_B }}>by La 33</span>
           </div>
           {!isMobile && <DesktopNav tab={tab} setTab={setTab} />}
         </div>

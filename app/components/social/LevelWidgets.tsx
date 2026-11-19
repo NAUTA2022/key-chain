@@ -291,7 +291,7 @@ function SeniorityTimeline({ months, since }: { months: number; since: string })
   return (
     <div style={{ marginTop: 'auto' }}>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 18 }}>
-        <b style={{ color: 'var(--text)', fontSize: 22, fontFamily: 'var(--font-h)' }}>{months}</b> meses en KEYCHAIN
+        <b style={{ color: 'var(--text)', fontSize: 22, fontFamily: 'var(--font-h)' }}>{months}</b> meses en La 33
         {nextStop && <span style={{ color: 'var(--ter)' }}> · próxima insignia: {nextStop.label} en {nextStop.m - months} {nextStop.m - months === 1 ? 'mes' : 'meses'}</span>}
       </div>
       <div style={{ position: 'relative', height: 26, margin: '0 22px' }}>

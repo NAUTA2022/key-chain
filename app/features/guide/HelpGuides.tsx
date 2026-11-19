@@ -80,7 +80,7 @@ export function GlossaryCard({ style }: { style?: CSSProperties }) {
   return (
     <PCard style={{ padding: isMobile ? '20px 18px' : '24px 28px', ...style }}>
       <h2 id="glosario" style={h2}>Glosario</h2>
-      <p style={lead}>Las palabras nuevas que vas a encontrar en KEY CHAIN, explicadas sin tecnicismos.</p>
+      <p style={lead}>Las palabras nuevas que vas a encontrar en La 33, explicadas sin tecnicismos.</p>
       <dl style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))', gap: isMobile ? 14 : '16px 28px', margin: 0 }}>
         {entries.map(e => (
           <div key={e.id} id={`glosario-${e.id}`} style={{ minWidth: 0 }}>

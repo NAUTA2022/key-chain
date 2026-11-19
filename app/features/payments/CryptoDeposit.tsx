@@ -118,7 +118,7 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
         <div style={{ textAlign: 'center', paddingTop: 6 }}>
           <SuccessMark />
           <div role="status" style={{ ...T.title, fontSize: 24 }}>+{fmtToken(received, sym)}</div>
-          <div style={{ ...T.body, marginBottom: 16 }}>Ya está disponible en tu saldo KEYCHAIN.</div>
+          <div style={{ ...T.body, marginBottom: 16 }}>Ya está disponible en tu saldo La 33.</div>
           <div style={{ textAlign: 'left', padding: '6px 14px', borderRadius: 14, background: 'var(--surface2)' }}>
             <KV k="Red" v={network.name} />
             <KV k="Hash" v={shortAddr(hash)} mono />

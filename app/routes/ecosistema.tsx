@@ -23,7 +23,7 @@ export default function EcosistemaRoute() {
   return (
     <ComingSoon
       nav={nav}
-      title="Ecosistema KEY CHAIN"
+      title="Ecosistema La 33"
       description="Estamos preparando el mapa interactivo del ecosistema: países, sectores, empresas y proyectos tokenizados, con su marco regulatorio y datos verificados."
       highlights={['Mapa por país y sector', 'Empresas emisoras y sus proyectos', 'Marco regulatorio de cada jurisdicción']}
     />

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 
 export type Theme = 'dark' | 'light';
-export type Palette = 'mono' | 'verde' | 'rojo' | 'azul' | 'marron';
+export type Palette = 'la33' | 'mono' | 'verde' | 'rojo' | 'azul' | 'marron';
 export type FontPreset = 'moderna' | 'geometrica' | 'humanista' | 'tech';
 export type Role = 'investor' | 'admin';
 
@@ -26,7 +26,8 @@ export const FONTS: Record<FontPreset, { h: string; b: string }> = {
   tech:       { h: '"Space Grotesk", sans-serif', b: '"IBM Plex Mono", monospace' },
 };
 
-const STORAGE_KEY = 'kc_prefs';
+// Renamed from 'kc_prefs' for La 33: browsers that stored the old light default start in dark again.
+const STORAGE_KEY = 'la33_prefs';
 type Stored = { theme?: Theme; palette?: Palette; font?: FontPreset; collapsed?: boolean };
 
 function readStored(): Stored {
@@ -46,9 +47,9 @@ const PreferencesContext = createContext<PreferencesValue | null>(null);
  * replacing the state that used to live inside the monolithic App component.
  */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-  // Light by default (the landing forces dark on its own, see useApplyPreferences).
-  const [theme, setTheme] = useState<Theme>('light');
-  const [palette, setPalette] = useState<Palette>('mono');
+  // Dark by default (La 33 brand: black background, orange accent).
+  const [theme, setTheme] = useState<Theme>('dark');
+  const [palette, setPalette] = useState<Palette>('la33');
   const [font, setFont] = useState<FontPreset>('moderna');
   const [rubro, setRubro] = useState('Todos');
   const [role, setRole] = useState<Role>('investor');

@@ -148,7 +148,7 @@ function Ecosystem2D({ nav }: EcosystemViewProps) {
     if (card?.node?.id === 'keychain') { closeCard(); return; }
     playNodeSelect();
     playZoomIn();
-    const coreNode: CoreNode = { id: 'keychain', type: 'core', name: 'KEYCHAIN', x: 0, y: 0 };
+    const coreNode: CoreNode = { id: 'keychain', type: 'core', name: 'La 33', x: 0, y: 0 };
     setCard({ node: coreNode });
     animateTo({ x: 0, y: 0 }, 2.0);
   }
@@ -258,7 +258,7 @@ function Ecosystem2D({ nav }: EcosystemViewProps) {
 
         {/* Title pill */}
         <div style={{ position:'absolute', top:14, left:'50%', transform:'translateX(-50%)', display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.9)', border:`1px solid ${GOLD}18`, borderRadius:20, padding:'5px 16px', backdropFilter:'blur(12px)', boxShadow:'0 4px 18px rgba(15,23,42,0.08)', pointerEvents:'none', whiteSpace:'nowrap' }}>
-          <span style={{ color:GOLD, fontSize:8, letterSpacing:3, fontWeight:800, textTransform:'uppercase', opacity:0.55 }}>KEY CHAIN</span>
+          <span style={{ color:GOLD, fontSize:8, letterSpacing:3, fontWeight:800, textTransform:'uppercase', opacity:0.55 }}>La 33</span>
           <span style={{ color:'#cbd5e1', fontSize:10 }}>·</span>
           <span style={{ color:'#64748b', fontSize:8, letterSpacing:2, textTransform:'uppercase' }}>Red Neuronal del Ecosistema</span>
         </div>
@@ -353,7 +353,7 @@ function CoreHex({ active, onSelect }: CoreHexProps) {
       <polygon points={hexPoints(0,0,27)} fill="#fff3cc" stroke={GOLD} strokeWidth={1.6} filter="url(#glow-gold)"/>
       <text x={0} y={-1} textAnchor="middle" dominantBaseline="middle" fill={GOLD} fontSize={6.5} fontWeight={900} letterSpacing={0.8}>KYCN</text>
       <text x={0} y={10} textAnchor="middle" fill={GOLD} fontSize={4.5} fillOpacity={0.45}>COIN</text>
-      <text x={0} y={79+DEPTH} textAnchor="middle" fill={GOLD} fontSize={10.5} fontWeight={900} letterSpacing={3}>KEYCHAIN</text>
+      <text x={0} y={79+DEPTH} textAnchor="middle" fill={GOLD} fontSize={10.5} fontWeight={900} letterSpacing={3}>La 33</text>
       <text x={0} y={92+DEPTH} textAnchor="middle" fill={GOLD} fontSize={6} fillOpacity={0.4} letterSpacing={1.5}>ECOSYSTEM CORE</text>
     </g>
   );

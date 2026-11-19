@@ -62,7 +62,7 @@ public/               estáticos (imágenes WebP, modelos .glb, íconos, manifes
 - Nueva página pública ⇒ agregarla en `app/routes.ts`, en `prerender()` de `react-router.config.ts` y en `app/lib/public-routes.ts` (sitemap/llms.txt).
 - Código que toque `window`/`document`/`localStorage` va en efectos o con `useSyncExternalStore` (el prerender corre en Node). Librerías que tocan `window` al importarse (Leaflet) se cargan con `lazy()`.
 - `VITE_*` se incrusta en el bundle público: **nunca secretos**. Claves de APIs (Anthropic, thirdweb secret) solo en el backend.
-- Marca: el nombre en metadatos es `KEY CHAIN`. En la UI conviven KEYCHAIN / FACTORACT / token FACT / KYCN: pendiente de definición del cliente, no unificar sin confirmación.
+- Marca: **La 33** (rebrand 2026-11-19, empresa B2B de tokenización en Panamá). `SITE_NAME = 'La 33'`; naranja `#F3B200` (claro `#FFCC40`) es el color principal (botones, títulos, `--accent` vía la paleta `la33`, por defecto), rojo `#FF2D2D` el secundario; fondo negro `#000000` y tema oscuro por defecto (preferencias en `la33_prefs`; la clave vieja `kc_prefs` se ignora a propósito para que nadie arranque en el claro viejo). Logos en `public/la33/` (y reemplazados `logo-dark/light.png`, `icono/iconow.png`, `3d.png`, `3ds.webp`, favicons, `og-image.jpg`). Los tickers de token (KYCN/FACT) y los identificadores internos (`issuer: 'keychain'`, rutas, demás claves de storage) no se renombraron.
 - Comentarios y commits en inglés; explicaciones al usuario en español.
 
 ## Verificación visual

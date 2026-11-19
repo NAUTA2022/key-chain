@@ -43,7 +43,7 @@ export function requestCategory(data: { category: RequestCategory; otherType?: s
 
 export const STAGE: Record<AssetStage, string> = { recaudacion: 'Recaudación', operativo: 'Operativo' };
 
-export const ISSUER_KIND: Record<IssuerKind, string> = { keychain: 'KEYCHAIN', verified: 'Verificado', community: 'Comunidad' };
+export const ISSUER_KIND: Record<IssuerKind, string> = { keychain: 'La 33', verified: 'Verificado', community: 'Comunidad' };
 
 export const DOC_KIND: Record<DocumentKind, string> = {
   legal: 'Legal', financial: 'Financiero', technical: 'Técnico', insurance: 'Seguro', other: 'Otro',

@@ -346,7 +346,7 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
 
             <PCard style={{ padding: isMobile ? '16px' : '20px 24px', marginBottom: 24, background: 'var(--accent-bg)', border: '1.5px solid var(--accent)' }}>
               <p style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--sec)', lineHeight: 1.6 }}>
-                Al enviar, tu solicitud queda <strong style={{ color: 'var(--text)' }}>Enviada</strong> y el equipo de KEY CHAIN la revisa. En el paso siguiente vas a poder subir la documentación del activo. Enviar la solicitud no publica el activo ni emite tokens.
+                Al enviar, tu solicitud queda <strong style={{ color: 'var(--text)' }}>Enviada</strong> y el equipo de La 33 la revisa. En el paso siguiente vas a poder subir la documentación del activo. Enviar la solicitud no publica el activo ni emite tokens.
               </p>
             </PCard>
 
@@ -371,7 +371,7 @@ export default function RequestForm({ contactName, contactEmail, onShowRequests 
               </div>
               <h2 data-step-title tabIndex={-1} style={{ ...STEP_TITLE, textAlign: 'center' }}>Recibimos tu solicitud</h2>
               <p style={{ ...bodyStyle, textAlign: 'center', maxWidth: 520, margin: '0 auto 20px', overflowWrap: 'anywhere' }}>
-                El equipo de KEY CHAIN va a revisar <strong style={{ color: 'var(--text)' }}>{created.data.assetName}</strong> junto con la documentación que subiste. Vas a ver cada cambio de estado en Mis solicitudes.
+                El equipo de La 33 va a revisar <strong style={{ color: 'var(--text)' }}>{created.data.assetName}</strong> junto con la documentación que subiste. Vas a ver cada cambio de estado en Mis solicitudes.
               </p>
               <h3 style={{ ...labelStyle, maxWidth: 520, margin: '0 auto 8px' }}>Qué sigue</h3>
               <ol style={{ ...bodyStyle, maxWidth: 520, margin: '0 auto', paddingLeft: 20, listStyle: 'decimal', display: 'flex', flexDirection: 'column', gap: 6, overflowWrap: 'anywhere' }}>

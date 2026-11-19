@@ -76,7 +76,7 @@ function liveMetrics(profile: CompanyProfile, live: CompanyLive, reviews: readon
     trust: null,
     countries: s.countries,
     cats: s.categories,
-    since: ['En KEYCHAIN desde', monthYear(live.createdAt)],
+    since: ['En La 33 desde', monthYear(live.createdAt)],
     raisedBy: a => perAsset.get(a.id)?.raised ?? 0,
     investorsBy: a => perAsset.get(a.id)?.investors ?? 0,
     ownerKyc: null,
@@ -380,7 +380,7 @@ export function CompanyTrust(props: SectionProps) {
   const round = (v: number | null) => (v === null ? null : Math.round(v));
   const posted = profile.live ? profile.live.stats.posts : posts.length;
   const factors: ReadonlyArray<readonly [string, number | null, string]> = [
-    ['Verificación de la empresa', m.verifiedScore, profile.verified ? 'KYB aprobado por KEYCHAIN' : 'Pendiente de verificación'],
+    ['Verificación de la empresa', m.verifiedScore, profile.verified ? 'KYB aprobado por La 33' : 'Pendiente de verificación'],
     ['Pagos a tiempo', round(m.onTime), m.payments && m.late !== null ? `${m.payments - m.late} de ${m.payments} distribuciones en fecha` : 'Sin distribuciones todavía'],
     ['Financiamiento de proyectos', Math.round(m.funded), 'Promedio vendido de sus proyectos'],
     ['Reseñas de inversores', Math.round((m.rating / 5) * 100), `${m.rating.toFixed(1)} de 5 en ${reviews.length} reseñas`],
@@ -437,7 +437,7 @@ export function CompanyTrust(props: SectionProps) {
           ))}
           {profile.verified && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>
-              <VerifiedBadge /> Verificada por KEYCHAIN
+              <VerifiedBadge /> Verificada por La 33
             </div>
           )}
         </PCard>

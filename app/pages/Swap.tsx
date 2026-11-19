@@ -7,7 +7,7 @@ import type { NavFn } from '~/lib/navigation';
 const TOKENS = [
   { sym: 'USDC', name: 'USD Coin',        bal: 12450.80, color: '#2775CA' },
   { sym: 'MATIC', name: 'Polygon',         bal: 4856.70,  color: '#8247E5' },
-  { sym: 'KYCN',  name: 'KEY CHAIN Token', bal: 3825.00,  color: 'var(--accent)' },
+  { sym: 'KYCN',  name: 'Token La 33', bal: 3825.00,  color: 'var(--accent)' },
   { sym: 'ETH',   name: 'Ethereum',        bal: 2940.00,  color: '#627EEA' },
 ];
 

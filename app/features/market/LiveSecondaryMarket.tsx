@@ -14,6 +14,8 @@ import { FilterBar, ListingCard, MagnetToolbar, MobileListingCard, MobileMarketH
 import { type MarketListing, cancelOnchain, shortWallet, useMarketInfo, useMarketListings, useMarketStats, useMyListings } from './api';
 import { SellModal } from './TradeModals';
 import GuideButton from '~/features/guide/GuideButton';
+import CategoryCarousel from '~/components/CategoryCarousel';
+import { RWA_CATS } from '~/data';
 
 type LiveListing = MarketListing & { catalog: CatalogAsset; diff: number };
 
@@ -171,6 +173,8 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
         </PCard>
       )}
 
+      <CategoryCarousel cats={RWA_CATS} value={cat} onChange={setCat} />
+
       {mobile ? <MagnetToolbar>{filterBar}</MagnetToolbar> : filterBar(false)}
 
       <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:16 }}>
@@ -204,7 +208,7 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
           })}
         </div>
       ) : (
-      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:20 }}>
+      <div className="g-market-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:20 }}>
         {sorted.map((l, idx) => {
           const isDiscount = l.diff < 0;
           const own = sameWallet(l.sellerWallet, me);
@@ -226,11 +230,11 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
                 onView={() => nav('detalle', l.catalog)}
                 actions={<>
                   {own ? (
-                    <PBtn guide="listing-withdraw" variant="secondary" style={{ flex:1 }} small disabled={cancelling === l.id} onClick={() => void cancel(l)}>
+                    <PBtn guide="listing-withdraw" variant="primary" style={{ flex:1 }} small disabled={cancelling === l.id} onClick={() => void cancel(l)}>
                       {cancelling === l.id ? 'Retirando…' : 'Retirar oferta'}
                     </PBtn>
                   ) : (
-                    <PBtn guide="listing-buy" variant={isDiscount ? 'accent' : 'secondary'} style={{ flex:1 }} small disabled={Boolean(unavailable) || buyable(l) < 1}
+                    <PBtn guide="listing-buy" variant={isDiscount ? 'accent' : 'primary'} style={{ flex:1 }} small disabled={Boolean(unavailable) || buyable(l) < 1}
                       onClick={() => buy(l)}>
                       Comprar
                     </PBtn>

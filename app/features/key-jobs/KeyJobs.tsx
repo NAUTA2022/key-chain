@@ -106,7 +106,7 @@ function initials(name = ''): string { return name.split(' ').map(w => w[0]).sli
 type AvatarProps = { name: string; size?: number; square?: boolean };
 function Avatar({ name, size = 40, square = false }: AvatarProps) {
   return (
-    <div style={{ width: size, height: size, borderRadius: square ? size * 0.3 : '50%', background: name === 'KEYCHAIN' ? BLUE_GRAD : avatarGradient(name), color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT_H, fontWeight: 700, fontSize: size * 0.38, flexShrink: 0, boxShadow: square ? '0 4px 10px rgba(15,23,42,0.18)' : 'none' }}>
+    <div style={{ width: size, height: size, borderRadius: square ? size * 0.3 : '50%', background: name === 'La 33' ? BLUE_GRAD : avatarGradient(name), color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT_H, fontWeight: 700, fontSize: size * 0.38, flexShrink: 0, boxShadow: square ? '0 4px 10px rgba(15,23,42,0.18)' : 'none' }}>
       {initials(name)}
     </div>
   );
@@ -164,18 +164,18 @@ const agroAsset    = RWA_ASSETS.find(a => a.name === 'Campo Agrícola Pergamino'
 
 const SKILLS_POOL: string[] = ['Gestión de propiedades', 'Atención al cliente', 'Excel', 'Licencia de conducir', 'Mantenimiento', 'Figma', 'Prototipado', 'UI Design', 'React', 'React Native', 'iOS/Android', 'API', 'Ventas', 'Inglés avanzado', 'Gestión agrícola', 'Vehículos eléctricos'];
 
-const KEYCHAIN_COMPANIES: string[] = ['KEYCHAIN', ...RWA_COMPANIES.filter(c => c !== 'Todos')];
+const KEYCHAIN_COMPANIES: string[] = ['La 33', ...RWA_COMPANIES.filter(c => c !== 'Todos')];
 
 const SEED_JOBS: Job[] = [
   { id: 'j1', company: 'PropChain', keychainLinked: true, linkedAsset: palermoAsset?.name, title: 'Property Manager — Edificio Corporativo Palermo', category: 'Gestión de Propiedades',
     tags: ['Gestión de propiedades', 'Atención al cliente', 'Excel'], salaryMin: 1200, salaryMax: 1800, unit: 'mes', type: 'Presencial', commitment: 'Tiempo completo',
     location: 'CABA, Argentina', postedAgo: '2 horas', applicants: 14,
     description: 'PropChain busca un/a Property Manager para administrar el Edificio Corporativo Palermo, un activo tokenizado con 94% de ocupación e inquilinos corporativos.',
-    responsibilities: ['Gestionar la relación con inquilinos y renovación de contratos', 'Coordinar mantenimiento y proveedores del edificio', 'Reportar mensualmente a los holders del token vía KEYCHAIN', 'Supervisar cobranzas y gastos operativos'] },
-  { id: 'j2', company: 'KEYCHAIN', keychainLinked: true, linkedAsset: teslaAsset?.name, title: 'Conductor — Flota Key Go', category: 'Conductor',
+    responsibilities: ['Gestionar la relación con inquilinos y renovación de contratos', 'Coordinar mantenimiento y proveedores del edificio', 'Reportar mensualmente a los holders del token vía La 33', 'Supervisar cobranzas y gastos operativos'] },
+  { id: 'j2', company: 'La 33', keychainLinked: true, linkedAsset: teslaAsset?.name, title: 'Conductor — Flota Key Go', category: 'Conductor',
     tags: ['Licencia de conducir', 'Atención al cliente'], salaryMin: 900, salaryMax: 1600, unit: 'mes', type: 'Presencial', commitment: 'Full o part-time',
     location: 'Buenos Aires, Argentina', postedAgo: '5 horas', applicants: 37,
-    description: 'Manejá autos tokenizados de la flota Key Go (Tesla Model 3 y más) en la plataforma de ride-hailing de KEYCHAIN. Horarios flexibles y bono por rendimiento.',
+    description: 'Manejá autos tokenizados de la flota Key Go (Tesla Model 3 y más) en la plataforma de ride-hailing de La 33. Horarios flexibles y bono por rendimiento.',
     responsibilities: ['Realizar viajes solicitados a través de la app Key Go', 'Mantener el vehículo limpio y en buen estado', 'Brindar una experiencia de viaje segura y amable', 'Cumplir con los estándares de seguridad de la flota'] },
   { id: 'j3', company: 'AutoMax', keychainLinked: false, title: 'Técnico de Mantenimiento — Flota Tesla Model 3', category: 'Mantenimiento',
     tags: ['Mantenimiento', 'Vehículos eléctricos'], salaryMin: 1500, salaryMax: 2000, unit: 'mes', type: 'Presencial', commitment: 'Tiempo completo',
@@ -200,9 +200,9 @@ const SEED_JOBS: Job[] = [
 ];
 
 const SEED_POSTS: Post[] = [
-  { id: 'p1', authorType: 'company', name: 'PropChain', role: 'Real Estate tokenizado · KEYCHAIN', content: 'Estamos buscando Property Manager para el Edificio Corporativo Palermo 🏢 Si te apasiona la gestión inmobiliaria, mirá el puesto en Empleos.', image: palermoAsset?.img, likes: 34, comments: [{ author: 'Martina Ibáñez', text: '¡Me postulé! 🙌' }], recommended: [] },
-  { id: 'p2', authorType: 'user', name: 'Max', role: 'Conductor en Key Go', content: '¡Contento de compartir que empecé como conductor en Key Go! 🚗 Gracias al equipo por la oportunidad, horarios flexibles y muy buena onda.', likes: 58, comments: [{ author: 'Sofía Gómez', text: '¡Felicitaciones! Yo también manejo para Key Go, es una gran experiencia.' }, { author: 'KEYCHAIN', text: '🎉 Bienvenido a la flota, Max!' }], recommended: ['KEYCHAIN'] },
-  { id: 'p3', authorType: 'company', name: 'KEYCHAIN', role: 'Plataforma de tokenización RWA', content: 'Conocé cómo tokenizamos nuestra flota de Tesla Model 3 y la ponemos a producir con Key Go 🎥', video: true, likes: 112, comments: [], recommended: [] },
+  { id: 'p1', authorType: 'company', name: 'PropChain', role: 'Real Estate tokenizado · La 33', content: 'Estamos buscando Property Manager para el Edificio Corporativo Palermo 🏢 Si te apasiona la gestión inmobiliaria, mirá el puesto en Empleos.', image: palermoAsset?.img, likes: 34, comments: [{ author: 'Martina Ibáñez', text: '¡Me postulé! 🙌' }], recommended: [] },
+  { id: 'p2', authorType: 'user', name: 'Max', role: 'Conductor en Key Go', content: '¡Contento de compartir que empecé como conductor en Key Go! 🚗 Gracias al equipo por la oportunidad, horarios flexibles y muy buena onda.', likes: 58, comments: [{ author: 'Sofía Gómez', text: '¡Felicitaciones! Yo también manejo para Key Go, es una gran experiencia.' }, { author: 'La 33', text: '🎉 Bienvenido a la flota, Max!' }], recommended: ['La 33'] },
+  { id: 'p3', authorType: 'company', name: 'La 33', role: 'Plataforma de tokenización RWA', content: 'Conocé cómo tokenizamos nuestra flota de Tesla Model 3 y la ponemos a producir con Key Go 🎥', video: true, likes: 112, comments: [], recommended: [] },
   { id: 'p4', authorType: 'company', name: 'AgroToken', role: 'Agro tokenizado', content: 'Cerramos la cosecha con rinde récord en el Campo Agrícola Pergamino 🌾 Buscamos sumar un/a Supervisor/a de Campo — ver Empleos.', likes: 21, comments: [], recommended: [] },
 ];
 
@@ -212,14 +212,14 @@ const SEED_PROFILE: Profile = {
   location: 'Buenos Aires, Argentina',
   about: 'Profesional orientado a resultados con experiencia en atención al cliente y gestión operativa. Actualmente conduciendo para Key Go mientras busco un rol estable en property management.',
   experience: [
-    { id: 'e1', role: 'Conductor', company: 'Key Go (KEYCHAIN)', period: '2026 — Presente', desc: 'Viajes de ride-hailing en la flota tokenizada de Key Go.' },
+    { id: 'e1', role: 'Conductor', company: 'Key Go (La 33)', period: '2026 — Presente', desc: 'Viajes de ride-hailing en la flota tokenizada de Key Go.' },
   ],
   education: [
     { id: 'ed1', school: 'Universidad de Buenos Aires', degree: 'Lic. en Administración', period: '2018 — 2023' },
   ],
   skills: ['Atención al cliente', 'Licencia de conducir', 'Excel'],
   recommendations: [
-    { from: 'KEYCHAIN', relation: 'Empleador en Key Go', text: 'Max es puntual, confiable y siempre recibe excelentes calificaciones de los pasajeros.' },
+    { from: 'La 33', relation: 'Empleador en Key Go', text: 'Max es puntual, confiable y siempre recibe excelentes calificaciones de los pasajeros.' },
   ],
 };
 
@@ -458,7 +458,7 @@ function JobDetail({ job, applied, onApply, onBack }: JobDetailProps) {
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: FONT_H, fontWeight: 800, fontSize: 17, color: INK }}>{job.title}</div>
               <div style={{ fontFamily: FONT_B, fontSize: 13, color: SUB, display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                {job.company} {job.keychainLinked && <span style={{ color: BLUE, display: 'flex', alignItems: 'center', gap: 3 }}>{JIcons.link} KEYCHAIN</span>} · {job.location}
+                {job.company} {job.keychainLinked && <span style={{ color: BLUE, display: 'flex', alignItems: 'center', gap: 3 }}>{JIcons.link} La 33</span>} · {job.location}
               </div>
             </div>
           </div>
@@ -1019,14 +1019,14 @@ function CompanyProfile({ company, setCompany, onSwitchRole, onLogout, myJobsCou
 
       <div style={{ background: CARD, borderRadius: 16, border: 'none', boxShadow: SHADOW_CARD, padding: 16, marginBottom: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div style={{ fontFamily: FONT_H, fontWeight: 700, fontSize: 14, color: INK }}>Vincular con empresa de KEYCHAIN</div>
+          <div style={{ fontFamily: FONT_H, fontWeight: 700, fontSize: 14, color: INK }}>Vincular con empresa de La 33</div>
           <button onClick={() => setCompany(c => ({ ...c, linked: !c.linked }))}
             style={{ width: 42, height: 24, borderRadius: 999, border: 'none', background: company.linked ? BLUE : BORDER, position: 'relative', cursor: 'pointer' }}>
             <span style={{ position: 'absolute', top: 2, left: company.linked ? 20 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.15s' }} />
           </button>
         </div>
         {company.linked ? (
-          <select value={company.name} onChange={e => setCompany(c => ({ ...c, name: e.target.value, industry: 'Tokenización de activos · KEYCHAIN' }))}
+          <select value={company.name} onChange={e => setCompany(c => ({ ...c, name: e.target.value, industry: 'Tokenización de activos · La 33' }))}
             style={{ width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: 11, border: `1.5px solid ${BORDER}`, fontFamily: FONT_B, fontSize: 13.5, background: '#fff' }}>
             <option value="">Elegí tu empresa…</option>
             {KEYCHAIN_COMPANIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -1068,7 +1068,7 @@ function CompanyProfile({ company, setCompany, onSwitchRole, onLogout, myJobsCou
                 <span style={{ color: SUB }}>Anuncios activos</span><span style={{ color: INK, fontWeight: 700 }}>{myJobsCount}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderTop: `1px solid ${BORDER}`, fontFamily: FONT_B, fontSize: 12.5 }}>
-                <span style={{ color: SUB }}>Vinculada a KEYCHAIN</span><span style={{ color: company.linked ? GREEN : SUB, fontWeight: 700 }}>{company.linked ? 'Sí' : 'No'}</span>
+                <span style={{ color: SUB }}>Vinculada a La 33</span><span style={{ color: company.linked ? GREEN : SUB, fontWeight: 700 }}>{company.linked ? 'Sí' : 'No'}</span>
               </div>
             </div>
           </div>
@@ -1198,7 +1198,7 @@ export default function KeyJobs() {
       <div style={{ position: 'fixed', inset: 0, background: BG, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 18px 10px' }}>
           <span style={{ fontFamily: FONT_H, fontWeight: 900, fontSize: 19, color: INK, letterSpacing: '-0.03em' }}>Key Jobs</span>
-          <span style={{ fontSize: 10.5, padding: '3px 8px', borderRadius: 999, background: `${BLUE}18`, color: BLUE, fontWeight: 700, fontFamily: FONT_B }}>by KEYCHAIN</span>
+          <span style={{ fontSize: 10.5, padding: '3px 8px', borderRadius: 999, background: `${BLUE}18`, color: BLUE, fontWeight: 700, fontFamily: FONT_B }}>by La 33</span>
         </div>
         <RoleSelect onSelect={setRole} />
       </div>
@@ -1213,7 +1213,7 @@ export default function KeyJobs() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '14px 18px 10px', background: CARD, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontFamily: FONT_H, fontWeight: 900, fontSize: 19, color: INK, letterSpacing: '-0.03em' }}>Key Jobs</span>
-          <span style={{ fontSize: 10.5, padding: '3px 8px', borderRadius: 999, background: `${BLUE}18`, color: BLUE, fontWeight: 700, fontFamily: FONT_B }}>by KEYCHAIN</span>
+          <span style={{ fontSize: 10.5, padding: '3px 8px', borderRadius: 999, background: `${BLUE}18`, color: BLUE, fontWeight: 700, fontFamily: FONT_B }}>by La 33</span>
         </div>
         {!isMobile && <DesktopNav tab={tab} setTab={setTab} role={role} onSearch={searchJobs} />}
       </div>

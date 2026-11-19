@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { PCard, PTag, PStat, PProgress, PImg, Icons, CompanyTag } from '~/components/ui';
+import { PCard, PImg, Icons } from '~/components/ui';
 import { ProjectCode } from '~/components/social/FeedPostCard';
 import { fmtUSD } from '~/data';
 import type { NavFn } from '~/lib/navigation';
@@ -8,11 +8,13 @@ import type { SocialAsset } from '~/lib/social/types';
 
 // The marketplace project card (Tokenizaciones). Reused wherever projects are
 // listed — company profile projects, a person's investments — so they all
-// look the same. `showCode` adds the project identifier next to the name;
-// `holding` ({ tokens, current, invested, yieldEarned }) adds a strip with
-// that person's position in the project, plus optional `actions` buttons.
-// `asset` is a demo RwaAsset or a live CatalogAsset (its pool adds the
-// "On-chain" tag).
+// look the same. Every card is photo-led: issuer and status over the top of
+// the photo, name, location, stats and funding over a dark scrim at the bottom.
+// `showCode` adds the project identifier next to the name; `holding`
+// ({ tokens, current, invested, yieldEarned }) adds a strip with that person's
+// position in the project, plus optional `actions` buttons. `asset` is a demo
+// RwaAsset or a live CatalogAsset (its pool adds the "On-chain" tag).
+// The mc-* class hooks drive the compact 2-per-row layout on phones (global.css).
 
 /** A person's position in the project, shown under the card. */
 export type AssetCardHolding = { tokens: number; current: number; invested: number; yieldEarned?: number };
@@ -27,143 +29,151 @@ export type AssetCardProps = {
   priority?: boolean;
 };
 
-const OnchainTag = () => <PTag label="On-chain" color="purple" style={{ background:'rgba(130,71,229,0.92)', color:'#fff' }} />;
+// ─── Shared photo-card pieces (also used by the secondary market) ────────────
 
-// ─── Asset card ───────────────────────────────────────────────────────────────
-// PStat hardcodes its own label/value colors (var(--ter)/var(--text)), which
-// flip dark in light theme — unreadable over a photo scrim that's always
-// dark regardless of the app's theme. This is the same stat shape with
-// colors fixed to white so it stays legible either way.
-type OverlayStatProps = { label: string; value: string; align?: CSSProperties['alignItems']; guide?: string };
+const PILL: CSSProperties = { display:'inline-flex', alignItems:'center', gap:5, height:24, padding:'0 10px', borderRadius:999, fontFamily:'var(--font-b)', fontSize:11.5, fontWeight:700, whiteSpace:'nowrap' };
 
-function OverlayStat({ label, value, align = 'flex-start', guide }: OverlayStatProps) {
+export type PillTone = 'live' | 'dark' | 'gain' | 'warn' | 'chain';
+const TONES: Record<PillTone, CSSProperties> = {
+  live:  { background:'rgba(22,163,74,0.95)', color:'#fff' },
+  dark:  { background:'rgba(0,0,0,0.5)', color:'#fff', backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)' },
+  gain:  { background:'rgba(22,163,74,0.95)', color:'#fff' },
+  warn:  { background:'#F3B200', color:'#000' },
+  chain: { background:'rgba(130,71,229,0.92)', color:'#fff' },
+};
+
+export function CardPill({ tone, dot, children }: { tone: PillTone; dot?: boolean; children: ReactNode }) {
   return (
-    <div data-guide={guide} style={{ display:'flex', flexDirection:'column', gap:3, alignItems:align }}>
-      <div style={{ fontSize:11, fontFamily:'var(--font-b)', color:'rgba(255,255,255,0.65)', letterSpacing:'0.05em', textTransform:'uppercase' }}>{label}</div>
-      <div style={{ fontSize:18, fontFamily:'var(--font-h)', fontWeight:700, color:'#fff', letterSpacing:'-0.02em' }}>{value}</div>
+    <span style={{ ...PILL, ...TONES[tone] }}>
+      {dot && <span style={{ width:6, height:6, borderRadius:'50%', background:'currentColor' }} />}
+      {children}
+    </span>
+  );
+}
+
+const initials = (name: string): string =>
+  name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+
+/** Issuer square (initials, or the La 33 mark) + name and category, over the photo. */
+export function CardIssuer({ name, sub, own }: { name: string; sub?: ReactNode; own?: boolean }) {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
+      <span style={{ width:36, height:36, flexShrink:0, borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center',
+        background: own ? '#000' : 'rgba(255,255,255,0.94)', color:'#1a1a1a', fontFamily:'var(--font-b)', fontSize:12.5, fontWeight:700 }}>
+        {own ? <img src="/la33/la33-icon.svg" alt="" width={22} height={22} style={{ width:22, height:22 }} /> : initials(name)}
+      </span>
+      <div style={{ minWidth:0, lineHeight:1.2 }}>
+        <div style={{ fontFamily:'var(--font-b)', fontSize:14, fontWeight:600, color:'#fff', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{name}</div>
+        {sub && <div style={{ fontFamily:'var(--font-b)', fontSize:12, color:'rgba(255,255,255,0.72)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{sub}</div>}
+      </div>
     </div>
   );
 }
 
-type CardBodyProps = Omit<AssetCardProps, 'asset'> & { a: SocialAsset; left: number };
+/** One stat over the scrim: small uppercase label, big value. */
+type OverlayStatProps = { label: string; value: string; align?: CSSProperties['alignItems']; guide?: string };
 
-// KEYCHAIN's own tokenizations get a distinct full-bleed photo treatment
-// (name/stats readable directly over the image, dark scrim at the bottom)
-// instead of just a glowing border — makes "this one is ours" obvious at a
-// glance rather than something you notice only up close.
-function KeychainAssetCard({ a, left, nav, showCode, holding, actions, priority }: CardBodyProps) {
-  const onchain = a.pool?.status === 'active';
+function OverlayStat({ label, value, align = 'flex-start', guide }: OverlayStatProps) {
   return (
-    // With a holding strip below, the wrapper is taller than the card: only
-    // lift it on hover — a shadow here would draw a box around card + strip.
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={holding ? { y:-4 } : { y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
-      <PCard guide="asset-card" className="market-card market-card-full" onClick={() => nav('detalle', a)} style={{ position:'relative' }}>
-        <PImg src={a.img} alt={a.name} height="100%" style={{ position:'absolute', inset:0 }} priority={priority}>
-          <div style={{ position:'absolute', top:0, left:0, right:0, height:84, background:'linear-gradient(to bottom, rgba(6,8,14,0.62) 0%, rgba(6,8,14,0) 100%)', pointerEvents:'none' }} />
-          <div style={{ position:'absolute', top:14, left:14 }}>
-            {/* This card only renders for issuer === 'keychain' — it's a
-                KEYCHAIN tokenization, not AutoMax/AgroToken/etc.'s own
-                listing, even though one of those companies operates it
-                day-to-day. */}
-            <CompanyTag company="KEYCHAIN" cat={a.cat} variant="overlay" />
-          </div>
-          <div style={{ position:'absolute', top:14, right:14, ...(onchain && { display:'flex', gap:6 }) }}>
-            {onchain && <OnchainTag />}
-            <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
-          </div>
-
-          <div style={{
-            position:'absolute', left:0, right:0, bottom:0, height:'66%',
-            background:'linear-gradient(to top, rgba(6,8,14,0.92) 0%, rgba(6,8,14,0.65) 48%, transparent 100%)',
-            display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:'18px 18px 16px',
-          }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              {showCode && <ProjectCode asset={a} overlay />}
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18, color:'#fff', letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', minWidth:0 }}>{a.name}</div>
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'rgba(255,255,255,0.7)' }}>
-              {Icons.location}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12 }}>{a.location}</span>
-            </div>
-
-            <div style={{ display:'flex', justifyContent:'space-between', marginTop:14 }}>
-              <OverlayStat label="Token" value={fmtUSD(a.tokenPrice)} />
-              <OverlayStat guide="asset-apy" label="APY est." value={`${a.apy}%`} />
-              <OverlayStat label="Disponibles" value={left.toLocaleString()} align="flex-end" />
-            </div>
-
-            <div data-guide="asset-funded" style={{ marginTop:10 }}>
-              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'rgba(255,255,255,0.65)' }}>Financiado</span>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, fontWeight:700, color:'#fff' }}>{a.sold}%</span>
-              </div>
-              <PProgress value={a.sold} style={{ background:'rgba(255,255,255,0.22)' }} color="#fff" />
-            </div>
-          </div>
-        </PImg>
-      </PCard>
-      {holding && <HoldingStrip holding={holding} actions={actions} />}
-    </motion.div>
+    <div data-guide={guide} style={{ display:'flex', flexDirection:'column', gap:4, alignItems:align, minWidth:0 }}>
+      <div style={{ fontSize:11, fontFamily:'var(--font-b)', fontWeight:600, color:'rgba(255,255,255,0.72)', letterSpacing:'0.08em', textTransform:'uppercase', whiteSpace:'nowrap' }}>{label}</div>
+      <div style={{ fontSize:22, fontFamily:'var(--font-h)', fontWeight:700, color:'#fff', letterSpacing:'-0.02em', whiteSpace:'nowrap', fontVariantNumeric:'tabular-nums' }}>{value}</div>
+    </div>
   );
 }
+
+export type PhotoCardProps = {
+  img: string;
+  alt: string;
+  onClick?: () => void;
+  priority?: boolean;
+  guide?: string;
+  topLeft: ReactNode;
+  topRight?: ReactNode;
+  title: ReactNode;
+  subtitle?: ReactNode;
+  /** [label, value, data-guide?] — three of them, laid out left / center / right. */
+  stats: ReadonlyArray<readonly [label: string, value: string, guide?: string]>;
+  footer?: ReactNode;
+};
+
+export function PhotoCard({ img, alt, onClick, priority, guide, topLeft, topRight, title, subtitle, stats, footer }: PhotoCardProps) {
+  return (
+    <PCard guide={guide} className="market-card market-card-full" onClick={onClick} style={{ position:'relative', borderRadius:18 }}>
+      <PImg src={img} alt={alt} height="100%" style={{ position:'absolute', inset:0 }} priority={priority}>
+        <div style={{ position:'absolute', inset:0, pointerEvents:'none',
+          background:'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.08) 26%, rgba(0,0,0,0.30) 52%, rgba(0,0,0,0.90) 100%)' }} />
+        <div style={{ position:'absolute', top:16, left:16, right:16, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
+          <div className="mc-company" style={{ flex:1, minWidth:0 }}>{topLeft}</div>
+          {topRight && <div className="mc-badges" style={{ display:'flex', gap:6, flexShrink:0, marginTop:2 }}>{topRight}</div>}
+        </div>
+        <div className="mc-overlay" style={{ position:'absolute', left:0, right:0, bottom:0, padding:'0 22px 22px' }}>
+          <div className="mc-name" style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:19, color:'#fff', letterSpacing:'-0.02em', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title}</div>
+          {subtitle && (
+            <div className="mc-loc" style={{ display:'flex', alignItems:'center', gap:6, marginTop:5, color:'rgba(255,255,255,0.82)', fontFamily:'var(--font-b)', fontSize:13.5, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{subtitle}</div>
+          )}
+          <div className="mc-stats" style={{ display:'flex', justifyContent:'space-between', gap:8, marginTop:16 }}>
+            {stats.map(([l, v, g], i) => (
+              <OverlayStat key={l} label={l} value={v} guide={g} align={i === 0 ? 'flex-start' : i === stats.length - 1 ? 'flex-end' : 'center'} />
+            ))}
+          </div>
+          {footer}
+        </div>
+      </PImg>
+    </PCard>
+  );
+}
+
+// ─── Primary market card ──────────────────────────────────────────────────────
 
 export default function AssetCard({ asset: a, nav, showCode, holding, actions, priority }: AssetCardProps) {
   const left = a.totalTokens - Math.round(a.totalTokens * a.sold / 100);
-  if (a.issuer === 'keychain') return <KeychainAssetCard a={a} left={left} nav={nav} showCode={showCode} holding={holding} actions={actions} priority={priority} />;
+  const own = a.issuer === 'keychain';
+  const funded = a.sold >= 100;
+  const status = funded ? <CardPill tone="dark">Financiado</CardPill>
+    : a.stage === 'Recaudación' ? <CardPill tone="live" dot>En vivo</CardPill>
+    : <CardPill tone="dark">{a.stage}</CardPill>;
 
   return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={holding ? { y:-4 } : { y:-4, boxShadow:'var(--sh-lg)' }} transition={{ duration:0.2 }} style={{ borderRadius:20 }}>
-      <PCard guide="asset-card" className="market-card" onClick={() => nav('detalle', a)} style={{ display:'flex', flexDirection:'column', position:'relative' }}>
-        <PImg src={a.img} alt={a.name} height={168} className="market-card-img" priority={priority}>
-          <div style={{ position:'absolute', top:12, left:12, display:'flex', gap:6, flexWrap:'wrap' }}>
-            <PTag label={a.stage} style={{ background: a.stage==='Operativo' ? 'rgba(110,231,114,0.92)':'rgba(255,255,255,0.92)', color:'#0a2a0d' }} />
-            {a.pool?.status === 'active' && <OnchainTag />}
-          </div>
-        </PImg>
-
-        <div style={{ padding:'15px 17px 17px', display:'flex', flexDirection:'column', gap:12, flex:1 }}>
-          <div>
-            <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:8, minWidth:0 }}>
-                {showCode && <ProjectCode asset={a} />}
-                <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)', letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', minWidth:0 }}>{a.name}</div>
-              </div>
+    // With a holding strip below, the wrapper is taller than the card: only
+    // lift it on hover — a shadow here would draw a box around card + strip.
+    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} whileHover={{ y:-4 }} transition={{ duration:0.2 }} style={{ borderRadius:18 }}>
+      <PhotoCard
+        guide="asset-card"
+        img={a.img} alt={a.name} priority={priority}
+        onClick={() => nav('detalle', a)}
+        topLeft={<CardIssuer name={own ? 'La 33' : (a.company || 'La 33')} sub={a.cat} own={own} />}
+        topRight={<>{a.pool?.status === 'active' && <CardPill tone="chain">On-chain</CardPill>}{status}</>}
+        title={<>{showCode && <ProjectCode asset={a} overlay />}{a.name}</>}
+        subtitle={<>{Icons.location}<span>{a.location}</span></>}
+        stats={[
+          ['Token', fmtUSD(a.tokenPrice)],
+          ['APY est.', `${a.apy}%`, 'asset-apy'],
+          ['Disponibles', left > 0 ? left.toLocaleString('en-US') : 'Agotado'],
+        ]}
+        footer={
+          <div data-guide="asset-funded" className="mc-funded" style={{ marginTop:16 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:7 }}>
+              <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'rgba(255,255,255,0.85)' }}>Financiado</span>
+              <span style={{ fontFamily:'var(--font-b)', fontSize:13, fontWeight:600, color:'#fff' }}>{a.sold}%</span>
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:4, color:'var(--ter)' }}>
-              {Icons.location}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)' }}>{a.location}</span>
+            <div style={{ height:4, borderRadius:999, background:'rgba(255,255,255,0.25)', overflow:'hidden' }}>
+              <div style={{ width:`${Math.min(100, a.sold)}%`, height:'100%', borderRadius:999, background:'#fff' }} />
             </div>
-            {a.company && (
-              <CompanyTag company={a.company} cat={a.cat} size="sm" style={{ marginTop:8 }} />
-            )}
           </div>
-
-          <div style={{ display:'flex', justifyContent:'space-between' }}>
-            <PStat label="Token" value={fmtUSD(a.tokenPrice)} />
-            <PStat guide="asset-apy" label="APY est." value={`${a.apy}%`} accent />
-            <PStat label="Disponibles" value={left.toLocaleString()} style={{ alignItems:'flex-end' }} />
-          </div>
-
-          <div data-guide="asset-funded">
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)' }}>Financiado</span>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12, fontWeight:700, color:'var(--accent-text)' }}>{a.sold}%</span>
-            </div>
-            <PProgress value={a.sold} />
-          </div>
-        </div>
-      </PCard>
+        }
+      />
       {holding && <HoldingStrip holding={holding} actions={actions} />}
     </motion.div>
   );
 }
 
-// The person's position, as a strip under the card (same for both card types
-// so the cards themselves keep identical sizes).
+// The person's position, as a strip under the card (same for every card so
+// the cards themselves keep identical sizes).
 function HoldingStrip({ holding: h, actions }: { holding: AssetCardHolding; actions?: ReactNode }) {
   const diff = h.invested ? ((h.current - h.invested) / h.invested) * 100 : 0;
   return (
-    <div style={{
+    <div className="mc-holding" style={{
       display:'flex', justifyContent:'space-between', alignItems:'center', gap:10, padding:'11px 17px',
       fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)',
       marginTop:8, borderRadius:14, border:'1px solid var(--border-l)', background:'var(--surface)',

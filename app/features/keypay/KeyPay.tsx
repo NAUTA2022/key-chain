@@ -707,7 +707,7 @@ const BENEFITS: KeyPayBenefit[] = [
   { icon:'hex',    title:'Fees reducidos', desc:'-50% en comisiones de mercado secundario por holdear KYCN', active:true },
   { icon:'bolt',   title:'Retiros prioritarios', desc:'Liquidación de fiat en <24h en vez de 3-5 días hábiles', active:true },
   { icon:'target', title:'Acceso anticipado', desc:'48h de ventana exclusiva antes del lanzamiento público de nuevos proyectos', active:true },
-  { icon:'shield', title:'Seguro extendido', desc:'Cobertura ampliada en activos con custodia KEYCHAIN', active:false },
+  { icon:'shield', title:'Seguro extendido', desc:'Cobertura ampliada en activos con custodia La 33', active:false },
 ];
 
 type MovTab = 'fondos' | 'inversiones' | 'escrow' | 'beneficios' | 'movimientos';
@@ -761,7 +761,7 @@ function ReceiveModal({ onClose, myAddress = '0x00000000000000000000000000000000
         </div>
 
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:16 }}>
-          <div style={{ width:44, height:44, borderRadius:'50%', background:'linear-gradient(135deg,#7c5cff,#5b8cff)', marginBottom:8 }} />
+          <div style={{ width:44, height:44, borderRadius:'50%', background:'linear-gradient(135deg,#7c5cff,#FFCC40)', marginBottom:8 }} />
           <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:14, color:'var(--kp-text)' }}>{myName}</div>
           <div style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, color:'var(--kp-ter)' }}>Perfil KeyPay</div>
         </div>
@@ -1129,7 +1129,7 @@ export function CartCheckout({ onClose, focusId }: CartCheckoutProps) {
         <motion.div onClick={e => e.stopPropagation()} style={{ width:'100%', maxWidth:340, borderRadius:20, background:'var(--kp-surface)', border:'1px solid var(--kp-border-l)', padding:'32px 24px', textAlign:'center' }}>
           <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:700, fontSize:16, color:'var(--kp-text)', marginBottom:8 }}>No tenés pagos pendientes</div>
           <div style={{ fontFamily:'var(--kp-font-b)', fontSize:13, color:'var(--kp-sec)', marginBottom:20 }}>
-            Cuando inviertas en el token KYCN o reserves una tokenización desde KEYCHAIN, aparecerán acá para pagar.
+            Cuando inviertas en el token KYCN o reserves una tokenización desde La 33, aparecerán acá para pagar.
           </div>
           <KBtn variant="accent" style={{ width:'100%', justifyContent:'center' }} onClick={onClose}>Cerrar</KBtn>
         </motion.div>
@@ -1150,7 +1150,7 @@ export function CartCheckout({ onClose, focusId }: CartCheckoutProps) {
         style={{ width:'100%', maxWidth:420, maxHeight:'88vh', overflowY:'auto', background:'var(--kp-surface)', border:'1px solid var(--kp-border-l)', borderRadius:22, boxShadow:'var(--kp-shadow)' }}
       >
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 20px', borderBottom:'1px solid var(--kp-border-l)' }}>
-          <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:16, color:'var(--kp-text)' }}>Checkout — Pendientes de KEYCHAIN</div>
+          <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:16, color:'var(--kp-text)' }}>Checkout — Pendientes de La 33</div>
           <button onClick={onClose} style={{ width:32, height:32, borderRadius:9, border:'none', background:'var(--kp-surface2)', color:'var(--kp-sec)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>{KIcons.close}</button>
         </div>
 
@@ -1179,7 +1179,7 @@ export function CartCheckout({ onClose, focusId }: CartCheckoutProps) {
               tokenAddress={USDC_BASE}
               amount={total.toFixed(2)}
               seller={KEYCHAIN_TREASURY}
-              name="Pendientes de KEYCHAIN"
+              name="Pendientes de La 33"
               description={`${pending.length} ítem${pending.length === 1 ? '' : 's'} pendiente${pending.length === 1 ? '' : 's'} de pago`}
               buttonLabel={`Pagar ${fmt(total)}`}
               style={{ flex:1 }}
@@ -1636,7 +1636,7 @@ function P2PFiatModal({ onClose }: ModalCloseProps) {
               <div style={{ width:56, height:56, borderRadius:'50%', background:'rgba(255,120,120,0.14)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 14px', color:'#ff8a8a' }}>{KIcons.shield}</div>
               <div style={{ fontFamily:'var(--kp-font-h)', fontWeight:800, fontSize:17, color:'#fff', marginBottom:8 }}>En revisión</div>
               <div style={{ fontFamily:'var(--kp-font-b)', fontSize:13, color:'#8a8a92', lineHeight:1.5, marginBottom:20 }}>
-                Tu cripto sigue bloqueada. El equipo de soporte de KEYCHAIN va a revisar el caso y resolverá en 24–48h.
+                Tu cripto sigue bloqueada. El equipo de soporte de La 33 va a revisar el caso y resolverá en 24–48h.
               </div>
               <button onClick={onClose} style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', background:'#1e1e22', color:'#fff', fontFamily:'var(--kp-font-b)', fontWeight:600, fontSize:13.5, cursor:'pointer' }}>Cerrar</button>
             </div>
@@ -2009,7 +2009,7 @@ function MovimientosListTab({ nav }: TabNavProps) {
 function EscrowTab({ nav }: TabNavProps) {
   return (
     <div>
-      <KSection title="Fondos en custodia" sub="Garantías y depósitos gestionados por el escrow de KEYCHAIN — tocá uno para verlo en Escrow Chain" />
+      <KSection title="Fondos en custodia" sub="Garantías y depósitos gestionados por el escrow de La 33 — tocá uno para verlo en Escrow Chain" />
       <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
         {ESCROWS.map(e => (
           <KCard key={e.id} onClick={() => nav?.('escrow')} style={{ padding:'18px 20px' }}>
@@ -2457,7 +2457,7 @@ function BottomBar({ screen, setScreen, containerRef, profile }: BottomBarProps)
                 {it.avatar ? (
                   <span style={{
                     position:'relative', width:27, height:27, borderRadius:'50%', overflow:'hidden', flexShrink:0,
-                    background: profile?.photo ? 'transparent' : 'linear-gradient(135deg,#7c5cff,#5b8cff)',
+                    background: profile?.photo ? 'transparent' : 'linear-gradient(135deg,#7c5cff,#FFCC40)',
                     display:'flex', alignItems:'center', justifyContent:'center',
                     border: active ? '1.5px solid #fff' : '1.5px solid rgba(255,255,255,0.25)',
                     boxShadow: active ? '0 0 8px rgba(124,140,255,0.7)' : 'none', transition:'border-color 0.15s',
@@ -2653,7 +2653,7 @@ function PerfilScreen({ onBack, profile, setProfile, verification, onOpenKYC }: 
           {profile.photo ? (
             <img src={profile.photo} alt="" style={{ width:84, height:84, borderRadius:'50%', objectFit:'cover' }} />
           ) : (
-            <div style={{ width:84, height:84, borderRadius:'50%', background:'linear-gradient(135deg,#7c5cff,#5b8cff)' }} />
+            <div style={{ width:84, height:84, borderRadius:'50%', background:'linear-gradient(135deg,#7c5cff,#FFCC40)' }} />
           )}
           <div style={{ position:'absolute', bottom:0, right:0, width:28, height:28, borderRadius:'50%', background:'var(--kp-text)', color:'var(--kp-bg)', display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid var(--kp-bg)' }}>{KIcons.camera}</div>
         </button>
@@ -2825,8 +2825,8 @@ export default function KeyPay({ nav, onClose, initialModal = null, cartFocusId 
   const TOUR_STEPS: TourStep[] = [
     { ref: balanceRef, title: 'Tu balance total', desc: 'Acá ves el total combinado de todas tus billeteras del ecosistema, siempre actualizado.' },
     { ref: actionsRef, title: 'Send & Request', desc: 'Enviá cripto a otra persona por x402, o generá un link/QR para que te paguen.' },
-    { ref: checkoutRef, title: 'Checkout', desc: 'Cuando invertís desde KEYCHAIN (token KYCN, tokenizaciones), el pago pendiente aparece acá para completarlo.' },
-    { ref: bottomBarRef, title: 'Navegación', desc: 'Volver a KEYCHAIN, ver todos tus Movimientos, Configuración y tu Perfil — siempre a un toque.' },
+    { ref: checkoutRef, title: 'Checkout', desc: 'Cuando invertís desde La 33 (token KYCN, tokenizaciones), el pago pendiente aparece acá para completarlo.' },
+    { ref: bottomBarRef, title: 'Navegación', desc: 'Volver a La 33, ver todos tus Movimientos, Configuración y tu Perfil — siempre a un toque.' },
   ];
 
   const endTour = () => { setTourStep(-1); localStorage.setItem('keypay_tour_seen', '1'); };
@@ -2898,7 +2898,7 @@ export default function KeyPay({ nav, onClose, initialModal = null, cartFocusId 
                         display:'flex', alignItems:'center', gap:6, padding:'6px 10px 6px 6px', flexShrink:0, minWidth:0,
                         borderRadius:999, border:'1px solid rgba(255,255,255,0.14)', background:'rgba(255,255,255,0.06)', cursor:'pointer',
                       }}>
-                        <span style={{ width:20, height:20, borderRadius:'50%', flexShrink:0, background:'linear-gradient(135deg,#7c5cff,#5b8cff)' }} />
+                        <span style={{ width:20, height:20, borderRadius:'50%', flexShrink:0, background:'linear-gradient(135deg,#7c5cff,#FFCC40)' }} />
                         <span style={{ fontFamily:'var(--kp-font-b)', fontSize:11.5, fontWeight:600, color:'#fff', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
                           {account?.address ? `${account.address.slice(0,6)}…${account.address.slice(-4)}` : 'Wallet'}
                         </span>

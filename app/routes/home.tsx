@@ -9,15 +9,15 @@ import { HOME_PATH } from '~/lib/navigation';
 // The landing is always dark, whatever theme the app itself is set to.
 export const handle: RouteHandle = { theme: 'dark' };
 
-// Hero illustration is the landing's LCP element.
+// Brand icon for the tab.
 export const links: Route.LinksFunction = () => [
-  { rel: 'preload', href: '/3ds.webp', as: 'image', type: 'image/webp', fetchPriority: 'high' },
+  { rel: 'icon', href: '/la33/la33-icon.svg', type: 'image/svg+xml' },
 ];
 
 export const meta: Route.MetaFunction = () =>
   seo({
-    title: 'Tokenización de activos reales (RWA) en Polygon',
-    description: 'Tokenizá e invertí en activos reales: autos, campos, drones, inmuebles y edificios tokenizados en Polygon, desde cualquier monto y con rendimientos mensuales en USDC.',
+    title: 'La 33 · Tokenización B2B de activos tangibles en Panamá',
+    description: 'La 33 tokeniza inmuebles, fincas, energía y otros activos tangibles de empresas en Panamá y los conecta con inversionistas verificados en un marketplace multi-proyecto.',
     path: '/',
   });
 

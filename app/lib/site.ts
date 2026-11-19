@@ -5,11 +5,11 @@
  */
 export const SITE_URL: string = (import.meta.env.VITE_SITE_URL ?? 'http://localhost:5173').replace(/\/+$/, '');
 
-export const SITE_NAME = 'KEY CHAIN';
-export const SITE_LOCALE = 'es_AR';
+export const SITE_NAME = 'La 33';
+export const SITE_LOCALE = 'es_PA';
 export const SITE_LANG = 'es';
 export const DEFAULT_DESCRIPTION =
-  'Plataforma de tokenización de activos reales (RWA) en Polygon: invertí en autos, campos, drones, inmuebles y edificios tokenizados desde cualquier monto, con rendimientos mensuales en USDC.';
+  'La 33: tokenización B2B de activos tangibles en Panamá. Estructuramos y emitimos inmuebles, fincas, energía e infraestructura, y los conectamos con inversionistas en un marketplace multi-proyecto.';
 export const DEFAULT_OG_IMAGE = '/og-image.jpg';
 
 export function absoluteUrl(path: string): string {

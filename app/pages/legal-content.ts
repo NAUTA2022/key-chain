@@ -5,7 +5,7 @@ export type LegalSection = { title: string; paragraphs: string[] };
 
 export const TERMS: LegalSection[] = [
   { title: 'Quiénes somos y qué ofrecemos', paragraphs: [
-    'KEY CHAIN es una plataforma que permite invertir en fracciones tokenizadas de activos reales (RWA) mediante tokens de seguridad bajo el estándar ERC-3643, con identidad verificada on-chain.',
+    'La 33 es una plataforma que permite invertir en fracciones tokenizadas de activos reales (RWA) mediante tokens de seguridad bajo el estándar ERC-3643, con identidad verificada on-chain.',
     'Mientras esté activo el entorno de pruebas, todas las operaciones se ejecutan en una red de pruebas privada con saldos sin valor económico. Ninguna operación de ese entorno representa una inversión real.',
   ] },
   { title: 'Requisitos para usar la plataforma', paragraphs: [
@@ -13,7 +13,7 @@ export const TERMS: LegalSection[] = [
     'Algunas jurisdicciones pueden estar restringidas por razones regulatorias o de sanciones. Podemos rechazar o suspender cuentas que no cumplan estos requisitos.',
   ] },
   { title: 'Tu wallet y tus claves', paragraphs: [
-    'Accedés con tu propia wallet. Sos responsable de custodiar tus claves y de los dispositivos desde los que firmás. KEY CHAIN nunca te pedirá tu frase semilla ni tus claves privadas.',
+    'Accedés con tu propia wallet. Sos responsable de custodiar tus claves y de los dispositivos desde los que firmás. La 33 nunca te pedirá tu frase semilla ni tus claves privadas.',
     'Tu identidad on-chain (ONCHAINID) es gestionada por la plataforma para registrar tus credenciales de verificación.',
   ] },
   { title: 'Riesgos de invertir', paragraphs: [

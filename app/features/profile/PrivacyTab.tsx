@@ -15,7 +15,7 @@ type TogglePref = { [K in keyof Preferences]: Preferences[K] extends boolean ? K
 
 const PREFS: ReadonlyArray<readonly [TogglePref, string, string]> = [
   ['investmentAlerts', 'Alertas de inversión', 'Avisos sobre tus inversiones: dividendos, liquidaciones y novedades de tus activos'],
-  ['productUpdates', 'Novedades de la plataforma', 'Cambios importantes y nuevas funciones de KEY CHAIN'],
+  ['productUpdates', 'Novedades de la plataforma', 'Cambios importantes y nuevas funciones de La 33'],
   ['marketingEmails', 'Comunicaciones de marketing', 'Noticias, lanzamientos y promociones por email'],
   ['publicProfile', 'Perfil público', 'Mostrar tu nombre y foto a otros inversores'],
   ['showInvestments', 'Mostrar mis inversiones en mi perfil público', 'Otros inversores ven en qué proyectos invertiste (nunca los montos)'],

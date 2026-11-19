@@ -546,7 +546,7 @@ export const MY_HOLDINGS: Holding[] = [
 export const MY_BALANCES: Balance[] = [
   { sym: 'USDC', name: 'USD Coin',        qty: 12450.80, usd: 12450.80, dot: '#2775CA' },
   { sym: 'MATIC', name: 'Polygon',         qty: 8230,     usd: 4856.70,  dot: '#8247E5' },
-  { sym: 'KYCN', name: 'KEY CHAIN Token', qty: 45000,    usd: 3825.00,  dot: 'var(--accent)' },
+  { sym: 'KYCN', name: 'Token La 33', qty: 45000,    usd: 3825.00,  dot: 'var(--accent)' },
   { sym: 'ETH',  name: 'Ethereum',         qty: 0.84,     usd: 2940.00,  dot: '#627EEA' },
 ];
 
@@ -575,7 +575,7 @@ export const ACADEMY_POSTS: AcademyPost[] = [
   { id: 3, cat: 'RWA', slug: 'campos-agricolas-el-rwa-con-mayor-demanda-en-latam', title: 'Campos agrícolas: el RWA con mayor demanda en LATAM', excerpt: 'Por qué la tierra productiva es el activo estrella de la tokenización en la región.', img: '/images/assets/photo-1500382017468-9049fed747ef.webp', read: '10 min', date: '21 May 2026' },
   { id: 4, cat: 'DeFi', slug: 'vesting-y-cliffs-entende-el-calendario-de-tu-token', title: 'Vesting y cliffs: entendé el calendario de tu token', excerpt: 'TGE, cliff, vesting lineal — todos los términos que necesitás dominar antes de un ICO.', img: '/images/assets/photo-1642104704074-907c0698cbd9.webp', read: '7 min', date: '14 May 2026' },
   { id: 5, cat: 'Guías', slug: 'mercado-secundario-cuando-comprar-con-descuento', title: 'Mercado secundario: cuándo comprar con descuento', excerpt: 'Cómo evaluar listados P2P, comparar precio real vs. precio pedido y detectar oportunidades.', img: '/images/assets/photo-1611974789855-9c2a0a7236a3.webp', read: '9 min', date: '07 May 2026' },
-  { id: 6, cat: 'Tokenización', slug: 'smart-contracts-en-polygon-asi-protegemos-tu-inversion', title: 'Smart contracts en Polygon: así protegemos tu inversión', excerpt: 'Auditorías, custodia y la arquitectura on-chain detrás de cada proyecto de KEY CHAIN.', img: '/images/assets/photo-1620321023374-d1a68fbc720d.webp', read: '11 min', date: '30 Abr 2026' },
+  { id: 6, cat: 'Tokenización', slug: 'smart-contracts-en-polygon-asi-protegemos-tu-inversion', title: 'Smart contracts en Polygon: así protegemos tu inversión', excerpt: 'Auditorías, custodia y la arquitectura on-chain detrás de cada proyecto de La 33.', img: '/images/assets/photo-1620321023374-d1a68fbc720d.webp', read: '11 min', date: '30 Abr 2026' },
 ];
 
 export const NOTIFICATIONS: AppNotification[] = [

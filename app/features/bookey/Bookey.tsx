@@ -238,7 +238,7 @@ const PROPERTIES: BookeyProperty[] = [
       'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=800&h=600&fit=crop&auto=format&q=80',
     ],
     amenities: ['wifi','ac','tv','kitchen','washer','gym','security','parking'],
-    description: 'Loft de 85 m² con techos de 4 metros en el barrio más cotizado de Madrid. Espacio de trabajo integrado con fibra óptica simétrica de 1 Gbps, sala de reuniones compartida en el edificio y recepción 24hs. Diseño nórdico con materiales de primera calidad. A 3 minutos a pie del metro Alonso Martínez. Contracto de arrendamiento mínimo 3 meses, con descuento del 8% para inversores KEYCHAIN.',
+    description: 'Loft de 85 m² con techos de 4 metros en el barrio más cotizado de Madrid. Espacio de trabajo integrado con fibra óptica simétrica de 1 Gbps, sala de reuniones compartida en el edificio y recepción 24hs. Diseño nórdico con materiales de primera calidad. A 3 minutos a pie del metro Alonso Martínez. Contracto de arrendamiento mínimo 3 meses, con descuento del 8% para inversores La 33.',
     host: { name: 'Isabel Moreno', since: 2019, rating: 4.92, reviews: 201, superhost: true },
     reviews: [
       { name:'Thomas H.', date:'Jun 2026', rating:5, text:'Perfect location for business travel. The workspace is excellent and the building services are top notch. Would stay again without hesitation.' },
@@ -780,7 +780,7 @@ function BookingWidget({ p }: BookingWidgetProps) {
         </div>
         <button onClick={() => routerNavigate('/')}
           style={{ width:'100%', padding:'13px', borderRadius:14, background:`${A}18`, border:`1.5px solid ${A}40`, color:A, fontFamily:'var(--font-b)', fontWeight:700, fontSize:14, cursor:'pointer' }}>
-          Ver portal del inquilino en KEYCHAIN →
+          Ver portal del inquilino en La 33 →
         </button>
         <button onClick={() => setStep('idle')}
           style={{ width:'100%', padding:'11px', borderRadius:14, background:'transparent', border:'none', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:13, cursor:'pointer', marginTop:8 }}>
@@ -906,7 +906,7 @@ function BookingWidget({ p }: BookingWidgetProps) {
         </div>
         {saved > 0 && (
           <div style={{ display:'flex', justifyContent:'space-between' }}>
-            <span style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:G }}>Ahorro inversor KEYCHAIN</span>
+            <span style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:G }}>Ahorro inversor La 33</span>
             <span style={{ fontFamily:'var(--font-b)', fontWeight:700, fontSize:13.5, color:G }}>−${saved}</span>
           </div>
         )}
@@ -992,7 +992,7 @@ function PropertyDetail({ p, nav }: PropertyDetailProps) {
           {p.verified && (
             <div style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:999, background:`${A}12`, border:`1px solid ${A}30`, flexShrink:0 }}>
               <span style={{ color:A, display:'flex' }}>{BIcons.token}</span>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:A, fontWeight:700, whiteSpace:'nowrap' }}>Tokenizado en KEYCHAIN</span>
+              <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:A, fontWeight:700, whiteSpace:'nowrap' }}>Tokenizado en La 33</span>
             </div>
           )}
         </div>
@@ -1029,7 +1029,7 @@ function PropertyDetail({ p, nav }: PropertyDetailProps) {
             {/* Features */}
             <div style={{ padding:'28px 0', borderBottom:'1px solid var(--border-l)', display:'flex', flexDirection:'column', gap:16 }}>
               {[
-                { icon:BIcons.token, title:`Token KEYCHAIN · −${p.investor_discount}% para inversores`, desc:'El activo está tokenizado on-chain. Holders de tokens acceden a descuentos exclusivos y rendimientos.' },
+                { icon:BIcons.token, title:`Token La 33 · −${p.investor_discount}% para inversores`, desc:'El activo está tokenizado on-chain. Holders de tokens acceden a descuentos exclusivos y rendimientos.' },
                 { icon:BIcons.medal, title: p.superhost ? 'Superhost verificado' : 'Anfitrión verificado', desc:`${p.host.name} lleva ${new Date().getFullYear()-p.host.since} años en la plataforma con ${p.host.reviews} reseñas y calificación ${p.host.rating}.` },
                 { icon:BIcons.clipboard, title:`Check-in ${p.checkin} · Check-out ${p.checkout}`, desc:'Acceso autónomo con código en tu wallet. El smart contract libera el acceso al confirmar el pago.' },
               ].map(f => (
@@ -1207,7 +1207,7 @@ function BookeyHome({ nav, query, searched, onSearch }: BookeyHomeProps) {
               style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20, justifyContent:'center' }}>
               <span style={{ display:'flex' }}>{BIcons.logo}</span>
               <span style={{ fontFamily:'var(--font-h)', fontWeight:900, fontSize:34, color:'var(--text)', letterSpacing:'-0.03em' }}>Bookey</span>
-              <span style={{ padding:'3px 10px', borderRadius:999, background:`${A}14`, color:A, fontSize:11, fontWeight:700, letterSpacing:'0.04em' }}>by KEYCHAIN</span>
+              <span style={{ padding:'3px 10px', borderRadius:999, background:`${A}14`, color:A, fontSize:11, fontWeight:700, letterSpacing:'0.04em' }}>by La 33</span>
             </motion.div>
 
             <motion.h1
@@ -1280,7 +1280,7 @@ function BookeyHome({ nav, query, searched, onSearch }: BookeyHomeProps) {
           <span style={{ color:A, display:'flex', transform:'scale(1.5)' }}>{BIcons.token}</span>
           <div style={{ flex:1 }}>
             <span style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:13.5, color:A }}>Precio inversor activo · </span>
-            <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--sec)' }}>Como holder de tokens KEYCHAIN, obtenés entre 8% y 20% de descuento en cada propiedad. El precio ya está aplicado en los listados.</span>
+            <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--sec)' }}>Como holder de tokens La 33, obtenés entre 8% y 20% de descuento en cada propiedad. El precio ya está aplicado en los listados.</span>
           </div>
         </motion.div>
       </div>
@@ -1600,8 +1600,8 @@ function BookeyFavorites({ nav }: BookeyFavoritesProps) {
 
 // ─── Help ─────────────────────────────────────────────────────────────────────
 const HELP_FAQS = [
-  { q:'¿Cómo reservo una propiedad?', a:'Elegí una propiedad, seleccioná fechas y huéspedes, y confirmá el pago desde el checkout de KEYCHAIN.' },
-  { q:'¿Qué es el descuento inversor?', a:'Si tenés tokens KEYCHAIN de una propiedad, accedés a un descuento de entre 8% y 20% sobre el precio de esa propiedad.' },
+  { q:'¿Cómo reservo una propiedad?', a:'Elegí una propiedad, seleccioná fechas y huéspedes, y confirmá el pago desde el checkout de La 33.' },
+  { q:'¿Qué es el descuento inversor?', a:'Si tenés tokens La 33 de una propiedad, accedés a un descuento de entre 8% y 20% sobre el precio de esa propiedad.' },
   { q:'¿En qué puedo pagar?', a:'Todos los pagos se hacen en cripto on-chain, con USDC o el token KYCN.' },
   { q:'¿Cómo cancelo una reserva?', a:'Escribinos a soporte@keychain.io y te ayudamos según la política de cancelación de esa propiedad.' },
 ];

@@ -40,7 +40,7 @@ function AdminDemo({ nav }: AdminProps) {
     <div style={{ padding: '28px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
       <PSection
         title="Panel Admin"
-        sub="Control total de la plataforma KEY CHAIN."
+        sub="Control total de la plataforma La 33."
         action={<PBtn variant="accent" onClick={() => nav('config')}>{Icons.settings} Configuración</PBtn>}
       />
 

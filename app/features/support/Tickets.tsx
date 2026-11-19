@@ -411,7 +411,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
             return (
               <li key={m.id} ref={i === ticket.messages.length - 1 ? lastRef : undefined} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
                 <div style={{ ...mutedStyle, fontSize: 11.5, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 600, color: mine ? 'var(--sec)' : 'var(--accent-text)' }}>{mine ? 'Vos' : 'Equipo KEY CHAIN'}</span>
+                  <span style={{ fontWeight: 600, color: mine ? 'var(--sec)' : 'var(--accent-text)' }}>{mine ? 'Vos' : 'Equipo La 33'}</span>
                   {' · '}
                   <time dateTime={m.createdAt}>{fmtDateTime(m.createdAt)}</time>
                 </div>

@@ -22,7 +22,7 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     term: 'Wallet',
     aka: 'Billetera',
     definition:
-      'Es tu cuenta y tu billetera a la vez: con ella entrás a KEY CHAIN (sin contraseña) y en ella guardás tus USDC y tus tokens. Solo vos podés autorizar movimientos desde tu wallet.',
+      'Es tu cuenta y tu billetera a la vez: con ella entrás a La 33 (sin contraseña) y en ella guardás tus USDC y tus tokens. Solo vos podés autorizar movimientos desde tu wallet.',
   },
   {
     id: 'direccion',
@@ -41,7 +41,7 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     term: 'USDC',
     aka: 'Dólar digital',
     definition:
-      'Un dólar digital: cada USDC vale 1 dólar estadounidense y está respaldado 1 a 1. Es la moneda con la que invertís y con la que recibís dividendos en KEY CHAIN.',
+      'Un dólar digital: cada USDC vale 1 dólar estadounidense y está respaldado 1 a 1. Es la moneda con la que invertís y con la que recibís dividendos en La 33.',
   },
   {
     id: 'token',
@@ -74,7 +74,7 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     term: 'Gas',
     aka: 'Comisión de red',
     definition:
-      'Una pequeña comisión que cobra la red por registrar una transacción. No la cobra KEY CHAIN; tu wallet te muestra el monto antes de confirmar.',
+      'Una pequeña comisión que cobra la red por registrar una transacción. No la cobra La 33; tu wallet te muestra el monto antes de confirmar.',
   },
   {
     id: 'kyc',

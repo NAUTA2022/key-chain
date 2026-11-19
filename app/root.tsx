@@ -28,7 +28,7 @@ export const links: Route.LinksFunction = () => [
 
 // Restores the visitor's saved theme before first paint (no light/dark flash).
 // Only runs on routes that don't force their own theme.
-const THEME_BOOT = `try{var p=JSON.parse(localStorage.getItem('kc_prefs')||'{}'),r=document.documentElement;if(p.theme)r.setAttribute('data-theme',p.theme);if(p.palette)r.setAttribute('data-palette',p.palette)}catch(e){}`;
+const THEME_BOOT = `try{var p=JSON.parse(localStorage.getItem('la33_prefs')||'{}'),r=document.documentElement;if(p.theme)r.setAttribute('data-theme',p.theme);if(p.palette)r.setAttribute('data-palette',p.palette)}catch(e){}`;
 
 function useForcedTheme(): 'dark' | 'light' | undefined {
   const matches = useMatches();
@@ -42,11 +42,11 @@ function useForcedTheme(): 'dark' | 'light' | undefined {
 export function Layout({ children }: { children: ReactNode }) {
   const forced = useForcedTheme();
   return (
-    <html lang={SITE_LANG} data-theme={forced ?? 'light'} data-palette="mono" suppressHydrationWarning>
+    <html lang={SITE_LANG} data-theme={forced ?? 'dark'} data-palette="la33" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="theme-color" content="#090909" />
+        <meta name="theme-color" content="#000000" />
         <meta name="application-name" content={SITE_NAME} />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <meta name="apple-mobile-web-app-capable" content="yes" />

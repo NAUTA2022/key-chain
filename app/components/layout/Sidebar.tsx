@@ -339,7 +339,7 @@ function SubsidiariesModal({ onClose, isAdmin }: SubsidiariesModalProps) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
           </button>
         </div>
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginBottom: 20 }}>Otros productos del ecosistema KEYCHAIN.</div>
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginBottom: 20 }}>Otros productos del ecosistema La 33.</div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {items.map(s => (
@@ -587,7 +587,7 @@ export default function Sidebar({ route, nav, role, canTokenize = false, theme, 
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: 36, height: 36 }}
           >
             <img src={logoIcon} alt="Inicio" style={{ position: 'absolute', width: 36, height: 36, objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />
-            <img src="/logoblue.png" alt="" style={{ position: 'absolute', width: 36, height: 36, objectFit: 'contain', opacity: logoHovered ? 1 : 0, transition: 'opacity 0.5s ease' }} />
+            <img src={logoIcon} alt="" style={{ position: 'absolute', width: 36, height: 36, filter: 'drop-shadow(0 0 10px rgba(243,178,0,0.6))', objectFit: 'contain', opacity: logoHovered ? 1 : 0, transition: 'opacity 0.5s ease' }} />
           </button>
         ) : (
           <button
@@ -595,10 +595,10 @@ export default function Sidebar({ route, nav, role, canTokenize = false, theme, 
             onMouseEnter={handleLogoEnter}
             onMouseLeave={handleLogoLeave}
             onClick={() => nav('feed')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, position: 'relative', height: 42 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, position: 'relative', height: 28 }}
           >
-            <img src={logoFull} alt="KEY CHAIN" style={{ height: 42, width: 'auto', objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />
-            <img src="/logoblue.png" alt="" style={{ position: 'absolute', left: 0, top: 0, height: 42, width: 'auto', objectFit: 'contain', opacity: logoHovered ? 1 : 0, transition: 'opacity 0.5s ease' }} />
+            <img src={logoFull} alt="La 33" style={{ height: 28, width: 'auto', objectFit: 'contain', opacity: logoHovered ? 0 : 1, transition: 'opacity 0.5s ease' }} />
+            <img src="/logoblue.png" alt="" style={{ position: 'absolute', left: 0, top: 0, height: 28, width: 'auto', objectFit: 'contain', opacity: logoHovered ? 1 : 0, transition: 'opacity 0.5s ease' }} />
           </button>
         )}
         <button

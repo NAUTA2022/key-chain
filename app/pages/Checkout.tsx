@@ -200,7 +200,7 @@ const goBackTo = (nav: NavFn, order: CheckoutOrder) => () => (order.back ? nav(o
 // ─── Demo ─────────────────────────────────────────────────────────────────────
 
 const METHODS = [
-  { id: 'balance', title: 'Saldo KEYCHAIN', icon: Ico.wallet },
+  { id: 'balance', title: 'Saldo La 33', icon: Ico.wallet },
   { id: 'wallet', title: 'Wallet conectada', icon: Ico.link },
   { id: 'transfer', title: 'Transferencia cripto', icon: Ico.qr },
 ] as const;

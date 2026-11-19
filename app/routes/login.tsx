@@ -9,7 +9,7 @@ import { seo } from '~/lib/seo';
 import { isInternalPath } from '~/lib/links';
 
 export const meta: Route.MetaFunction = () =>
-  seo({ title: 'Iniciar sesión', description: 'Entrá a KEY CHAIN: conectá tu wallet para invertir en activos reales tokenizados.', path: '/ingresar', noindex: true });
+  seo({ title: 'Iniciar sesión', description: 'Entrá a La 33: conectá tu wallet para invertir en activos reales tokenizados.', path: '/ingresar', noindex: true });
 
 type LoginState = { redirectTo?: string } | null;
 

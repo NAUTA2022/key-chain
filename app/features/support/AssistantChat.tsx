@@ -110,7 +110,7 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {messages.length === 0 && (
           <p style={{ ...bodyStyle, margin: 0 }}>
-            Hola, soy el asistente virtual de KEY CHAIN. Preguntame cómo usar la plataforma: tu cuenta, la verificación de identidad, las inversiones o los pagos.
+            Hola, soy el asistente virtual de La 33. Preguntame cómo usar la plataforma: tu cuenta, la verificación de identidad, las inversiones o los pagos.
           </p>
         )}
         <div role="log" aria-live="polite" aria-label="Conversación con el asistente" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -159,7 +159,7 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
     <Modal
       open={open}
       onClose={onClose}
-      title="Asistente de KEY CHAIN"
+      title="Asistente de La 33"
       width={560}
       footer={
         authed ? (
