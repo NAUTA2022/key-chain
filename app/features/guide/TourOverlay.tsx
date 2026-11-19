@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { PBtn } from '~/components/ui';
-import type { GuidePlacement, GuideStep, Tour } from './tours';
+import { stepKey, type GuidePlacement, type GuideStep, type Tour } from './tours';
+import { useT } from '~/i18n/useT';
 
 // Coach-mark renderer: dims the page, cuts a spotlight around the step's anchor
 // (`[data-guide="…"]`) and shows a bubble next to it. Fixed positioning in a portal,
@@ -135,6 +136,7 @@ export default function TourOverlay({ tour, onEnd }: Props) {
   const [reduced] = useState(prefersReducedMotion);
   const titleId = useId();
   const bodyId = useId();
+  const { t } = useT('help');
 
   // Wait (briefly) for the anchors of a freshly loaded page, then freeze the step list.
   useEffect(() => {
@@ -253,6 +255,7 @@ export default function TourOverlay({ tour, onEnd }: Props) {
   if (!step || !layout || typeof document === 'undefined') return null;
 
   const isLast = index === total - 1;
+  const stepTitle = t(stepKey(tour.id, step, 'title'));
   const fade = reduced ? undefined : 'kcGuideIn 0.2s ease-out';
   const spot = layout.spot;
   const vw = window.innerWidth;
@@ -324,21 +327,21 @@ export default function TourOverlay({ tour, onEnd }: Props) {
         {arrowStyle && <span aria-hidden="true" style={arrowStyle} />}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
           <span data-guide-progress="" style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--ter)' }}>
-            Paso {index + 1} de {total}
+            {t('guide.overlay.progress', { current: index + 1, total })}
           </span>
           <button
             type="button"
             onClick={() => onEnd('skip')}
             style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 500, color: 'var(--sec)', textDecoration: 'underline', textUnderlineOffset: 3 }}
           >
-            Saltar guía
+            {t('guide.overlay.skip')}
           </button>
         </div>
         <h2 ref={titleRef} id={titleId} tabIndex={-1} style={{ margin: '0 0 6px', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16.5, letterSpacing: '-0.01em', color: 'var(--text)', outline: 'none' }}>
-          {step.title}
+          {stepTitle}
         </h2>
         <p id={bodyId} style={{ margin: 0, fontFamily: 'var(--font-b)', fontSize: 13.5, lineHeight: 1.55, color: 'var(--sec)' }}>
-          {step.body}
+          {t(stepKey(tour.id, step, 'body'))}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 16 }}>
           <div aria-hidden="true" style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -349,15 +352,15 @@ export default function TourOverlay({ tour, onEnd }: Props) {
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             {index > 0 && (
               <PBtn variant="secondary" small onClick={back}>
-                Atrás
+                {t('guide.overlay.back')}
               </PBtn>
             )}
             <PBtn variant="primary" small onClick={next}>
-              {isLast ? 'Entendido' : 'Siguiente'}
+              {isLast ? t('guide.overlay.done') : t('guide.overlay.next')}
             </PBtn>
           </div>
         </div>
-        <span aria-live="polite" className="sr-only">{`Paso ${index + 1} de ${total}: ${step.title}`}</span>
+        <span aria-live="polite" className="sr-only">{t('guide.overlay.announce', { current: index + 1, total, title: stepTitle })}</span>
       </div>
     </div>,
     document.body,

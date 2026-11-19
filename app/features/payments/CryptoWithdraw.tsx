@@ -8,6 +8,7 @@ import { sendUsdc, validateWithdraw } from '~/features/wallet/withdraw';
 import { PayModal, TokenNetworkPicker, Notice, PrimaryBtn, ProgressSteps, SuccessMark, KV, CopyField } from './PayKit';
 import { T, Ico, explorerUrl } from './payTheme';
 import { LIVE_USDC, PLATFORM_NET } from './live';
+import { useT } from '~/i18n/useT';
 import { TOKENS, tokenBySym, networkById, useWallet, debit, fmtToken, isAddress, shortAddr, fakeTxHash, type PayNetwork } from '~/lib/wallet';
 
 type Step = 'form' | 'review' | 'processing' | 'done';
@@ -32,7 +33,6 @@ type CryptoWithdrawProps = {
   live?: LiveWithdraw;
 };
 
-const TITLES: Record<Step, string> = { form: 'Retirar cripto', review: 'Revisa el retiro', processing: 'Enviando retiro', done: 'Retiro enviado' };
 const field: CSSProperties = { width: '100%', boxSizing: 'border-box', height: 48, padding: '0 14px', borderRadius: 14, border: '1px solid var(--border-l)', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 14, outline: 'none' };
 const maxBtn: CSSProperties = { height: 34, padding: '0 10px', borderRadius: 10, border: 'none', background: 'var(--surface2)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 700, cursor: 'pointer' };
 const errorText: CSSProperties = { marginTop: 8, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)' };
@@ -52,6 +52,7 @@ function DemoWithdrawFlow({ open, onClose, defaultSym = 'USDC' }: Omit<CryptoWit
   const [code, setCode] = useState('');
   const [hash, setHash] = useState('');
   const { balances } = useWallet();
+  const { t } = useT('market');
   const token = tokenBySym(sym);
   const network = networkById(net);
 
@@ -61,9 +62,9 @@ function DemoWithdrawFlow({ open, onClose, defaultSym = 'USDC' }: Omit<CryptoWit
   const receive = Math.max(0, amount - feeTok);
   const addrOk = isAddress(addr);
   const errors = [
-    addr && !addrOk && 'La dirección no es válida (0x + 40 caracteres).',
-    amount > bal && 'No tienes saldo suficiente.',
-    amount > 0 && amount < token.min && `El mínimo es ${fmtToken(token.min, sym)}.`,
+    addr && !addrOk && t('withdraw.invalidAddress'),
+    amount > bal && t('withdraw.noBalance'),
+    amount > 0 && amount < token.min && t('withdraw.minimum', { amount: fmtToken(token.min, sym) }),
   ].filter((e): e is string => typeof e === 'string');
   const canReview = addrOk && amount > 0 && !errors.length;
 
@@ -71,45 +72,45 @@ function DemoWithdrawFlow({ open, onClose, defaultSym = 'USDC' }: Omit<CryptoWit
   const close = () => { onClose(); setTimeout(reset, 300); };
   const confirm = () => { setHash(fakeTxHash()); setStep('processing'); };
   const finish = () => {
-    debit(sym, amount, `Retiro ${sym} · ${network.name} a ${shortAddr(addr)}`, { net, hash });
+    debit(sym, amount, t('withdraw.historyLabel', { sym, network: network.name, address: shortAddr(addr) }), { net, hash });
     setStep('done');
   };
 
   const footer = {
-    form: <PrimaryBtn disabled={!canReview} onClick={() => setStep('review')}>Revisar retiro</PrimaryBtn>,
-    review: <PrimaryBtn disabled={code.length !== 6} onClick={confirm}>{Ico.up} Confirmar retiro</PrimaryBtn>,
+    form: <PrimaryBtn disabled={!canReview} onClick={() => setStep('review')}>{t('withdraw.review')}</PrimaryBtn>,
+    review: <PrimaryBtn disabled={code.length !== 6} onClick={confirm}>{Ico.up} {t('withdraw.confirm')}</PrimaryBtn>,
     processing: null,
-    done: <PrimaryBtn onClick={close}>Listo</PrimaryBtn>,
+    done: <PrimaryBtn onClick={close}>{t('pay.done')}</PrimaryBtn>,
   }[step];
 
   return (
-    <PayModal open={open} onClose={close} title={TITLES[step]} onBack={step === 'review' ? () => setStep('form') : undefined} footer={footer}>
+    <PayModal open={open} onClose={close} title={t(`withdraw.titles.${step}`)} onBack={step === 'review' ? () => setStep('form') : undefined} footer={footer}>
       {step === 'form' && (
         <>
           <TokenNetworkPicker tokens={TOKENS} sym={sym} setSym={setSym} net={net} setNet={setNet} balances={balances} showBalance />
 
-          <label style={{ ...T.label, marginTop: 18 }} htmlFor="wd-addr">Dirección de destino</label>
+          <label style={{ ...T.label, marginTop: 18 }} htmlFor="wd-addr">{t('withdraw.destination')}</label>
           <input id="wd-addr" value={addr} onChange={e => setAddr(e.target.value.trim())} placeholder="0x…" spellCheck={false} autoComplete="off"
             style={{ ...field, ...T.mono, fontSize: 13, borderColor: addr && !addrOk ? 'var(--neg)' : 'var(--border-l)' }} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 16 }}>
-            <label style={T.label} htmlFor="wd-amt">Monto</label>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>Disponible: <b style={{ color: 'var(--text)' }}>{fmtToken(bal, sym)}</b></span>
+            <label style={T.label} htmlFor="wd-amt">{t('withdraw.amount')}</label>
+            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{t('withdraw.available')} <b style={{ color: 'var(--text)' }}>{fmtToken(bal, sym)}</b></span>
           </div>
           <div style={{ position: 'relative' }}>
             <input id="wd-amt" inputMode="decimal" value={amt} onChange={e => setAmt(e.target.value.replace(/[^0-9.,]/g, ''))} placeholder="0.00"
               style={{ ...field, paddingRight: 112, fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, borderColor: amount > bal ? 'var(--neg)' : 'var(--border-l)' }} />
             <span style={{ position: 'absolute', right: 8, top: 7, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 700, color: 'var(--ter)' }}>{sym}</span>
-              <button type="button" onClick={() => setAmt(String(+bal.toFixed(token.decimals)))} style={maxBtn}>MÁX</button>
+              <button type="button" onClick={() => setAmt(String(+bal.toFixed(token.decimals)))} style={maxBtn}>{t('withdraw.max')}</button>
             </span>
           </div>
 
           {errors.length > 0 && <div role="alert" style={errorText}>{errors[0]}</div>}
 
           <div style={{ marginTop: 14, padding: '4px 14px', borderRadius: 14, background: 'var(--surface2)' }}>
-            <KV k="Comisión de red" v={`${fmtToken(feeTok, sym)}`} />
-            <KV k="Recibes" v={fmtToken(receive, sym)} strong />
+            <KV k={t('withdraw.networkFee')} v={`${fmtToken(feeTok, sym)}`} />
+            <KV k={t('withdraw.youReceive')} v={fmtToken(receive, sym)} strong />
           </div>
         </>
       )}
@@ -118,29 +119,29 @@ function DemoWithdrawFlow({ open, onClose, defaultSym = 'USDC' }: Omit<CryptoWit
         <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }}>
           <div style={{ textAlign: 'center', margin: '4px 0 16px' }}>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 30, color: 'var(--text)', letterSpacing: '-0.03em' }}>{fmtToken(receive, sym)}</div>
-            <div style={{ ...T.body, fontSize: 12.5 }}>llegan a destino en {network.eta}</div>
+            <div style={{ ...T.body, fontSize: 12.5 }}>{t('withdraw.arrivesIn', { eta: network.eta })}</div>
           </div>
           <div style={{ padding: '4px 14px', borderRadius: 14, background: 'var(--surface2)', marginBottom: 14 }}>
-            <KV k="Moneda" v={`${token.name} (${sym})`} />
-            <KV k="Red" v={network.name} />
-            <KV k="Destino" v={shortAddr(addr)} mono />
-            <KV k="Monto" v={fmtToken(amount, sym)} />
-            <KV k="Comisión de red" v={fmtToken(feeTok, sym)} />
+            <KV k={t('withdraw.currency')} v={`${token.name} (${sym})`} />
+            <KV k={t('withdraw.network')} v={network.name} />
+            <KV k={t('withdraw.to')} v={shortAddr(addr)} mono />
+            <KV k={t('withdraw.amount')} v={fmtToken(amount, sym)} />
+            <KV k={t('withdraw.networkFee')} v={fmtToken(feeTok, sym)} />
           </div>
-          <Notice>Revisa la dirección y la red. Los retiros on-chain no se pueden revertir.</Notice>
-          <label style={{ ...T.label, marginTop: 16 }} htmlFor="wd-2fa">Código de verificación (2FA)</label>
+          <Notice>{t('withdraw.irreversible')}</Notice>
+          <label style={{ ...T.label, marginTop: 16 }} htmlFor="wd-2fa">{t('withdraw.code2fa')}</label>
           <input id="wd-2fa" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="••••••"
             style={{ ...field, textAlign: 'center', letterSpacing: '0.5em', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20 }} />
-          <div style={{ marginTop: 6, fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Ingresa el código de 6 dígitos de tu app autenticadora.</div>
+          <div style={{ marginTop: 6, fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t('withdraw.code2faHint')}</div>
         </motion.div>
       )}
 
       {step === 'processing' && (
         <ProgressSteps onDone={finish} steps={[
-          { label: 'Verificando código 2FA', ms: 800 },
-          { label: 'Chequeo de seguridad', sub: 'Dirección y límites diarios', ms: 1000 },
-          { label: `Firmando y enviando en ${network.name}`, sub: `Hash ${shortAddr(hash)}`, ms: 1400 },
-          { label: 'Esperando confirmación', ms: 1200 },
+          { label: t('withdraw.verifying2fa'), ms: 800 },
+          { label: t('withdraw.securityCheck'), sub: t('withdraw.securityCheckSub'), ms: 1000 },
+          { label: t('withdraw.signingOn', { network: network.name }), sub: t('pay.hash', { hash: shortAddr(hash) }), ms: 1400 },
+          { label: t('withdraw.waitingConfirmation'), ms: 1200 },
         ]} />
       )}
 
@@ -148,13 +149,13 @@ function DemoWithdrawFlow({ open, onClose, defaultSym = 'USDC' }: Omit<CryptoWit
         <div style={{ textAlign: 'center', paddingTop: 6 }}>
           <SuccessMark />
           <div role="status" style={{ ...T.title, fontSize: 24 }}>{fmtToken(receive, sym)}</div>
-          <div style={{ ...T.body, marginBottom: 16 }}>enviados a {shortAddr(addr)} por {network.name}.</div>
+          <div style={{ ...T.body, marginBottom: 16 }}>{t('withdraw.sentTo', { address: shortAddr(addr), network: network.name })}</div>
           <div style={{ textAlign: 'left' }}>
-            <CopyField label="Hash de la transacción" value={hash} />
+            <CopyField label={t('withdraw.txHash')} value={hash} />
           </div>
           <a href={explorerUrl(net, hash)} target="_blank" rel="noreferrer"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 12, fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-            Ver en el explorador {Ico.chev}
+            {t('withdraw.explorer')} {Ico.chev}
           </a>
         </div>
       )}
@@ -173,8 +174,10 @@ function LiveWithdrawFlow({ open, onClose, live }: Omit<CryptoWithdrawProps, 'li
   const [phase, setPhase] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [hash, setHash] = useState('');
+  const { t } = useT('market');
+  const { t: tp } = useT('portfolio');
   const bal = usdc.balanceWei === null ? null : Number(toTokens(usdc.balanceWei, usdc.decimals));
-  const check = validateWithdraw({ to: addr, amount: amt }, { from: account.address, balanceWei: usdc.balanceWei, decimals: usdc.decimals });
+  const check = validateWithdraw({ to: addr, amount: amt }, { from: account.address, balanceWei: usdc.balanceWei, decimals: usdc.decimals, t: tp });
   const message = !check.ok && (check.field === 'to' ? addr !== '' : amt !== '') ? check.message : null;
   const amount = check.ok ? Number(check.amount) : parseFloat(amt.replace(',', '.')) || 0;
   const sending = step === 'processing' && error === null;
@@ -191,52 +194,52 @@ function LiveWithdrawFlow({ open, onClose, live }: Omit<CryptoWithdrawProps, 'li
     setError(null);
     setPhase(0);
     try {
-      const h = await sendUsdc({ account, wallet, chain, token: usdc.address, to: check.to, amountWei: check.amountWei, onStep: s => setPhase(s === 'confirm' ? 1 : 0) });
+      const h = await sendUsdc({ account, wallet, chain, token: usdc.address, to: check.to, amountWei: check.amountWei, onStep: s => setPhase(s === 'confirm' ? 1 : 0), t: tp });
       setHash(h);
       setPhase(2);
       setStep('done');
       live.onSent();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'La transferencia no se pudo completar.');
+      setError(e instanceof Error ? e.message : t('withdraw.transferFailed'));
     }
   };
   const txUrl = hash ? chainExplorerUrl('tx', hash, chain.id) : null;
 
   const footer = {
-    form: <PrimaryBtn disabled={!check.ok} onClick={() => setStep('review')}>Revisar retiro</PrimaryBtn>,
-    review: <PrimaryBtn disabled={!check.ok} onClick={() => void send()}>{Ico.up} Confirmar retiro</PrimaryBtn>,
-    processing: error ? <PrimaryBtn onClick={() => void send()}>Reintentar</PrimaryBtn> : null,
-    done: <PrimaryBtn onClick={close}>Listo</PrimaryBtn>,
+    form: <PrimaryBtn disabled={!check.ok} onClick={() => setStep('review')}>{t('withdraw.review')}</PrimaryBtn>,
+    review: <PrimaryBtn disabled={!check.ok} onClick={() => void send()}>{Ico.up} {t('withdraw.confirm')}</PrimaryBtn>,
+    processing: error ? <PrimaryBtn onClick={() => void send()}>{t('pay.retry')}</PrimaryBtn> : null,
+    done: <PrimaryBtn onClick={close}>{t('pay.done')}</PrimaryBtn>,
   }[step];
 
   return (
-    <PayModal open={open} onClose={close} title={TITLES[step]} onBack={step === 'review' || (step === 'processing' && error) ? () => { setError(null); setStep(step === 'review' ? 'form' : 'review'); } : undefined} footer={footer}>
+    <PayModal open={open} onClose={close} title={t(`withdraw.titles.${step}`)} onBack={step === 'review' || (step === 'processing' && error) ? () => { setError(null); setStep(step === 'review' ? 'form' : 'review'); } : undefined} footer={footer}>
       {step === 'form' && (
         <>
           <TokenNetworkPicker tokens={[LIVE_USDC]} networks={{ [PLATFORM_NET]: network }} sym="USDC" setSym={() => undefined} net={PLATFORM_NET} setNet={() => undefined} balances={{ USDC: bal ?? 0 }} showBalance />
 
-          <label style={{ ...T.label, marginTop: 18 }} htmlFor="wd-addr">Dirección de destino</label>
+          <label style={{ ...T.label, marginTop: 18 }} htmlFor="wd-addr">{t('withdraw.destination')}</label>
           <input id="wd-addr" value={addr} onChange={e => setAddr(e.target.value.trim())} placeholder="0x…" spellCheck={false} autoComplete="off" maxLength={42}
             style={{ ...field, ...T.mono, fontSize: 13, borderColor: message && !check.ok && check.field === 'to' ? 'var(--neg)' : 'var(--border-l)' }} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 16 }}>
-            <label style={T.label} htmlFor="wd-amt">Monto</label>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>Disponible: <b style={{ color: 'var(--text)' }}>{bal === null ? '…' : fmtToken(bal, 'USDC')}</b></span>
+            <label style={T.label} htmlFor="wd-amt">{t('withdraw.amount')}</label>
+            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{t('withdraw.available')} <b style={{ color: 'var(--text)' }}>{bal === null ? '…' : fmtToken(bal, 'USDC')}</b></span>
           </div>
           <div style={{ position: 'relative' }}>
             <input id="wd-amt" inputMode="decimal" value={amt} onChange={e => setAmt(e.target.value.replace(/[^0-9.,]/g, ''))} placeholder="0.00" maxLength={24}
               style={{ ...field, paddingRight: 112, fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, borderColor: message && !check.ok && check.field === 'amount' ? 'var(--neg)' : 'var(--border-l)' }} />
             <span style={{ position: 'absolute', right: 8, top: 7, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 700, color: 'var(--ter)' }}>USDC</span>
-              <button type="button" disabled={usdc.balanceWei === null} onClick={() => usdc.balanceWei !== null && setAmt(toTokens(usdc.balanceWei, usdc.decimals))} style={maxBtn}>MÁX</button>
+              <button type="button" disabled={usdc.balanceWei === null} onClick={() => usdc.balanceWei !== null && setAmt(toTokens(usdc.balanceWei, usdc.decimals))} style={maxBtn}>{t('withdraw.max')}</button>
             </span>
           </div>
 
           {message && <div role="alert" style={errorText}>{message}</div>}
 
           <div style={{ marginTop: 14, padding: '4px 14px', borderRadius: 14, background: 'var(--surface2)' }}>
-            <KV k="Comisión de red" v={`Gas en ${gasSymbol}`} />
-            <KV k="Recibes" v={fmtToken(amount, 'USDC')} strong />
+            <KV k={t('withdraw.networkFee')} v={t('withdraw.gasIn', { gas: gasSymbol })} />
+            <KV k={t('withdraw.youReceive')} v={fmtToken(amount, 'USDC')} strong />
           </div>
         </>
       )}
@@ -245,25 +248,25 @@ function LiveWithdrawFlow({ open, onClose, live }: Omit<CryptoWithdrawProps, 'li
         <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }}>
           <div style={{ textAlign: 'center', margin: '4px 0 16px' }}>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 30, color: 'var(--text)', letterSpacing: '-0.03em' }}>{fmtToken(amount, 'USDC')}</div>
-            <div style={{ ...T.body, fontSize: 12.5 }}>llegan a destino por la red {network.name}</div>
+            <div style={{ ...T.body, fontSize: 12.5 }}>{t('withdraw.arrivesVia', { network: network.name })}</div>
           </div>
           <div style={{ padding: '4px 14px', borderRadius: 14, background: 'var(--surface2)', marginBottom: 14 }}>
-            <KV k="Moneda" v="USD Coin (USDC)" />
-            <KV k="Red" v={network.name} />
-            <KV k="Destino" v={<span title={check.to}>{shortAddr(check.to)}</span>} mono />
-            <KV k="Monto" v={fmtToken(amount, 'USDC')} />
-            <KV k="Comisión de red" v={`Gas en ${gasSymbol} (lo cobra la red)`} />
+            <KV k={t('withdraw.currency')} v={t('pay.usdCoin')} />
+            <KV k={t('withdraw.network')} v={network.name} />
+            <KV k={t('withdraw.to')} v={<span title={check.to}>{shortAddr(check.to)}</span>} mono />
+            <KV k={t('withdraw.amount')} v={fmtToken(amount, 'USDC')} />
+            <KV k={t('withdraw.networkFee')} v={t('withdraw.gasInNetwork', { gas: gasSymbol })} />
           </div>
-          <Notice>Revisa la dirección y la red. Los retiros on-chain no se pueden revertir.</Notice>
-          <div style={{ marginTop: 12, fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Vas a confirmar el envío con tu wallet.</div>
+          <Notice>{t('withdraw.irreversible')}</Notice>
+          <div style={{ marginTop: 12, fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t('withdraw.confirmWithWallet')}</div>
         </motion.div>
       )}
 
       {step === 'processing' && (
         <>
           <ProgressSteps current={phase} failed={error !== null} steps={[
-            { label: 'Firma el retiro en tu wallet', sub: `${fmtToken(amount, 'USDC')} a ${check.ok ? shortAddr(check.to) : ''}` },
-            { label: `Enviando en ${network.name}`, sub: 'Esperando la confirmación de la red' },
+            { label: t('withdraw.signInWallet'), sub: t('withdraw.signSub', { amount: fmtToken(amount, 'USDC'), address: check.ok ? shortAddr(check.to) : '' }) },
+            { label: t('withdraw.sendingOn', { network: network.name }), sub: t('withdraw.waitingNetwork') },
           ]} />
           {error && <div style={{ marginTop: 12 }}><Notice>{error}</Notice></div>}
         </>
@@ -273,14 +276,14 @@ function LiveWithdrawFlow({ open, onClose, live }: Omit<CryptoWithdrawProps, 'li
         <div style={{ textAlign: 'center', paddingTop: 6 }}>
           <SuccessMark />
           <div role="status" style={{ ...T.title, fontSize: 24 }}>{fmtToken(amount, 'USDC')}</div>
-          <div style={{ ...T.body, marginBottom: 16 }}>enviados a {check.ok ? shortAddr(check.to) : shortAddr(addr)} por {network.name}.</div>
+          <div style={{ ...T.body, marginBottom: 16 }}>{t('withdraw.sentTo', { address: check.ok ? shortAddr(check.to) : shortAddr(addr), network: network.name })}</div>
           <div style={{ textAlign: 'left' }}>
-            <CopyField label="Hash de la transacción" value={hash} />
+            <CopyField label={t('withdraw.txHash')} value={hash} />
           </div>
           {txUrl && (
             <a href={txUrl} target="_blank" rel="noreferrer"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 12, fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-              Ver en el explorador {Ico.chev}
+              {t('withdraw.explorer')} {Ico.chev}
             </a>
           )}
         </div>

@@ -1,0 +1,269 @@
+{
+  "shared": {
+    "seeAll": "Ver todo →",
+    "loadingHistory": "Cargando historial…",
+    "noHistory": "Todavía no hay historial de tu portafolio. Aparece a partir de tu primera inversión.",
+    "invested": "Invertido",
+    "pnl": "P&L",
+    "yieldCollected": "Yield cobrado",
+    "projects_one": "{{count}} proyecto",
+    "projects_other": "{{count}} proyectos",
+    "onchainDividends": "dividendos on-chain",
+    "sinceDemo": "desde Mar 2025",
+    "comingSoon": "Próximamente",
+    "loadingInvestments": "Cargando inversiones…",
+    "noInvestmentsYet": "Todavía no tienes inversiones."
+  },
+  "dashboard": {
+    "greeting": "Hola, {{name}} 👋",
+    "greetingNoName": "Hola 👋",
+    "summaryAt": "Resumen de tu posición al {{date}}.",
+    "summary": "Resumen de tu posición.",
+    "newInvestment": "+ Nueva inversión",
+    "kpi": {
+      "totalWealth": "Patrimonio total",
+      "investedRwa": "Invertido en RWA",
+      "dividendsEarned": "Dividendos ganados",
+      "unrealizedPnl": "P&L no realizado",
+      "in30Days": "{{value}} en 30 días",
+      "no30DayData": "sin datos de 30 días",
+      "dividendsToCollect": "dividendos por cobrar",
+      "assetsInPortfolio": "activos en portafolio",
+      "avgPerAsset": "promedio por activo",
+      "memberSince": "miembro desde {{date}}",
+      "returnOnCapital": "retorno sobre capital",
+      "collectedAndPending": "cobrados · {{amount}} por cobrar",
+      "unrealizedLoss": "pérdida no realizada",
+      "unrealizedGain": "ganancia no realizada",
+      "initialCapital": "capital invertido inicial",
+      "thisMonth": "{{value}} este mes",
+      "vsLastMonth": "vs mes anterior",
+      "cashAvailable": "en efectivo disponible",
+      "monthlyAvg": "promedio mensual"
+    },
+    "chart": {
+      "title": "Portafolio total",
+      "periods": {
+        "3M": "3M",
+        "6M": "6M",
+        "12M": "12M"
+      },
+      "ago": "Hace {{period}} · {{value}}",
+      "minMax": "Min {{min}} · Max {{max}}",
+      "months": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    },
+    "distribution": {
+      "title": "Próxima distribución",
+      "onchainPending": "Dividendos on-chain por cobrar",
+      "noneScheduled": "Sin distribución programada",
+      "units": {
+        "d": "d",
+        "h": "h",
+        "m": "m",
+        "s": "s"
+      },
+      "toCollect": "Por cobrar",
+      "estimated": "Estimado"
+    },
+    "investments": {
+      "title": "Mis inversiones",
+      "explore": "Explorar tokenizaciones",
+      "rowMeta": "{{tokens}} tokens · {{pct}}% cartera",
+      "apy": "APY",
+      "yield": "Rendimiento",
+      "viewFull": "Ver completo",
+      "investMore": "Invertir 10 más · {{amount}}"
+    },
+    "allocation": {
+      "title": "Diversificación",
+      "viewRwa": "RWA",
+      "viewTotal": "Total",
+      "inRwa": "en RWA",
+      "total": "total",
+      "empty": "Sin inversiones todavía.",
+      "index": "Índice de diversificación",
+      "sectors": "Sectores activos",
+      "rwaAssets": "RWA Activos",
+      "usdcLiquid": "USDC Líquido",
+      "brikToken": "Token BRIK",
+      "crypto": "Crypto"
+    },
+    "academy": {
+      "title": "Academia",
+      "progress": "Progreso general",
+      "readCount": "{{read}}/{{total}} leídos",
+      "loading": "Cargando artículos…",
+      "empty": "Todavía no hay artículos publicados.",
+      "readTime": "· {{min}} min lectura",
+      "categories": {
+        "tokenization": "Tokenización",
+        "guides": "Guías",
+        "defi": "DeFi"
+      },
+      "demoArticles": {
+        "rwa": "¿Qué es RWA?",
+        "howToInvest": "Cómo invertir paso a paso",
+        "vesting": "Vesting y cliffs",
+        "governance": "Gobernanza on-chain",
+        "pools": "Pools de liquidez"
+      }
+    },
+    "roadmap": {
+      "title": "Roadmap BRIK",
+      "completedCount": "{{done}}/{{total}} completados",
+      "globalProgress": "Progreso global",
+      "status": {
+        "done": "Completado",
+        "current": "En curso",
+        "pending": "Pendiente"
+      },
+      "claimed": "¡Cobrado!",
+      "claim": "Cobrar →",
+      "phaseAirdrop": "Airdrop de fase",
+      "airdrop": {
+        "claimed": "Reclamado",
+        "tapToClaim": "Tap para reclamar"
+      },
+      "claimLabels": {
+        "yield": "USDC de rendimiento",
+        "pending": "USDC pendiente de cobrar"
+      },
+      "items": {
+        "seed": {
+          "label": "Seed Round",
+          "detail": "Ronda seed cerrada con inversores estratégicos. Capital utilizado para desarrollo core y auditorías de smart contracts."
+        },
+        "private": {
+          "label": "Ronda Privada",
+          "detail": "Ronda privada oversubscribed en 2x. Se incorporaron 14 inversores institucionales de LATAM y España."
+        },
+        "ico": {
+          "label": "ICO Pública",
+          "detail": "Token BRIK disponible al público general. Más de 4.200 wallets participantes en la primera semana."
+        },
+        "dex": {
+          "label": "DEX Listing",
+          "detail": "Listado en los principales DEX de Polygon. Provisión de liquidez inicial de $2M. Farming incentivado con BRIK."
+        },
+        "governance": {
+          "label": "Gobernanza",
+          "detail": "Lanzamiento del módulo de gobernanza descentralizada. Los holders de BRIK podrán votar proyectos, fees y upgrades."
+        },
+        "v2": {
+          "label": "V2 Platform",
+          "detail": "Expansión a Ethereum mainnet y Arbitrum. Incorporación de nuevas categorías de activos reales: deuda corporativa y arte."
+        }
+      }
+    },
+    "rewards": {
+      "title": "Recompensas BRIK",
+      "body": "El programa de recompensas y airdrops del token BRIK todavía no está activo. Cuando se habilite vas a ver aquí tus hitos y lo que te corresponda reclamar."
+    }
+  },
+  "holdings": {
+    "title": "Mis Pertenencias",
+    "subtitle": "Wallet y portafolio de inversiones",
+    "tabsLabel": "Secciones",
+    "tabs": {
+      "wallet": "Wallet",
+      "investments": "Inversiones"
+    },
+    "card": {
+      "yourWallet": "Tu wallet",
+      "noWallet": "Sin wallet conectada",
+      "usdcBalance": "Saldo USDC",
+      "usdcOn": "USDC en {{network}}",
+      "usdcWithGas": "USDC · {{amount}} {{symbol}} para gas",
+      "yourAddress": "Tu dirección Brikme",
+      "multiNetwork": "Multi-red",
+      "brikmeBalance": "Saldo Brikme",
+      "deposit": "Depositar",
+      "withdraw": "Retirar"
+    },
+    "kpi": {
+      "rwaPortfolio": "Portafolio RWA",
+      "initialCapital": "capital inicial"
+    },
+    "balanceByCurrency": "Saldo por moneda",
+    "tokens": {
+      "title": "Activos en wallet",
+      "on": "Tokens en {{network}}",
+      "connect": "Conecta tu wallet para ver balances reales",
+      "loadingNetwork": "Cargando la red de la plataforma…",
+      "gasToken": "{{symbol}} · gas de la red"
+    },
+    "evolution": {
+      "title": "Evolución del portafolio RWA",
+      "last12Months": "Últimos 12 meses",
+      "rwa": "RWA",
+      "loss": "Pérdida",
+      "gain": "Ganancia"
+    },
+    "movements": {
+      "title": "Movimientos",
+      "loading": "Cargando movimientos…",
+      "empty": "Todavía no hay movimientos. Aparecen con tu primera inversión.",
+      "status": {
+        "pending": "Pendiente",
+        "available": "Disponible",
+        "completed": "Completado"
+      }
+    },
+    "claim": {
+      "claiming": "Cobrando…",
+      "dividends": "Cobrar dividendos · {{amount}}",
+      "capital": "Cobrar capital · {{amount}}",
+      "failed": "No se pudo cobrar.",
+      "connectWallet": "Conecta tu wallet.",
+      "dividendsDone": "Dividendos cobrados en tu wallet.",
+      "capitalDone": "Capital cobrado en tu wallet."
+    },
+    "sell": "Vender",
+    "loadingYours": "Cargando tus inversiones…",
+    "emptyOnchain": "Todavía no tienes inversiones on-chain. Explora las tokenizaciones para empezar.",
+    "position": {
+      "tokens": "Tokens",
+      "currentValue": "Valor actual"
+    }
+  },
+  "wallet": {
+    "close": "Cerrar",
+    "address": {
+      "copied": "Copiado",
+      "copiedCheck": "Copiado ✓",
+      "copy": "Copiar",
+      "copyAddress": "Copiar dirección {{value}}",
+      "copyTx": "Copiar hash de la transacción {{value}}"
+    },
+    "faucet": {
+      "title": "Fondos de prueba",
+      "testnet": "Red de pruebas",
+      "body": "Recibe {{usdc}} USDC y {{gas}} {{symbol}} para probar inversiones. No tienen valor real.",
+      "sending": "Enviando fondos…",
+      "availableIn": "Disponible de nuevo en {{time}}",
+      "request": "Pedir fondos de prueba",
+      "sent": "Listo: te enviamos {{usdc}} USDC y {{gas}} {{symbol}} de prueba.",
+      "hoursMinutes": "{{h}} h {{min}} min",
+      "minutes": "{{min}} min",
+      "errors": {
+        "cooldown": "Ya pediste fondos de prueba en las últimas 24 horas.",
+        "disabled": "Los fondos de prueba no están disponibles en esta red.",
+        "failed": "No se pudieron enviar los fondos de prueba. Prueba de nuevo en unos minutos.",
+        "network": "No se pudo contactar al servidor. Revisa tu conexión."
+      }
+    },
+    "withdraw": {
+      "errors": {
+        "invalidAddress": "Ingresa una dirección de wallet válida (0x…).",
+        "ownAddress": "La dirección de destino no puede ser tu propia wallet.",
+        "invalidAmount": "Ingresa un monto válido (hasta {{decimals}} decimales).",
+        "zeroAmount": "El monto tiene que ser mayor a 0.",
+        "balanceLoading": "Espera a que cargue tu saldo de USDC.",
+        "overBalance": "El monto supera tu saldo de USDC.",
+        "cancelled": "Operación cancelada en la wallet.",
+        "noGas": "No tienes saldo suficiente para pagar el gas de la red.",
+        "failed": "La transferencia no se pudo completar."
+      }
+    }
+  }
+}

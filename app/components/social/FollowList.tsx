@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { CompanyLogo, UserAvatar } from '~/components/social/IdentityAvatar';
 import { fmtCount } from '~/lib/projectFeed';
 import type { FollowEntry } from '~/lib/social/types';
+import { useT } from '~/i18n/useT';
 
 type FollowButtonProps = {
   following: boolean;
@@ -13,6 +14,7 @@ type FollowButtonProps = {
 
 // Seguir / Siguiendo pill. Callers hide it on the viewer's own row.
 export function FollowButton({ following, onToggle, small }: FollowButtonProps) {
+  const { t } = useT('profile');
   return (
     <button onClick={e => { e.stopPropagation(); onToggle(); }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') e.stopPropagation(); }} aria-pressed={following}
       style={{
@@ -21,7 +23,7 @@ export function FollowButton({ following, onToggle, small }: FollowButtonProps) 
         border: following ? '1px solid var(--border-l)' : '1px solid var(--text)',
         background: following ? 'transparent' : 'var(--text)', color: following ? 'var(--text)' : 'var(--bg)',
       }}>
-      {following ? 'Siguiendo' : 'Seguir'}
+      {following ? t('social.follow.following') : t('social.follow.follow')}
     </button>
   );
 }
@@ -37,6 +39,7 @@ type SocialCountsProps = {
 
 // "N Seguidores · M Seguidos" — each opens the list.
 export function SocialCounts({ followers, following, onOpen, style }: SocialCountsProps) {
+  const { t } = useT('profile');
   const item = (n: number, label: string, tab: FollowListTabId) => (
     <button onClick={() => onOpen(tab)}
       style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--ter)' }}>
@@ -45,8 +48,8 @@ export function SocialCounts({ followers, following, onOpen, style }: SocialCoun
   );
   return (
     <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', ...style }}>
-      {item(followers, 'Seguidores', 'followers')}
-      {following != null && item(following, 'Seguidos', 'following')}
+      {item(followers, t('social.follow.followers'), 'followers')}
+      {following != null && item(following, t('social.follow.followingCount'), 'following')}
     </div>
   );
 }
@@ -73,8 +76,9 @@ type FollowListModalProps = {
 // Modal with one or more tabs of people / companies. Rows open the profile
 // and carry their own Seguir button.
 export default function FollowListModal({ title, tabs, initialTab, onClose, onOpen, onToggleFollow }: FollowListModalProps) {
+  const { t } = useT('profile');
   const [tab, setTab] = useState<FollowListTabId | undefined>(initialTab ?? tabs[0]?.id);
-  const current = tabs.find(t => t.id === tab) ?? tabs[0];
+  const current = tabs.find(x => x.id === tab) ?? tabs[0];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -94,22 +98,22 @@ export default function FollowListModal({ title, tabs, initialTab, onClose, onOp
         style={{ width: '100%', maxWidth: 440, maxHeight: '80vh', display: 'flex', flexDirection: 'column', background: 'var(--surface)', border: '1px solid var(--border-l)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
         <div style={{ display: 'flex', alignItems: 'center', padding: '16px 18px 0' }}>
           <div style={{ flex: 1, fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{title}</div>
-          <button onClick={onClose} aria-label="Cerrar"
+          <button onClick={onClose} aria-label={t('social.close')}
             style={{ width: 30, height: 30, borderRadius: '50%', border: 'none', background: 'var(--surface2)', color: 'var(--sec)', cursor: 'pointer', fontSize: 14 }}>✕</button>
         </div>
         <div role="tablist" style={{ display: 'flex', gap: 4, padding: '10px 18px 0', borderBottom: '1px solid var(--border-l)' }}>
-          {tabs.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} role="tab" aria-selected={current?.id === t.id}
+          {tabs.map(x => (
+            <button key={x.id} onClick={() => setTab(x.id)} role="tab" aria-selected={current?.id === x.id}
               style={{ padding: '8px 10px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 13,
-                fontWeight: current?.id === t.id ? 700 : 500, color: current?.id === t.id ? 'var(--text)' : 'var(--ter)',
-                borderBottom: `2px solid ${current?.id === t.id ? 'var(--text)' : 'transparent'}`, marginBottom: -1 }}>
-              {t.label}
+                fontWeight: current?.id === x.id ? 700 : 500, color: current?.id === x.id ? 'var(--text)' : 'var(--ter)',
+                borderBottom: `2px solid ${current?.id === x.id ? 'var(--text)' : 'transparent'}`, marginBottom: -1 }}>
+              {x.label}
             </button>
           ))}
         </div>
         <div style={{ overflowY: 'auto', padding: '6px 18px 14px' }}>
           {current && current.items.length === 0 && (
-            <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{current.loading ? 'Cargando…' : 'Nadie por aquí todavía.'}</div>
+            <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{current.loading ? t('social.loading') : t('social.follow.empty')}</div>
           )}
           {current?.items.map(it => (
             <div key={it.kind === 'company' ? `company-${it.slug}` : `person-${it.id}`} onClick={() => open(it)} role="button" tabIndex={0}
@@ -121,14 +125,14 @@ export default function FollowListModal({ title, tabs, initialTab, onClose, onOp
                   ? <UserAvatar size={40} user={it} />
                   : <div style={{ width: 40, height: 40, borderRadius: '50%', background: it.gradient, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, flexShrink: 0 }}>{it.initial}</div>}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.kind === 'person' && it.isSelf ? `${it.name} (tú)` : it.name}</div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{it.kind === 'company' ? 'Empresa' : it.companyName ? `Dueño de ${it.companyName}` : it.handle ? `@${it.handle}` : it.anonymous ? 'Perfil privado' : 'Inversor'}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.kind === 'person' && it.isSelf ? t('social.follow.you', { name: it.name }) : it.name}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{it.kind === 'company' ? t('social.follow.company') : it.companyName ? t('social.follow.ownerOf', { name: it.companyName }) : it.handle ? `@${it.handle}` : it.anonymous ? t('social.follow.privateProfile') : t('social.follow.investor')}</div>
               </div>
               {!(it.kind === 'person' && it.isSelf) && !(it.kind === 'company' && it.isMine) && <FollowButton following={it.isFollowing} onToggle={() => onToggleFollow(it)} small />}
             </div>
           ))}
           {current?.more != null && current.more > 0 && (
-            <div style={{ padding: '12px 0 0', textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>y {fmtCount(current.more)} más</div>
+            <div style={{ padding: '12px 0 0', textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{t('social.follow.andMore', { count: fmtCount(current.more) })}</div>
           )}
         </div>
       </motion.div>

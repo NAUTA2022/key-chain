@@ -3,40 +3,57 @@ import type { Chain } from 'thirdweb/chains';
 import { transfer } from 'thirdweb/extensions/erc20';
 import { isAddress, toUnits } from 'thirdweb/utils';
 import type { Account, Wallet } from 'thirdweb/wallets';
+import { SOURCE_MESSAGES, interpolate, lookup } from '~/i18n/messages';
+import type { Translator } from '~/i18n/useT';
 import { client } from '~/lib/thirdweb';
 
 // USDC withdrawals from the investor's own wallet (an ERC-20 transfer they sign).
+// Messages come from `portfolio:wallet.withdraw.errors.*`: callers pass the `t` of
+// `useT('portfolio')` to get them in the active language (Spanish otherwise).
 
 const ZERO = '0x0000000000000000000000000000000000000000';
 
+type T = Translator['t'];
+
+/** Spanish (source) texts of the portfolio namespace, for callers that pass no translator. */
+const sourceT: T = (key, vars) => {
+  const v = lookup(SOURCE_MESSAGES.portfolio, key);
+  return typeof v === 'string' ? interpolate(v, vars) : key;
+};
+
+/** Validation error ids; the text is `portfolio:wallet.withdraw.errors.<id>`. */
+export type WithdrawError = 'invalidAddress' | 'ownAddress' | 'invalidAmount' | 'zeroAmount' | 'balanceLoading' | 'overBalance';
 export type WithdrawField = 'to' | 'amount';
 export type WithdrawCheck =
   | { ok: true; to: string; amount: string; amountWei: bigint }
-  | { ok: false; field: WithdrawField; message: string };
+  | { ok: false; field: WithdrawField; error: WithdrawError; message: string };
 
 export function validateWithdraw(
   input: { to: string; amount: string },
-  ctx: { from: string; balanceWei: bigint | null; decimals: number },
+  ctx: { from: string; balanceWei: bigint | null; decimals: number; t?: T },
 ): WithdrawCheck {
+  const t = ctx.t ?? sourceT;
+  const fail = (field: WithdrawField, error: WithdrawError): WithdrawCheck =>
+    ({ ok: false, field, error, message: t(`wallet.withdraw.errors.${error}`, { decimals: ctx.decimals }) });
   const to = input.to.trim();
-  if (!isAddress(to) || to.toLowerCase() === ZERO) return { ok: false, field: 'to', message: 'Ingresa una dirección de wallet válida (0x…).' };
-  if (to.toLowerCase() === ctx.from.toLowerCase()) return { ok: false, field: 'to', message: 'La dirección de destino no puede ser tu propia wallet.' };
+  if (!isAddress(to) || to.toLowerCase() === ZERO) return fail('to', 'invalidAddress');
+  if (to.toLowerCase() === ctx.from.toLowerCase()) return fail('to', 'ownAddress');
 
   const amount = input.amount.trim().replace(',', '.');
   const pattern = new RegExp(`^\\d+(\\.\\d{1,${ctx.decimals}})?$`);
-  if (!pattern.test(amount)) return { ok: false, field: 'amount', message: `Ingresa un monto válido (hasta ${ctx.decimals} decimales).` };
+  if (!pattern.test(amount)) return fail('amount', 'invalidAmount');
   const amountWei = toUnits(amount, ctx.decimals);
-  if (amountWei <= 0n) return { ok: false, field: 'amount', message: 'El monto tiene que ser mayor a 0.' };
-  if (ctx.balanceWei === null) return { ok: false, field: 'amount', message: 'Espera a que cargue tu saldo de USDC.' };
-  if (amountWei > ctx.balanceWei) return { ok: false, field: 'amount', message: 'El monto supera tu saldo de USDC.' };
+  if (amountWei <= 0n) return fail('amount', 'zeroAmount');
+  if (ctx.balanceWei === null) return fail('amount', 'balanceLoading');
+  if (amountWei > ctx.balanceWei) return fail('amount', 'overBalance');
   return { ok: true, to, amount, amountWei };
 }
 
-function walletError(e: unknown): string {
+function walletError(e: unknown, t: T): string {
   const msg = e instanceof Error ? e.message : String(e);
-  if (/reject|denied|cancel/i.test(msg)) return 'Operación cancelada en la wallet.';
-  if (/insufficient funds|gas/i.test(msg)) return 'No tienes saldo suficiente para pagar el gas de la red.';
-  return 'La transferencia no se pudo completar.';
+  if (/reject|denied|cancel/i.test(msg)) return t('wallet.withdraw.errors.cancelled');
+  if (/insufficient funds|gas/i.test(msg)) return t('wallet.withdraw.errors.noGas');
+  return t('wallet.withdraw.errors.failed');
 }
 
 /** Where a withdrawal is: waiting for the wallet's signature, or sent and waiting for the network. */
@@ -45,6 +62,8 @@ export type SendStep = 'sign' | 'confirm';
 /** Sends `amountWei` USDC to `to` and waits for the receipt; returns the tx hash. */
 export async function sendUsdc(opts: {
   account: Account; wallet: Wallet | undefined; chain: Chain; token: string; to: string; amountWei: bigint; onStep?: (s: SendStep) => void;
+  /** `t` of `useT('portfolio')`, for the error message in the active language. */
+  t?: T;
 }): Promise<string> {
   try {
     opts.onStep?.('sign');
@@ -59,6 +78,6 @@ export async function sendUsdc(opts: {
     if (receipt.status !== 'success') throw new Error('reverted');
     return receipt.transactionHash;
   } catch (e) {
-    throw new Error(walletError(e), { cause: e });
+    throw new Error(walletError(e, opts.t ?? sourceT), { cause: e });
   }
 }

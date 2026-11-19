@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { api } from '~/lib/api/client';
 import type { paths } from '~/lib/api/schema';
+import { useT } from '~/i18n/useT';
 import { useSession } from '~/lib/session';
 import { call, checkFile, errorText, IMAGE_TYPES, MB, uploadFile, useApi } from './api';
 
@@ -42,31 +43,33 @@ export function useStatement(year: number) {
   return useApi(useAuthedKey(`statement:${year}`), () => call(api.GET('/v1/me/statements', { params: { query: { year } } })));
 }
 
+/** Language names are shown in their own language (endonyms), so they are not translated. */
 export const LOCALE_LABEL: Record<ProfileLocale, string> = { es: 'Español', en: 'English' };
 
 /** Avatar upload/removal (POST/DELETE /v1/me/avatar), refreshing the session user afterwards. */
 export function useAvatarActions() {
+  const { t } = useT('profile');
   const { refresh } = useSession();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const upload = useCallback(async (file: File) => {
-    const problem = checkFile(file, { types: IMAGE_TYPES, maxBytes: 2 * MB });
+    const problem = checkFile(file, { types: IMAGE_TYPES, maxBytes: 2 * MB }, t);
     if (problem) return setError(problem);
     setBusy(true);
     setError(null);
     const { data, error: e } = await uploadFile<Me>('/v1/me/avatar', file);
     if (data) await refresh();
-    else setError(errorText(e, 'No pudimos subir la foto. Prueba con otra imagen.', { validation_failed: 'La imagen no es válida. Usa PNG, JPG o WebP de hasta 2 MB.', bad_request: 'La imagen no es válida. Usa PNG, JPG o WebP de hasta 2 MB.' }));
+    else setError(errorText(e, t('edit.errors.photoUpload'), { validation_failed: t('edit.errors.photoInvalid'), bad_request: t('edit.errors.photoInvalid') }, t));
     setBusy(false);
-  }, [refresh]);
+  }, [refresh, t]);
   const remove = useCallback(async () => {
     setBusy(true);
     setError(null);
     const { data, error: e } = await call(api.DELETE('/v1/me/avatar'));
     if (data) await refresh();
-    else setError(errorText(e, 'No pudimos quitar la foto.'));
+    else setError(errorText(e, t('edit.errors.photoRemove'), {}, t));
     setBusy(false);
-  }, [refresh]);
+  }, [refresh, t]);
   return { busy, error, setError, upload, remove };
 }
 export type AvatarActions = ReturnType<typeof useAvatarActions>;

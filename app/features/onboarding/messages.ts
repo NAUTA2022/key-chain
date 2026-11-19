@@ -1,8 +1,10 @@
 import { isProblem } from '~/lib/api/client';
+import type { Translator } from '~/i18n/useT';
 
-// Friendly Spanish messages for the onboarding and email verification API problems.
+// Friendly messages for the onboarding and email verification API problems.
+// The copy lives in the `help` dictionaries (`onboarding.messages.*`); callers pass their `t`.
 
-const NETWORK = 'No pudimos conectar con el servidor. Revisa tu conexión y prueba de nuevo.';
+type T = Translator['t'];
 
 function reasonOf(e: unknown): string | undefined {
   return isProblem(e) && typeof e.reason === 'string' ? e.reason : undefined;
@@ -13,19 +15,19 @@ function issuePaths(e: unknown): string[] {
   return e.issues.flatMap((i: unknown) => (typeof i === 'object' && i !== null && 'path' in i && typeof i.path === 'string' ? [i.path] : []));
 }
 
-export function onboardingError(e: unknown): string {
-  if (!isProblem(e)) return NETWORK;
-  if (e.status === 401) return 'Tu sesión expiró. Vuelve a conectar tu wallet para continuar.';
-  if (e.status === 429) return 'Hiciste demasiados intentos. Espera unos minutos y prueba de nuevo.';
+export function onboardingError(t: T, e: unknown): string {
+  if (!isProblem(e)) return t('onboarding.messages.network');
+  if (e.status === 401) return t('onboarding.messages.sessionExpired');
+  if (e.status === 429) return t('onboarding.messages.tooManyAttempts');
   if (e.code === 'validation_failed') {
     const paths = issuePaths(e);
-    if (paths.includes('termsVersion')) return 'Los términos se actualizaron. Recarga la página y acéptalos de nuevo.';
-    if (paths.includes('email')) return 'El email no es válido.';
-    if (paths.includes('displayName')) return 'El nombre no es válido: usa entre 2 y 80 caracteres.';
-    if (paths.includes('country')) return 'Elige un país de la lista.';
-    return 'Revisa los datos e intenta de nuevo.';
+    if (paths.includes('termsVersion')) return t('onboarding.messages.termsUpdated');
+    if (paths.includes('email')) return t('onboarding.messages.emailInvalid');
+    if (paths.includes('displayName')) return t('onboarding.messages.nameInvalid');
+    if (paths.includes('country')) return t('onboarding.messages.countryInvalid');
+    return t('onboarding.messages.checkData');
   }
-  return 'No pudimos guardar tus datos. Prueba de nuevo en unos minutos.';
+  return t('onboarding.messages.saveError');
 }
 
 export type SendOutcome =
@@ -34,29 +36,29 @@ export type SendOutcome =
   | { kind: 'verified' }
   | { kind: 'error'; message: string };
 
-export function sendOutcome(e: unknown): SendOutcome {
+export function sendOutcome(t: T, e: unknown): SendOutcome {
   const reason = reasonOf(e);
   if (reason === 'email_unavailable') return { kind: 'unavailable' };
   if (reason === 'already_verified') return { kind: 'verified' };
-  if (reason === 'no_email') return { kind: 'error', message: 'Tu cuenta no tiene un email cargado. Puedes agregarlo más tarde desde tu perfil.' };
-  if (isProblem(e) && e.status === 429) return { kind: 'error', message: 'Pediste varios códigos seguidos. Espera unos minutos antes de pedir otro.' };
-  return { kind: 'error', message: isProblem(e) ? 'No pudimos enviar el código. Prueba de nuevo en unos minutos.' : NETWORK };
+  if (reason === 'no_email') return { kind: 'error', message: t('onboarding.messages.noEmail') };
+  if (isProblem(e) && e.status === 429) return { kind: 'error', message: t('onboarding.messages.codesTooFast') };
+  return { kind: 'error', message: isProblem(e) ? t('onboarding.messages.sendError') : t('onboarding.messages.network') };
 }
 
-export function confirmError(e: unknown): string {
+export function confirmError(t: T, e: unknown): string {
   const reason = reasonOf(e);
   if (reason === 'invalid_code') {
     const left = isProblem(e) && typeof e.attemptsLeft === 'number' ? e.attemptsLeft : null;
-    if (left === null) return 'El código no es correcto.';
-    if (left <= 0) return 'El código no es correcto y no te quedan intentos. Pide un código nuevo.';
-    return `El código no es correcto. ${left === 1 ? 'Te queda 1 intento.' : `Te quedan ${left} intentos.`}`;
+    if (left === null) return t('onboarding.messages.codeWrong');
+    if (left <= 0) return t('onboarding.messages.codeWrongNoAttempts');
+    return left === 1 ? t('onboarding.messages.codeWrongLeft_one') : t('onboarding.messages.codeWrongLeft_other', { count: left });
   }
-  if (reason === 'code_expired') return 'El código venció o ya no es válido. Pide uno nuevo.';
-  if (reason === 'too_many_attempts') return 'Superaste los intentos permitidos. Pide un código nuevo.';
-  if (reason === 'email_changed') return 'Tu email cambió mientras verificabas. Pide un código nuevo.';
-  if (isProblem(e) && e.status === 429) return 'Hiciste demasiados intentos seguidos. Espera unos minutos y prueba de nuevo.';
-  if (isProblem(e) && e.code === 'validation_failed') return 'El código tiene 6 dígitos.';
-  return isProblem(e) ? 'No pudimos verificar el código. Prueba de nuevo.' : NETWORK;
+  if (reason === 'code_expired') return t('onboarding.messages.codeExpired');
+  if (reason === 'too_many_attempts') return t('onboarding.messages.codeTooManyAttempts');
+  if (reason === 'email_changed') return t('onboarding.messages.emailChanged');
+  if (isProblem(e) && e.status === 429) return t('onboarding.messages.tooManyAttemptsRow');
+  if (isProblem(e) && e.code === 'validation_failed') return t('onboarding.messages.codeDigits');
+  return isProblem(e) ? t('onboarding.messages.verifyError') : t('onboarding.messages.network');
 }
 
 export function isAlreadyVerified(e: unknown): boolean {

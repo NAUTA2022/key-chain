@@ -29,3 +29,14 @@ export function identicon(seed: string): { cells: boolean[]; hue: number } {
   }
   return { cells, hue: h % 360 };
 }
+
+const MONTHS_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+/**
+ * A date label from the data ("Mar 2025", "13 Jun 2026", "Mar": Spanish short months)
+ * with the month in the active language. `names` = the 12 short month names
+ * (`raw('social.months')` of the profile namespace).
+ */
+export function localMonthLabel(label: string, names: readonly string[]): string {
+  return label.replace(/\b(Ene|Feb|Mar|Abr|May|Jun|Jul|Ago|Sep|Oct|Nov|Dic)\b/, m => names[MONTHS_ES.indexOf(m)] ?? m);
+}

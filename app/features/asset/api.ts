@@ -4,6 +4,7 @@ import { api, apiEnabled, apiUrl, authHeaders } from '~/lib/api/client';
 import type { paths } from '~/lib/api/schema';
 import { mediaUrl, toCatalogAsset, useCatalog, type ApiAssetDto, type CatalogAsset } from '~/lib/catalog';
 import { useSession } from '~/lib/session';
+import { MarketError } from '~/features/market/i18n';
 import { useApiData } from '~/features/portfolio/useApiData';
 
 // Live data of an asset page: the asset itself (catalog or API), its feed,
@@ -115,11 +116,11 @@ export async function toggleUpdateLike(updateId: string): Promise<{ liked: boole
   return parsed.success ? parsed.data : null;
 }
 
-/** Publishes an issuer update; returns an error message or null on success. */
+/** Publishes an issuer update; returns the `market` i18n key of the error, or null on success. */
 export async function publishUpdate(assetId: number, input: { body: string; milestone: boolean; imageUrl: string | null }): Promise<string | null> {
   const body = input.body.trim();
-  if (!body) return 'Escribe la actualización antes de publicarla.';
-  if (body.length > 2000) return 'La actualización puede tener hasta 2000 caracteres.';
+  if (!body) return 'errors.updateEmpty';
+  if (body.length > 2000) return 'errors.updateTooLong';
   try {
     const r = await api.POST('/v1/assets/{id}/updates', {
       params: { path: { id: assetId } },
@@ -127,14 +128,14 @@ export async function publishUpdate(assetId: number, input: { body: string; mile
     });
     if (r.response.ok) return null;
     switch (r.response.status) {
-      case 401: return 'Inicia sesión para publicar.';
-      case 403: return 'Solo el emisor del proyecto puede publicar actualizaciones.';
-      case 409: return 'El feed se habilita cuando el proyecto está operativo o financiado.';
-      case 429: return 'Publicaste muchas actualizaciones seguidas. Prueba de nuevo más tarde.';
-      default: return 'No se pudo publicar la actualización.';
+      case 401: return 'errors.updateLogin';
+      case 403: return 'errors.updateOnlyIssuer';
+      case 409: return 'errors.updateFeedLocked';
+      case 429: return 'errors.updateRateLimited';
+      default: return 'errors.updateFailed';
     }
   } catch {
-    return 'No se pudo contactar al servidor.';
+    return 'errors.serverUnreachable';
   }
 }
 
@@ -150,9 +151,9 @@ export function useAssetDocuments(idOrSlug: string | null) {
 /** Downloads a document with the session credentials (files are not public). */
 export async function downloadDocument(doc: AssetDocument): Promise<void> {
   // Credentials only ever go to the API's own file endpoint.
-  if (!/^\/v1\/files\/[\w-]+$/.test(doc.url)) throw new Error('Documento no disponible.');
+  if (!/^\/v1\/files\/[\w-]+$/.test(doc.url)) throw new MarketError('errors.documentUnavailable');
   const res = await fetch(apiUrl(doc.url), { credentials: 'include', headers: authHeaders() });
-  if (!res.ok) throw new Error(res.status === 401 ? 'Tu sesión expiró. Vuelve a iniciar sesión.' : 'No se pudo descargar el documento.');
+  if (!res.ok) throw new MarketError(res.status === 401 ? 'errors.sessionExpired' : 'errors.downloadFailed');
   const href = URL.createObjectURL(await res.blob());
   const link = document.createElement('a');
   link.href = href;

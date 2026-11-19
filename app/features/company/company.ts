@@ -3,7 +3,7 @@ import type { PTagColor } from '~/components/ui';
 import { api } from '~/lib/api/client';
 import type { paths } from '~/lib/api/schema';
 import { COUNTRY_NAMES, type CountryCode } from '~/lib/countries';
-import { call, checkFile, errorText, IMAGE_TYPES, MB, uploadFile, type ApiResult } from '~/features/profile/api';
+import { call, checkFile, errorText, IMAGE_TYPES, MB, profileSourceT, uploadFile, type ApiResult, type ProfileT } from '~/features/profile/api';
 
 // Self-service company accounts (live mode): form model, validation and the
 // /v1/me/company calls shared by the onboarding and the Perfil section.
@@ -44,30 +44,31 @@ const isHttps = (v: string): boolean => {
   }
 };
 
+// Messages are `profile` keys, translated in parseCompanyForm.
 const companySchema = z.object({
-  name: z.string().trim().min(2, 'Ingresa la razón social.').max(120, 'Usa como máximo 120 caracteres.'),
+  name: z.string().trim().min(2, 'company.errors.nameRequired').max(120, 'company.errors.max120'),
   taxId: z.string().trim()
-    .min(4, 'Ingresa la identificación tributaria.')
-    .max(40, 'Usa como máximo 40 caracteres.')
-    .regex(/^[A-Za-z0-9][A-Za-z0-9.\-/ ]*$/, 'Usa solo letras, números, puntos, guiones o barras.')
-    .refine(v => /\d/.test(v), 'La identificación debe incluir números.'),
-  country: z.string().refine(v => v in COUNTRY_NAMES, 'Elige el país de la empresa.').transform(v => v as CountryCode),
-  website: z.string().trim().max(200, 'El enlace es demasiado largo.').refine(v => v === '' || isHttps(v), 'Usa un enlace que empiece con https://'),
-  bio: z.string().trim().min(10, 'Cuenta en al menos 10 caracteres qué hace tu empresa.').max(BIO_MAX, `Usa como máximo ${BIO_MAX} caracteres.`),
+    .min(4, 'company.errors.taxIdRequired')
+    .max(40, 'company.errors.max40')
+    .regex(/^[A-Za-z0-9][A-Za-z0-9.\-/ ]*$/, 'company.errors.taxIdChars')
+    .refine(v => /\d/.test(v), 'company.errors.taxIdDigits'),
+  country: z.string().refine(v => v in COUNTRY_NAMES, 'company.errors.country').transform(v => v as CountryCode),
+  website: z.string().trim().max(200, 'company.errors.websiteLong').refine(v => v === '' || isHttps(v), 'company.errors.websiteHttps'),
+  bio: z.string().trim().min(10, 'company.errors.bioMin').max(BIO_MAX, 'company.errors.bioMax'),
 });
 
 export type CompanyErrors = Partial<Record<CompanyField, string>>;
 
-/** Validates the form; returns the API body or the Spanish error of each field. */
-export function parseCompanyForm(form: CompanyForm): { body: CreateBody; errors: null } | { body: null; errors: CompanyErrors } {
+/** Validates the form; returns the API body or the error of each field (`t`: profile translator; Spanish without it). */
+export function parseCompanyForm(form: CompanyForm, t: ProfileT = profileSourceT): { body: CreateBody; errors: null } | { body: null; errors: CompanyErrors } {
   const errors: CompanyErrors = {};
-  const logoError = form.logo ? checkFile(form.logo, { types: IMAGE_TYPES, maxBytes: 5 * MB }) : null;
+  const logoError = form.logo ? checkFile(form.logo, { types: IMAGE_TYPES, maxBytes: 5 * MB }, t) : null;
   if (logoError) errors.logo = logoError;
   const parsed = companySchema.safeParse(form);
   if (!parsed.success) {
     for (const issue of parsed.error.issues) {
       const key = issue.path[0];
-      if (typeof key === 'string' && key in form && !errors[key as CompanyField]) errors[key as CompanyField] = issue.message;
+      if (typeof key === 'string' && key in form && !errors[key as CompanyField]) errors[key as CompanyField] = t(issue.message, { max: BIO_MAX });
     }
   }
   if (!parsed.success || logoError) return { body: null, errors };
@@ -75,14 +76,16 @@ export function parseCompanyForm(form: CompanyForm): { body: CreateBody; errors:
   return { body: website ? { ...rest, website } : rest, errors: null };
 }
 
+/** API reason → `profile` key. */
 const COMPANY_ERRORS: Record<string, string> = {
-  company_exists: 'Tu cuenta ya tiene una empresa registrada.',
-  company_verified: 'Tu empresa ya está verificada: edita su perfil desde la página de la empresa.',
-  validation_failed: 'Revisa los datos de la empresa.',
-  not_found: 'No encontramos tu empresa. Recarga la página.',
+  company_exists: 'company.errors.exists',
+  company_verified: 'company.errors.alreadyVerified',
+  validation_failed: 'company.errors.validation',
+  not_found: 'company.errors.notFound',
 };
 
-export const companyErrorText = (error: unknown): string => errorText(error, 'No pudimos guardar la empresa. Prueba de nuevo.', COMPANY_ERRORS);
+export const companyErrorText = (error: unknown, t: ProfileT = profileSourceT): string =>
+  errorText(error, t('company.errors.saveFailed'), Object.fromEntries(Object.entries(COMPANY_ERRORS).map(([k, key]) => [k, t(key)])), t);
 
 export function loadMyCompany(): Promise<ApiResult<MyCompany | null>> {
   return call(api.GET('/v1/me/company')).then(r => ({ data: r.data ? r.data.company : null, error: r.error }));
@@ -92,20 +95,21 @@ export function loadMyCompany(): Promise<ApiResult<MyCompany | null>> {
  * Registers the company (or updates/resubmits the existing one) and uploads the logo if one was picked.
  * A failed logo upload keeps the saved company and reports `logoError`.
  */
-export async function saveCompany(body: CreateBody, logo: File | null, existing: MyCompany | null): Promise<{ company: MyCompany | null; error: string | null; logoError: string | null }> {
+export async function saveCompany(body: CreateBody, logo: File | null, existing: MyCompany | null, t: ProfileT = profileSourceT): Promise<{ company: MyCompany | null; error: string | null; logoError: string | null }> {
   const saved = existing
     ? await call(api.PATCH('/v1/me/company', { body: { ...body, website: body.website ?? '' } }))
     : await call(api.POST('/v1/me/company', { body }));
-  if (!saved.data) return { company: null, error: companyErrorText(saved.error), logoError: null };
+  if (!saved.data) return { company: null, error: companyErrorText(saved.error, t), logoError: null };
   if (!logo) return { company: saved.data, error: null, logoError: null };
   const up = await uploadFile<{ logoUrl: string | null }>(`/v1/companies/${saved.data.slug}/logo`, logo);
   return up.data
     ? { company: { ...saved.data, logoUrl: up.data.logoUrl }, error: null, logoError: null }
-    : { company: saved.data, error: null, logoError: errorText(up.error, 'La empresa se guardó, pero no pudimos subir el logo.') };
+    : { company: saved.data, error: null, logoError: errorText(up.error, t('company.errors.logoFailed'), {}, t) };
 }
 
-export const COMPANY_STATUS: Record<CompanyStatus, { label: string; color: PTagColor }> = {
-  pending: { label: 'Pendiente de verificación', color: 'blue' },
-  rejected: { label: 'Rechazada', color: 'red' },
-  verified: { label: 'Verificada', color: 'green' },
+/** Status tag: `labelKey` is a `profile` key. */
+export const COMPANY_STATUS: Record<CompanyStatus, { labelKey: string; color: PTagColor }> = {
+  pending: { labelKey: 'company.status.pending', color: 'blue' },
+  rejected: { labelKey: 'company.status.rejected', color: 'red' },
+  verified: { labelKey: 'company.status.verified', color: 'green' },
 };

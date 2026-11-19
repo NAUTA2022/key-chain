@@ -1,0 +1,372 @@
+{
+  "assets": {
+    "1": {
+      "name": "Tesla Model 3 Fleet",
+      "location": "Los Angeles, USA",
+      "desc": "Fleet of 10 Tesla Model 3 vehicles operating on a ride-hailing platform. Monthly revenue distributed pro rata among holders.",
+      "lifespan": "6 years"
+    },
+    "2": {
+      "name": "Porsche 911 Carrera",
+      "location": "Miami, USA",
+      "desc": "Collector vehicle earning premium rental income from events and productions. Historical appreciation of 4% per year.",
+      "lifespan": "8 years"
+    },
+    "3": {
+      "name": "Pergamino Farmland",
+      "location": "Buenos Aires, Argentina",
+      "desc": "240 hectares of soybeans and corn in the core farming region. Yields audited by an independent agronomy consultancy.",
+      "lifespan": "25 years"
+    },
+    "4": {
+      "name": "Uco Valley Vineyard",
+      "location": "Mendoza, Argentina",
+      "desc": "85 hectares of premium Malbec with a boutique winery. Guaranteed offtake agreement with an exporter.",
+      "lifespan": "30 years"
+    },
+    "5": {
+      "name": "DJI Agricultural Drone Fleet",
+      "location": "Córdoba, Argentina",
+      "desc": "20 DJI Agras T40 drones for precision spraying. Service contracts with 14 growers.",
+      "lifespan": "4 years"
+    },
+    "6": {
+      "name": "Palermo Corporate Building",
+      "location": "Buenos Aires City, Argentina",
+      "desc": "12-story Class AAA tower with 94% occupancy. Corporate tenants on 5-year leases.",
+      "lifespan": "50 years"
+    },
+    "7": {
+      "name": "Madrid Residential Complex",
+      "location": "Madrid, Spain",
+      "desc": "16 long-term rental units in Chamberí. Stable returns backed by sustained demand.",
+      "lifespan": "40 years"
+    },
+    "8": {
+      "name": "Miami Logistics Tower",
+      "location": "Miami, USA",
+      "desc": "18,000 m² last-mile distribution center. Pre-leased to an international logistics operator.",
+      "lifespan": "45 years"
+    },
+    "9": {
+      "name": "Uber Toyota Corolla Hybrid Fleet",
+      "location": "Chicago, USA",
+      "desc": "Fleet of 15 Toyota Corolla hybrids operating on ride-hailing platforms. Maintenance and comprehensive insurance included.",
+      "lifespan": "8 years"
+    },
+    "10": {
+      "name": "Ferrari 488 GTB Limited Edition",
+      "location": "Los Angeles, USA",
+      "desc": "Collector supercar earning premium rental income from events and photo shoots. Sustained historical appreciation.",
+      "lifespan": "7 years"
+    },
+    "11": {
+      "name": "BYD Electric Delivery Fleet",
+      "location": "Buenos Aires, Argentina",
+      "desc": "Fleet of 20 BYD electric vans for last-mile logistics in Buenos Aires City and Greater Buenos Aires.",
+      "lifespan": "7 years"
+    },
+    "12": {
+      "name": "Lamborghini Huracán Evo",
+      "location": "Madrid, Spain",
+      "desc": "High-end vehicle rented for exclusive events and luxury tourism on the Costa del Sol.",
+      "lifespan": "4 years"
+    },
+    "13": {
+      "name": "Ford Ranger Agro Pickup Fleet",
+      "location": "Córdoba, Argentina",
+      "desc": "Fleet of 4x4 pickups leased to rural contractors for the farming season.",
+      "lifespan": "7 years"
+    },
+    "14": {
+      "name": "Armored Mercedes-Benz G-Class",
+      "location": "Miami, USA",
+      "desc": "B6-level armored vehicle on corporate rental for executives and diplomats.",
+      "lifespan": "7 years"
+    },
+    "15": {
+      "name": "BYD Electric Taxi Fleet",
+      "location": "Barcelona, Spain",
+      "desc": "Fleet of 25 certified electric taxis operating under a municipal license.",
+      "lifespan": "8 years"
+    },
+    "16": {
+      "name": "Range Rover Sport Collection",
+      "location": "Buenos Aires, Argentina",
+      "desc": "Premium SUVs on long-term executive rental for companies and corporate travel.",
+      "lifespan": "10 years"
+    },
+    "17": {
+      "name": "Rosario Soybean Farm",
+      "location": "Rosario, Argentina",
+      "desc": "380 hectares of prime soybean land in Santa Fe's core farming region. Leased to an established grower.",
+      "lifespan": "15 years"
+    },
+    "18": {
+      "name": "Cafayate Premium Vineyard",
+      "location": "Salta, Argentina",
+      "desc": "60 hectares of high-altitude Torrontés and Malbec with its own winery and direct exports.",
+      "lifespan": "20 years"
+    },
+    "19": {
+      "name": "Century-Old Andalusian Olive Grove",
+      "location": "Jaén, Spain",
+      "desc": "Plantation of century-old olive trees producing award-winning extra virgin olive oil.",
+      "lifespan": "25 years"
+    },
+    "20": {
+      "name": "Corrientes Cattle Ranch",
+      "location": "Corrientes, Argentina",
+      "desc": "1,200 hectares of natural grassland for cattle breeding and fattening.",
+      "lifespan": "30 years"
+    },
+    "21": {
+      "name": "Tucumán Citrus Orchard",
+      "location": "Tucumán, Argentina",
+      "desc": "150 hectares of premium lemons with an on-site packing plant and exports to Europe.",
+      "lifespan": "40 years"
+    },
+    "22": {
+      "name": "North Pergamino Corn Farm",
+      "location": "Pergamino, Argentina",
+      "desc": "210 hectares of corn in rotation with soybeans, with supplemental center-pivot irrigation.",
+      "lifespan": "15 years"
+    },
+    "23": {
+      "name": "Uco Valley Reserve Vineyard",
+      "location": "Mendoza, Argentina",
+      "desc": "45 hectares of high-altitude Malbec, a reserve line with export contracts to the USA.",
+      "lifespan": "30 years"
+    },
+    "24": {
+      "name": "Rioja Alta Vineyard",
+      "location": "La Rioja, Spain",
+      "desc": "30-hectare boutique winery within the Rioja Qualified Designation of Origin.",
+      "lifespan": "20 years"
+    },
+    "25": {
+      "name": "Solar Inspection Drones",
+      "location": "Austin, USA",
+      "desc": "Fleet of 12 thermal drones for inspecting utility-scale solar farms.",
+      "lifespan": "3 years"
+    },
+    "26": {
+      "name": "Urban Delivery Drone Fleet",
+      "location": "Valencia, Spain",
+      "desc": "Last-mile delivery operation using certified drones in an authorized urban zone.",
+      "lifespan": "6 years"
+    },
+    "27": {
+      "name": "Cadastral Mapping Drones",
+      "location": "Buenos Aires, Argentina",
+      "desc": "Topographic and cadastral surveying service using high-precision RTK drones.",
+      "lifespan": "4 years"
+    },
+    "28": {
+      "name": "Perimeter Security Drone Fleet",
+      "location": "Houston, USA",
+      "desc": "24/7 autonomous surveillance of industrial sites with patrol drones.",
+      "lifespan": "6 years"
+    },
+    "29": {
+      "name": "Precision Crop-Spraying Drones",
+      "location": "Córdoba, Argentina",
+      "desc": "Fleet of agricultural drones for precision variable-rate application of agrochemicals.",
+      "lifespan": "3 years"
+    },
+    "30": {
+      "name": "Mining Survey Drone Fleet",
+      "location": "San Juan, Argentina",
+      "desc": "Volumetric surveying of ore stockpiles at open-pit mining operations.",
+      "lifespan": "6 years"
+    },
+    "31": {
+      "name": "Cinematic Filming Drones",
+      "location": "Los Angeles, USA",
+      "desc": "Cinema-grade drone equipment rented to film and video productions.",
+      "lifespan": "5 years"
+    },
+    "32": {
+      "name": "Wildfire Prevention Drone Fleet",
+      "location": "Girona, Spain",
+      "desc": "Early wildfire detection drones equipped with thermal cameras.",
+      "lifespan": "5 years"
+    },
+    "33": {
+      "name": "Power Line Inspection Drones",
+      "location": "Mendoza, Argentina",
+      "desc": "Autonomous inspection of high-voltage lines for electricity distributors.",
+      "lifespan": "4 years"
+    },
+    "34": {
+      "name": "Barcelona Eixample Apartments",
+      "location": "Barcelona, Spain",
+      "desc": "12 tourist apartments in the Eixample with an average occupancy of 85%.",
+      "lifespan": "25 years"
+    },
+    "35": {
+      "name": "Miami Brickell Residences",
+      "location": "Miami, USA",
+      "desc": "40-unit residential tower in Brickell's financial district.",
+      "lifespan": "20 years"
+    },
+    "36": {
+      "name": "Puerto Madero Condominium",
+      "location": "Buenos Aires City, Argentina",
+      "desc": "Complex of 24 premium riverfront apartments in Puerto Madero.",
+      "lifespan": "35 years"
+    },
+    "37": {
+      "name": "Valencia Beach Apartments",
+      "location": "Valencia, Spain",
+      "desc": "18 vacation rental apartments steps from Malvarrosa Beach.",
+      "lifespan": "20 years"
+    },
+    "38": {
+      "name": "Brooklyn Heights Residences",
+      "location": "New York, USA",
+      "desc": "30-unit residential building in one of NYC's most sought-after neighborhoods.",
+      "lifespan": "30 years"
+    },
+    "39": {
+      "name": "Palermo Soho Premium Duplexes",
+      "location": "Buenos Aires City, Argentina",
+      "desc": "10 designer duplexes in the heart of Palermo Soho, rented as short-term stays.",
+      "lifespan": "40 years"
+    },
+    "40": {
+      "name": "Seville City Center Apartments",
+      "location": "Seville, Spain",
+      "desc": "14 fully renovated tourist apartments in the historic quarter.",
+      "lifespan": "30 years"
+    },
+    "41": {
+      "name": "Austin Tech District Residences",
+      "location": "Austin, USA",
+      "desc": "22 residential units aimed at tech-sector professionals.",
+      "lifespan": "40 years"
+    },
+    "42": {
+      "name": "Chicago Industrial Lofts",
+      "location": "Chicago, USA",
+      "desc": "16 lofts converted from a former textile factory in the West Loop.",
+      "lifespan": "40 years"
+    },
+    "43": {
+      "name": "Puerto Madero Office Tower",
+      "location": "Buenos Aires City, Argentina",
+      "desc": "18-story Class AAA tower with LEED Gold certification and 88% occupancy.",
+      "lifespan": "30 years"
+    },
+    "44": {
+      "name": "Rosario Shopping Center",
+      "location": "Rosario, Argentina",
+      "desc": "22,000 m² shopping mall with 90 stores and top-tier national anchor tenants.",
+      "lifespan": "45 years"
+    },
+    "45": {
+      "name": "Houston Corporate Tower",
+      "location": "Houston, USA",
+      "desc": "24-story corporate building leased to energy-sector firms.",
+      "lifespan": "30 years"
+    },
+    "46": {
+      "name": "Madrid Office Building",
+      "location": "Madrid, Spain",
+      "desc": "Class A offices in the AZCA financial district, fully occupied.",
+      "lifespan": "45 years"
+    },
+    "47": {
+      "name": "Córdoba Industrial Warehouse",
+      "location": "Córdoba, Argentina",
+      "desc": "12,000 m² distribution center pre-leased to a national logistics operator.",
+      "lifespan": "30 years"
+    },
+    "48": {
+      "name": "Miami Financial Tower",
+      "location": "Miami, USA",
+      "desc": "30-story financial tower with tenants from the international banking sector.",
+      "lifespan": "45 years"
+    },
+    "49": {
+      "name": "Madrid Data Center",
+      "location": "Madrid, Spain",
+      "desc": "8,000 m² Tier III data center with 10-year contracts with hyperscalers.",
+      "lifespan": "30 years"
+    },
+    "50": {
+      "name": "Palermo Hollywood Boutique Building",
+      "location": "Buenos Aires City, Argentina",
+      "desc": "6-story boutique office building in a creative and technology hub.",
+      "lifespan": "30 years"
+    }
+  },
+  "academy": {
+    "1": {
+      "title": "What is real-world asset (RWA) tokenization?",
+      "excerpt": "The definitive guide to understanding how physical assets become tradable digital tokens."
+    },
+    "2": {
+      "title": "How to invest in your first project, step by step",
+      "excerpt": "From connecting your wallet to receiving your first yield distribution."
+    },
+    "3": {
+      "title": "Farmland: the most in-demand RWA in Latin America",
+      "excerpt": "Why productive land is the star asset of tokenization in the region."
+    },
+    "4": {
+      "title": "Vesting and cliffs: understand your token schedule",
+      "excerpt": "TGE, cliff, linear vesting: every term you need to master before an ICO."
+    },
+    "5": {
+      "title": "Secondary market: when to buy at a discount",
+      "excerpt": "How to evaluate P2P listings, compare actual price vs. asking price and spot opportunities."
+    },
+    "6": {
+      "title": "Smart contracts on Polygon: how we protect your investment",
+      "excerpt": "Audits, custody and the on-chain architecture behind every Brikme project."
+    }
+  },
+  "achievements": {
+    "trophy": {
+      "label": "First investment",
+      "desc": "You invested in your first project"
+    },
+    "shield": {
+      "label": "KYC complete",
+      "desc": "Identity verified"
+    },
+    "star": {
+      "label": "6 months active",
+      "desc": "Half a year of investing"
+    },
+    "compass": {
+      "label": "Diversified",
+      "desc": "Projects in 3 or more sectors"
+    },
+    "drop": {
+      "label": "First $1K in yield",
+      "desc": "Cumulative rental income collected"
+    },
+    "calendar": {
+      "label": "1 year on Brikme",
+      "desc": "Twelve months as a member"
+    },
+    "diamond": {
+      "label": "$50K invested",
+      "desc": "Reach Level 5"
+    },
+    "rocket": {
+      "label": "10 projects",
+      "desc": "A broad portfolio"
+    }
+  },
+  "activity": {
+    "1": "Rental income distribution — Pergamino Farmland",
+    "2": "P2P Fiat escrow release — received by Pavlo",
+    "3": "Rental income distribution — Tesla Model 3 Fleet",
+    "4": "Token purchase — Palermo Corporate Building",
+    "5": "Escrow release — 40ft Container #118",
+    "6": "Transfer to @sofia_g"
+  }
+}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { ACADEMY_POSTS } from '~/data';
+import { useT } from '~/i18n/useT';
 import { api, apiEnabled } from '~/lib/api/client';
 import { useCatalog } from '~/lib/catalog';
 import { pathFor, routeKeyFromPath, type NavState, type RouteKey } from '~/lib/navigation';
@@ -22,29 +23,29 @@ export type SearchGroup = { kind: SearchKind; label: string; items: SearchResult
 
 type PostEntry = { slug: string; title: string; category: string; excerpt: string };
 
-type Section = { title: string; subtitle: string; keywords: string; adminOnly?: boolean } & ({ key: RouteKey } | { path: string });
+/** `id`: the section's texts are `search.sections.<id>.title/subtitle` in `common`; `keywords` stay in Spanish (extra search terms). */
+type Section = { id: string; keywords: string; adminOnly?: boolean } & ({ key: RouteKey } | { path: string });
 
 const SECTIONS: Section[] = [
-  { key: 'feed', title: 'Feed', subtitle: 'Hitos y novedades de los proyectos', keywords: 'feed inicio novedades hitos publicaciones empresas' },
-  { key: 'dashboard', title: 'Mi dashboard', subtitle: 'Tu panel', keywords: 'panel dashboard resumen home' },
-  { key: 'primario', title: 'Tokenizaciones', subtitle: 'Mercado primario', keywords: 'proyectos invertir mercado primario tokens rwa activos' },
-  { key: 'secundario', title: 'Mercado secundario', subtitle: 'Compra y venta entre inversores', keywords: 'p2p comprar vender ordenes listados trading' },
-  { key: 'token', title: 'Token BRIK', subtitle: 'Token de la plataforma', keywords: 'kycn token ico staking vesting tokenomics' },
-  { key: 'pertenencias', title: 'Mis pertenencias', subtitle: 'Tu portafolio', keywords: 'wallet billetera portafolio cartera inversiones dividendos rendimientos cobrar holdings' },
-  { key: 'ecosistema', title: 'Ecosistema', subtitle: 'Mapa del ecosistema', keywords: 'mapa 3d red productos' },
-  { key: 'academia', title: 'Academia', subtitle: 'Guías y artículos', keywords: 'guias articulos aprender blog educacion' },
-  { key: 'perfil', title: 'Perfil', subtitle: 'Cuenta y verificación KYC', keywords: 'cuenta kyc verificacion identidad datos seguridad email' },
-  { key: 'ayuda', title: 'Ayuda', subtitle: 'Help Center y soporte', keywords: 'soporte help center faq preguntas tickets contacto' },
-  { key: 'wizard', title: 'Tokenizar mi activo', subtitle: 'Solicitud de tokenización', keywords: 'tokenizar solicitud emitir activo emisor' },
-  { key: 'swap', title: 'Swap', subtitle: 'Intercambio de tokens', keywords: 'intercambio cambiar usdc convertir' },
-  { path: '/terminos', title: 'Términos y condiciones', subtitle: 'Legal', keywords: 'legal terminos condiciones' },
-  { path: '/privacidad', title: 'Política de privacidad', subtitle: 'Legal', keywords: 'legal privacidad datos personales' },
-  { key: 'admin', title: 'Panel admin', subtitle: 'Administración', keywords: 'administracion usuarios kyc aprobaciones', adminOnly: true },
-  { key: 'config', title: 'Configuración', subtitle: 'Ajustes de la plataforma', keywords: 'ajustes settings banners mantenimiento red', adminOnly: true },
+  { id: 'feed', key: 'feed', keywords: 'feed inicio novedades hitos publicaciones empresas' },
+  { id: 'dashboard', key: 'dashboard', keywords: 'panel dashboard resumen home' },
+  { id: 'primario', key: 'primario', keywords: 'proyectos invertir mercado primario tokens rwa activos' },
+  { id: 'secundario', key: 'secundario', keywords: 'p2p comprar vender ordenes listados trading' },
+  { id: 'token', key: 'token', keywords: 'kycn token ico staking vesting tokenomics' },
+  { id: 'pertenencias', key: 'pertenencias', keywords: 'wallet billetera portafolio cartera inversiones dividendos rendimientos cobrar holdings' },
+  { id: 'ecosistema', key: 'ecosistema', keywords: 'mapa 3d red productos' },
+  { id: 'academia', key: 'academia', keywords: 'guias articulos aprender blog educacion' },
+  { id: 'perfil', key: 'perfil', keywords: 'cuenta kyc verificacion identidad datos seguridad email' },
+  { id: 'ayuda', key: 'ayuda', keywords: 'soporte help center faq preguntas tickets contacto' },
+  { id: 'wizard', key: 'wizard', keywords: 'tokenizar solicitud emitir activo emisor' },
+  { id: 'swap', key: 'swap', keywords: 'intercambio cambiar usdc convertir' },
+  { id: 'terminos', path: '/terminos', keywords: 'legal terminos condiciones' },
+  { id: 'privacidad', path: '/privacidad', keywords: 'legal privacidad datos personales' },
+  { id: 'admin', key: 'admin', keywords: 'administracion usuarios kyc aprobaciones', adminOnly: true },
+  { id: 'config', key: 'config', keywords: 'ajustes settings banners mantenimiento red', adminOnly: true },
 ];
 
 const LIMITS: Record<SearchKind, number> = { asset: 5, post: 3, section: 4 };
-const LABELS: Record<SearchKind, string> = { asset: 'Proyectos', post: 'Academia', section: 'Secciones' };
 
 /** Lowercase without accents, so "tecnologia" finds "Tecnología". */
 export function normalize(s: string): string {
@@ -107,14 +108,20 @@ function rank(entries: Indexed[], terms: string[], phrase: string, limit: number
  * posts and app sections. `active` starts loading the academy index.
  */
 export function useSearch(query: string, opts: { isAdmin: boolean; active: boolean }): { groups: SearchGroup[]; flat: SearchResult[]; loading: boolean } {
+  const { t, raw } = useT('common');
   const { assets, loading: catalogLoading } = useCatalog();
   const posts = usePosts(opts.active);
 
-  const assetIndex = useMemo<Indexed[]>(() => assets.map(a => ({
-    title: normalize(a.name),
-    hay: normalize([a.name, a.location, a.company, a.cat, a.country].join(' ')),
-    result: { id: `asset-${a.id}`, kind: 'asset', title: a.name, subtitle: [a.cat, a.location].filter(Boolean).join(' · '), href: pathFor('detalle', { id: a.id }), image: a.img },
-  })), [assets]);
+  const assetIndex = useMemo<Indexed[]>(() => assets.map(a => {
+    // Category names are data in Spanish: shown translated, searchable in both.
+    const tr = raw<unknown>(`categories.${a.cat}`);
+    const cat = typeof tr === 'string' ? tr : a.cat;
+    return {
+      title: normalize(a.name),
+      hay: normalize([a.name, a.location, a.company, a.cat, cat, a.country].join(' ')),
+      result: { id: `asset-${a.id}`, kind: 'asset', title: a.name, subtitle: [cat, a.location].filter(Boolean).join(' · '), href: pathFor('detalle', { id: a.id }), image: a.img },
+    };
+  }), [assets, raw]);
 
   const postIndex = useMemo<Indexed[]>(() => posts.map(p => ({
     title: normalize(p.title),
@@ -122,11 +129,15 @@ export function useSearch(query: string, opts: { isAdmin: boolean; active: boole
     result: { id: `post-${p.slug}`, kind: 'post', title: p.title, subtitle: p.category, href: pathFor('articulo', { slug: p.slug }) },
   })), [posts]);
 
-  const sectionIndex = useMemo<Indexed[]>(() => SECTIONS.filter(s => opts.isAdmin || !s.adminOnly).map(s => ({
-    title: normalize(s.title),
-    hay: normalize([s.title, s.subtitle, s.keywords].join(' ')),
-    result: { id: `section-${s.title}`, kind: 'section', title: s.title, subtitle: s.subtitle, href: 'key' in s ? pathFor(s.key) : s.path },
-  })), [opts.isAdmin]);
+  const sectionIndex = useMemo<Indexed[]>(() => SECTIONS.filter(s => opts.isAdmin || !s.adminOnly).map(s => {
+    const title = t(`search.sections.${s.id}.title`);
+    const subtitle = t(`search.sections.${s.id}.subtitle`);
+    return {
+      title: normalize(title),
+      hay: normalize([title, subtitle, s.keywords].join(' ')),
+      result: { id: `section-${s.id}`, kind: 'section', title, subtitle, href: 'key' in s ? pathFor(s.key) : s.path },
+    };
+  }), [opts.isAdmin, t]);
 
   return useMemo(() => {
     const phrase = normalize(query.trim()).replace(/\s+/g, ' ');
@@ -138,9 +149,9 @@ export function useSearch(query: string, opts: { isAdmin: boolean; active: boole
       ['section', rank(sectionIndex, terms, phrase, LIMITS.section)],
     ] as const)
       .filter(([, items]) => items.length > 0)
-      .map(([kind, items]) => ({ kind, label: LABELS[kind], items }));
+      .map(([kind, items]) => ({ kind, label: t(`search.groups.${kind}`), items }));
     return { groups, flat: groups.flatMap(g => g.items), loading: catalogLoading };
-  }, [query, assetIndex, postIndex, sectionIndex, catalogLoading]);
+  }, [query, assetIndex, postIndex, sectionIndex, catalogLoading, t]);
 }
 
 /** Navigates to a search result (internal paths only), keeping the "from" page like useNav(). */

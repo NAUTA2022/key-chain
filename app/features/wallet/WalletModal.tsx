@@ -1,5 +1,6 @@
 import { useEffect, useId, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { useT } from '~/i18n/useT';
 
 type WalletModalProps = {
   title: string;
@@ -9,6 +10,7 @@ type WalletModalProps = {
 
 /** Centered dialog over a blurred backdrop (same overlay as the Brikme Pay modal). */
 export default function WalletModal({ title, onClose, children }: WalletModalProps) {
+  const { t } = useT('portfolio');
   const titleId = useId();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -41,7 +43,7 @@ export default function WalletModal({ title, onClose, children }: WalletModalPro
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <h2 id={titleId} style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, letterSpacing: '-0.02em', color: 'var(--text)', margin: 0 }}>{title}</h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar"
+          <button type="button" onClick={onClose} aria-label={t('wallet.close')}
             style={{ width: 32, height: 32, borderRadius: 10, border: '1px solid var(--border-l)', background: 'var(--surface2)', color: 'var(--sec)', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}>
             ×
           </button>

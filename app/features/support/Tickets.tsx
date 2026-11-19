@@ -6,11 +6,12 @@ import { bodyStyle, labelStyle, mutedStyle } from '~/features/profile/styles';
 import { api } from '~/lib/api/client';
 import type { SessionStatus } from '~/lib/session';
 import {
-  ATTACHMENT_MAX_BYTES, CATEGORY_LABEL, MAX_ATTACHMENTS, MESSAGE_MAX, STATUS_TAG, SUBJECT_MAX, TICKET_CATEGORIES,
-  srOnly, ticketErrorText, validateNewTicket, validateReply,
+  ATTACHMENT_MAX_BYTES, MAX_ATTACHMENTS, MESSAGE_MAX, STATUS_TAG, SUBJECT_MAX, TICKET_CATEGORIES, VALIDATION_VARS,
+  categoryKey, srOnly, ticketErrorText, validateNewTicket, validateReply,
   type NewTicketErrors, type NewTicketField, type TicketAttachment, type TicketDetail, type TicketSummary,
 } from './schema';
 import SignInCta from './SignInCta';
+import { useT } from '~/i18n/useT';
 
 // Support tickets: "Mis tickets" list, new-ticket form and the ticket thread.
 
@@ -42,13 +43,15 @@ export function TicketsSection({ status, tickets, onOpen, onNew, style }: {
   style?: CSSProperties;
 }) {
   const [now] = useState(() => Date.now());
+  const { t } = useT('help');
+  const { t: tp, locale } = useT('profile');
 
   let body: ReactNode;
   if (status === 'anonymous') {
     body = (
       <SignInCta
-        title="Inicia sesión para ver tus tickets"
-        text="Con tu sesión puedes abrir tickets, adjuntar archivos y seguir las respuestas del equipo."
+        title={t('tickets.signInListTitle')}
+        text={t('tickets.signInListText')}
       />
     );
   } else if (status !== 'authenticated' || (!tickets.data && !tickets.error)) {
@@ -56,43 +59,43 @@ export function TicketsSection({ status, tickets, onOpen, onNew, style }: {
   } else if (!tickets.data) {
     body = (
       <Notice tone="error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <span>{errorText(tickets.error, 'No pudimos cargar tus tickets.')}</span>
-        <PBtn variant="secondary" small onClick={tickets.reload}>Reintentar</PBtn>
+        <span>{errorText(tickets.error, t('tickets.loadListError'))}</span>
+        <PBtn variant="secondary" small onClick={tickets.reload}>{t('shared.retry')}</PBtn>
       </Notice>
     );
   } else if (!tickets.data.length) {
     body = (
       <EmptyState
         icon={Icons.doc}
-        title="Todavía no abriste tickets"
-        text="Cuando abras uno, vas a ver aquí las respuestas del equipo."
-        action={<PBtn variant="secondary" small onClick={onNew}>Abrir un ticket</PBtn>}
+        title={t('tickets.emptyTitle')}
+        text={t('tickets.emptyText')}
+        action={<PBtn variant="secondary" small onClick={onNew}>{t('tickets.openTicket')}</PBtn>}
       />
     );
   } else {
     body = (
       <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-        {tickets.data.map((t, i) => {
-          const tag = STATUS_TAG[t.status];
-          const fresh = t.lastMessageFromStaff && t.status === 'answered';
+        {tickets.data.map((tk, i) => {
+          const tag = STATUS_TAG[tk.status];
+          const fresh = tk.lastMessageFromStaff && tk.status === 'answered';
           return (
-            <li key={t.id} style={{ borderTop: i ? '1px solid var(--border-l)' : 'none' }}>
-              <button type="button" onClick={() => onOpen(t.id)} style={rowButtonStyle}>
+            <li key={tk.id} style={{ borderTop: i ? '1px solid var(--border-l)' : 'none' }}>
+              <button type="button" onClick={() => onOpen(tk.id)} style={rowButtonStyle}>
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ display: 'block', fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 14, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {t.subject}
+                    {tk.subject}
                   </span>
                   <span style={{ ...mutedStyle, display: 'block', marginTop: 3 }}>
-                    {CATEGORY_LABEL[t.category]} · <time dateTime={t.lastMessageAt}>{fmtRelative(t.lastMessageAt, now)}</time>
+                    {t(categoryKey(tk.category))} · <time dateTime={tk.lastMessageAt}>{fmtRelative(tk.lastMessageAt, now, tp, locale)}</time>
                   </span>
                   {fresh && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 6, fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 600, color: 'var(--accent-text)' }}>
                       <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }} />
-                      Nueva respuesta
+                      {t('tickets.newReply')}
                     </span>
                   )}
                 </span>
-                <PTag label={tag.label} color={tag.color} />
+                <PTag label={t(tag.label)} color={tag.color} />
                 <span aria-hidden="true" style={{ color: 'var(--ter)', display: 'flex', flexShrink: 0 }}>{Icons.chevR}</span>
               </button>
             </li>
@@ -104,9 +107,9 @@ export function TicketsSection({ status, tickets, onOpen, onNew, style }: {
 
   return (
     <Section
-      title="Mis tickets"
+      title={t('tickets.listTitle')}
       style={style}
-      action={status === 'authenticated' ? <PBtn variant="accent" small onClick={onNew}>Abrir un ticket</PBtn> : undefined}
+      action={status === 'authenticated' ? <PBtn variant="accent" small onClick={onNew}>{t('tickets.openTicket')}</PBtn> : undefined}
     >
       {body}
     </Section>
@@ -127,6 +130,7 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
   const subjectId = useId();
   const categoryId = useId();
   const messageId = useId();
+  const { t } = useT('help');
   const ids: Record<NewTicketField, string> = { subject: subjectId, category: categoryId, message: messageId };
   const [subject, setSubject] = useState('');
   const [category, setCategory] = useState('');
@@ -153,13 +157,13 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
     const created = await call(api.POST('/v1/support/tickets', { body: v.data }));
     if (!created.data) {
       setBusy(false);
-      setFormError(ticketErrorText(created.error, 'No pudimos crear el ticket. Prueba de nuevo en unos minutos.'));
+      setFormError(ticketErrorText(t, created.error, t('tickets.createError')));
       return;
     }
     let attachmentError: string | null = null;
     if (file) {
       const up = await uploadFile<TicketAttachment>(`/v1/support/tickets/${created.data.id}/attachments`, file);
-      if (!up.data) attachmentError = ticketErrorText(up.error, 'No pudimos subir el archivo.', 'upload');
+      if (!up.data) attachmentError = ticketErrorText(t, up.error, t('tickets.uploadError'), 'upload');
     }
     setBusy(false);
     onCreated(created.data.id, attachmentError);
@@ -171,39 +175,39 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
     <Modal
       open={open}
       onClose={busy ? () => undefined : onClose}
-      title="Abrir un ticket"
+      title={t('tickets.openTicket')}
       width={560}
       footer={
         authed ? (
           <>
-            <PBtn variant="secondary" small onClick={onClose} disabled={busy}>Cancelar</PBtn>
-            <PBtn variant="accent" small onClick={() => void submit()} disabled={busy}>{busy ? 'Enviando…' : 'Enviar ticket'}</PBtn>
+            <PBtn variant="secondary" small onClick={onClose} disabled={busy}>{t('tickets.cancel')}</PBtn>
+            <PBtn variant="accent" small onClick={() => void submit()} disabled={busy}>{busy ? t('tickets.sending') : t('tickets.submit')}</PBtn>
           </>
         ) : undefined
       }
     >
       {status === 'anonymous' ? (
-        <SignInCta title="Inicia sesión para abrir un ticket" text="Así podemos responderte y vas a ver la respuesta en Mis tickets." />
+        <SignInCta title={t('tickets.signInNewTitle')} text={t('tickets.signInNewText')} />
       ) : !authed ? (
         <Skeleton rows={4} height={18} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <p style={{ ...bodyStyle, margin: 0 }}>Cuéntanos qué pasó con el mayor detalle posible. Te respondemos por aquí y vas a ver la respuesta en Mis tickets.</p>
-          <Field label="Asunto" htmlFor={ids.subject} error={errors.subject}>
+          <p style={{ ...bodyStyle, margin: 0 }}>{t('tickets.newIntro')}</p>
+          <Field label={t('tickets.subject')} htmlFor={ids.subject} error={errors.subject && t(errors.subject, VALIDATION_VARS)}>
             <TextInput
               id={ids.subject}
               value={subject}
               maxLength={SUBJECT_MAX}
               disabled={busy}
               invalid={Boolean(errors.subject)}
-              placeholder="Ej.: No puedo ver mi inversión"
+              placeholder={t('tickets.subjectPlaceholder')}
               onChange={e => {
                 setSubject(e.target.value);
                 clearError('subject');
               }}
             />
           </Field>
-          <Field label="Categoría" htmlFor={ids.category} error={errors.category}>
+          <Field label={t('tickets.category')} htmlFor={ids.category} error={errors.category && t(errors.category, VALIDATION_VARS)}>
             <Select
               id={ids.category}
               value={category}
@@ -215,13 +219,13 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
                 clearError('category');
               }}
             >
-              <option value="" disabled>Elige una categoría</option>
+              <option value="" disabled>{t('tickets.categoryPlaceholder')}</option>
               {TICKET_CATEGORIES.map(c => (
-                <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>
+                <option key={c} value={c}>{t(categoryKey(c))}</option>
               ))}
             </Select>
           </Field>
-          <Field label="Mensaje" htmlFor={ids.message} error={errors.message} hint={`${message.trim().length}/${MESSAGE_MAX} caracteres · mínimo 10`}>
+          <Field label={t('tickets.message')} htmlFor={ids.message} error={errors.message && t(errors.message, VALIDATION_VARS)} hint={t('tickets.messageHint', { count: message.trim().length, max: MESSAGE_MAX })}>
             <TextArea
               id={ids.message}
               value={message}
@@ -229,7 +233,7 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
               maxLength={MESSAGE_MAX}
               disabled={busy}
               invalid={Boolean(errors.message)}
-              placeholder="Describe el problema, qué intentaste y, si aplica, el activo o la operación."
+              placeholder={t('tickets.messagePlaceholder')}
               onChange={e => {
                 setMessage(e.target.value);
                 clearError('message');
@@ -237,7 +241,7 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
             />
           </Field>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>Archivo adjunto (opcional)</span>
+            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{t('tickets.attachmentOptional')}</span>
             {file ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface2)', borderRadius: 12, padding: '10px 12px', minWidth: 0 }}>
                 <span aria-hidden="true" style={{ color: 'var(--ter)', display: 'flex', flexShrink: 0 }}>{Icons.doc}</span>
@@ -247,25 +251,25 @@ export function NewTicketModal({ open, status, initialMessage = '', onClose, onC
                   type="button"
                   onClick={() => setFile(null)}
                   disabled={busy}
-                  aria-label={`Quitar ${file.name}`}
+                  aria-label={t('tickets.removeFile', { name: file.name })}
                   style={{ border: 'none', background: 'none', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, cursor: busy ? 'not-allowed' : 'pointer', padding: '2px 4px', flexShrink: 0 }}
                 >
-                  Quitar
+                  {t('tickets.remove')}
                 </button>
               </div>
             ) : (
               <div>
-                <FileButton label="Adjuntar archivo" accept={DOC_TYPES} maxBytes={ATTACHMENT_MAX_BYTES} onFile={setFile} onError={setFileError} disabled={busy} />
+                <FileButton label={t('tickets.attachFile')} accept={DOC_TYPES} maxBytes={ATTACHMENT_MAX_BYTES} onFile={setFile} onError={setFileError} disabled={busy} />
               </div>
             )}
             {fileError ? (
               <div role="alert" style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--neg)' }}>{fileError}</div>
             ) : (
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>PDF, PNG, JPG o WebP · hasta 10 MB.</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t('tickets.fileTypes')}</div>
             )}
           </div>
           {formError && <Notice tone="error">{formError}</Notice>}
-          <div role="status" style={srOnly}>{busy ? 'Enviando ticket…' : ''}</div>
+          <div role="status" style={srOnly}>{busy ? t('tickets.sendingTicket') : ''}</div>
         </div>
       )}
     </Modal>
@@ -290,6 +294,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
   onNewTicket: () => void;
 }) {
   const replyId = useId();
+  const { t } = useT('help');
   const authed = status === 'authenticated';
   const detail = useApi<TicketDetail>(id && authed ? `support-ticket:${id}` : null, () =>
     call(api.GET('/v1/support/tickets/{id}', { params: { path: { id: id ?? '' } } })),
@@ -333,10 +338,10 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
     setBusy(null);
     if (r.data) {
       detail.mutate(r.data);
-      patch({ reply: '', feedback: { tone: 'success', text: 'Mensaje enviado. Te avisamos cuando el equipo responda.' } });
+      patch({ reply: '', feedback: { tone: 'success', text: t('tickets.sent') } });
       onChanged();
     } else {
-      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos enviar el mensaje. Prueba de nuevo.') } });
+      patch({ feedback: { tone: 'error', text: ticketErrorText(t, r.error, t('tickets.sendError')) } });
       detail.reload();
     }
   };
@@ -349,10 +354,10 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
     setConfirming(false);
     if (r.data) {
       detail.mutate(r.data);
-      patch({ reply: '', replyError: null, feedback: { tone: 'success', text: 'Cerraste el ticket.' } });
+      patch({ reply: '', replyError: null, feedback: { tone: 'success', text: t('tickets.closedOk') } });
       onChanged();
     } else {
-      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos cerrar el ticket. Prueba de nuevo.') } });
+      patch({ feedback: { tone: 'error', text: ticketErrorText(t, r.error, t('tickets.closeError')) } });
     }
   };
 
@@ -365,10 +370,10 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
     if (r.data) {
       if (ticket) detail.mutate({ ...ticket, attachments: [...ticket.attachments, r.data] });
       else detail.reload();
-      patch({ feedback: { tone: 'success', text: `Adjuntamos ${r.data.filename}.` } });
+      patch({ feedback: { tone: 'success', text: t('tickets.attached', { name: r.data.filename }) } });
       onChanged();
     } else {
-      patch({ feedback: { tone: 'error', text: ticketErrorText(r.error, 'No pudimos subir el archivo. Prueba de nuevo.', 'upload') } });
+      patch({ feedback: { tone: 'error', text: ticketErrorText(t, r.error, t('tickets.uploadRetryError'), 'upload') } });
       detail.reload();
     }
   };
@@ -377,19 +382,19 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
     setDownloading(a.id);
     const ok = await downloadAuthed(a.url, a.filename);
     setDownloading(null);
-    if (!ok) patch({ feedback: { tone: 'error', text: `No pudimos descargar ${a.filename}. Prueba de nuevo.` } });
+    if (!ok) patch({ feedback: { tone: 'error', text: t('tickets.downloadError', { name: a.filename }) } });
   };
 
   const notice = local.feedback ?? (flash && flash.id === id ? { tone: flash.tone, text: flash.text } : null);
 
   let body: ReactNode;
   if (status === 'anonymous') {
-    body = <SignInCta title="Inicia sesión para ver este ticket" text="Los tickets son privados: solo tú y el equipo de soporte pueden verlos." />;
+    body = <SignInCta title={t('tickets.signInDetailTitle')} text={t('tickets.signInDetailText')} />;
   } else if (!ticket && detail.error) {
     body = (
       <Notice tone="error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <span>{ticketErrorText(detail.error, 'No pudimos cargar el ticket.', 'load')}</span>
-        <PBtn variant="secondary" small onClick={detail.reload}>Reintentar</PBtn>
+        <span>{ticketErrorText(t, detail.error, t('tickets.loadError'), 'load')}</span>
+        <PBtn variant="secondary" small onClick={detail.reload}>{t('shared.retry')}</PBtn>
       </Notice>
     );
   } else if (!ticket) {
@@ -399,19 +404,19 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
     body = (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <PTag label={tag.label} color={tag.color} />
-          <span style={mutedStyle}>{CATEGORY_LABEL[ticket.category]} · Abierto el <time dateTime={ticket.createdAt}>{fmtDate(ticket.createdAt)}</time></span>
+          <PTag label={t(tag.label)} color={tag.color} />
+          <span style={mutedStyle}>{t(categoryKey(ticket.category))} · {t('tickets.openedOn')} <time dateTime={ticket.createdAt}>{fmtDate(ticket.createdAt)}</time></span>
         </div>
 
         {notice && <Notice tone={notice.tone}>{notice.text}</Notice>}
 
-        <ol aria-label="Mensajes del ticket" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <ol aria-label={t('tickets.messagesLabel')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {ticket.messages.map((m, i) => {
             const mine = !m.fromStaff;
             return (
               <li key={m.id} ref={i === ticket.messages.length - 1 ? lastRef : undefined} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
                 <div style={{ ...mutedStyle, fontSize: 11.5, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 600, color: mine ? 'var(--sec)' : 'var(--accent-text)' }}>{mine ? 'Tú' : 'Equipo Brikme'}</span>
+                  <span style={{ fontWeight: 600, color: mine ? 'var(--sec)' : 'var(--accent-text)' }}>{mine ? t('shared.you') : t('tickets.staff')}</span>
                   {' · '}
                   <time dateTime={m.createdAt}>{fmtDateTime(m.createdAt)}</time>
                 </div>
@@ -431,7 +436,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
 
         {attachments.length > 0 && (
           <div>
-            <div style={{ ...labelStyle, marginBottom: 8 }}>Archivos adjuntos ({attachments.length}/{MAX_ATTACHMENTS})</div>
+            <div style={{ ...labelStyle, marginBottom: 8 }}>{t('tickets.attachments', { count: attachments.length, max: MAX_ATTACHMENTS })}</div>
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {attachments.map(a => (
                 <li key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface2)', borderRadius: 12, padding: '8px 10px 8px 12px', minWidth: 0 }}>
@@ -441,7 +446,7 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
                     <span style={{ ...mutedStyle, fontSize: 11.5 }}>{fmtSize(a.size)} · {fmtDate(a.createdAt)}</span>
                   </span>
                   <PBtn variant="ghost" small onClick={() => void download(a)} disabled={downloading === a.id} style={{ padding: '7px 12px', flexShrink: 0 }}>
-                    {downloading === a.id ? 'Descargando…' : 'Descargar'}
+                    {downloading === a.id ? t('tickets.downloading') : t('tickets.download')}
                   </PBtn>
                 </li>
               ))}
@@ -451,15 +456,15 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
 
         {closed ? (
           <Notice tone="info" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span>Este ticket está cerrado y es de solo lectura. Si necesitas más ayuda, abre uno nuevo.</span>
-            <PBtn variant="secondary" small onClick={onNewTicket}>Abrir un ticket nuevo</PBtn>
+            <span>{t('tickets.closedNotice')}</span>
+            <PBtn variant="secondary" small onClick={onNewTicket}>{t('tickets.openNew')}</PBtn>
           </Notice>
         ) : (
           <Field
-            label="Tu respuesta"
+            label={t('tickets.replyLabel')}
             htmlFor={replyId}
-            error={local.replyError}
-            hint={limitReached ? `Llegaste al máximo de ${MAX_ATTACHMENTS} archivos en este ticket.` : 'Puedes adjuntar PDF, PNG, JPG o WebP de hasta 10 MB.'}
+            error={local.replyError && t(local.replyError, VALIDATION_VARS)}
+            hint={limitReached ? t('tickets.limitReached', { max: MAX_ATTACHMENTS }) : t('tickets.replyHint')}
           >
             <TextArea
               id={replyId}
@@ -468,13 +473,13 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
               maxLength={MESSAGE_MAX}
               disabled={busy !== null}
               invalid={Boolean(local.replyError)}
-              placeholder="Escribe tu mensaje…"
+              placeholder={t('tickets.replyPlaceholder')}
               onChange={e => patch({ reply: e.target.value, replyError: null })}
             />
           </Field>
         )}
         <div role="status" style={srOnly}>
-          {busy === 'send' ? 'Enviando mensaje…' : busy === 'attach' ? 'Subiendo archivo…' : busy === 'close' ? 'Cerrando ticket…' : ''}
+          {busy === 'send' ? t('tickets.sendingMessage') : busy === 'attach' ? t('tickets.uploadingFile') : busy === 'close' ? t('tickets.closingTicket') : ''}
         </div>
       </div>
     );
@@ -486,21 +491,21 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
         open={id !== null}
         // Escape also reaches this dialog while the confirmation is on top: only dismiss that one.
         onClose={confirming ? () => setConfirming(false) : handleClose}
-        title={ticket?.subject ?? 'Ticket de soporte'}
+        title={ticket?.subject ?? t('tickets.fallbackTitle')}
         width={640}
         footer={
           ticket && !closed && authed ? (
             <>
               <FileButton
-                label={busy === 'attach' ? 'Subiendo…' : 'Adjuntar archivo'}
+                label={busy === 'attach' ? t('tickets.uploading') : t('tickets.attachFile')}
                 accept={DOC_TYPES}
                 maxBytes={ATTACHMENT_MAX_BYTES}
                 onFile={f => void attach(f)}
                 onError={message => patch({ feedback: message ? { tone: 'error', text: message } : null })}
                 disabled={busy !== null || limitReached}
               />
-              <PBtn variant="secondary" small onClick={() => setConfirming(true)} disabled={busy !== null}>Cerrar ticket</PBtn>
-              <PBtn variant="accent" small onClick={() => void send()} disabled={busy !== null}>{busy === 'send' ? 'Enviando…' : 'Enviar'}</PBtn>
+              <PBtn variant="secondary" small onClick={() => setConfirming(true)} disabled={busy !== null}>{t('tickets.close')}</PBtn>
+              <PBtn variant="accent" small onClick={() => void send()} disabled={busy !== null}>{busy === 'send' ? t('tickets.sending') : t('tickets.send')}</PBtn>
             </>
           ) : undefined
         }
@@ -509,13 +514,13 @@ export function TicketDetailModal({ id, status, flash, onClose, onChanged, onNew
       </Modal>
       <ConfirmDialog
         open={confirming && id !== null}
-        title="¿Cerrar este ticket?"
-        confirmLabel="Cerrar ticket"
+        title={t('tickets.confirmTitle')}
+        confirmLabel={t('tickets.close')}
         busy={busy === 'close'}
         onConfirm={() => void closeTicket()}
         onClose={() => setConfirming(false)}
       >
-        Vas a poder leerlo, pero ya no vas a poder responder ni adjuntar archivos. Si después necesitas ayuda, abre un ticket nuevo.
+        {t('tickets.confirmText')}
       </ConfirmDialog>
     </>
   );

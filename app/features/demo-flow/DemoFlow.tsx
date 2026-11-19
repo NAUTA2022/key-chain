@@ -13,17 +13,21 @@ import BlockchainLog from './BlockchainLog';
 import { CoachCard, HitoReceipt, StepPanel } from './Guide';
 import { guideContent } from './guide-content';
 import WalletPointer from './WalletPointer';
-import { actualGuideStep, HITOS, type GuideStep, type Hito, type HitoId } from './guide-data';
+import { actualGuideStep, hitosFor, type GuideStep, type Hito, type HitoId } from './guide-data';
 import { useChainInfo } from '~/features/wallet/chain';
 import { useSession } from '~/lib/session';
+import { useT } from '~/i18n/useT';
+import { richText, type TFn } from '~/features/market/i18n';
 
 
-const usd = (n: number) => n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const usd = (n: number, locale: string) => n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const bold = (c: string, k: number) => <strong key={k} style={{ color: 'var(--text)' }}>{c}</strong>;
 
 /** Crossfading photo band of the project (Ken Burns drift unless reduced motion). */
 function Gallery({ height }: { height: number }) {
   const still = useReducedMotion() ?? false;
   const [i, setI] = useState(0);
+  const { t } = useT('market');
   useEffect(() => {
     const id = setInterval(() => setI(n => (n + 1) % DEMO_IMAGES.length), 5200);
     return () => clearInterval(id);
@@ -39,7 +43,7 @@ function Gallery({ height }: { height: number }) {
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(6,6,8,0.86) 0%, rgba(6,6,8,0.55) 45%, rgba(6,6,8,0.05) 100%)' }} />
       <div style={{ position: 'absolute', right: 16, bottom: 14, display: 'flex', gap: 6 }}>
         {DEMO_IMAGES.map((src, n) => (
-          <button key={src} type="button" onClick={() => setI(n)} aria-label={`Foto ${n + 1}`} aria-current={n === i ? 'true' : undefined}
+          <button key={src} type="button" onClick={() => setI(n)} aria-label={t('demo.flow.photo', { n: n + 1 })} aria-current={n === i ? 'true' : undefined}
             style={{ width: n === i ? 22 : 7, height: 7, borderRadius: 999, border: 'none', padding: 0, cursor: 'pointer', background: n === i ? '#fff' : 'rgba(255,255,255,0.45)' }} />
         ))}
       </div>
@@ -95,11 +99,11 @@ type Pick = { method: Method | null; network: string; setMethod: (m: Method) => 
 const NETWORK_SHORT: Record<string, string> = { TRX: 'TRON', BSC: 'BSC' };
 
 /** The diagram's source node for a payment method. */
-function flowSource(method: Method | null, network: string | null): FlowSource {
-  if (!method) return { title: 'Tu recarga', sub: 'Binance, wallet o gratis' };
-  if (method === 'binance_pay') return { title: 'Binance Pay', sub: 'Pagas en USDT', accent: '#F0B90B' };
-  if (method === 'crypto') return { title: `USDT · ${NETWORK_SHORT[network ?? ''] ?? network ?? 'red'}`, sub: 'Desde tu wallet', accent: '#3ddc97' };
-  return { title: 'Recarga de prueba', sub: 'Sin dinero real', accent: '#9fb7d3' };
+function flowSource(method: Method | null, network: string | null, t: TFn): FlowSource {
+  if (!method) return { title: t('demo.flow.sourceNone'), sub: t('demo.flow.sourceNoneSub') };
+  if (method === 'binance_pay') return { title: 'Binance Pay', sub: t('demo.flow.sourceBinanceSub'), accent: '#F0B90B' };
+  if (method === 'crypto') return { title: `USDT · ${NETWORK_SHORT[network ?? ''] ?? network ?? t('demo.flow.network')}`, sub: t('demo.flow.sourceCryptoSub'), accent: '#3ddc97' };
+  return { title: t('demo.flow.sourceFree'), sub: t('demo.flow.sourceFreeSub'), accent: '#9fb7d3' };
 }
 
 function Option({ selected, onSelect, title, sub }: { selected: boolean; onSelect: () => void; title: string; sub: string }) {
@@ -117,34 +121,35 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
   const price = s.priceUsdt * tokens / 5;
   const back = s.payoutUsdt * tokens / 5;
   const [refund, setRefund] = useState('');
+  const { t, locale } = useT('market');
 
   if (run?.status === 'awaiting_payment' && run.amountUsdt !== null) {
     const amount = run.amountUsdt.toFixed(2);
     const waiting = (
       <Line done={false} live>
-        Esperando tu pago…{run.expiresAt && <> vence en <strong style={{ color: 'var(--text)', marginLeft: 4 }}><Countdown until={run.expiresAt} /></strong></>}
+        {t('demo.flow.waitingPayment')}{run.expiresAt && <> {t('demo.flow.expiresIn')} <strong style={{ color: 'var(--text)', marginLeft: 4 }}><Countdown until={run.expiresAt} /></strong></>}
       </Line>
     );
     const change = (
       <div style={{ display: 'grid', gap: 4, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
         <PBtn variant="ghost" small disabled={act.busy} onClick={() => act.run(() => cancelRun(run.id))} style={{ justifySelf: 'start' }}>
-          ← Elegir otro método de pago
+          {t('demo.flow.changeMethod')}
         </PBtn>
-        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>Si ya enviaste el pago, espera: si llega, la demo sigue sola.</span>
+        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{t('demo.flow.alreadySent')}</span>
       </div>
     );
     if (run.method === 'crypto' && run.depositAddress) {
       return (
         <div style={{ display: 'grid', gap: 12 }}>
           <ol style={{ margin: 0, paddingLeft: 18, fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.6 }}>
-            <li>Desde cualquier exchange o wallet, retira/envía <strong style={{ color: 'var(--text)' }}>USDT</strong>.</li>
-            <li>Red: <strong style={{ color: 'var(--text)' }}>{NETWORK_LABEL[run.network ?? ''] ?? run.network}</strong>. Otra red o moneda se pierde.</li>
-            <li>Monto que tiene que llegar: <strong style={{ color: 'var(--text)' }}>exactamente {amount} USDT</strong> (si tu exchange cobra comisión, súmala aparte).</li>
+            <li>{richText(t('demo.flow.cryptoStep1'), bold)}</li>
+            <li>{richText(t('demo.flow.cryptoStep2', { network: NETWORK_LABEL[run.network ?? ''] ?? run.network ?? '' }), bold)}</li>
+            <li>{richText(t('demo.flow.cryptoStep3', { amount }), bold)}</li>
           </ol>
-          <CopyField label="Dirección de depósito" value={run.depositAddress} />
-          <CopyField label="Monto exacto (USDT)" value={amount} />
+          <CopyField label={t('demo.flow.depositAddress')} value={run.depositAddress} />
+          <CopyField label={t('demo.flow.exactAmount')} value={amount} />
           {waiting}
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>La red tarda unos minutos en confirmar el depósito.</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{t('demo.flow.networkDelay')}</div>
           {change}
         </div>
       );
@@ -152,12 +157,12 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
     return (
       <div style={{ display: 'grid', gap: 12 }}>
         <ol style={{ margin: 0, paddingLeft: 18, fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.6 }}>
-          <li>Abre Binance y entra a <strong style={{ color: 'var(--text)' }}>Pay → Enviar</strong>.</li>
-          <li>Elige <strong style={{ color: 'var(--text)' }}>Pay ID</strong> y pega el de abajo.</li>
-          <li>Envía <strong style={{ color: 'var(--text)' }}>exactamente {amount} USDT</strong>: los centavos identifican tu pago.</li>
+          <li>{richText(t('demo.flow.binanceStep1'), bold)}</li>
+          <li>{richText(t('demo.flow.binanceStep2'), bold)}</li>
+          <li>{richText(t('demo.flow.binanceStep3', { amount }), bold)}</li>
         </ol>
         {s.payId && <CopyField label="Pay ID" value={s.payId} />}
-        <CopyField label="Monto exacto (USDT)" value={amount} />
+        <CopyField label={t('demo.flow.exactAmount')} value={amount} />
         {waiting}
         {change}
       </div>
@@ -173,8 +178,8 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
   return (
     <div style={{ display: 'grid', gap: 10 }}>
       <div style={{ display: 'grid', gap: 6 }}>
-        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 700, color: 'var(--text)' }}>¿Cuántas partes quieres comprar?</span>
-        <div role="radiogroup" aria-label="Partes a comprar" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
+        <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 700, color: 'var(--text)' }}>{t('demo.flow.howMany')}</span>
+        <div role="radiogroup" aria-label={t('demo.flow.howManyAria')} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
           {[1, 2, 3, 4, 5].map(n => (
             <button key={n} type="button" role="radio" aria-checked={tokens === n} onClick={() => setTokens(n)}
               style={{ padding: '9px 0', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font-h)', fontSize: 15, fontWeight: 800, border: `1.5px solid ${tokens === n ? 'var(--text)' : 'var(--border)'}`, background: tokens === n ? 'var(--text)' : 'transparent', color: tokens === n ? 'var(--bg)' : 'var(--text)' }}>
@@ -183,16 +188,16 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
           ))}
         </div>
         <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>
-          {tokens} {tokens === 1 ? 'parte' : 'partes'} = {usd(price)} USD · {tokens * 20}% de la casa · te toca {tokens * 20}% de cada ganancia
+          {t(tokens === 1 ? 'demo.flow.pickSummaryOne' : 'demo.flow.pickSummaryMany', { count: tokens, price: usd(price, locale), pct: tokens * 20 })}
         </span>
       </div>
-      {run?.status === 'expired' && !run.steps.some(x => x.key === 'cancelled') && <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)' }}>El pago anterior venció sin confirmarse. Puedes generar uno nuevo.</div>}
-      {s.methods.binancePay && <Option selected={method === 'binance_pay'} onSelect={() => setMethod('binance_pay')} title="Binance Pay" sub={`Desde la app de Binance, sin comisión. Pagas unos ${usd(price)} USDT y te devolvemos ${usd(back)}.`} />}
-      {s.methods.crypto && <Option selected={method === 'crypto'} onSelect={() => setMethod('crypto')} title="USDT desde tu wallet o exchange" sub="Por red TRON o BNB Smart Chain, desde MetaMask, Trust Wallet, otro exchange o cualquier wallet. Te devolvemos a tu dirección." />}
-      <Option selected={method === 'free'} onSelect={() => setMethod('free')} title="Ver la demo gratis" sub="Todo el recorrido con dinero de prueba. Sin pago ni devolución." />
+      {run?.status === 'expired' && !run.steps.some(x => x.key === 'cancelled') && <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)' }}>{t('demo.flow.expired')}</div>}
+      {s.methods.binancePay && <Option selected={method === 'binance_pay'} onSelect={() => setMethod('binance_pay')} title="Binance Pay" sub={t('demo.flow.binanceSub', { price: usd(price, locale), back: usd(back, locale) })} />}
+      {s.methods.crypto && <Option selected={method === 'crypto'} onSelect={() => setMethod('crypto')} title={t('demo.flow.cryptoTitle')} sub={t('demo.flow.cryptoSub')} />}
+      <Option selected={method === 'free'} onSelect={() => setMethod('free')} title={t('demo.flow.freeTitle')} sub={t('demo.flow.freeSub')} />
       {method === 'crypto' && (
         <div style={{ display: 'grid', gap: 8, padding: '4px 2px' }}>
-          <div role="radiogroup" aria-label="Red" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div role="radiogroup" aria-label={t('demo.flow.networkAria')} style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {s.networks.map(n => (
               <button key={n} type="button" role="radio" aria-checked={network === n} onClick={() => setNetwork(n)}
                 style={{ padding: '6px 11px', borderRadius: 999, cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 600, border: `1px solid ${network === n ? 'var(--text)' : 'var(--border)'}`, background: network === n ? 'var(--text)' : 'transparent', color: network === n ? 'var(--bg)' : 'var(--text)' }}>
@@ -200,13 +205,13 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
               </button>
             ))}
           </div>
-          <PInput ariaLabel="Tu dirección para la devolución" placeholder={`Tu dirección ${hint?.placeholder ?? ''} para la devolución`} value={refund} onChange={e => setRefund(e.target.value)} maxLength={64} autoComplete="off" />
-          {refund.trim() !== '' && !refundOk && <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--neg)' }}>Esa dirección no es de la red {NETWORK_LABEL[network] ?? network}.</div>}
+          <PInput ariaLabel={t('demo.flow.refundAria')} placeholder={t('demo.flow.refundPlaceholder', { hint: hint?.placeholder ?? '' })} value={refund} onChange={e => setRefund(e.target.value)} maxLength={64} autoComplete="off" />
+          {refund.trim() !== '' && !refundOk && <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--neg)' }}>{t('demo.flow.wrongNetwork', { network: NETWORK_LABEL[network] ?? network })}</div>}
         </div>
       )}
       <PBtn variant="accent" disabled={act.busy || !s.available || !method || !refundOk} onClick={start}
         style={{ width: '100%', justifyContent: 'center', marginTop: 2, ...(method === 'binance_pay' ? { background: '#F0B90B', color: '#1a1406' } : {}) }}>
-        {act.busy ? 'Preparando…' : !method ? 'Elige una opción' : method === 'free' ? (again ? 'Ver la demo otra vez' : 'Ver la demo gratis') : method === 'crypto' ? 'Generar dirección de pago' : 'Recargar con Binance'}
+        {act.busy ? t('demo.flow.preparing') : !method ? t('demo.flow.pickOption') : method === 'free' ? (again ? t('demo.flow.watchAgain') : t('demo.flow.freeTitle')) : method === 'crypto' ? t('demo.flow.generateAddress') : t('demo.flow.topUpBinance')}
       </PBtn>
     </div>
   );
@@ -215,36 +220,37 @@ function PayStage({ s, run, act, pick }: { s: DemoFlowState; run: DemoRun | null
 function Ledger({ s, run, p, hito }: { s: DemoFlowState; run: DemoRun | null; p: Progress; hito: Hito }) {
   const mine = run?.tokens ?? 5;
   const paid = run !== null && run.status !== 'awaiting_payment' && run.status !== 'expired';
-  const real = run?.simulated ? 'Simulado' : 'Dinero real';
+  const { t, locale } = useT('market');
+  const real = run?.simulated ? t('demo.ledger.simulated') : t('demo.ledger.realMoney');
   // 'swap' rows turn money into tokens: shown, but not counted as income or expense.
-  const rows: Array<{ label: string; where: string; amount: number; kind: 'in' | 'out' | 'swap'; show: boolean }> = [
-    { label: run?.method === 'crypto' ? 'Depósito de USDT' : run?.simulated ? 'Recarga de prueba' : 'Pago con Binance Pay', where: real, amount: run?.amountUsdt ?? mine, kind: 'out', show: paid },
-    { label: `Inversión: ${mine} × 1 USD`, where: 'On-chain · tu recarga pasa a partes', amount: Math.min(p.invested, mine), kind: 'swap', show: p.invested > 0 },
-    { label: `Ganancia: ${hito.title.toLowerCase()} (${mine} × 1 USD)`, where: 'On-chain · llega a tu wallet', amount: p.swept, kind: 'in', show: p.swept > 0 },
-    { label: run?.method === 'crypto' ? 'Devolución a tu wallet' : 'Devolución a tu Binance', where: p.payout ? 'Dinero real' : 'Dinero real · pendiente de envío', amount: p.payout?.amount ?? s.payoutUsdt * mine / 5, kind: p.payout ? 'in' : 'swap', show: !run?.simulated && p.swept === mine },
+  const rows: Array<{ label: string; where: string; amount: number; kind: 'in' | 'out' | 'swap'; show: boolean; invest?: boolean }> = [
+    { label: run?.method === 'crypto' ? t('demo.ledger.usdtDeposit') : run?.simulated ? t('demo.ledger.testTopUp') : t('demo.ledger.binancePayment'), where: real, amount: run?.amountUsdt ?? mine, kind: 'out', show: paid },
+    { label: t('demo.ledger.investment', { mine }), where: t('demo.ledger.investmentWhere'), amount: Math.min(p.invested, mine), kind: 'swap', show: p.invested > 0, invest: true },
+    { label: t('demo.ledger.profit', { hito: hito.title.toLowerCase(), mine }), where: t('demo.ledger.profitWhere'), amount: p.swept, kind: 'in', show: p.swept > 0 },
+    { label: run?.method === 'crypto' ? t('demo.ledger.refundWallet') : t('demo.ledger.refundBinance'), where: p.payout ? t('demo.ledger.realMoney') : t('demo.ledger.realPending'), amount: p.payout?.amount ?? s.payoutUsdt * mine / 5, kind: p.payout ? 'in' : 'swap', show: !run?.simulated && p.swept === mine },
   ];
   const visible = rows.filter(r => r.show);
   const ins = visible.filter(r => r.kind === 'in').reduce((a, r) => a + r.amount, 0);
   const outs = visible.filter(r => r.kind === 'out').reduce((a, r) => a + r.amount, 0);
-  if (!visible.length) return <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>Tus movimientos aparecen aquí a medida que avanza la demo.</div>;
+  if (!visible.length) return <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>{t('demo.ledger.empty')}</div>;
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-        {([['Ingresos', ins, 'var(--pos)'], ['Egresos', outs, 'var(--neg)']] as const).map(([l, v, c]) => (
+        {([[t('demo.ledger.income'), ins, 'var(--pos)'], [t('demo.ledger.expenses'), outs, 'var(--neg)']] as const).map(([l, v, c]) => (
           <div key={l} style={{ background: 'var(--surface2)', borderRadius: 12, padding: '10px 12px' }}>
             <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--sec)' }}>{l}</div>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: c, fontVariantNumeric: 'tabular-nums' }}>{usd(v)} USD</div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: c, fontVariantNumeric: 'tabular-nums' }}>{usd(v, locale)} USD</div>
           </div>
         ))}
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-b)', fontSize: 13 }}>
-        <caption style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>Ingresos y egresos de la demo</caption>
+        <caption style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>{t('demo.ledger.caption')}</caption>
         <tbody>
           {visible.map(r => (
             <tr key={r.label} style={{ borderTop: '1px solid var(--border-l)' }}>
               <td style={{ padding: '9px 0', color: 'var(--text)' }}>{r.label}<div style={{ fontSize: 11.5, color: 'var(--ter)' }}>{r.where}</div></td>
               <td style={{ padding: '9px 0', textAlign: 'right', fontWeight: 700, color: r.kind === 'in' ? 'var(--pos)' : r.kind === 'out' ? 'var(--neg)' : 'var(--sec)', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-                {r.kind === 'in' ? '+' : r.kind === 'out' ? '−' : ''}{usd(r.amount)}{r.kind === 'swap' && r.label.startsWith('Inversión') && ` → ${Math.min(p.invested, mine)} partes`}
+                {r.kind === 'in' ? '+' : r.kind === 'out' ? '−' : ''}{usd(r.amount, locale)}{r.kind === 'swap' && r.invest && t('demo.ledger.toParts', { n: Math.min(p.invested, mine) })}
               </td>
             </tr>
           ))}
@@ -258,22 +264,24 @@ function Ledger({ s, run, p, hito }: { s: DemoFlowState; run: DemoRun | null; p:
 /** What to do once the demo ended: see the result in the portfolio or start over. */
 function DoneActions({ onRestart }: { onRestart: () => void }) {
   const navigate = useNavigate();
+  const { t } = useT('market');
   return (
     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-      <PBtn variant="accent" onClick={() => void navigate('/pertenencias')}>Ver mis pertenencias</PBtn>
-      <PBtn variant="secondary" onClick={onRestart}>Reiniciar la demo</PBtn>
+      <PBtn variant="accent" onClick={() => void navigate('/pertenencias')}>{t('demo.page.viewHoldings')}</PBtn>
+      <PBtn variant="secondary" onClick={onRestart}>{t('demo.page.restart')}</PBtn>
     </div>
   );
 }
 
 /** Right-side sheet over the map (movements, blockchain), so the page never scrolls. */
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+  const { t } = useT('market');
   return (
     <motion.aside aria-label={title} initial={{ x: 24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       style={{ position: 'absolute', top: 10, right: 10, bottom: 10, width: 'min(420px, calc(100% - 20px))', background: 'linear-gradient(var(--surface), var(--surface)), var(--bg)', border: '1px solid var(--border)', borderRadius: 18, boxShadow: 'var(--sh-lg)', display: 'flex', flexDirection: 'column', zIndex: 3 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px 6px' }}>
         <h2 style={{ margin: 0, fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16, color: 'var(--text)' }}>{title}</h2>
-        <button type="button" onClick={onClose} aria-label="Cerrar" style={{ border: 'none', background: 'var(--surface2)', color: 'var(--text)', width: 30, height: 30, borderRadius: 999, cursor: 'pointer', fontSize: 16 }}>×</button>
+        <button type="button" onClick={onClose} aria-label={t('demo.page.close')} style={{ border: 'none', background: 'var(--surface2)', color: 'var(--text)', width: 30, height: 30, borderRadius: 999, cursor: 'pointer', fontSize: 16 }}>×</button>
       </div>
       <div style={{ padding: '6px 16px 16px', overflowY: 'auto', minHeight: 0 }}>{children}</div>
     </motion.aside>
@@ -286,6 +294,7 @@ type SheetKey = 'ledger' | 'chain';
 export default function DemoFlow() {
   const mobile = useMobile();
   const flow = useDemoFlow();
+  const { t } = useT('market');
   const isAdmin = useSession().user?.role === 'admin';
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -294,7 +303,8 @@ export default function DemoFlow() {
   const [tokens, setTokens] = useState(5);
   const [hitoId, setHitoId] = useState<HitoId>('rent');
   const [sheet, setSheet] = useState<SheetKey | null>(null);
-  const hito = HITOS.find(h => h.id === hitoId) ?? HITOS[0] ?? { id: 'rent', title: 'Alquiler del mes', story: '', lines: [] };
+  const hitos = hitosFor(t);
+  const hito = hitos.find(h => h.id === hitoId) ?? hitos[0];
   // Guide: null = follow the run (e.g. after a reload); a number = the step the user moved to.
   const [guideStep, setGuideStep] = useState<GuideStep | null>(null);
   const chain = useChainInfo().data;
@@ -324,7 +334,7 @@ export default function DemoFlow() {
   const pick: Pick = { method, network, setMethod, setNetwork, tokens, setTokens };
   // While choosing, the diagram follows the selection; once paid (or paying), it shows the run's method.
   const choosing = stage === 'pay' && run?.status !== 'awaiting_payment';
-  const source = choosing || !run ? flowSource(method, network) : flowSource(run.method, run.network);
+  const source = choosing || !run ? flowSource(method, network, t) : flowSource(run.method, run.network, t);
   const shownMethod: Method | null = choosing || !run ? method : run.method;
   const mine = run && run.status !== 'expired' ? run.tokens : tokens;
 
@@ -333,7 +343,7 @@ export default function DemoFlow() {
   const shown: GuideStep = guideStep === null ? (run ? actual : 0) : guideStep === 0 && !run ? 0 : (Math.min(Math.max(guideStep, 1), actual) as GuideStep);
   const ready = actual > shown;
   const focus = shown === 0 || shown === 6 ? 'all' as const : shown;
-  const content = guideContent({ step: shown, ready, run, p, hito, mine });
+  const content = guideContent({ step: shown, ready, run, p, hito, mine, t });
   const voice = useNarration(voiceClip(shown, ready, run?.status === 'awaiting_payment', hitoId, Boolean(run && !run.simulated)));
 
   const act: Act = {
@@ -346,7 +356,7 @@ export default function DemoFlow() {
       setGuideStep(g => g ?? shown);
       void fn().then(r => {
         setBusy(false);
-        if (!r.ok) setError(r.message ?? 'No se pudo completar la acción.');
+        if (!r.ok) setError(r.message ?? t('demo.page.actionFailed'));
         flow.reload();
       });
     },
@@ -370,34 +380,34 @@ export default function DemoFlow() {
         <button type="button" onClick={voice.toggle} aria-pressed={voice.on} style={{ ...ctl, ...(voice.on ? on : {}) }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />{voice.on && <path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />}</svg>
-            {voice.on ? (voice.speaking ? 'Narrando…' : 'Voz activada') : 'Escuchar'}
+            {voice.on ? (voice.speaking ? t('demo.voice.narrating') : t('demo.voice.enabled')) : t('demo.voice.listen')}
           </span>
         </button>
       )}
-      <button type="button" aria-pressed={sheet === 'ledger'} onClick={() => setSheet(v => (v === 'ledger' ? null : 'ledger'))} style={{ ...ctl, ...(sheet === 'ledger' ? on : {}) }}>Movimientos</button>
-      <button type="button" aria-pressed={sheet === 'chain'} onClick={() => setSheet(v => (v === 'chain' ? null : 'chain'))} style={{ ...ctl, ...(sheet === 'chain' ? on : {}) }}>Blockchain</button>
+      <button type="button" aria-pressed={sheet === 'ledger'} onClick={() => setSheet(v => (v === 'ledger' ? null : 'ledger'))} style={{ ...ctl, ...(sheet === 'ledger' ? on : {}) }}>{t('demo.page.movements')}</button>
+      <button type="button" aria-pressed={sheet === 'chain'} onClick={() => setSheet(v => (v === 'chain' ? null : 'chain'))} style={{ ...ctl, ...(sheet === 'chain' ? on : {}) }}>{t('demo.page.blockchain')}</button>
     </>
   );
 
   const panelBody = s && (() => {
     switch (panelKind) {
-      case 'intro': return <PBtn variant="accent" onClick={() => setGuideStep(1)} style={{ width: '100%', justifyContent: 'center' }}>Empezar</PBtn>;
+      case 'intro': return <PBtn variant="accent" onClick={() => setGuideStep(1)} style={{ width: '100%', justifyContent: 'center' }}>{t('demo.page.start')}</PBtn>;
       case 'pay': return <PayStage s={s} run={run} act={act} pick={pick} />;
       case 'profit': return (
         <div style={{ display: 'grid', gap: 10 }}>
-          <div role="radiogroup" aria-label="Qué generó la ganancia" style={{ display: 'grid', gap: 8 }}>
-            {HITOS.map(h => <Option key={h.id} selected={hito.id === h.id} onSelect={() => setHitoId(h.id)} title={h.title} sub={h.story} />)}
+          <div role="radiogroup" aria-label={t('demo.page.profitAria')} style={{ display: 'grid', gap: 8 }}>
+            {hitos.map(h => <Option key={h.id} selected={hito.id === h.id} onSelect={() => setHitoId(h.id)} title={h.title} sub={h.story} />)}
           </div>
           <HitoReceipt hito={hito} />
           <PBtn variant="accent" disabled={act.busy || !run} onClick={() => run && act.run(() => loadProfit(run.id))} style={{ width: '100%', justifyContent: 'center' }}>
-            {act.busy ? 'Repartiendo…' : 'Repartir la ganancia'}
+            {act.busy ? t('demo.page.distributing') : t('demo.page.distribute')}
           </PBtn>
         </div>
       );
       case 'failed': return (
         <div role="alert" style={{ display: 'grid', gap: 10, fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--neg)' }}>
-          La red no confirmó un paso de la demo. Tu pago está registrado: reintenta y seguimos desde donde quedó.
-          {run && <PBtn variant="accent" disabled={busy} onClick={() => act.run(() => retryRun(run.id))}>{busy ? 'Reintentando…' : 'Reintentar'}</PBtn>}
+          {t('demo.page.failed')}
+          {run && <PBtn variant="accent" disabled={busy} onClick={() => act.run(() => retryRun(run.id))}>{busy ? t('demo.page.retrying') : t('demo.page.retry')}</PBtn>}
         </div>
       );
       case 'summary': return (
@@ -418,17 +428,17 @@ export default function DemoFlow() {
         <img src={DEMO_IMAGES[0]} alt="" width={44} height={44} style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover' }} />
         <div style={{ minWidth: 0 }}>
           <h1 style={{ margin: 0, fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: mobile ? 19 : 22, letterSpacing: '-0.02em', color: 'var(--text)' }}>Villa Mirador</h1>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>Casa de alquiler en 5 partes de 1 USD · sigue el dinero paso a paso</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>{t('demo.page.subtitle')}</div>
         </div>
         <div style={{ display: 'flex', gap: 6, marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <PTag label="Proyecto destacado" color="dark" />
-          <PTag label={run && run.status !== 'expired' && run.status !== 'completed' ? (run.simulated ? 'Demo gratis' : 'Demo con dinero real') : real ? 'Gratis o con dinero real' : 'Demo gratis'} color="green" />
+          <PTag label={t('demo.page.featured')} color="dark" />
+          <PTag label={run && run.status !== 'expired' && run.status !== 'completed' ? (run.simulated ? t('demo.page.freeDemo') : t('demo.page.realDemo')) : real ? t('demo.page.freeOrReal') : t('demo.page.freeDemo')} color="green" />
         </div>
       </header>
 
       <div style={{ position: 'relative', height: stageH, minHeight: 460, background: 'var(--surface)', border: '1px solid var(--border-l)', borderRadius: 22, padding: 6, boxShadow: 'var(--sh-md)', overflow: 'hidden' }}>
         {!s ? (
-          <div role="status" style={{ padding: 40, textAlign: 'center', fontFamily: 'var(--font-b)', color: 'var(--sec)' }}>{flow.failed ? 'No pudimos cargar la demo. Recarga la página.' : 'Cargando la demo…'}</div>
+          <div role="status" style={{ padding: 40, textAlign: 'center', fontFamily: 'var(--font-b)', color: 'var(--sec)' }}>{flow.failed ? t('demo.page.loadFailed') : t('demo.page.loading')}</div>
         ) : (
           <>
             <FlowDiagram fill mobile={mobile} status={choosing ? null : (run?.status ?? null)} p={choosing ? progress(null) : p} wallets={s.wallets} image={DEMO_IMAGES[0] ?? ''}
@@ -442,19 +452,19 @@ export default function DemoFlow() {
                     <StepPanel content={content} media={panelKind === 'intro' ? <div style={{ position: 'relative', height: 150, flex: '0 0 150px' }}><Gallery height={150} /></div> : undefined}>
                       {panelBody}
                       {error && <div role="alert" style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--neg)' }}>{error}</div>}
-                      {!s.available && <div role="status" style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>La demo no está disponible en esta red.</div>}
+                      {!s.available && <div role="status" style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>{t('demo.page.unavailable')}</div>}
                     </StepPanel>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-            {sheet === 'ledger' && <Sheet title="Tus ingresos y egresos" onClose={() => setSheet(null)}><Ledger s={s} run={run} p={p} hito={hito} /></Sheet>}
-            {sheet === 'chain' && <Sheet title="Blockchain" onClose={() => setSheet(null)}><BlockchainLog run={run} rpcUrl={chain?.rpcUrl ?? null} networkName={chain?.name ?? 'Brikme Devnet'} /></Sheet>}
+            {sheet === 'ledger' && <Sheet title={t('demo.page.ledgerTitle')} onClose={() => setSheet(null)}><Ledger s={s} run={run} p={p} hito={hito} /></Sheet>}
+            {sheet === 'chain' && <Sheet title={t('demo.page.blockchain')} onClose={() => setSheet(null)}><BlockchainLog run={run} rpcUrl={chain?.rpcUrl ?? null} networkName={chain?.name ?? 'Brikme Devnet'} /></Sheet>}
           </>
         )}
       </div>
 
-      {(shown === 5 || shown === 6) && run && p.swept > 0 && <WalletPointer label={`Tu saldo subió +${p.swept} USD`} />}
+      {(shown === 5 || shown === 6) && run && p.swept > 0 && <WalletPointer label={t('demo.page.balanceUp', { n: p.swept })} />}
       {voice.ask && <VoiceInvite onChoose={v => { voice.choose(v); if (v && run?.status === 'completed') restart(); }} />}
       {isAdmin && <div style={{ marginTop: 20 }}><AdminPayouts /></div>}
     </div>

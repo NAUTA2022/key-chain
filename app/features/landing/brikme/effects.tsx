@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import { useT } from '~/i18n/useT';
 import { BrikmeMark } from './geometry';
 
 /*
@@ -17,6 +18,7 @@ const LOADER_MS = 5000;
  * of the 3D (`progress`, 0…1); it reaches 100% only once `done`.
  */
 export function HeroLoader({ done, progress }: { done: boolean; progress: number }) {
+  const { t } = useT('landing');
   const [pct, setPct] = useState(0);
   useEffect(() => {
     const id = window.setInterval(() => setPct(p => Math.min(99, p + 1)), LOADER_MS / 100);
@@ -29,7 +31,7 @@ export function HeroLoader({ done, progress }: { done: boolean; progress: number
       <span className="bk-loader-word">BRIKME</span>
       <span className="bk-loader-tag">Real World Tokenization</span>
       <div className="bk-loader-bar"><i style={{ transform: `scaleX(${shown / 100})` }} /></div>
-      <div className="bk-loader-meta"><span>Preparando la experiencia</span><span>{String(shown).padStart(3, '0')}%</span></div>
+      <div className="bk-loader-meta"><span>{t('loader.preparing')}</span><span>{String(shown).padStart(3, '0')}%</span></div>
     </motion.div>
   );
 }

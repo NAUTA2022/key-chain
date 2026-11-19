@@ -6,7 +6,8 @@ import { EmptyState, Notice, Skeleton } from '~/features/profile/kit';
 import { mutedStyle } from '~/features/profile/styles';
 import { useMobile } from '~/hooks/useMobile';
 import { api } from '~/lib/api/client';
-import { countLabel, faqCategoryIcon, faqCategoryKey, faqCategoryLabel, faqMatches, searchTerms, srOnly, type FaqItem } from './schema';
+import { faqCategoryIcon, faqCategoryKey, faqCategoryLabel, faqMatches, pluralKey, searchTerms, srOnly, type FaqItem } from './schema';
+import { useT } from '~/i18n/useT';
 
 // Live FAQ: real search, category filters and the same accordion as the demo page.
 
@@ -24,6 +25,8 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
   const isMobile = useMobile();
   const isNarrow = useMobile(480);
   const searchId = useId();
+  const { t } = useT('help');
+  const general = t('faq.general');
   const faq = useApi<FaqItem[]>('support-faq', () => call(api.GET('/v1/faq')));
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string | null>(null);
@@ -36,10 +39,10 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
       const key = faqCategoryKey(f.category);
       const current = map.get(key);
       if (current) current.count += 1;
-      else map.set(key, { key, label: faqCategoryLabel(f.category), count: 1 });
+      else map.set(key, { key, label: faqCategoryLabel(f.category, general), count: 1 });
     }
     return [...map.values()];
-  }, [faq.data]);
+  }, [faq.data, general]);
 
   const terms = useMemo(() => searchTerms(query), [query]);
   const visible = useMemo(
@@ -58,8 +61,8 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
   if (!faq.data && faq.error) {
     list = (
       <Notice tone="error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <span>No pudimos cargar las preguntas frecuentes.</span>
-        <PBtn variant="secondary" small onClick={faq.reload}>Reintentar</PBtn>
+        <span>{t('faq.loadError')}</span>
+        <PBtn variant="secondary" small onClick={faq.reload}>{t('shared.retry')}</PBtn>
       </Notice>
     );
   } else if (!faq.data) {
@@ -68,18 +71,18 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
     list = (
       <EmptyState
         icon={Icons.help}
-        title="Todavía no hay preguntas frecuentes"
-        text="Si tienes una duda, escríbenos y te respondemos por aquí."
-        action={<PBtn variant="secondary" small onClick={onAsk}>Abrir un ticket</PBtn>}
+        title={t('faq.emptyTitle')}
+        text={t('faq.emptyText')}
+        action={<PBtn variant="secondary" small onClick={onAsk}>{t('helpCenter.openTicket')}</PBtn>}
       />
     );
   } else if (!visible.length) {
     list = (
       <EmptyState
         icon={Icons.search}
-        title="No encontramos resultados"
-        text="Prueba con otras palabras o abre un ticket y te ayudamos."
-        action={<PBtn variant="secondary" small onClick={clearFilters}>Limpiar búsqueda</PBtn>}
+        title={t('faq.noResultsTitle')}
+        text={t('faq.noResultsText')}
+        action={<PBtn variant="secondary" small onClick={clearFilters}>{t('faq.clearSearch')}</PBtn>}
       />
     );
   } else {
@@ -142,7 +145,7 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
       >
         <label htmlFor={searchId} style={{ display: 'flex', flexShrink: 0, cursor: 'text' }}>
           <span aria-hidden="true" style={{ display: 'flex' }}>{Icons.search}</span>
-          <span style={srOnly}>Buscar en el centro de ayuda</span>
+          <span style={srOnly}>{t('helpCenter.searchLabel')}</span>
         </label>
         <input
           id={searchId}
@@ -154,7 +157,7 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
           }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="Buscar en el centro de ayuda…"
+          placeholder={t('helpCenter.searchPlaceholder')}
           autoComplete="off"
           enterKeyHint="search"
           style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', padding: 0, margin: 0, fontFamily: 'var(--font-b)', fontSize: 15, color: 'var(--text)' }}
@@ -165,7 +168,7 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
       {categories.length > 0 && (
         <div
           role="group"
-          aria-label="Filtrar por categoría"
+          aria-label={t('faq.filterByCategory')}
           style={{
             display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, 1fr)',
             gap: isMobile ? 10 : 14, marginBottom: isMobile ? 28 : 36,
@@ -189,7 +192,7 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
                   </span>
                   <span style={{ display: 'block', minWidth: 0 }}>
                     <span style={{ display: 'block', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)', overflowWrap: 'anywhere' }}>{c.label}</span>
-                    <span style={{ display: 'block', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2 }}>{countLabel(c.count, 'pregunta', 'preguntas')}</span>
+                    <span style={{ display: 'block', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2 }}>{t(pluralKey('faq.questions', c.count), { count: c.count })}</span>
                   </span>
                 </button>
               </motion.div>
@@ -199,10 +202,12 @@ export default function FaqLive({ onAsk }: { onAsk: () => void }) {
       )}
 
       {/* FAQs */}
-      <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'var(--text)', marginBottom: 18 }}>Preguntas frecuentes</h2>
+      <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'var(--text)', marginBottom: 18 }}>{t('helpCenter.faqTitle')}</h2>
       <div role="status" aria-live="polite" style={filtering && faq.data ? { ...mutedStyle, marginTop: -8, marginBottom: 10 } : srOnly}>
         {filtering && faq.data
-          ? `${countLabel(visible.length, 'resultado', 'resultados')}${activeLabel ? ` en ${activeLabel}` : ''}`
+          ? activeLabel
+            ? t(pluralKey('faq.resultsIn', visible.length), { count: visible.length, category: activeLabel })
+            : t(pluralKey('faq.results', visible.length), { count: visible.length })
           : ''}
       </div>
       {list}

@@ -5,6 +5,8 @@ import type { NavFn } from '~/lib/navigation';
 import { api, apiEnabled } from '~/lib/api/client';
 import { useCatalog, type CatalogAsset } from '~/lib/catalog';
 import { useSession } from '~/lib/session';
+import { useT } from '~/i18n/useT';
+import { sourceT, type TFn } from '~/features/market/i18n';
 
 type ChatRole = 'user' | 'assistant';
 type ChatMessage = { role: ChatRole; content: string };
@@ -21,43 +23,38 @@ async function askClaude(messages: ChatMessage[]): Promise<string | null> {
   return data?.text ?? null;
 }
 
-// Keyword → category for the live catalog (the demo keeps its curated ids below).
-const KEYWORD_CATEGORY: ReadonlyArray<readonly [ReadonlyArray<string>, AssetCategory]> = [
-  [['auto', 'vehículo', 'coche'], 'Autos'],
-  [['campo', 'agro', 'tierra'], 'Campos'],
-  [['drone'], 'Drones'],
-  [['edificio', 'oficina', 'logística'], 'Edificios'],
-  [['inmueble', 'apartamento', 'vivienda'], 'Inmuebles'],
-];
+// Categories the advisor recognizes, in matching order; the words are `advisor.keywords.<category>`
+// (Spanish always, plus the active language). The demo keeps its curated ids per category.
+const KEYWORD_CATEGORIES: readonly AssetCategory[] = ['Autos', 'Campos', 'Drones', 'Edificios', 'Inmuebles'];
+const DEMO_IDS: Partial<Record<AssetCategory, number[]>> = { Autos: [1, 2], Campos: [3, 4], Drones: [5], Edificios: [6, 8], Inmuebles: [7] };
+
+const keywordsOf = (cat: AssetCategory, t: TFn) =>
+  [sourceT(`advisor.keywords.${cat}`), t(`advisor.keywords.${cat}`)].join(',').split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
 
 const topByApy = (list: readonly RwaAsset[]) => [...list].sort((a, b) => b.apy - a.apy).slice(0, 3).map(a => a.id);
 
 // Rule-based fallback when no API key
-function smartRecommend(history: ChatMessage[], catalog: readonly RwaAsset[], live: boolean): { text: string; ids: number[] } {
+function smartRecommend(history: ChatMessage[], catalog: readonly RwaAsset[], live: boolean, t: TFn): { text: string; ids: number[] } {
   const text = history.map(m => m.content).join(' ').toLowerCase();
   const budget = parseInt(text.match(/\d+/)?.[0] || '0');
   const affordable = catalog.filter(a => budget === 0 || a.tokenPrice <= Math.max(budget / 5, 50));
   let ids: number[];
+  const cat = KEYWORD_CATEGORIES.find(c => keywordsOf(c, t).some(w => text.includes(w)));
   if (live) {
-    const cat = KEYWORD_CATEGORY.find(([words]) => words.some(w => text.includes(w)))?.[1];
     ids = topByApy(cat ? catalog.filter(a => a.cat === cat) : affordable);
     if (!ids.length) ids = topByApy(catalog);
   } else {
-    if (text.includes('auto') || text.includes('vehículo') || text.includes('coche')) ids = [1, 2];
-    else if (text.includes('campo') || text.includes('agro') || text.includes('tierra')) ids = [3, 4];
-    else if (text.includes('drone')) ids = [5];
-    else if (text.includes('edificio') || text.includes('oficina') || text.includes('logística')) ids = [6, 8];
-    else if (text.includes('inmueble') || text.includes('apartamento') || text.includes('vivienda')) ids = [7];
+    const curated = cat ? DEMO_IDS[cat] : undefined;
     // recommend highest APY options
-    else ids = topByApy(affordable);
+    ids = curated ?? topByApy(affordable);
     if (!ids.length) ids = [3, 5, 1];
   }
   const assets = ids.map(id => catalog.find(a => a.id === id)).filter((a): a is RwaAsset => Boolean(a));
   if (!assets.length) {
-    return { text: 'Todavía no hay proyectos publicados para recomendarte. Vuelve a consultarme pronto.', ids: [] };
+    return { text: t('advisor.noProjects'), ids: [] };
   }
   return {
-    text: `Basándome en lo que me cuentas, estas son mis recomendaciones principales para tu perfil:\n\n${assets.map(a => `**${a.name}** — APY ${a.apy}%, token desde $${a.tokenPrice}. ${a.desc.slice(0, 80)}...`).join('\n\n')}\n\n¿Quieres explorar alguno de estos proyectos en el mercado?`,
+    text: `${t('advisor.recIntro')}\n\n${assets.map(a => t('advisor.recItem', { name: a.name, apy: a.apy, price: a.tokenPrice, desc: a.desc.slice(0, 80) })).join('\n\n')}\n\n${t('advisor.recOutro')}`,
     ids,
   };
 }
@@ -107,6 +104,7 @@ function MsgBubble({ msg }: MsgBubbleProps) {
 type RecommendationCardProps = { asset: RwaAsset; nav: NavFn; onClose: () => void };
 
 function RecommendationCard({ asset, nav, onClose }: RecommendationCardProps) {
+  const { t } = useT('market');
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -126,7 +124,7 @@ function RecommendationCard({ asset, nav, onClose }: RecommendationCardProps) {
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 13, color: 'rgba(255,255,255,0.92)', marginBottom: 4 }}>{asset.name}</div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'rgba(80,160,255,0.9)', fontWeight: 700 }}>APY {asset.apy}%</span>
-          <span style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)' }}>Token ${asset.tokenPrice}</span>
+          <span style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)' }}>{t('advisor.tokenPrice', { price: asset.tokenPrice })}</span>
         </div>
       </div>
     </motion.div>
@@ -138,7 +136,9 @@ type InvestAdvisorProps = { onClose: () => void; nav: NavFn };
 export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
   const { assets: catalog } = useCatalog();
   const live = useSession().status !== 'disabled';
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { t, raw } = useT('market');
+  // Greeting on mount (in the language active when the chat opens).
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [{ role: 'assistant', content: t(hasAdvisorBackend ? 'advisor.greetingAi' : 'advisor.greeting') }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [recIds, setRecIds] = useState<number[]>([]);
@@ -147,13 +147,8 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const hasKey = hasAdvisorBackend;
 
-  // Greeting on mount
+  // Focus the input once the modal has animated in.
   useEffect(() => {
-    const greeting = hasAdvisorBackend
-      ? '¡Hola! Soy tu asesor de inversiones de Brikme. 👋\n\n¿Qué tipo de activo te genera más interés? Por ejemplo: campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.'
-      : '¡Hola! Soy tu asesor de inversiones. 👋\n\n¿Qué tipo de activo te genera más interés? Puedes elegir entre campos agrícolas, vehículos, drones, inmuebles o edificios comerciales.';
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- pre-existing greeting-on-mount pattern; rewriting it would change behavior
-    setMessages([{ role: 'assistant', content: greeting }]);
     setTimeout(() => inputRef.current?.focus(), 300);
   }, []);
 
@@ -186,21 +181,18 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
       } else {
         // Fallback: after 3 user messages give recommendations
         if (newMessages.filter(m => m.role === 'user').length >= 2) {
-          const { text, ids } = smartRecommend(newMessages, catalog, live);
+          const { text, ids } = smartRecommend(newMessages, catalog, live, t);
           setMessages(prev => [...prev, { role: 'assistant', content: text }]);
           setRecIds(ids);
           setPhase('results');
         } else {
-          const followUps = [
-            '¿Y cuál sería tu presupuesto aproximado en dólares para esta inversión?',
-            '¿Piensas mantener la inversión a corto plazo (menos de 2 años), mediano (2-5 años) o largo plazo?',
-          ];
-          const q = followUps[newMessages.filter(m => m.role === 'user').length - 1] || '¿Algún otro detalle que quieras contarme sobre tus objetivos?';
+          const followUps = raw<string[]>('advisor.followUps');
+          const q = followUps[newMessages.filter(m => m.role === 'user').length - 1] || t('advisor.anythingElse');
           setMessages(prev => [...prev, { role: 'assistant', content: q }]);
         }
       }
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Hubo un error consultando el asesor. Intenta de nuevo.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: t('advisor.error') }]);
     }
     setLoading(false);
   };
@@ -237,8 +229,8 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="rgba(80,150,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'rgba(255,255,255,0.95)' }}>Asesor de inversión</div>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(80,150,255,0.8)' }}>Powered by IA · Brikme</div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'rgba(255,255,255,0.95)' }}>{t('advisor.title')}</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'rgba(80,150,255,0.8)' }}>{t('advisor.poweredBy')}</div>
           </div>
           <button onClick={onClose} style={{ marginLeft: 'auto', width: 28, height: 28, borderRadius: 8, border: '1px solid rgba(255,255,255,0.10)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ter)' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
@@ -266,7 +258,7 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
           <AnimatePresence>
             {phase === 'results' && recAssets.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: 8 }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Proyectos recomendados</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>{t('advisor.recommended')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10, marginBottom: 16 }}>
                   {recAssets.map(a => <RecommendationCard key={a.id} asset={a} nav={nav} onClose={onClose} />)}
                 </div>
@@ -279,7 +271,7 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
                     border: 'none', cursor: 'pointer',
                   }}
                 >
-                  Ver todos los proyectos →
+                  {t('advisor.viewAll')}
                 </button>
               </motion.div>
             )}
@@ -294,7 +286,7 @@ export default function InvestAdvisor({ onClose, nav }: InvestAdvisorProps) {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-            placeholder="Escribe tu respuesta..."
+            placeholder={t('advisor.placeholder')}
             style={{
               flex: 1, padding: '10px 14px', borderRadius: 12,
               background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)',

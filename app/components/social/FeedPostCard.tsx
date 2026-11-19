@@ -3,8 +3,10 @@ import { SquareMedia, PostComments } from '~/components/social/feed';
 import { CompanyLogo } from '~/components/social/IdentityAvatar';
 import { Icons } from '~/components/ui';
 import { projectCode } from '~/lib/projectFeed';
+import { localMonthLabel } from '~/lib/social/identity';
 import type { NavFn } from '~/lib/navigation';
 import type { CompanyRef, FeedPost, PostComment, SocialAsset, SocialSource } from '~/lib/social/types';
+import { useT } from '~/i18n/useT';
 
 type FeedPostCardProps = {
   post: FeedPost;
@@ -20,6 +22,8 @@ type FeedPostCardProps = {
 // project name opens the project),
 // square media, likes/comments/"Ver proyecto", then the caption.
 export default function FeedPostCard({ post, asset, company, nav, source }: FeedPostCardProps) {
+  const { t, raw } = useT('profile');
+  const { t: tc } = useT('common');
   const [open, setOpen] = useState(false);
   // Optimistic like until the source answers (in-memory sources re-render with the new post right away).
   const [likeOverride, setLikeOverride] = useState<{ liked: boolean; likes: number } | null>(null);
@@ -55,18 +59,18 @@ export default function FeedPostCard({ post, asset, company, nav, source }: Feed
     source.addComment(post.id, text).then(c => { if (!post.comments) setAdded(a => [...a, c]); }, () => undefined);
   };
   const deletePost = () => {
-    if (!source?.deletePost || !window.confirm('¿Eliminar esta publicación? No se puede deshacer.')) return;
+    if (!source?.deletePost || !window.confirm(t('social.post.confirmDeletePost'))) return;
     setDeleteError(null);
     source.deletePost(post.id).then(
       () => setRemoved(r => ({ ...r, post: true })),
-      (e: unknown) => setDeleteError(e instanceof Error ? e.message : 'No pudimos eliminar la publicación.'),
+      (e: unknown) => setDeleteError(e instanceof Error ? e.message : t('social.post.deletePostError')),
     );
   };
   const deleteComment = (c: PostComment) => {
-    if (!source?.deleteComment || !window.confirm('¿Eliminar este comentario?')) return;
+    if (!source?.deleteComment || !window.confirm(t('social.post.confirmDeleteComment'))) return;
     source.deleteComment(c.id).then(
       () => setRemoved(r => ({ ...r, comments: [...r.comments, c.id] })),
-      (e: unknown) => setDeleteError(e instanceof Error ? e.message : 'No pudimos eliminar el comentario.'),
+      (e: unknown) => setDeleteError(e instanceof Error ? e.message : t('social.post.deleteCommentError')),
     );
   };
   const openCompany = () => nav('empresa', company.slug);
@@ -81,7 +85,7 @@ export default function FeedPostCard({ post, asset, company, nav, source }: Feed
       <div data-guide="feed-post" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
         {/* Posts are always the company's: its hexagon + name lead, the
             project is the secondary line. */}
-        <button onClick={openCompany} aria-label={`Ver perfil de ${issuer}`} style={{ ...linkStyle, display: 'flex', flexShrink: 0 }}>
+        <button onClick={openCompany} aria-label={t('social.avatar.viewProfileOf', { name: issuer })} style={{ ...linkStyle, display: 'flex', flexShrink: 0 }}>
           <CompanyLogo company={issuer} logoUrl={company.logoUrl} size={38} />
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -92,18 +96,18 @@ export default function FeedPostCard({ post, asset, company, nav, source }: Feed
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             <ProjectCode asset={asset} onClick={openProject} />{' '}
             <button onClick={openProject} style={{ ...linkStyle, fontWeight: 600, color: 'var(--sec)' }}>{asset.name}</button>
-            {' · '}{asset.cat} · <time dateTime={post.createdAt || undefined}>{post.date}</time>
+            {' · '}{tc(`categories.${asset.cat}`)} · <time dateTime={post.createdAt || undefined}>{localMonthLabel(post.date, raw<string[]>('social.months'))}</time>
           </div>
         </div>
         {post.milestone && (
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 999, background: 'var(--accent-bg)', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 10.5, flexShrink: 0 }}>
-            ★ Hito
+            {t('social.post.milestone')}
           </span>
         )}
         {post.canManage && source?.deletePost && (
-          <button onClick={deletePost} aria-label="Eliminar publicación" title="Eliminar publicación"
+          <button onClick={deletePost} aria-label={t('social.post.deletePost')} title={t('social.post.deletePost')}
             style={{ ...linkStyle, flexShrink: 0, color: 'var(--ter)', fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 600 }}>
-            Eliminar
+            {t('social.post.delete')}
           </button>
         )}
       </div>
@@ -112,17 +116,17 @@ export default function FeedPostCard({ post, asset, company, nav, source }: Feed
       <SquareMedia media={media} />
 
       <div data-guide="feed-comment" style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '4px 0 8px' }}>
-        <button onClick={toggleLike} aria-pressed={liked} aria-label={`${liked ? 'Quitar me gusta' : 'Me gusta'} (${likes})`}
+        <button onClick={toggleLike} aria-pressed={liked} aria-label={t(liked ? 'social.post.unlike' : 'social.post.like', { count: likes })}
           style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: liked ? 'var(--neg)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, padding: 0 }}>
           {liked ? '♥' : '♡'} {likes}
         </button>
         <button onClick={toggleComments} aria-expanded={open}
           style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: open ? 'var(--text)' : 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 12.5, padding: 0 }}>
-          {Icons.comment} {commentCount ? `${commentCount} ${commentCount === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
+          {Icons.comment} {commentCount ? t(commentCount === 1 ? 'social.post.commentsOne' : 'social.post.commentsOther', { count: commentCount }) : t('social.post.comment')}
         </button>
         <button onClick={() => nav('detalle', { ...asset, focusPostId: post.id })} data-guide="feed-project-link"
           style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, padding: 0 }}>
-          Ver proyecto →
+          {t('social.post.viewProject')}
         </button>
       </div>
       {post.text && (

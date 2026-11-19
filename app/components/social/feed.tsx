@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
 import { PBtn, CompanyAvatar } from '~/components/ui';
 import { UserAvatar } from '~/components/social/IdentityAvatar';
+import { localMonthLabel } from '~/lib/social/identity';
 import type { MediaItem, PostComment } from '~/lib/social/types';
+import { useT } from '~/i18n/useT';
 
 // Shared pieces of a feed post, used by a project's Feed tab
 // (pages/ProductDetail) and by the global Feed (pages/GlobalFeed).
@@ -25,6 +27,7 @@ export function PostMedia({ media }: { media: readonly MediaItem[] }) {
 // Several items swipe as a carousel (drag on touch, arrows on desktop),
 // with a "2/3" counter and dots.
 export function SquareMedia({ media }: { media: readonly MediaItem[] }) {
+  const { t } = useT('profile');
   const ref = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   if (!media.length) return null;
@@ -34,7 +37,7 @@ export function SquareMedia({ media }: { media: readonly MediaItem[] }) {
     if (el) el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
   };
   const arrow = (dir: -1 | 1) => (
-    <button onClick={() => go(index + dir)} aria-label={dir < 0 ? 'Anterior' : 'Siguiente'}
+    <button onClick={() => go(index + dir)} aria-label={dir < 0 ? t('social.post.prev') : t('social.post.next')}
       style={{ position: 'absolute', top: '50%', ...(dir < 0 ? { left: 8 } : { right: 8 }), transform: 'translateY(-50%)', width: 30, height: 30, borderRadius: '50%', border: 'none', cursor: 'pointer',
         background: 'rgba(255,255,255,0.88)', color: '#111', fontSize: 16, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
       {dir < 0 ? '‹' : '›'}
@@ -90,6 +93,8 @@ type PostCommentsProps = {
 };
 
 export function PostComments({ comments, onAdd, issuerName, isOwner, onDelete, onAuthor }: PostCommentsProps) {
+  const { t, raw } = useT('profile');
+  const months = raw<string[]>('social.months');
   const [draft, setDraft] = useState('');
   const send = () => {
     if (!draft.trim()) return;
@@ -107,7 +112,7 @@ export function PostComments({ comments, onAdd, issuerName, isOwner, onDelete, o
   return (
     <div style={{ marginTop:12, display:'flex', flexDirection:'column', gap:10 }}>
       {comments.length === 0 && (
-        <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>Todavía no hay comentarios. ¡Sé el primero!</div>
+        <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>{t('social.post.noComments')}</div>
       )}
       {comments.map(c => (
         <div key={c.id} style={{ display:'flex', gap:8 }}>
@@ -119,11 +124,11 @@ export function PostComments({ comments, onAdd, issuerName, isOwner, onDelete, o
               {onAuthor && c.authorId && !c.isIssuer
                 ? <button onClick={() => onAuthor(c)} style={{ background:'none', border:'none', padding:0, cursor:'pointer', fontFamily:'var(--font-h)', fontWeight:700, fontSize:12.5, color:'var(--text)' }}>{c.author}</button>
                 : <span style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:12.5, color:'var(--text)' }}>{c.author}</span>}
-              {c.isIssuer && <span style={{ padding:'1px 6px', borderRadius:999, background:'var(--accent-bg)', color:'var(--accent-text)', fontFamily:'var(--font-b)', fontWeight:700, fontSize:9.5 }}>Emisor</span>}
-              <span style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>· {c.date}</span>
+              {c.isIssuer && <span style={{ padding:'1px 6px', borderRadius:999, background:'var(--accent-bg)', color:'var(--accent-text)', fontFamily:'var(--font-b)', fontWeight:700, fontSize:9.5 }}>{t('social.post.issuer')}</span>}
+              <span style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>· {localMonthLabel(c.date, months)}</span>
               {onDelete && c.canDelete && (
-                <button onClick={() => onDelete(c)} aria-label="Eliminar comentario"
-                  style={{ marginLeft:'auto', background:'none', border:'none', padding:0, cursor:'pointer', fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>Eliminar</button>
+                <button onClick={() => onDelete(c)} aria-label={t('social.post.deleteComment')}
+                  style={{ marginLeft:'auto', background:'none', border:'none', padding:0, cursor:'pointer', fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)' }}>{t('social.post.delete')}</button>
               )}
             </div>
             <div style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--text)', lineHeight:1.5, whiteSpace:'pre-wrap', overflowWrap:'anywhere' }}>{c.text}</div>
@@ -131,13 +136,13 @@ export function PostComments({ comments, onAdd, issuerName, isOwner, onDelete, o
         </div>
       ))}
       <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-        {avatar(isOwner ? issuerName : 'Vos', isOwner)}
+        {avatar(isOwner ? issuerName : t('social.post.you'), isOwner)}
         <input value={draft} onChange={e => setDraft(e.target.value)} maxLength={500}
           onKeyDown={e => { if (e.key === 'Enter') send(); }}
-          aria-label={isOwner ? 'Responder como emisor' : 'Escribe un comentario'}
-          placeholder={isOwner ? 'Responder como emisor...' : 'Escribe un comentario...'}
+          aria-label={isOwner ? t('social.post.replyAsIssuer') : t('social.post.writeComment')}
+          placeholder={isOwner ? t('social.post.replyAsIssuerPlaceholder') : t('social.post.writeCommentPlaceholder')}
           style={{ flex:1, minWidth:0, border:'1px solid var(--border-l)', borderRadius:999, padding:'8px 14px', fontFamily:'var(--font-b)', fontSize:13, color:'var(--text)', background:'var(--surface)', outline:'none' }} />
-        <PBtn variant="accent" small disabled={!draft.trim()} onClick={send} style={{ opacity: draft.trim() ? 1 : 0.5 }}>Enviar</PBtn>
+        <PBtn variant="accent" small disabled={!draft.trim()} onClick={send} style={{ opacity: draft.trim() ? 1 : 0.5 }}>{t('social.post.send')}</PBtn>
       </div>
     </div>
   );

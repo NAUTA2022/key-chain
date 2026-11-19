@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PATHS, type NavFn, type NavPayload, type RouteKey } from '~/lib/navigation';
+import { sourceT } from '~/features/market/i18n';
 
 // Every "buy / invest / pay" CTA in the platform opens Brikme's own
 // checkout through this helper.
@@ -46,15 +47,25 @@ export function goCheckout(nav: NavFn, order: CheckoutOrder): void {
 export type CheckoutAsset = { id: number; name: string; img: string; tokenPrice: number; apy: number; cat: string };
 
 /**
+ * Display texts of an investment order. `t` is the `market` translator (`useT('market').t`);
+ * `category` shows the asset's category in the active language (`useT('common')`).
+ * Without them the order is written in Spanish, the source language (`sourceT`).
+ */
+export type OrderTexts = { t: (key: string, vars?: Record<string, string | number>) => string; category?: (cat: string) => string };
+
+/**
  * The investment order behind `/checkout?activo=<id>&cantidad=<n>`. Demo: the
  * design's 0.5% fee on top. Live: the API prices it (the fee is inside the
- * token price), so no fee is added.
+ * token price), so no fee is added. `source` stays 'Tokenizaciones': it is an
+ * identifier the checkout and the wallet history read, not a display text.
  */
-export function investmentOrder(a: CheckoutAsset, qty: number, live: boolean): CheckoutOrder {
+export function investmentOrder(a: CheckoutAsset, qty: number, live: boolean, texts?: OrderTexts): CheckoutOrder {
+  const t = texts?.t ?? sourceT;
+  const cat = texts?.category?.(a.cat) ?? a.cat;
   return {
-    title: 'Inversión', source: 'Tokenizaciones', fee: live ? 0 : qty * a.tokenPrice * 0.005,
-    items: [{ name: a.name, img: a.img, qty, unit: a.tokenPrice, meta: `${a.apy}% APY · ${a.cat}` }],
-    back: { route: 'detalle', data: { id: a.id } }, done: { route: 'pertenencias', label: 'Ver en Mis Pertenencias' },
+    title: t('order.investment'), source: 'Tokenizaciones', fee: live ? 0 : qty * a.tokenPrice * 0.005,
+    items: [{ name: a.name, img: a.img, qty, unit: a.tokenPrice, meta: t('order.investmentMeta', { apy: a.apy, cat }) }],
+    back: { route: 'detalle', data: { id: a.id } }, done: { route: 'pertenencias', label: t('order.viewInHoldings') },
     action: { kind: 'primary', assetId: a.id, quantity: qty },
   };
 }

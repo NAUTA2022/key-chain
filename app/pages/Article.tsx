@@ -11,6 +11,8 @@ import { errorText } from '~/features/profile/api';
 import { Notice, Skeleton } from '~/features/profile/kit';
 import { bodyBlocks, markRead, toAcademyPost, useAcademyPost, useAcademyPosts } from '~/features/academy/api';
 import NotFound from '~/routes/not-found';
+import { useT, type Translator } from '~/i18n/useT';
+import { useDataText } from '~/i18n/data';
 
 type ArticleProps = { nav: NavFn; post?: AcademyPost; slug?: string };
 
@@ -23,25 +25,33 @@ export default function Article({ nav, post, slug }: ArticleProps) {
 
 // ─── Shared pieces (same markup in demo and live) ────────────────────────────
 
+/** Translated label of a post category; categories the dictionary doesn't know (live API) show as they come. */
+function catLabel(raw: Translator['raw'], cat: string): string {
+  const label = raw<unknown>(`academy.cats.${cat}`);
+  return typeof label === 'string' ? label : cat;
+}
+
 function BackLink({ nav }: { nav: NavFn }) {
+  const { t } = useT('help');
   return (
     <button onClick={() => nav('academia')} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 13.5, marginBottom: 24, padding: 0 }}>
-      {Icons.back} Volver a Academia
+      {Icons.back} {t('article.back')}
     </button>
   );
 }
 
 function ArticleHeader({ article, isMobile, badge }: { article: AcademyPost; isMobile: boolean; badge?: ReactNode }) {
+  const { t, raw } = useT('help');
   return (
     <>
-      <PTag label={article.cat} color="neutral" style={{ marginBottom: 16 }} />
+      <PTag label={catLabel(raw, article.cat)} color="neutral" style={{ marginBottom: 16 }} />
       {badge}
       <h1 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 28 : 38, color: 'var(--text)', letterSpacing: '-0.035em', lineHeight: 1.15, marginBottom: 16 }}>{article.title}</h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
         <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>F</div>
         <div>
           <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)' }}>Brikme Editorial</div>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{article.date} · {article.read} de lectura</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{article.date} · {t('article.readTime', { time: article.read })}</div>
         </div>
       </div>
 
@@ -51,27 +61,29 @@ function ArticleHeader({ article, isMobile, badge }: { article: AcademyPost; isM
 }
 
 function ArticleCta({ nav }: { nav: NavFn }) {
+  const { t } = useT('help');
   return (
     <PCard style={{ padding: '24px 28px', marginBottom: 36, textAlign: 'center' }}>
-      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>¿Listo para invertir?</div>
-      <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', marginBottom: 18 }}>Explora proyectos disponibles en el Mercado Primario.</div>
-      <PBtn variant="accent" onClick={() => nav('primario')} style={{ padding: '13px 28px' }}>Ver proyectos</PBtn>
+      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>{t('article.ctaTitle')}</div>
+      <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', marginBottom: 18 }}>{t('article.ctaText')}</div>
+      <PBtn variant="accent" onClick={() => nav('primario')} style={{ padding: '13px 28px' }}>{t('article.ctaButton')}</PBtn>
     </PCard>
   );
 }
 
 function Related({ nav, posts, isMobile }: { nav: NavFn; posts: AcademyPost[]; isMobile: boolean }) {
+  const { t, raw } = useT('help');
   return (
     <>
-      <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'var(--text)', marginBottom: 18 }}>Sigue leyendo</h2>
+      <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 20, color: 'var(--text)', marginBottom: 18 }}>{t('article.related')}</h2>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(3, 1fr)', gap: 16 }}>
         {posts.map(p => (
           <PCard key={p.id} onClick={() => nav('articulo', { slug: p.slug })} style={{ cursor: 'pointer' }}>
             <PImg src={p.img} height={120} />
             <div style={{ padding: '14px 16px' }}>
-              <PTag label={p.cat} color="neutral" style={{ marginBottom: 8 }} />
+              <PTag label={catLabel(raw, p.cat)} color="neutral" style={{ marginBottom: 8 }} />
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)', lineHeight: 1.3 }}>{p.title}</div>
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 6 }}>{p.read} de lectura</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 6 }}>{t('article.readTime', { time: p.read })}</div>
             </div>
           </PCard>
         ))}
@@ -86,8 +98,9 @@ const leadStyle: CSSProperties = { fontFamily: 'var(--font-b)', fontSize: 17, co
 
 function ArticleDemo({ nav, post }: { nav: NavFn; post?: AcademyPost }) {
   const isMobile = useMobile();
-  const article = post || ACADEMY_POSTS[0];
-  const related = ACADEMY_POSTS.filter(p => p.id !== article.id).slice(0, 3);
+  const dataText = useDataText();
+  const article = dataText.post(post || ACADEMY_POSTS[0]);
+  const related = ACADEMY_POSTS.filter(p => p.id !== article.id).slice(0, 3).map(dataText.post);
 
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 900, margin: '0 auto' }}>
@@ -130,6 +143,7 @@ function ArticleDemo({ nav, post }: { nav: NavFn; post?: AcademyPost }) {
  */
 function ArticleLive({ nav, slug, preview }: { nav: NavFn; slug: string; preview?: AcademyPost }) {
   const isMobile = useMobile();
+  const { t } = useT('help');
   const { status } = useSession();
   const detail = useAcademyPost(slug);
   const list = useAcademyPosts();
@@ -158,7 +172,7 @@ function ArticleLive({ nav, slug, preview }: { nav: NavFn; slug: string; preview
   const header = data ? toAcademyPost(data) : preview;
   const blocks = data ? bodyBlocks(data.body) : [];
   const related = (list.data ?? []).filter(p => p.slug !== slug).slice(0, 3).map(toAcademyPost);
-  const badge = marked === slug ? <PTag label="Marcado como leído ✓" color="green" style={{ marginBottom: 16, marginLeft: 8 }} /> : null;
+  const badge = marked === slug ? <PTag label={t('article.markedRead')} color="green" style={{ marginBottom: 16, marginLeft: 8 }} /> : null;
 
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 900, margin: '0 auto' }}>
@@ -187,13 +201,13 @@ function ArticleLive({ nav, slug, preview }: { nav: NavFn; slug: string; preview
                 )}
               </div>
             ) : (
-              <Notice tone="info" style={{ marginBottom: 32 }}>El artículo completo estará disponible pronto.</Notice>
+              <Notice tone="info" style={{ marginBottom: 32 }}>{t('article.comingSoon')}</Notice>
             )}
           </>
         ) : detail.error ? (
           <Notice tone="error" style={{ marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span>{errorText(detail.error, 'No pudimos cargar el artículo. Prueba de nuevo en unos minutos.')}</span>
-            <PBtn variant="secondary" small onClick={detail.reload}>Reintentar</PBtn>
+            <span>{errorText(detail.error, t('article.loadError'))}</span>
+            <PBtn variant="secondary" small onClick={detail.reload}>{t('shared.retry')}</PBtn>
           </Notice>
         ) : (
           <div style={{ marginBottom: 32 }}>

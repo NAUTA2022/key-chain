@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { useGuide } from './context';
 import type { GuideId } from './tours';
+import { useT } from '~/i18n/useT';
 
 const STYLE: CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 5, verticalAlign: 'middle',
@@ -20,11 +21,12 @@ const QUESTION_ICON = (
 /** Discreet "¿Cómo funciona?" entry point that replays a section's tour. Renders nothing in demo mode. */
 export default function GuideButton({ tour, style }: { tour: GuideId; style?: CSSProperties }) {
   const { enabled, start } = useGuide();
+  const { t } = useT('help');
   if (!enabled) return null;
   return (
     <button type="button" onClick={() => start(tour)} aria-haspopup="dialog" style={{ ...STYLE, ...style }}>
       {QUESTION_ICON}
-      ¿Cómo funciona?
+      {t('guide.howItWorks')}
     </button>
   );
 }

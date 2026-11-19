@@ -2,12 +2,11 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEv
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icons } from '~/components/ui';
+import { useT } from '~/i18n/useT';
 import { useSearch, useSearchNavigate, type SearchGroup, type SearchResult } from './useSearch';
 
 // Global search in the top bar: an inline combobox on desktop and a full-screen
 // overlay on phones. Results: catalog assets, academy posts and app sections.
-
-const PLACEHOLDER = 'Buscar proyectos, tokens…';
 
 const groupLabel: CSSProperties = {
   fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 600, color: 'var(--ter)',
@@ -28,15 +27,16 @@ type ListProps = {
 };
 
 function ResultsList({ listId, query, groups, flat, active, loading, onHover, onPick }: ListProps) {
+  const { t } = useT('common');
   if (flat.length === 0) {
     return (
       <div role="status" style={{ padding: '18px 16px', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', textAlign: 'center' }}>
-        {loading ? 'Buscando…' : `Sin resultados para “${query.trim()}”.`}
+        {loading ? t('search.searching') : t('search.noResults', { query: query.trim() })}
       </div>
     );
   }
   return (
-    <div id={listId} role="listbox" aria-label="Resultados de búsqueda">
+    <div id={listId} role="listbox" aria-label={t('search.results')}>
       {groups.map(g => (
         <div key={g.kind} role="group" aria-label={g.label}>
           <div aria-hidden="true" style={groupLabel}>{g.label}</div>
@@ -110,6 +110,7 @@ const inputStyle: CSSProperties = {
 
 /** Desktop search box: same look as the original decorative field, now a real combobox. */
 export function SearchBox({ isAdmin }: { isAdmin: boolean }) {
+  const { t } = useT('common');
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -157,14 +158,14 @@ export function SearchBox({ isAdmin }: { isAdmin: boolean }) {
       <div style={{ position: 'relative', flex: 1, minWidth: 0, display: 'flex' }}>
         {!query && (
           <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', maxWidth: '100%', fontFamily: 'var(--font-b)', fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', pointerEvents: 'none' }}>
-            {PLACEHOLDER}
+            {t('search.placeholder')}
           </span>
         )}
         <input
           ref={inputRef}
           type="text"
           role="combobox"
-          aria-label="Buscar proyectos, artículos y secciones"
+          aria-label={t('search.label')}
           aria-expanded={showList}
           aria-controls={listId}
           aria-autocomplete="list"
@@ -214,6 +215,7 @@ export function SearchBox({ isAdmin }: { isAdmin: boolean }) {
 }
 
 function SearchOverlay({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => void }) {
+  const { t } = useT('common');
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
@@ -234,7 +236,7 @@ function SearchOverlay({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => 
     <motion.div
       role="dialog"
       aria-modal="true"
-      aria-label="Buscar"
+      aria-label={t('search.open')}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -248,7 +250,7 @@ function SearchOverlay({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => 
             ref={inputRef}
             type="text"
             role="combobox"
-            aria-label="Buscar proyectos, artículos y secciones"
+            aria-label={t('search.label')}
             aria-expanded={ready && flat.length > 0}
             aria-controls={listId}
             aria-autocomplete="list"
@@ -257,7 +259,7 @@ function SearchOverlay({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => 
             spellCheck={false}
             enterKeyHint="search"
             maxLength={80}
-            placeholder={PLACEHOLDER}
+            placeholder={t('search.placeholder')}
             value={query}
             onChange={e => {
               setQuery(e.target.value);
@@ -269,7 +271,7 @@ function SearchOverlay({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => 
           />
         </div>
         <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', padding: '6px 2px', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 14, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
-          Cancelar
+          {t('search.cancel')}
         </button>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '6px 0 24px' }}>
@@ -277,7 +279,7 @@ function SearchOverlay({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => 
           <ResultsList listId={listId} query={query} groups={groups} flat={flat} active={keys.active} loading={loading} onHover={keys.setActive} onPick={pick} />
         ) : (
           <p style={{ margin: 0, padding: '22px 20px', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', textAlign: 'center', lineHeight: 1.5 }}>
-            Busca proyectos, artículos de la Academia o secciones de la plataforma.
+            {t('search.hint')}
           </p>
         )}
       </div>
@@ -288,13 +290,14 @@ function SearchOverlay({ isAdmin, onClose }: { isAdmin: boolean; onClose: () => 
 
 /** Phone variant: an icon button in the top bar that opens a full-screen search. */
 export function MobileSearch({ isAdmin }: { isAdmin: boolean }) {
+  const { t } = useT('common');
   const [open, setOpen] = useState(false);
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Buscar"
+        aria-label={t('search.open')}
         aria-haspopup="dialog"
         style={{ width: 36, height: 36, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sec)', flexShrink: 0, padding: 0 }}
       >

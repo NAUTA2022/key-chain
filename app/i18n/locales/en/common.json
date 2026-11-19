@@ -1,0 +1,285 @@
+{
+  "language": {
+    "choose": "Choose language"
+  },
+  "categories": {
+    "Todos": "All",
+    "Autos": "Cars",
+    "Campos": "Farmland",
+    "Drones": "Drones",
+    "Inmuebles": "Real estate",
+    "Edificios": "Buildings"
+  },
+  "stages": {
+    "Operativo": "Operating",
+    "Recaudación": "Live"
+  },
+  "countries": {
+    "Todos": "All",
+    "Panamá": "Panama",
+    "Colombia": "Colombia",
+    "España": "Spain",
+    "Argentina": "Argentina",
+    "EE.UU.": "USA"
+  },
+  "all": "All",
+  "close": "Close",
+  "help": {
+    "moreInfo": "More information"
+  },
+  "nav": {
+    "feed": "Feed",
+    "dashboard": "My dashboard",
+    "admin": "Admin panel",
+    "primario": "Tokenizations",
+    "secundario": "Secondary Market",
+    "token": "BRIK Token",
+    "pertenencias": "My Holdings",
+    "ecosistema": "Ecosystem",
+    "academia": "Academy",
+    "config": "Settings",
+    "wizard": "Tokenize an asset",
+    "subsidiarias": "Subsidiaries",
+    "perfil": "Profile",
+    "ayuda": "Help Center",
+    "mobile": {
+      "feed": "Feed",
+      "dashboard": "Dashboard",
+      "admin": "Admin",
+      "primario": "Tokens",
+      "secundario": "Secondary",
+      "token": "BRIK Token",
+      "pertenencias": "Holdings",
+      "ecosistema": "Ecosystem",
+      "academia": "Academy",
+      "config": "Settings",
+      "wizard": "Tokenize"
+    },
+    "logout": "Log out",
+    "main": "Main navigation",
+    "goFeed": "Go to feed",
+    "home": "Home",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
+  },
+  "mobileNav": {
+    "label": "Navigation",
+    "feed": "Feed",
+    "dashboard": "Dashboard",
+    "primario": "Tokens",
+    "pertenencias": "Wallet",
+    "admin": "Admin",
+    "perfil": "Profile"
+  },
+  "menu": {
+    "open": "Open menu",
+    "close": "Close menu"
+  },
+  "subsidiaries": {
+    "intro": "Other products in the Brikme ecosystem.",
+    "bookey": "Bookings for tokenized properties",
+    "keydrive": "Rides in tokenized cars (preview)",
+    "keyjobs": "Tokenized jobs and talent (preview)",
+    "keyrural": "Farmland and agricultural assets (preview)",
+    "escrow": "Imports and exports (preview)",
+    "tracker": "Asset tracking (preview)"
+  },
+  "topbar": {
+    "theme": "Switch theme",
+    "themeMobile": "Switch between light and dark theme",
+    "unread": "{{count}} unread notifications",
+    "more": "More options",
+    "personalize": "Customize",
+    "connect": "Connect",
+    "connectTitle": "Connect to Brikme"
+  },
+  "personalize": {
+    "title": "Customization",
+    "reset": "Reset",
+    "sector": "Sector",
+    "font": "Typography",
+    "palette": "Color palette",
+    "fonts": {
+      "brikme": "Brikme",
+      "moderna": "Modern",
+      "geometrica": "Geometric",
+      "humanista": "Humanist",
+      "tech": "Tech"
+    },
+    "palettes": {
+      "brikme": "Brikme",
+      "verde": "Green",
+      "rojo": "Red",
+      "azul": "Blue",
+      "marron": "Brown",
+      "mono": "B / W"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAll": "Mark all as read",
+    "loading": "Loading notifications…",
+    "empty": "You have no notifications yet.",
+    "signIn": "Sign in to see your notifications.",
+    "time": {
+      "now": "just now",
+      "minutes": "{{count}} min ago",
+      "hours": "{{count}} h ago",
+      "day": "1 day ago",
+      "days": "{{count}} days ago"
+    },
+    "demo": {
+      "1": {
+        "title": "Distribution received",
+        "desc": "+$465.00 USDC from Campo Agrícola Pergamino",
+        "time": "12 min ago"
+      },
+      "2": {
+        "title": "New project available",
+        "desc": "Torre Logística Miami is now on the primary market",
+        "time": "2 h ago"
+      },
+      "3": {
+        "title": "KYC approved",
+        "desc": "Your Sumsub verification was completed successfully",
+        "time": "1 day ago"
+      },
+      "4": {
+        "title": "Order executed",
+        "desc": "You sold 50 Flota Tesla tokens at $44.00",
+        "time": "2 days ago"
+      },
+      "5": {
+        "title": "Vesting unlock",
+        "desc": "3,750 BRIK released to your wallet",
+        "time": "3 days ago"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Search projects, tokens…",
+    "label": "Search projects, articles and sections",
+    "open": "Search",
+    "searching": "Searching…",
+    "noResults": "No results for “{{query}}”.",
+    "results": "Search results",
+    "cancel": "Cancel",
+    "hint": "Search projects, Academy articles or platform sections.",
+    "groups": {
+      "asset": "Projects",
+      "post": "Academy",
+      "section": "Sections"
+    },
+    "sections": {
+      "feed": {
+        "title": "Feed",
+        "subtitle": "Project milestones and news"
+      },
+      "dashboard": {
+        "title": "My dashboard",
+        "subtitle": "Your overview"
+      },
+      "primario": {
+        "title": "Tokenizations",
+        "subtitle": "Primary market"
+      },
+      "secundario": {
+        "title": "Secondary market",
+        "subtitle": "Buy and sell between investors"
+      },
+      "token": {
+        "title": "BRIK Token",
+        "subtitle": "The platform token"
+      },
+      "pertenencias": {
+        "title": "My holdings",
+        "subtitle": "Your portfolio"
+      },
+      "ecosistema": {
+        "title": "Ecosystem",
+        "subtitle": "Ecosystem map"
+      },
+      "academia": {
+        "title": "Academy",
+        "subtitle": "Guides and articles"
+      },
+      "perfil": {
+        "title": "Profile",
+        "subtitle": "Account and KYC verification"
+      },
+      "ayuda": {
+        "title": "Help",
+        "subtitle": "Help Center and support"
+      },
+      "wizard": {
+        "title": "Tokenize my asset",
+        "subtitle": "Tokenization request"
+      },
+      "swap": {
+        "title": "Swap",
+        "subtitle": "Token exchange"
+      },
+      "terminos": {
+        "title": "Terms and conditions",
+        "subtitle": "Legal"
+      },
+      "privacidad": {
+        "title": "Privacy policy",
+        "subtitle": "Legal"
+      },
+      "admin": {
+        "title": "Admin panel",
+        "subtitle": "Administration"
+      },
+      "config": {
+        "title": "Settings",
+        "subtitle": "Platform settings"
+      }
+    }
+  },
+  "banners": {
+    "paused": "Investments temporarily paused.",
+    "maintenance": "We're carrying out maintenance. Your tokens and funds are not affected.",
+    "more": "Learn more",
+    "dismiss": "Dismiss notice"
+  },
+  "asset": {
+    "view": "View {{name}}",
+    "token": "Token",
+    "apy": "Est. APY",
+    "available": "Available",
+    "soldOut": "Sold out",
+    "funded": "Funded",
+    "onchain": "On-chain",
+    "tokens": "tokens",
+    "value": "Value"
+  },
+  "carousel": {
+    "title": "Browse by category",
+    "prev": "Previous categories",
+    "next": "More categories"
+  },
+  "comingSoon": {
+    "badge": "Coming soon",
+    "cta": "Explore tokenizations"
+  },
+  "status": {
+    "home": "Back to home",
+    "notFound": {
+      "title": "Page not found",
+      "message": "The page you're looking for doesn't exist or has been moved."
+    },
+    "error": {
+      "code": "Error",
+      "title": "Something went wrong",
+      "message": "An unexpected error occurred. Try reloading the page."
+    }
+  },
+  "wallet": {
+    "reconnectTitle": "Reconnect your wallet",
+    "reconnectText": "Your session is still open, but your wallet didn't reconnect. Open or unlock it and connect it again to continue.",
+    "connect": "Connect wallet"
+  }
+}

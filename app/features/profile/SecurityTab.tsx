@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { PBtn, PTag } from '~/components/ui';
 import { api } from '~/lib/api/client';
+import { useT } from '~/i18n/useT';
 import { useSession } from '~/lib/session';
-import { call, errorText, fmtDate, fmtDateTime } from './api';
+import { call, errorText, fmtDate, fmtDateTime, type ProfileT } from './api';
 import { useSessions, type SessionRow } from './hooks';
 import { ConfirmDialog, EmptyState, Notice, Section, Skeleton } from './kit';
 import { bodyStyle, mutedStyle } from './styles';
@@ -10,16 +11,17 @@ import { bodyStyle, mutedStyle } from './styles';
 // Seguridad (live): the account is protected by the wallet signature (SIWE), so instead of
 // the demo 2FA/SMS options this tab lists the active sessions and lets the user close them.
 
-function deviceName(ua: string | null): string {
-  if (!ua) return 'Dispositivo desconocido';
-  const browser = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'Navegador';
+function deviceName(ua: string | null, t: ProfileT): string {
+  if (!ua) return t('security.unknownDevice');
+  const browser = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : t('security.browser');
   const os = /iPhone|iPad/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Mac OS X/.test(ua) ? 'macOS' : /Windows/.test(ua) ? 'Windows' : /Linux/.test(ua) ? 'Linux' : '';
-  return os ? `${browser} en ${os}` : browser;
+  return os ? t('security.deviceOn', { browser, os }) : browser;
 }
 
 type Target = { kind: 'one'; row: SessionRow } | { kind: 'others' };
 
 export default function SecurityTab() {
+  const { t, locale } = useT('profile');
   const { logout } = useSession();
   const { data: sessions, loading, error, reload } = useSessions();
   const [target, setTarget] = useState<Target | null>(null);
@@ -37,8 +39,8 @@ export default function SecurityTab() {
       const { data, error: e } = await call(api.POST('/v1/me/sessions/revoke-others'));
       setBusy(false);
       setTarget(null);
-      if (!data) return setNotice({ tone: 'error', text: errorText(e, 'No pudimos cerrar las otras sesiones.') });
-      setNotice({ tone: 'success', text: data.revoked === 1 ? 'Cerramos 1 sesión.' : `Cerramos ${data.revoked} sesiones.` });
+      if (!data) return setNotice({ tone: 'error', text: errorText(e, t('security.closeOthersError'), {}, t) });
+      setNotice({ tone: 'success', text: t(data.revoked === 1 ? 'security.closedOne' : 'security.closedOther', { count: data.revoked }) });
       return reload();
     }
     const { row } = target;
@@ -49,28 +51,28 @@ export default function SecurityTab() {
       .catch(() => false);
     setBusy(false);
     setTarget(null);
-    if (!ok) return setNotice({ tone: 'error', text: 'No pudimos cerrar esa sesión. Prueba de nuevo.' });
+    if (!ok) return setNotice({ tone: 'error', text: t('security.closeOneError') });
     if (row.current) {
       // Closing this device's session signs the user out here too.
       await logout();
       return;
     }
-    setNotice({ tone: 'success', text: 'Sesión cerrada.' });
+    setNotice({ tone: 'success', text: t('security.closed') });
     reload();
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Section
-        title="Sesiones activas"
-        action={<PBtn variant="secondary" small disabled={!others || busy} onClick={() => setTarget({ kind: 'others' })}>Cerrar las demás</PBtn>}
+        title={t('security.activeTitle')}
+        action={<PBtn variant="secondary" small disabled={!others || busy} onClick={() => setTarget({ kind: 'others' })}>{t('security.closeOthers')}</PBtn>}
       >
         {loading && !sessions ? (
           <Skeleton rows={3} height={44} />
         ) : error && !sessions ? (
-          <Notice tone="error">No pudimos cargar tus sesiones.</Notice>
+          <Notice tone="error">{t('security.loadError')}</Notice>
         ) : list.length === 0 ? (
-          <EmptyState title="No hay sesiones activas" />
+          <EmptyState title={t('security.empty')} />
         ) : (
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {list.map(s => (
@@ -80,14 +82,14 @@ export default function SecurityTab() {
                 </div>
                 <div style={{ flex: 1, minWidth: 180 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{deviceName(s.userAgent)}</span>
-                    {s.current && <PTag label="Este dispositivo" color="green" />}
+                    <span style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{deviceName(s.userAgent, t)}</span>
+                    {s.current && <PTag label={t('security.thisDevice')} color="green" />}
                   </div>
                   <div style={{ ...mutedStyle, fontSize: 12, marginTop: 3 }}>
-                    {s.ip ? `IP ${s.ip} · ` : ''}Inició {fmtDateTime(s.createdAt)} · Vence {fmtDate(s.expiresAt)}
+                    {s.ip ? t('security.ip', { ip: s.ip }) : ''}{t('security.meta', { created: fmtDateTime(s.createdAt, locale), expires: fmtDate(s.expiresAt, undefined, locale) })}
                   </div>
                 </div>
-                <PBtn variant="secondary" small disabled={busy} onClick={() => setTarget({ kind: 'one', row: s })}>Cerrar sesión</PBtn>
+                <PBtn variant="secondary" small disabled={busy} onClick={() => setTarget({ kind: 'one', row: s })}>{t('security.closeSession')}</PBtn>
               </li>
             ))}
           </ul>
@@ -95,9 +97,9 @@ export default function SecurityTab() {
         {notice && <Notice tone={notice.tone} style={{ marginTop: 14 }}>{notice.text}</Notice>}
       </Section>
 
-      <Section title="Cómo protegemos tu cuenta">
+      <Section title={t('security.howTitle')}>
         <p style={bodyStyle}>
-          Entras firmando con tu wallet: no usamos contraseñas ni códigos por SMS. Si ves una sesión que no reconoces, ciérrala y revisa la seguridad de tu wallet. Cerrar la sesión de este dispositivo te pide volver a firmar.
+          {t('security.howText')}
         </p>
       </Section>
 
@@ -106,14 +108,14 @@ export default function SecurityTab() {
         onClose={() => !busy && setTarget(null)}
         onConfirm={() => void confirm()}
         busy={busy}
-        title={target?.kind === 'others' ? 'Cerrar las demás sesiones' : target?.row.current ? 'Cerrar esta sesión' : 'Cerrar sesión'}
-        confirmLabel={target?.kind === 'others' ? `Cerrar ${others} ${others === 1 ? 'sesión' : 'sesiones'}` : 'Cerrar sesión'}
+        title={target?.kind === 'others' ? t('security.confirmOthersTitle') : target?.row.current ? t('security.confirmThisTitle') : t('security.closeSession')}
+        confirmLabel={target?.kind === 'others' ? t(others === 1 ? 'security.confirmCountOne' : 'security.confirmCountOther', { count: others }) : t('security.closeSession')}
       >
         {target?.kind === 'others'
-          ? 'Vas a cerrar la sesión en todos tus otros dispositivos. Este dispositivo sigue conectado.'
+          ? t('security.othersText')
           : target?.row.current
-            ? 'Vas a cerrar la sesión en este dispositivo. Para volver a entrar vas a tener que firmar con tu wallet.'
-            : `Vas a cerrar la sesión de ${deviceName(target?.row.userAgent ?? null)}.`}
+            ? t('security.thisText')
+            : t('security.oneText', { device: deviceName(target?.row.userAgent ?? null, t) })}
       </ConfirmDialog>
     </div>
   );

@@ -13,7 +13,8 @@
     "typecheck": "react-router typegen && tsc",
     "lint": "eslint .",
     "check": "npm run typecheck && npm run lint && npm run build",
-    "api:types": "npx -y openapi-typescript@7 ${API_SPEC:-http://localhost:4000/openapi.json} -o app/lib/api/schema.ts"
+    "api:types": "npx -y openapi-typescript@7 ${API_SPEC:-http://localhost:4000/openapi.json} -o app/lib/api/schema.ts",
+    "i18n:check": "node scripts/i18n-check.mjs"
   },
   "dependencies": {
     "@react-router/node": "^8.4.0",

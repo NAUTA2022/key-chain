@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useT } from '~/i18n/useT';
 
 export type FilterOption = { value: string; label: string; count?: number | string };
 
@@ -22,6 +23,7 @@ type FilterSelectProps = {
 // list of options with counts and a check on the selected one. With many
 // options it adds a search box inside the menu, so it scales as filters grow.
 export default function FilterSelect({ label, value, options, onChange, allValue = 'Todos', align = 'left', searchAt = 8, block }: FilterSelectProps) {
+  const { t } = useT('profile');
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const ref = useRef<HTMLDivElement>(null);
@@ -64,7 +66,7 @@ export default function FilterSelect({ label, value, options, onChange, allValue
               background: 'var(--surface)', border: '1px solid var(--border-l)', borderRadius: 14, boxShadow: '0 16px 40px rgba(0,0,0,0.18)', padding: 6,
             }}>
             {options.length >= searchAt && (
-              <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder={`Buscar ${label.toLowerCase()}…`} aria-label={`Buscar ${label.toLowerCase()}`}
+              <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder={t('social.filter.searchPlaceholder', { label: label.toLowerCase() })} aria-label={t('social.filter.searchAria', { label: label.toLowerCase() })}
                 style={{ width: '100%', boxSizing: 'border-box', height: 36, margin: '0 0 6px', padding: '0 10px', borderRadius: 9, border: '1px solid var(--border-l)', background: 'var(--surface2)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 13, outline: 'none' }} />
             )}
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
@@ -86,7 +88,7 @@ export default function FilterSelect({ label, value, options, onChange, allValue
                   </button>
                 );
               })}
-              {!shown.length && <div style={{ padding: '10px', fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>Sin resultados</div>}
+              {!shown.length && <div style={{ padding: '10px', fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{t('social.filter.noResults')}</div>}
             </div>
           </motion.div>
         )}

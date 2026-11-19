@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { PAvatar, PBtn, PTag } from '~/components/ui';
 import { kycStatusTag } from '~/features/kyc/status';
 import { useMobile } from '~/hooks/useMobile';
+import { useT } from '~/i18n/useT';
 import { mediaUrl } from '~/lib/catalog';
 import { useSession } from '~/lib/session';
 import { fmtDate, IMAGE_TYPES } from './api';
@@ -16,6 +17,7 @@ import { CopyButton } from './kit';
 const RING = 'linear-gradient(135deg, #8247E5, #3b82f6)';
 
 function LiveAvatar({ name, url, size, busy, onPick }: { name: string; url: string | null; size: number; busy: boolean; onPick: (f: File) => void }) {
+  const { t } = useT('profile');
   const input = useRef<HTMLInputElement>(null);
   const total = size + 7;
   return (
@@ -23,7 +25,7 @@ function LiveAvatar({ name, url, size, busy, onPick }: { name: string; url: stri
       {url ? (
         <div style={{ width: total, height: total, borderRadius: '50%', background: RING, padding: 2, boxSizing: 'border-box' }}>
           <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d0d0f', padding: 1.5, boxSizing: 'border-box' }}>
-            <img src={mediaUrl(url)} alt={`Foto de ${name}`} width={size} height={size} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+            <img src={mediaUrl(url)} alt={t('headerLive.photoAlt', { name })} width={size} height={size} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
           </div>
         </div>
       ) : (
@@ -46,8 +48,8 @@ function LiveAvatar({ name, url, size, busy, onPick }: { name: string; url: stri
         type="button"
         onClick={() => input.current?.click()}
         disabled={busy}
-        aria-label={url ? 'Cambiar foto de perfil' : 'Subir foto de perfil'}
-        title={url ? 'Cambiar foto' : 'Subir foto'}
+        aria-label={url ? t('headerLive.changePhotoAria') : t('headerLive.uploadPhotoAria')}
+        title={url ? t('edit.changePhoto') : t('edit.uploadPhoto')}
         style={{
           position: 'absolute', right: 0, bottom: 2, width: 28, height: 28, borderRadius: '50%', border: '2px solid var(--bg)',
           background: 'var(--text)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -64,6 +66,7 @@ function LiveAvatar({ name, url, size, busy, onPick }: { name: string; url: stri
 }
 
 export default function ProfileHeaderLive({ stats }: { stats: Stats | null }) {
+  const { t, locale } = useT('profile');
   const isMobile = useMobile();
   const { user } = useSession();
   const avatar = useAvatarActions();
@@ -86,29 +89,29 @@ export default function ProfileHeaderLive({ stats }: { stats: Stats | null }) {
         <div style={{ flex: 1, paddingBottom: 4, minWidth: isMobile ? '100%' : 0, order: isMobile ? 3 : undefined }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <h1 style={{ fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: isMobile ? 22 : 26, color: 'var(--text)', letterSpacing: '-0.03em', margin: 0, overflowWrap: 'anywhere' }}>{name}</h1>
-            <PTag label={user.kycStatus === 'verified' ? 'KYC ✓' : `KYC · ${tag.label}`} color={tag.color} />
-            {stats && <PTag label={`Nivel ${stats.level.level} · ${stats.level.name}`} color="purple" />}
+            <PTag label={user.kycStatus === 'verified' ? t('kyc.tagVerified') : t('kyc.tag', { status: t(tag.labelKey) })} color={tag.color} />
+            {stats && <PTag label={t('headerLive.levelTag', { level: stats.level.level, name: stats.level.name })} color="purple" />}
           </div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <span title={wallet} style={{ fontVariantNumeric: 'tabular-nums' }}>{shortWallet}</span>
-            <CopyButton value={wallet} label="Copiar" />
+            <CopyButton value={wallet} label={t('kit.copy')} />
             {user.email && (
               <>
                 <span aria-hidden="true">·</span>
                 <span style={{ overflowWrap: 'anywhere' }}>{user.email}</span>
                 {!user.emailVerified && (
-                  <button type="button" onClick={() => setEditing(true)} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label="Verificar email">
-                    <PTag label="Sin verificar" color="neutral" />
+                  <button type="button" onClick={() => setEditing(true)} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label={t('headerLive.verifyEmail')}>
+                    <PTag label={t('headerLive.unverified')} color="neutral" />
                   </button>
                 )}
               </>
             )}
             <span aria-hidden="true">·</span>
-            <span>Miembro desde {fmtDate(since, { month: 'long', year: 'numeric' })}</span>
+            <span>{t('headerLive.memberSince', { date: fmtDate(since, { month: 'long', year: 'numeric' }, locale) })}</span>
           </div>
           {avatar.error && <div role="alert" style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--neg)', marginTop: 6 }}>{avatar.error}</div>}
         </div>
-        <PBtn variant="secondary" small style={{ marginBottom: 6, ...(isMobile ? { marginLeft: 'auto', order: 2 } : null) }} onClick={() => setEditing(true)}>Editar perfil</PBtn>
+        <PBtn variant="secondary" small style={{ marginBottom: 6, ...(isMobile ? { marginLeft: 'auto', order: 2 } : null) }} onClick={() => setEditing(true)}>{t('edit.title')}</PBtn>
       </div>
       <EditProfileModal open={editing} onClose={() => setEditing(false)} avatar={avatar} />
     </>

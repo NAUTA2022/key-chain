@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PCard, PTag } from '~/components/ui';
 import { fmtUSD } from '~/data';
+import { useT } from '~/i18n/useT';
 import { fmtRelative } from './api';
 import type { ActivityItem, Stats } from './hooks';
 import { EmptyState, Notice, Skeleton } from './kit';
@@ -19,19 +20,20 @@ const LEVEL_COUNT = 5;
 const PAGE = 6;
 
 export function ActivityCardLive({ items, loading, error }: { items: ActivityItem[] | null; loading: boolean; error: boolean }) {
+  const { t, locale } = useT('profile');
   const [now] = useState(() => Date.now());
   const [all, setAll] = useState(false);
   const list = items ?? [];
   const shown = all ? list : list.slice(0, PAGE);
   return (
     <PCard className="dual-glow" style={{ padding: '22px 24px' }}>
-      <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>Actividad reciente</h2>
+      <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>{t('cardsLive.activityTitle')}</h2>
       {loading && !items ? (
         <Skeleton rows={4} />
       ) : error && !items ? (
-        <Notice tone="error">No pudimos cargar tu actividad. Prueba recargar la página.</Notice>
+        <Notice tone="error">{t('cardsLive.activityError')}</Notice>
       ) : list.length === 0 ? (
-        <EmptyState title="Todavía no hay movimientos" text="Aquí vas a ver tus inversiones, dividendos, verificaciones y consultas de soporte." />
+        <EmptyState title={t('cardsLive.emptyTitle')} text={t('cardsLive.emptyText')} />
       ) : (
         <ul style={{ display: 'flex', flexDirection: 'column', listStyle: 'none', margin: 0, padding: 0 }}>
           {shown.map((a, i) => (
@@ -46,7 +48,7 @@ export function ActivityCardLive({ items, loading, error }: { items: ActivityIte
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)', overflowWrap: 'anywhere' }}>{a.title}{a.detail ? ` — ${a.detail}` : ''}</div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2 }}>
-                  <time dateTime={a.at}>{fmtRelative(a.at, now)}</time>
+                  <time dateTime={a.at}>{fmtRelative(a.at, now, t, locale)}</time>
                 </div>
               </div>
               {a.amount !== null && (
@@ -60,7 +62,7 @@ export function ActivityCardLive({ items, loading, error }: { items: ActivityIte
       )}
       {list.length > PAGE && (
         <button type="button" onClick={() => setAll(v => !v)} aria-expanded={all} style={{ marginTop: 12, border: 'none', background: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, color: 'var(--accent-text)' }}>
-          {all ? 'Ver menos' : `Ver toda la actividad (${list.length})`}
+          {all ? t('cardsLive.showLess') : t('cardsLive.showAll', { count: list.length })}
         </button>
       )}
     </PCard>
@@ -74,6 +76,7 @@ function monthsSince(iso: string, now: number): number {
 }
 
 export function LevelCardLive({ stats, loading }: { stats: Stats | null; loading: boolean }) {
+  const { t } = useT('profile');
   const [now] = useState(() => Date.now());
   const lvl = stats?.level;
   const months = stats ? monthsSince(stats.memberSince, now) : 0;
@@ -82,15 +85,15 @@ export function LevelCardLive({ stats, loading }: { stats: Stats | null; loading
       <PCard style={{ padding: '22px 24px', border: 'none', borderRadius: 17 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 12 }}>
           <div>
-            <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Nivel de inversor{lvl ? ` · ${lvl.name}` : ''}</h2>
+            <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{t('cardsLive.levelTitle')}{lvl ? ` · ${lvl.name}` : ''}</h2>
             <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginTop: 3 }}>
-              {!stats ? (loading ? 'Cargando…' : 'Sin datos por ahora') : lvl && lvl.nextLevelAt !== null ? `${fmtUSD(Math.max(0, lvl.nextLevelAt - stats.invested))} para Nivel ${lvl.level + 1}` : 'Alcanzaste el nivel máximo'}
+              {!stats ? (loading ? t('cardsLive.loading') : t('cardsLive.noData')) : lvl && lvl.nextLevelAt !== null ? t('cardsLive.toNextLevel', { amount: fmtUSD(Math.max(0, lvl.nextLevelAt - stats.invested)), level: lvl.level + 1 }) : t('cardsLive.maxLevel')}
             </div>
           </div>
-          <div aria-label={lvl ? `Nivel ${lvl.level}` : undefined} style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #8247E5, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 18, color: '#fff', flexShrink: 0 }}>{lvl?.level ?? '—'}</div>
+          <div aria-label={lvl ? t('cardsLive.levelBadge', { level: lvl.level }) : undefined} style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #8247E5, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 18, color: '#fff', flexShrink: 0 }}>{lvl?.level ?? '—'}</div>
         </div>
         {/* Track: full segments up to the current level, the next one filled by the progress. */}
-        <div style={{ display: 'flex', gap: 0, alignItems: 'center', marginBottom: 10 }} role="img" aria-label={lvl ? `Nivel ${lvl.level} de ${LEVEL_COUNT}${lvl.nextLevelAt !== null ? `, ${Math.round(lvl.progress * 100)}% hacia el siguiente` : ''}` : 'Nivel sin datos'}>
+        <div style={{ display: 'flex', gap: 0, alignItems: 'center', marginBottom: 10 }} role="img" aria-label={lvl ? (lvl.nextLevelAt !== null ? t('cardsLive.trackAriaProgress', { level: lvl.level, total: LEVEL_COUNT, pct: Math.round(lvl.progress * 100) }) : t('cardsLive.trackAria', { level: lvl.level, total: LEVEL_COUNT })) : t('cardsLive.trackNoData')}>
           {Array.from({ length: LEVEL_COUNT }, (_, i) => i + 1).map(n => {
             const fill = !lvl ? 0 : n <= lvl.level ? 100 : n === lvl.level + 1 ? Math.round(lvl.progress * 100) : 0;
             return (
@@ -98,16 +101,16 @@ export function LevelCardLive({ stats, loading }: { stats: Stats | null; loading
                 <div style={{ height: 6, width: '100%', background: 'var(--surface2)', borderRadius: n === 1 ? '99px 0 0 99px' : n === LEVEL_COUNT ? '0 99px 99px 0' : 0, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${fill}%`, background: 'linear-gradient(90deg, #8247E5, #3b82f6)' }} />
                 </div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: lvl && n <= lvl.level ? 'var(--accent-text)' : 'var(--ter)', fontWeight: lvl && n === lvl.level ? 700 : 400 }}>N{n}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: lvl && n <= lvl.level ? 'var(--accent-text)' : 'var(--ter)', fontWeight: lvl && n === lvl.level ? 700 : 400 }}>{t('cardsLive.levelShort', { n })}</div>
               </div>
             );
           })}
         </div>
         <div style={{ display: 'flex', gap: 20, marginTop: 14, flexWrap: 'wrap' }}>
           {([
-            [stats ? fmtUSD(stats.invested) : '—', 'invertido total'],
-            [stats ? (months < 1 ? 'Menos de 1 mes' : `${months} ${months === 1 ? 'mes' : 'meses'}`) : '—', 'antigüedad'],
-            [stats ? String(stats.assetsCount) : '—', stats?.assetsCount === 1 ? 'activo en cartera' : 'activos en cartera'],
+            [stats ? fmtUSD(stats.invested) : '—', t('cardsLive.invested')],
+            [stats ? (months < 1 ? t('cardsLive.monthsLess') : t(months === 1 ? 'cardsLive.monthsOne' : 'cardsLive.monthsOther', { count: months })) : '—', t('cardsLive.seniority')],
+            [stats ? String(stats.assetsCount) : '—', stats?.assetsCount === 1 ? t('cardsLive.assetsOne') : t('cardsLive.assetsOther')],
           ] as const).map(([v, l]) => (
             <div key={l}>
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{v}</div>
@@ -121,12 +124,13 @@ export function LevelCardLive({ stats, loading }: { stats: Stats | null; loading
 }
 
 export function AchievementsCardLive({ stats, loading }: { stats: Stats | null; loading: boolean }) {
+  const { t } = useT('profile');
   return (
     <div className="anim-border" style={{ borderRadius: 18, padding: '1.5px' }}>
       <PCard style={{ padding: '22px 22px', border: 'none', borderRadius: 17 }}>
-        <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 16 }}>Logros</h2>
+        <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 16 }}>{t('cardsLive.achievementsTitle')}</h2>
         {!stats ? (
-          loading ? <Skeleton rows={2} height={56} /> : <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>No pudimos cargar tus logros.</div>
+          loading ? <Skeleton rows={2} height={56} /> : <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{t('cardsLive.achievementsError')}</div>
         ) : (
           <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, listStyle: 'none', margin: 0, padding: 0 }}>
             {stats.achievements.map((ach, i) => (
@@ -135,7 +139,7 @@ export function AchievementsCardLive({ stats, loading }: { stats: Stats | null; 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.15 + i * 0.07 }}
-                aria-label={`${ach.label}: ${ach.done ? 'logrado' : 'pendiente'}`}
+                aria-label={`${ach.label}: ${ach.done ? t('cardsLive.achieved') : t('cardsLive.pending')}`}
                 style={{ padding: '14px 12px', borderRadius: 14, textAlign: 'center', background: ach.done ? 'var(--accent-bg)' : 'var(--surface2)', border: `1.5px solid ${ach.done ? 'var(--accent)' : 'var(--border-l)'}`, opacity: ach.done ? 1 : 0.45 }}
               >
                 <div aria-hidden="true" style={{ fontSize: 24, lineHeight: 1, marginBottom: 6 }}>{ACHIEVEMENT_ICON[ach.id]}</div>
@@ -151,14 +155,15 @@ export function AchievementsCardLive({ stats, loading }: { stats: Stats | null; 
 
 /** Referral programme placeholder: no code and nothing to copy until it exists. */
 export function ReferralSoon() {
+  const { t } = useT('profile');
   return (
     <div className="shimmer-surface" style={{ borderRadius: 18, padding: '20px 22px', background: 'linear-gradient(135deg, oklch(0.20 0.03 265) 0%, oklch(0.28 0.08 270) 100%)', color: '#fff', position: 'relative', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
-        <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16 }}>Invita un amigo</h2>
-        <PTag label="Próximamente" style={{ background: 'rgba(255,255,255,0.18)', color: '#fff' }} />
+        <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16 }}>{t('cardsLive.referralTitle')}</h2>
+        <PTag label={t('cardsLive.soon')} style={{ background: 'rgba(255,255,255,0.18)', color: '#fff' }} />
       </div>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, opacity: 0.7, lineHeight: 1.55 }}>
-        Estamos preparando el programa de referidos. Te vamos a avisar cuando puedas invitar a otras personas.
+        {t('cardsLive.referralText')}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import AssetCard from '~/components/AssetCard';
 import FilterSelect, { type FilterOption } from '~/components/social/FilterSelect';
 import type { NavFn } from '~/lib/navigation';
 import type { SocialAsset } from '~/lib/social/types';
+import { useT } from '~/i18n/useT';
 
 // Mini marketplace for a set of projects (a person's investments, a
 // company's projects): search, Rubro / Estado dropdowns, sorting and the
@@ -16,13 +17,9 @@ const sinceKey = (label: string | undefined): number => {
 };
 
 type SortKey = 'recent' | 'apy' | 'funded' | 'name';
-const SORTS: Array<FilterOption & { value: SortKey }> = [
-  { value: 'recent', label: 'Más recientes' },
-  { value: 'apy', label: 'Mayor APY' },
-  { value: 'funded', label: 'Más financiados' },
-  { value: 'name', label: 'Nombre A–Z' },
-];
-const isSortKey = (v: string): v is SortKey => SORTS.some(s => s.value === v);
+// Labels by key: social.projects.sorts.<key>.
+const SORT_KEYS: readonly SortKey[] = ['recent', 'apy', 'funded', 'name'];
+const isSortKey = (v: string): v is SortKey => SORT_KEYS.some(s => s === v);
 const fundedPct = (a: SocialAsset) => (a.totalTokens ? a.sold / a.totalTokens : 0);
 
 export type ProjectBrowserItem = { asset: SocialAsset; since?: string };
@@ -40,7 +37,11 @@ type ProjectBrowserProps = {
   minCard?: number;
 };
 
-export default function ProjectBrowser({ items, nav, isMobile, placeholder = 'Buscar proyectos…', limit, onMore, showCode, emptyText = 'Todavía no hay proyectos', minCard = 280 }: ProjectBrowserProps) {
+export default function ProjectBrowser({ items, nav, isMobile, placeholder: placeholderProp, limit, onMore, showCode, emptyText: emptyTextProp, minCard = 280 }: ProjectBrowserProps) {
+  const { t } = useT('profile');
+  const { t: tc } = useT('common');
+  const placeholder = placeholderProp ?? t('social.projects.searchPlaceholder');
+  const emptyText = emptyTextProp ?? t('social.projects.empty');
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('Todos');
   const [stage, setStage] = useState('Todos');
@@ -64,9 +65,10 @@ export default function ProjectBrowser({ items, nav, isMobile, placeholder = 'Bu
   const filtered = cat !== 'Todos' || stage !== 'Todos' || !!term;
   const clear = () => { setQ(''); setCat('Todos'); setStage('Todos'); };
 
-  const catOptions: FilterOption[] = [{ value: 'Todos', label: 'Todos', count: items.length }, ...cats.map(([v, n]) => ({ value: v, label: v, count: n }))];
-  const stageOptions: FilterOption[] = [{ value: 'Todos', label: 'Todos', count: items.length }, ...stages.map(([v, n]) => ({ value: v, label: v, count: n }))];
-  const sortSelect = <FilterSelect label="Ordenar" value={sort} onChange={v => { if (isSortKey(v)) setSort(v); }} options={SORTS} allValue="recent" align="right" />;
+  const catOptions: FilterOption[] = [{ value: 'Todos', label: tc('all'), count: items.length }, ...cats.map(([v, n]) => ({ value: v, label: tc(`categories.${v}`), count: n }))];
+  const stageOptions: FilterOption[] = [{ value: 'Todos', label: tc('all'), count: items.length }, ...stages.map(([v, n]) => ({ value: v, label: tc(`stages.${v}`), count: n }))];
+  const sorts: FilterOption[] = SORT_KEYS.map(k => ({ value: k, label: t(`social.projects.sorts.${k}`) }));
+  const sortSelect = <FilterSelect label={t('social.projects.sort')} value={sort} onChange={v => { if (isSortKey(v)) setSort(v); }} options={sorts} allValue="recent" align="right" />;
 
   return (
     <div>
@@ -75,17 +77,17 @@ export default function ProjectBrowser({ items, nav, isMobile, placeholder = 'Bu
           {Icons.search}
           <input value={q} onChange={e => setQ(e.target.value)} placeholder={placeholder} aria-label={placeholder}
             style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 13.5 }} />
-          {q && <button onClick={() => setQ('')} aria-label="Borrar búsqueda" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ter)', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>}
+          {q && <button onClick={() => setQ('')} aria-label={t('social.projects.clearSearch')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ter)', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>}
         </label>
-        <FilterSelect label="Rubro" value={cat} onChange={setCat} options={catOptions} block={isMobile} />
-        <FilterSelect label="Estado" value={stage} onChange={setStage} options={stageOptions} block={isMobile} align={isMobile ? 'right' : 'left'} />
+        <FilterSelect label={t('social.projects.category')} value={cat} onChange={setCat} options={catOptions} block={isMobile} />
+        <FilterSelect label={t('social.projects.status')} value={stage} onChange={setStage} options={stageOptions} block={isMobile} align={isMobile ? 'right' : 'left'} />
         {!isMobile && sortSelect}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 12, minHeight: 32 }}>
         <span role="status">
-          {list.length} {list.length === 1 ? 'proyecto' : 'proyectos'}{list.length !== items.length ? ` de ${items.length}` : ''}
-          {filtered && <button onClick={clear} style={{ marginLeft: 10, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--text)', textDecoration: 'underline', font: 'inherit', fontWeight: 600 }}>Limpiar filtros</button>}
+          {t(list.length === 1 ? 'social.projects.countOne' : 'social.projects.countOther', { count: list.length })}{list.length !== items.length ? t('social.projects.ofTotal', { total: items.length }) : ''}
+          {filtered && <button onClick={clear} style={{ marginLeft: 10, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--text)', textDecoration: 'underline', font: 'inherit', fontWeight: 600 }}>{t('social.projects.clearFilters')}</button>}
         </span>
         {isMobile && sortSelect}
       </div>
@@ -97,15 +99,15 @@ export default function ProjectBrowser({ items, nav, isMobile, placeholder = 'Bu
       ) : (
         <PCard style={{ padding: '36px 20px', textAlign: 'center' }}>
           <div style={{ width: 44, height: 44, borderRadius: 14, margin: '0 auto 12px', background: 'var(--surface2)', color: 'var(--ter)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{Icons.search}</div>
-          <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{items.length ? 'Ningún proyecto coincide' : emptyText}</div>
-          {items.length > 0 && <button onClick={clear} style={{ marginTop: 10, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', textDecoration: 'underline', fontFamily: 'var(--font-b)', fontSize: 13 }}>Limpiar filtros</button>}
+          <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{items.length ? t('social.projects.noMatch') : emptyText}</div>
+          {items.length > 0 && <button onClick={clear} style={{ marginTop: 10, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', textDecoration: 'underline', fontFamily: 'var(--font-b)', fontSize: 13 }}>{t('social.projects.clearFilters')}</button>}
         </PCard>
       )}
 
       {onMore && list.length > shown.length && (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
           <button onClick={onMore} style={{ display: 'flex', alignItems: 'center', gap: 6, height: 40, padding: '0 18px', borderRadius: 999, border: '1px solid var(--border-l)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600 }}>
-            Ver los {list.length} proyectos
+            {t('social.projects.viewAll', { count: list.length })}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
           </button>
         </div>

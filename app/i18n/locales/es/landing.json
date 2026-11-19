@@ -1,0 +1,248 @@
+{
+  "format": {
+    "thousands": "."
+  },
+  "nav": {
+    "aria": "Principal",
+    "items": {
+      "vision": "Visión",
+      "mercado": "Mercado",
+      "sectores": "Sectores",
+      "modelo": "Modelo",
+      "liderazgo": "Liderazgo",
+      "contacto": "Contacto"
+    },
+    "login": "Iniciar sesión",
+    "invest": "Invertir",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "dev": "Entrar dev",
+    "devTitle": "Entrar sin wallet (solo desarrollo)"
+  },
+  "links": {
+    "projects": "Proyectos",
+    "tokenizations": "Tokenizaciones",
+    "secondary": "Mercado secundario",
+    "academy": "Academia",
+    "help": "Centro de ayuda",
+    "terms": "Términos",
+    "privacy": "Privacidad",
+    "siteAria": "Páginas de Brikme"
+  },
+  "loader": {
+    "preparing": "Preparando la experiencia"
+  },
+  "hero": {
+    "badge": "Registrada y licenciada en Dubái · VARA",
+    "titleThin": "Invierte en lo",
+    "titleBold": "extraordinario.",
+    "lead": "Activos reales tokenizados: de un superdeportivo a una torre en Dubái. Participa desde US$200.",
+    "prev": "Activo anterior",
+    "next": "Activo siguiente",
+    "explore": "Explorar proyectos",
+    "tokenize": "Tokeniza tu activo",
+    "dragHint": "Arrastra para girar",
+    "items": {
+      "car": { "title": "Autos de lujo", "sub": "Superdeportivos y flotas premium" },
+      "tower": { "title": "Real Estate Dubái", "sub": "Torres y hoteles en zonas prime" },
+      "watch": { "title": "Relojes de colección", "sub": "Alta relojería como activo" },
+      "turbine": { "title": "Energía renovable", "sub": "Infraestructura eólica y solar" },
+      "gold": { "title": "Minerales", "sub": "Materias primas tokenizadas" },
+      "villa": { "title": "Residencial", "sub": "Villas y casas de alto valor" }
+    }
+  },
+  "figures": {
+    "aria": "Cifras clave",
+    "stats": [
+      "USD de participación mínima",
+      "Mercado global, sin horarios",
+      "Sectores de la economía real",
+      "Registrada y licenciada en Dubái"
+    ]
+  },
+  "vision": {
+    "kicker": "El cambio macro",
+    "thin": "La evolución",
+    "bold": "de la propiedad.",
+    "sub": "Leer, escribir… y ahora poseer. Internet entra en su tercera era.",
+    "physicsLabel": "Tres cubos en 3D con física: arrástralos, lánzalos y haz que choquen",
+    "hint": "Agarra, lanza y apila los cubos",
+    "evolution": [
+      { "verb": "Read", "desc": "Consumo de información." },
+      { "verb": "Write", "desc": "Creación e interacción." },
+      { "verb": "Own", "desc": "Propiedad digital verificada." }
+    ],
+    "quote": "Los activos y el dinero se están desmaterializando. Los tokens implican, por primera vez en la historia de internet, PROPIEDAD."
+  },
+  "market": {
+    "kicker": "La oportunidad",
+    "thin": "¿Una oportunidad 100 veces",
+    "bold": "más grande que Bitcoin?",
+    "sub": "Cada cubo está a escala: su volumen es el tamaño de cada mercado.",
+    "physicsLabel": "Cubos a escala de cada mercado, con física: arrástralos y lánzalos",
+    "names": ["DeFi", "Criptomonedas", "Mercado de valores", "Inmobiliario global", "Derivados"],
+    "band": {
+      "lead": "El mercado global de tokenización de RWA proyecta alcanzar los ",
+      "strong1": "US$24 mil millones en 2025",
+      "mid": ", creciendo a un ",
+      "strong2": "CAGR del 22,7 %",
+      "end": " hasta 2030."
+    }
+  },
+  "adoption": {
+    "kicker": "Adopción institucional y estatal",
+    "thin": "Los gigantes ya están",
+    "bold": "construyendo la plomería.",
+    "statesTitle": "Movimientos estatales",
+    "institutionsTitle": "El movimiento institucional",
+    "states": [
+      { "flag": "EE. UU.", "text": "Mayor reserva estatal del mundo." },
+      { "flag": "El Salvador", "text": "Primer país con estrategia nacional de acumulación." },
+      { "flag": "Emiratos Árabes Unidos", "text": "Tokenizados: apuesta estatal por el real estate en blockchain." }
+    ],
+    "institutions": [
+      "Su fondo tokenizado BUIDL alcanza los US$3 mil millones en activos administrados.",
+      "Lanzamiento del Fidelity Digital Dollar (FIDD) institucional.",
+      "Asociación estratégica para lanzar acciones tokenizadas en 2027."
+    ],
+    "insightLabel": "Insight.",
+    "insight": "Si no puedes con tu enemigo, únete a él: los gigantes ya construyen la infraestructura financiera de la próxima década."
+  },
+  "compare": {
+    "kicker": "La problemática vs. la solución",
+    "thin": "Del viejo mundo",
+    "bold": "a la nueva era.",
+    "aria": "Inversión tradicional frente a inversión tokenizada",
+    "oldTitle": "El viejo mundo",
+    "oldTag": "Tradicional",
+    "newTitle": "La nueva era",
+    "newTag": "Tokenizado",
+    "rows": [
+      { "k": "Barrera de entrada", "old": "US$100.000+ requeridos.", "next": "Participación desde US$200." },
+      { "k": "Liquidez", "old": "Capital bloqueado por meses o años.", "next": "Inmediata, mercados globales 24/7." },
+      { "k": "Fronteras", "old": "Restricciones locales y burocracia pesada.", "next": "Acceso digital sin fronteras geográficas." },
+      { "k": "Intermediarios", "old": "Bancos, notarios y comisiones altas.", "next": "Smart contracts con ejecución automática." }
+    ],
+    "statement": "Mientras las grandes instituciones construyen piscinas privadas de liquidez para billonarios, el inversionista retail y el emprendedor siguen bloqueados."
+  },
+  "bridge": {
+    "kicker": "Presentamos Brikme",
+    "thin": "El puente",
+    "bold": "digital.",
+    "sub": "La primera comunidad y marketplace DeFi de activos del mundo real (RWA).",
+    "oldLabel": "Capital tradicional",
+    "newLabel": "Activos tokenizados",
+    "pillars": [
+      { "t": "Democratizamos el acceso", "d": "Participa en activos de alto valor desde US$200, con la misma información que un institucional." },
+      { "t": "Generamos liquidez", "d": "Financiamos y fondeamos activos para desarrolladores donde la banca tradicional falla." },
+      { "t": "Un club sin fronteras", "d": "Una comunidad de inversión global con la blockchain como columna vertebral." }
+    ],
+    "taglineLead": "Todo en un único marketplace.",
+    "taglineStrong": "Confiable, transparente y global."
+  },
+  "club": {
+    "kicker": "Club de inversión sin fronteras",
+    "thin": "Invierte en",
+    "bold": "lo real.",
+    "sub": "Cada token es un ladrillo de un activo real, registrado en blockchain y respaldado por un contrato. Construye tu portafolio pieza por pieza.",
+    "facts": ["Inversión mínima en USD", "Liquidez global", "Fronteras para invertir"],
+    "cta": "Empezar a invertir",
+    "hint": "Arrastra para girar"
+  },
+  "sectors": {
+    "kicker": "Sectores de la economía real",
+    "thin": "Activos tangibles,",
+    "bold": "no especulación.",
+    "sub": "Respaldados por activos reales: diversificación y trazabilidad legal en cada proyecto.",
+    "items": {
+      "real-estate": { "t": "Real Estate", "d": "Propiedades y hoteles" },
+      "mineria": { "t": "Minería", "d": "Activos físicos y extracción" },
+      "agricultura": { "t": "Agricultura", "d": "Producción sostenible" },
+      "energia": { "t": "Energía", "d": "Infraestructura renovable" },
+      "transporte": { "t": "Transporte", "d": "Logística global" },
+      "lujo": { "t": "Activos de lujo", "d": "Arte y coleccionables" }
+    },
+    "aria": "Sectores",
+    "card": "Sector {{n}}",
+    "view": "Ver proyectos",
+    "prev": "Sector anterior",
+    "next": "Sector siguiente"
+  },
+  "engine": {
+    "kicker": "El motor Brikme",
+    "thin": "Smart",
+    "bold": "contracts.",
+    "sub": "Ejecución automática sin intermediarios. Transparente, inmutable y auditable por cualquier persona en el mundo.",
+    "flow": ["Condiciones cumplidas", "Ejecución automática", "Transacción registrada en el ledger"],
+    "sealLabel": "Cumplimiento",
+    "sealText": "Registrada y licenciada en Dubái",
+    "sealStrong": "(VARA compliant)",
+    "tokensTitle": "Jerarquía y tipología de tokens",
+    "tokens": {
+      "utility": { "t": "Utility tokens", "d": "Acceso a servicios", "ex": "ETH · GT3 · FIT" },
+      "security": { "t": "Security / E-Money", "d": "Acciones, CBDCs", "ex": "Tokens de capital · CBDC" },
+      "stable": { "t": "Stablecoins", "d": "Valor estable", "ex": "USDT · USDC · DAI" },
+      "rwa": { "t": "RWA — el enfoque Brikme", "d": "Activos del mundo real: valor capturado del mundo tradicional", "ex": "Inmuebles · Oro · Infraestructura" },
+      "nft": { "t": "NFTs / Memecoins", "d": "Coleccionables, especulación", "ex": "Fuera de nuestro foco" }
+    }
+  },
+  "model": {
+    "kicker": "Para desarrolladores y dueños de activos",
+    "thin": "Un modelo híbrido",
+    "bold": "y escalable.",
+    "sub": "La entrada de mejores activos atrae más liquidez, y más liquidez atrae activos institucionales de mayor grado.",
+    "step1": { "n": "Paso 1", "title": "Originación", "text": "Estructuración legal y tecnológica del activo físico." },
+    "step2": { "n": "Paso 2", "title": "Distribución", "text": "Lanzamiento en el Marketplace Brikme a la red global de inversionistas." },
+    "setupFee": "Setup fee",
+    "setupText": "Curaduría, análisis y digitalización del activo con smart contracts.",
+    "successFee": "Success fee",
+    "successText": "Comisión sobre el fondeo exitoso de tu proyecto en el marketplace.",
+    "cta": "Tokeniza tu activo",
+    "caseHint": "Pasa el cursor: 1 activo → 40.000 tokens",
+    "caseTag": "Caso de éxito",
+    "caseName": "Proyecto Dubái",
+    "caseAmount": "US$40 millones",
+    "fractionTitle": "La fracción",
+    "fractionLead": "tokens emitidos a ",
+    "fractionStrong": "US$1.000",
+    "fractionEnd": " cada uno",
+    "returnTitle": "El retorno al inversionista",
+    "appreciation": "Valorización proyectada",
+    "appreciationValue": "15% anual",
+    "rent": "Ingresos por renta",
+    "rentValue": "10% anual",
+    "disclaimer": "Cifras proyectadas del caso de estudio; no constituyen garantía de rendimientos futuros."
+  },
+  "leader": {
+    "kicker": "Liderazgo y ejecución",
+    "role": "CEO & Founder",
+    "photoAlt": "Andrés Ortiz, CEO y fundador de Brikme, en su oficina",
+    "points": [
+      "22 años de experiencia escalando negocios en tecnología y real estate.",
+      "Miembro fundador del Colombian Business Council en Dubái (Cámara de Comercio de Dubái).",
+      "Galardonado con el International Visionaries Award 2025 en Dubái."
+    ],
+    "quote": "“La visión institucional requiere una ejecución inquebrantable.”"
+  },
+  "final": {
+    "statement": "Por primera vez en la historia, la riqueza global no pertenece solo a las instituciones.",
+    "strong": "Asegura tu lugar en el futuro del capital.",
+    "explore": "Explorar proyectos",
+    "create": "Crear mi cuenta",
+    "email": "Email",
+    "hq": "Sede",
+    "hqValue": "Zlafa Building, Al Garhoud Office M02, Business Bay Bridge, Dubái — EAU",
+    "web": "Web"
+  },
+  "footer": {
+    "about": "Marketplace de activos del mundo real tokenizados. Registrada y licenciada en Dubái (VARA).",
+    "risk": "Invertir en activos tokenizados implica riesgos. Los rendimientos proyectados no garantizan resultados futuros."
+  },
+  "a11y": {
+    "physics": "Cubos en 3D con física: arrástralos, lánzalos y apílalos",
+    "logo3d": "Logo de Brikme en 3D: arrastra para girarlo",
+    "tokenBlock": "Un activo dividido en tokens: pasa el cursor o toca para fraccionarlo",
+    "evoSolid": "Cubo en 3D: arrástralo hacia arriba y suéltalo",
+    "evoGlass": "Cubo de vidrio en 3D: pasa el cursor para separar sus bloques"
+  }
+}

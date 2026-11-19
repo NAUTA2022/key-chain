@@ -4,16 +4,14 @@ import { Icons, PBtn } from '~/components/ui';
 import type { NavFn } from '~/lib/navigation';
 import { useSession } from '~/lib/session';
 import { fmtShortDate } from '~/features/portfolio/format';
+import { useT } from '~/i18n/useT';
+import { errorText, type TFn } from '~/features/market/i18n';
 import { downloadDocument, useAssetDocuments, type AssetDocument } from './api';
 
-const KIND: Record<AssetDocument['kind'], string> = {
-  legal: 'Legal', financial: 'Financiero', technical: 'Técnico', insurance: 'Seguro', other: 'Otro',
-};
-
-function fileTag(doc: AssetDocument): string {
+function fileTag(doc: AssetDocument, t: TFn): string {
   const ext = /\.([a-z0-9]{2,5})$/i.exec(doc.filename)?.[1];
   if (ext) return ext.toUpperCase();
-  return doc.contentType === 'application/pdf' ? 'PDF' : 'Archivo';
+  return doc.contentType === 'application/pdf' ? 'PDF' : t('docs.file');
 }
 
 function fileSize(bytes: number): string {
@@ -31,6 +29,7 @@ export default function LiveDocuments({ idOrSlug, nav }: LiveDocumentsProps) {
   const docs = useAssetDocuments(idOrSlug);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useT('market');
 
   const open = async (doc: AssetDocument) => {
     setBusy(doc.id);
@@ -38,7 +37,7 @@ export default function LiveDocuments({ idOrSlug, nav }: LiveDocumentsProps) {
     try {
       await downloadDocument(doc);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No se pudo descargar el documento.');
+      setError(errorText(e, t, 'errors.downloadFailed'));
     } finally {
       setBusy(null);
     }
@@ -46,37 +45,37 @@ export default function LiveDocuments({ idOrSlug, nav }: LiveDocumentsProps) {
 
   let body;
   if (status === 'loading' || (status === 'authenticated' && docs.loading && !docs.data)) {
-    body = <div role="status" style={note}>Cargando documentos…</div>;
+    body = <div role="status" style={note}>{t('docs.loading')}</div>;
   } else if (status !== 'authenticated') {
     body = (
       <div style={note}>
-        <div style={{ marginBottom: 14 }}>Inicia sesión para ver los documentos del proyecto.</div>
-        <PBtn variant="accent" small onClick={() => nav('login')}>Iniciar sesión</PBtn>
+        <div style={{ marginBottom: 14 }}>{t('docs.signInToView')}</div>
+        <PBtn variant="accent" small onClick={() => nav('login')}>{t('docs.signIn')}</PBtn>
       </div>
     );
   } else if (!docs.data) {
     body = (
       <div style={note}>
-        <div style={{ marginBottom: 14 }}>No se pudieron cargar los documentos.</div>
-        <PBtn variant="secondary" small onClick={docs.reload}>Reintentar</PBtn>
+        <div style={{ marginBottom: 14 }}>{t('docs.loadFailed')}</div>
+        <PBtn variant="secondary" small onClick={docs.reload}>{t('docs.retry')}</PBtn>
       </div>
     );
   } else if (docs.data.length === 0) {
-    body = <div style={note}>El emisor todavía no publicó documentos de este proyecto.</div>;
+    body = <div style={note}>{t('docs.none')}</div>;
   } else {
     body = docs.data.map(doc => (
       <button key={doc.id} type="button" onClick={() => void open(doc)} disabled={busy !== null}
-        aria-label={`Descargar ${doc.title}`}
+        aria-label={t('docs.download', { title: doc.title })}
         style={{ width: '100%', textAlign: 'left', background: 'var(--surface)', border: '1px solid var(--border-l)', borderRadius: 14, padding: '15px 18px', display: 'flex', alignItems: 'center', gap: 13, cursor: busy ? 'wait' : 'pointer', font: 'inherit', color: 'inherit' }}>
         <span style={{ color: 'var(--sec)', display: 'flex' }}>{Icons.doc}</span>
         <span style={{ flex: 1, minWidth: 0 }}>
           <span style={{ display: 'block', fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.title}</span>
           <span style={{ display: 'block', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginTop: 2 }}>
-            {KIND[doc.kind]} · {fileSize(doc.size)} · {fmtShortDate(doc.createdAt)}
+            {t(`docs.kind.${doc.kind}`)} · {fileSize(doc.size)} · {fmtShortDate(doc.createdAt)}
           </span>
         </span>
         <span style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--sec)', fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
-          {busy === doc.id ? 'Descargando…' : fileTag(doc)}
+          {busy === doc.id ? t('docs.downloading') : fileTag(doc, t)}
         </span>
         <span style={{ color: 'var(--ter)', display: 'flex' }}>{Icons.chevR}</span>
       </button>

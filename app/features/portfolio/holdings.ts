@@ -36,7 +36,8 @@ export function assetInfoFor(h: ApiHolding, catalogAsset: CatalogAsset | undefin
   };
 }
 
-export type AllocationSlice = { label: string; value: number; amount: number; color: string; sub: string };
+/** `label` is the category (a data value: translate it with `common:categories.*` when shown). */
+export type AllocationSlice = { label: AssetCategory; value: number; amount: number; color: string; avgApy: number };
 
 /**
  * Allocation by category (share of value, whole percents) and a diversification
@@ -61,7 +62,7 @@ export function allocationByCategory(items: ReadonlyArray<{ cat: AssetCategory; 
       value: Math.round((d.val / total) * 100),
       amount: d.val,
       color: CATEGORY_COLOR[cat],
-      sub: `APY prom. ${(d.apySum / d.count).toFixed(1)}%`,
+      avgApy: d.apySum / d.count,
     })),
     index: Math.round((1 - hhi) * 100) / 10,
   };

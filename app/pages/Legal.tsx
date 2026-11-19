@@ -1,4 +1,5 @@
 import { PCard, PTag } from '~/components/ui';
+import { useT } from '~/i18n/useT';
 
 import { TERMS_VERSION, type LegalSection } from './legal-content';
 
@@ -6,11 +7,12 @@ type Props = { title: string; intro: string; sections: LegalSection[] };
 
 /** Legal document page (terms, privacy). Content is a draft until reviewed by counsel. */
 export default function Legal({ title, intro, sections }: Props) {
+  const { t } = useT('help');
   return (
     <div className="g-page" style={{ padding: '28px 32px 48px', maxWidth: 860, margin: '0 auto' }}>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
-        <PTag label={`Versión ${TERMS_VERSION}`} />
-        <PTag label="Borrador pendiente de revisión legal" color="purple" />
+        <PTag label={t('legal.version', { version: TERMS_VERSION })} />
+        <PTag label={t('legal.draft')} color="purple" />
       </div>
       <h1 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, letterSpacing: '-0.03em', color: 'var(--text)', margin: 0 }}>{title}</h1>
       <p style={{ fontFamily: 'var(--font-b)', fontSize: 14.5, color: 'var(--sec)', lineHeight: 1.7, margin: '12px 0 24px' }}>{intro}</p>

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { PBtn, PCard } from '~/components/ui';
 import { useHydrated } from '~/hooks/useHydrated';
 import { useMobile } from '~/hooks/useMobile';
+import { useT } from '~/i18n/useT';
 import { checkFile } from './api';
 import { bodyStyle, titleStyle } from './styles';
 
@@ -36,6 +37,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([t
 
 /** Accessible modal dialog (portal, Escape, focus trap, focus restore). */
 export function Modal({ open, onClose, title, children, width = 520, footer }: ModalProps) {
+  const { t } = useT('profile');
   const isMobile = useMobile();
   const hydrated = useHydrated();
   const titleId = useId();
@@ -124,7 +126,7 @@ export function Modal({ open, onClose, title, children, width = 520, footer }: M
               <h2 id={titleId} style={{ ...titleStyle, fontSize: 17, margin: 0, minWidth: 0, overflowWrap: 'anywhere' }}>{title}</h2>
               <button
                 type="button"
-                aria-label="Cerrar"
+                aria-label={t('kit.close')}
                 onClick={() => closeRef.current()}
                 style={{ width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'var(--surface2)', color: 'var(--sec)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               >
@@ -154,6 +156,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, busy, onCon
   onClose: () => void;
   danger?: boolean;
 }) {
+  const { t } = useT('profile');
   return (
     <Modal
       open={open}
@@ -162,9 +165,9 @@ export function ConfirmDialog({ open, title, children, confirmLabel, busy, onCon
       width={440}
       footer={
         <>
-          <PBtn variant="secondary" small onClick={onClose} disabled={busy}>Cancelar</PBtn>
+          <PBtn variant="secondary" small onClick={onClose} disabled={busy}>{t('kit.cancel')}</PBtn>
           <PBtn variant={danger ? 'primary' : 'accent'} small onClick={onConfirm} disabled={busy} style={danger ? { background: 'var(--neg)', color: '#fff' } : undefined}>
-            {busy ? 'Procesando…' : confirmLabel}
+            {busy ? t('kit.processing') : confirmLabel}
           </PBtn>
         </>
       }
@@ -235,12 +238,13 @@ export function FileButton({ label, accept, maxBytes, onFile, onError, disabled,
   variant?: 'secondary' | 'accent' | 'ghost' | 'primary';
   style?: CSSProperties;
 }) {
+  const { t } = useT('profile');
   const ref = useRef<HTMLInputElement>(null);
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    const problem = checkFile(file, { types: accept, maxBytes });
+    const problem = checkFile(file, { types: accept, maxBytes }, t);
     onError(problem);
     if (!problem) onFile(file);
   };
@@ -277,8 +281,9 @@ export function Notice({ tone = 'info', children, style }: { tone?: NoticeTone; 
 
 /** Placeholder rows while data loads (no invented content). */
 export function Skeleton({ rows = 3, height = 16 }: { rows?: number; height?: number }) {
+  const { t } = useT('profile');
   return (
-    <div aria-busy="true" aria-label="Cargando" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div aria-busy="true" aria-label={t('kit.loading')} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} style={{ height, borderRadius: 8, background: 'var(--surface2)', width: `${90 - i * 12}%`, opacity: 0.8 }} />
       ))}
@@ -310,8 +315,10 @@ export function Section({ title, action, children, style }: { title: ReactNode; 
   );
 }
 
-/** "Copiar" helper with a transient confirmation. */
-export function CopyButton({ value, label = 'Copiar', style }: { value: string; label?: string; style?: CSSProperties }) {
+/** "Copiar" helper with a transient confirmation (`label` defaults to the translated "Copiar"). */
+export function CopyButton({ value, label: labelProp, style }: { value: string; label?: string; style?: CSSProperties }) {
+  const { t } = useT('profile');
+  const label = labelProp ?? t('kit.copy');
   const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (!copied) return;
@@ -324,10 +331,10 @@ export function CopyButton({ value, label = 'Copiar', style }: { value: string; 
       onClick={() => {
         void navigator.clipboard?.writeText(value).then(() => setCopied(true)).catch(() => undefined);
       }}
-      aria-label={copied ? 'Copiado' : `${label}: ${value}`}
+      aria-label={copied ? t('kit.copied') : `${label}: ${value}`}
       style={{ border: 'none', background: 'var(--surface2)', color: copied ? 'var(--accent-text)' : 'var(--sec)', borderRadius: 8, padding: '3px 8px', fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', ...style }}
     >
-      {copied ? 'Copiado ✓' : label}
+      {copied ? t('kit.copiedCheck') : label}
     </button>
   );
 }

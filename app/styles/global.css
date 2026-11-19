@@ -788,7 +788,7 @@ body {
    layout, keep content readable on small screens. */
 @media (max-width: 767px) {
   .kc-shell-sidebar { display: none !important; }
-  .kc-shell-content { margin-left: 0 !important; }
+  .kc-shell-content { margin-inline-start: 0 !important; }
 }
 
 /* Sidebar menu: scrolls on short windows with a discreet scrollbar. */
@@ -951,3 +951,33 @@ body {
   .sm-card-actions { margin-top: 10px; }
   .sm-card-actions > * { min-width: 0; padding-left: 8px !important; padding-right: 8px !important; font-size: 12px !important; }
 }
+
+/* ── Language switcher (app/i18n/LanguageSwitcher.tsx) ───────────────────── */
+.lang-switch { position: relative; flex-shrink: 0; }
+.lang-switch-btn { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 11px; border: 1px solid rgba(13,11,51,0.22); background: transparent;
+  color: #0d0b33; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 12px; letter-spacing: 0.08em; transition: border-color .2s ease; }
+.lang-switch-btn:hover, .lang-switch-btn[aria-expanded="true"] { border-color: currentColor; }
+.lang-switch-btn:focus-visible { outline: 2px solid #F0900F; outline-offset: 2px; }
+.lang-switch-dark .lang-switch-btn { color: #fff; border-color: rgba(255,255,255,0.4); }
+.lang-switch-bar .lang-switch-btn { height: 46px; padding: 0 13px; border-color: var(--border); background: var(--surface); color: var(--text); }
+.lang-switch-bar .lang-switch-btn:hover, .lang-switch-bar .lang-switch-btn[aria-expanded="true"] { border-color: var(--ter); }
+.lang-switch-menu { position: absolute; top: calc(100% + 6px); inset-inline-end: 0; z-index: 300; min-width: 190px; margin: 0; padding: 6px 0; list-style: none;
+  background: #fff; border: 1px solid rgba(13,11,51,0.12); box-shadow: 0 14px 34px rgba(0,0,0,0.18); }
+.lang-switch-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border: 0; background: none; cursor: pointer;
+  font-family: inherit; font-size: 14px; font-weight: 500; color: #0d0b33; text-align: start; }
+.lang-switch-menu button:hover { background: rgba(240,144,15,0.10); }
+.lang-switch-menu button.is-on { font-weight: 700; color: #A85A00; }
+.lang-switch-code { width: 24px; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; color: #F0900F; }
+[data-theme="dark"] .lang-switch-menu { background: #171d27; border-color: rgba(255,255,255,0.10); }
+[data-theme="dark"] .lang-switch-menu button { color: rgba(255,255,255,0.92); }
+[data-theme="dark"] .lang-switch-menu button.is-on { color: #F7A733; }
+
+/* ── Arabic: Arabic typeface, right-to-left, no letter-spacing (it breaks the joined script) ── */
+html[lang="ar"] { --font-h: "IBM Plex Sans Arabic", "Raleway", sans-serif; --font-b: "IBM Plex Sans Arabic", "Raleway", sans-serif; }
+html[lang="ar"] body, html[lang="ar"] .bk-page { font-family: "IBM Plex Sans Arabic", "Raleway", sans-serif; }
+html[dir="rtl"] :where(#root) * { letter-spacing: 0 !important; }
+.lang-switch-compact .lang-switch-btn { height: 36px; padding: 0 8px; gap: 5px; border-color: transparent; background: transparent; }
+
+/* Direction glyphs (← →) mirror in right-to-left languages. */
+.rtl-flip { display: inline-block; }
+[dir="rtl"] .rtl-flip { transform: scaleX(-1); }

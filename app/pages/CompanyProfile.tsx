@@ -15,6 +15,7 @@ import { fmtCount } from '~/lib/projectFeed';
 import { NO_FEED_FILTERS, useFollowToggle, useSocialQuery, useSocialSource } from '~/lib/social/source';
 import type { NavFn, RouteKey } from '~/lib/navigation';
 import GuideButton from '~/features/guide/GuideButton';
+import { useT } from '~/i18n/useT';
 import type { CompanyProfile as Company, FeedQuery, FollowEntry, FollowTarget, Review, ReviewInput, SocialAsset, SocialSource } from '~/lib/social/types';
 
 // Company (issuer) profile — opened from the Feed's featured profiles or any
@@ -39,16 +40,11 @@ type CompanyProfileProps = {
 const LIVE_POSTS_LIMIT = 100;
 const allPostsOf = (slug: string): FeedQuery => ({ ...NO_FEED_FILTERS, scope: { kind: 'company', slug }, milestonesOnly: false });
 
-const TABS_BASE: ReadonlyArray<readonly [CompanySectionTab, string]> = [
-  ['resumen', 'Resumen'],
-  ['proyectos', 'Proyectos'],
-  ['hitos', 'Hitos'],
-  ['analitica', 'Analítica'],
-  ['confianza', 'Rentabilidad y confianza'],
-  ['resenas', 'Reseñas'],
-];
+// Labels by id: companyPage.tabs.<id>.
+const TABS_BASE: readonly CompanySectionTab[] = ['resumen', 'proyectos', 'hitos', 'analitica', 'confianza', 'resenas'];
 
 export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPersonal }: CompanyProfileProps) {
+  const { t } = useT('profile');
   const isMobile = useMobile();
   const navigate = useNavigate();
   const source = useSocialSource();
@@ -77,8 +73,8 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
     return (
       <div className="g-page" style={{ padding: '28px 32px 40px', maxWidth: 1280, margin: '0 auto', fontFamily: 'var(--font-b)', color: 'var(--ter)' }}>
         {companyQ.loading
-          ? <span role="status">Cargando perfil…</span>
-          : <>No encontramos este perfil. <PBtn variant="secondary" small onClick={back}>Volver</PBtn></>}
+          ? <span role="status">{t('companyPage.loading')}</span>
+          : <>{t('companyPage.notFound')} <PBtn variant="secondary" small onClick={back}>{t('companyPage.back')}</PBtn></>}
       </div>
     );
   }
@@ -100,10 +96,14 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
   // Live: the API counts every milestone (the posts list is only the latest page).
   const milestoneCount = live ? live.stats.milestones : milestones.length;
   const counts: Partial<Record<CompanySectionTab, number>> = { proyectos: profile.allAssets.length, hitos: milestoneCount, resenas: reviews.length };
-  const tabs = TABS_BASE.map(([id, label]) => [id, counts[id] === undefined ? label : `${label} (${counts[id]})`] as const);
+  const tabs = TABS_BASE.map(id => {
+    const label = t(`companyPage.tabs.${id}`);
+    const n = counts[id];
+    return [id, n === undefined ? label : t('companyPage.tabWithCount', { label, count: n })] as const;
+  });
   const sectionProps = { profile, posts, reviews, nav, isMobile };
   const reviewFailed = (e: unknown) => {
-    setReviewError(e instanceof Error ? e.message : 'No pudimos guardar tu reseña.');
+    setReviewError(e instanceof Error ? e.message : t('companyPage.reviewSaveError'));
     return false;
   };
   const addReview = (input: ReviewInput): Promise<boolean> => {
@@ -113,10 +113,10 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
   };
   const editReview = source?.updateReview && ((r: Review, input: Omit<ReviewInput, 'assetId'>): Promise<boolean> => {
     setReviewError(null);
-    return (source.updateReview?.(r.id, input) ?? Promise.reject(new Error('No disponible'))).then(() => { reviewsQ.reload(); return true; }, reviewFailed);
+    return (source.updateReview?.(r.id, input) ?? Promise.reject(new Error(t('companyPage.unavailable')))).then(() => { reviewsQ.reload(); return true; }, reviewFailed);
   });
   const deleteReview = source?.deleteReview && ((r: Review) => {
-    if (!window.confirm('¿Eliminar tu reseña?')) return;
+    if (!window.confirm(t('companyPage.confirmDeleteReview'))) return;
     setReviewError(null);
     source.deleteReview?.(r.id).then(() => reviewsQ.reload(), reviewFailed);
   });
@@ -134,7 +134,7 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14, minHeight: 28 }}>
           <button onClick={back}
             style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 13 }}>
-            {Icons.back} Volver
+            {Icons.back} {t('companyPage.back')}
           </button>
         </div>
       )}
@@ -155,11 +155,11 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
         <div style={{ padding: isMobile ? '12px 16px 18px' : '14px 28px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, minHeight: avatar / 2 - 6 }}>
             {canEdit && (
-              <PBtn variant="secondary" small onClick={() => setEditing(true)} style={{ height: 38 }}>Editar perfil</PBtn>
+              <PBtn variant="secondary" small onClick={() => setEditing(true)} style={{ height: 38 }}>{t('companyPage.editProfile')}</PBtn>
             )}
             {/* Live only: the owner's shortcut to the tokenization wizard. */}
             {live && isMine && (
-              <PBtn variant="accent" small onClick={() => nav('wizard')} style={{ height: 38 }}>Tokenizar mi activo</PBtn>
+              <PBtn variant="accent" small onClick={() => nav('wizard')} style={{ height: 38 }}>{t('companyPage.tokenize')}</PBtn>
             )}
             {!isMine && (
               <button onClick={() => follow.toggle(profile.slug, target, base)} aria-pressed={following} data-guide="company-follow"
@@ -169,7 +169,7 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
                   background: following ? 'transparent' : 'var(--text)',
                   color: following ? 'var(--text)' : 'var(--bg)',
                 }}>
-                {following ? 'Siguiendo' : 'Seguir'}
+                {following ? t('social.follow.following') : t('social.follow.follow')}
               </button>
             )}
           </div>
@@ -178,13 +178,13 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
             {profile.verified && <VerifiedBadge size={isMobile ? 18 : 20} guide="company-verified" />}
           </div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--ter)', marginBottom: 12 }}>@{profile.handle}<GuideButton tour="companies" /></div>
-          <p style={{ margin: '0 0 16px', fontFamily: 'var(--font-b)', fontSize: 14, color: profile.bio ? 'var(--sec)' : 'var(--ter)', lineHeight: 1.55, maxWidth: 680 }}>{profile.bio || (canEdit ? 'Agrega una descripción de la empresa desde "Editar perfil".' : '')}</p>
+          <p style={{ margin: '0 0 16px', fontFamily: 'var(--font-b)', fontSize: 14, color: profile.bio ? 'var(--sec)' : 'var(--ter)', lineHeight: 1.55, maxWidth: 680 }}>{profile.bio || (canEdit ? t('companyPage.addBio') : '')}</p>
           <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', fontFamily: 'var(--font-b)', fontSize: 14 }}>
-            <span><b style={{ color: 'var(--text)' }}>{profile.allAssets.length}</b> <span style={{ color: 'var(--ter)' }}>Proyectos</span></span>
+            <span><b style={{ color: 'var(--text)' }}>{profile.allAssets.length}</b> <span style={{ color: 'var(--ter)' }}>{t('companyPage.projects')}</span></span>
             <button onClick={() => setShowFollowers(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
-              <b style={{ color: 'var(--text)' }}>{fmtCount(followers)}</b> <span style={{ color: 'var(--ter)' }}>Seguidores</span>
+              <b style={{ color: 'var(--text)' }}>{fmtCount(followers)}</b> <span style={{ color: 'var(--ter)' }}>{t('companyPage.followers')}</span>
             </button>
-            <span><b style={{ color: 'var(--text)' }}>{milestoneCount}</b> <span style={{ color: 'var(--ter)' }}>Hitos</span></span>
+            <span><b style={{ color: 'var(--text)' }}>{milestoneCount}</b> <span style={{ color: 'var(--ter)' }}>{t('companyPage.milestones')}</span></span>
           </div>
         </div>
       </motion.header>
@@ -235,7 +235,8 @@ export default function CompanyProfile({ nav, slug, fromRoute, embedded, onPerso
 // Mini marketplace of the company's projects (search, Rubro / Estado, sort),
 // same cards as the market with each project's identifier.
 function ProjectsGrid({ nav, assets, isMobile }: { nav: NavFn; assets: readonly SocialAsset[]; isMobile: boolean }) {
-  return <ProjectBrowser items={assets.map(asset => ({ asset }))} nav={nav} isMobile={isMobile} showCode minCard={300} placeholder="Buscar proyectos de la empresa…" />;
+  const { t } = useT('profile');
+  return <ProjectBrowser items={assets.map(asset => ({ asset }))} nav={nav} isMobile={isMobile} showCode minCard={300} placeholder={t('social.company.searchProjects')} />;
 }
 
 type EntryTarget = { key: string; target: FollowTarget };
@@ -244,6 +245,7 @@ type CompanyFollowersProps = { source: SocialSource | null; profile: Company; fo
 
 // "Seguidores" list of the company, with a Seguir button per person.
 function CompanyFollowers({ source, profile, followers, nav, onClose }: CompanyFollowersProps) {
+  const { t } = useT('profile');
   const target: FollowTarget = { kind: 'company', slug: profile.slug };
   const list = useSocialQuery(source, `followers:${profile.slug}:${followers}`, s => s.followers(target), src => src.listFollowers(target, null));
   const follow = useFollowToggle(source);
@@ -259,11 +261,11 @@ function CompanyFollowers({ source, profile, followers, nav, onClose }: CompanyF
     else nav('usuario', e.id);
   };
   const toggle = (e: FollowEntry) => {
-    const { key, target: t } = entryTarget(e);
-    follow.toggle(key, t, { following: e.isFollowing, followers: 0 });
+    const { key, target: tg } = entryTarget(e);
+    follow.toggle(key, tg, { following: e.isFollowing, followers: 0 });
   };
   return (
     <FollowListModal title={profile.name} onClose={onClose} onOpen={open} onToggleFollow={toggle}
-      tabs={[{ id: 'followers', label: `Seguidores (${fmtCount(count)})`, items, more: count - items.length, loading: list.loading }]} />
+      tabs={[{ id: 'followers', label: t('companyPage.followersTab', { count: fmtCount(count) }), items, more: count - items.length, loading: list.loading }]} />
   );
 }

@@ -44,6 +44,8 @@
 .bk-btn:hover::before { transform: scaleX(1); transform-origin: 0 50%; }
 .bk-btn-arrow { display: inline-block; font-weight: 400; font-size: 16px; letter-spacing: 0; transition: transform .35s ease; }
 .bk-btn:hover .bk-btn-arrow { transform: translateX(5px); }
+[dir="rtl"] .bk-btn-arrow { transform: scaleX(-1); }
+[dir="rtl"] .bk-btn:hover .bk-btn-arrow { transform: translateX(-5px) scaleX(-1); }
 .bk-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
 /* Primary buttons use the isotype orange (brand decision); they fill with ink (light bg) or white (dark bg) on hover. */
 .bk-btn-solid { background: var(--orange); color: var(--ink); }
@@ -582,6 +584,8 @@
 .bk-sx-item.is-on .bk-sx-n { color: var(--orange); }
 .bk-sx-item.is-on .bk-sx-desc { color: var(--ink-2); }
 .bk-sx-item.is-on .bk-sx-arrow { opacity: 1; transform: none; }
+[dir="rtl"] .bk-sx-arrow { transform: translateX(8px) scaleX(-1); }
+[dir="rtl"] .bk-sx-item.is-on .bk-sx-arrow { transform: scaleX(-1); }
 .bk-sx-item:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
 .bk-sx-bar { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--teal); transform-origin: 0 50%; }
 

@@ -10,7 +10,9 @@ import { useMobile } from '~/hooks/useMobile';
 import { BrikmeMark, type CubeTone } from './geometry';
 import type { PhysCube } from './Physics';
 import { GiantType, HeroLoader, Horizon } from './effects';
-import SectorExplorer from './SectorExplorer';
+import SectorExplorer, { type Sector } from './SectorExplorer';
+import LanguageSwitcher from '~/i18n/LanguageSwitcher';
+import { useT } from '~/i18n/useT';
 import { HERO_ITEMS } from './heroItems';
 
 // three.js scenes: client-only, loaded after hydration (the SVG mark is the fallback).
@@ -39,15 +41,14 @@ type IntroPhase = 'loading' | 'dark' | 'on';
 const LOGIN_PATH = '/ingresar';
 const MARKET_PATH = '/tokenizaciones';
 
-const NAV: ReadonlyArray<readonly [label: string, id: string]> = [
-  ['Visión', 'vision'], ['Mercado', 'mercado'], ['Sectores', 'sectores'], ['Modelo', 'modelo'], ['Liderazgo', 'liderazgo'], ['Contacto', 'contacto'],
+// Section ids; labels are `nav.items.<id>` in the landing dictionary.
+const NAV: readonly string[] = ['vision', 'mercado', 'sectores', 'modelo', 'liderazgo', 'contacto'];
+// Public pages, listed for crawlers and screen readers. Labels are `links.<key>`.
+const SITE_LINKS: ReadonlyArray<readonly [key: string, href: string]> = [
+  ['tokenizations', '/tokenizaciones'], ['secondary', '/mercado-secundario'], ['academy', '/academia'], ['help', '/ayuda'],
 ];
-// Public pages, listed for crawlers and screen readers.
-const SITE_LINKS: ReadonlyArray<readonly [label: string, href: string]> = [
-  ['Tokenizaciones', '/tokenizaciones'], ['Mercado secundario', '/mercado-secundario'], ['Academia', '/academia'], ['Centro de ayuda', '/ayuda'],
-];
-const FOOTER_LINKS: ReadonlyArray<readonly [label: string, href: string]> = [
-  ['Proyectos', '/tokenizaciones'], ['Academia', '/academia'], ['Centro de ayuda', '/ayuda'], ['Términos', '/terminos'], ['Privacidad', '/privacidad'],
+const FOOTER_LINKS: ReadonlyArray<readonly [key: string, href: string]> = [
+  ['projects', '/tokenizaciones'], ['academy', '/academia'], ['help', '/ayuda'], ['terms', '/terminos'], ['privacy', '/privacidad'],
 ];
 
 const scrollToId = (id: string): void => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -127,81 +128,65 @@ const fadeUp = (delay = 0) => ({
 
 /* ── Data (client deck) ──────────────────────────────────────────── */
 
-const HERO_STATS: ReadonlyArray<{ value: ReactNode; label: string }> = [
-  { value: <>$<CountUp to={200} duration={1.6} /></>, label: 'USD de participación mínima' },
-  { value: <><CountUp to={24} duration={1.6} />/7</>, label: 'Mercado global, sin horarios' },
-  { value: <CountUp to={6} duration={1.6} />, label: 'Sectores de la economía real' },
-  { value: 'VARA', label: 'Registrada y licenciada en Dubái' },
+// Texts live in the landing dictionary (app/i18n/locales/<lang>/landing.json);
+// here only values, figures, ids and images. Lists are read with raw() by index or id.
+
+type Text2 = { t: string; d: string };
+
+/** Hero figures (labels: `figures.stats[i]`). */
+const HERO_STAT_VALUES: readonly ReactNode[] = [
+  <>$<CountUp to={200} duration={1.6} /></>,
+  <><CountUp to={24} duration={1.6} />/7</>,
+  <CountUp to={6} duration={1.6} />,
+  'VARA',
 ];
 
-const EVOLUTION: ReadonlyArray<{ web: string; verb: string; desc: string; tone: 'concrete' | 'sand' | 'glass'; size: number; hint: string }> = [
-  { web: 'Web 1', verb: 'Read', desc: 'Consumo de información.', tone: 'concrete', size: 150, hint: 'Arrástralo y suéltalo' },
-  { web: 'Web 2', verb: 'Write', desc: 'Creación e interacción.', tone: 'sand', size: 190, hint: 'Arrástralo y suéltalo' },
-  { web: 'Web 3', verb: 'Own', desc: 'Propiedad digital verificada.', tone: 'glass', size: 230, hint: 'Pasa el cursor encima' },
+/** Evolution columns (verb + description: `vision.evolution[i]`). */
+const EVOLUTION_WEBS: readonly string[] = ['Web 1', 'Web 2', 'Web 3'];
+
+// Cube edge ∝ value^(1/3): the volumes are to scale (DeFi = 1 unit). Names: `market.names[i]`.
+const MARKETS: ReadonlyArray<{ value: string; units: number; tone: CubeTone }> = [
+  { value: '$120B', units: 1, tone: 'navy' },
+  { value: '$3.6T', units: 3.1, tone: 'steel' },
+  { value: '$115T', units: 9.9, tone: 'sand' },
+  { value: '$380T', units: 14.7, tone: 'concrete' },
+  { value: '$1Q', units: 20.3, tone: 'glass' },
 ];
 
-// Cube edge ∝ value^(1/3): the volumes are to scale (DeFi = 1 unit).
-const MARKETS: ReadonlyArray<{ name: string; value: string; units: number; tone: CubeTone }> = [
-  { name: 'DeFi', value: '$120B', units: 1, tone: 'navy' },
-  { name: 'Criptomonedas', value: '$3.6T', units: 3.1, tone: 'steel' },
-  { name: 'Mercado de valores', value: '$115T', units: 9.9, tone: 'sand' },
-  { name: 'Inmobiliario global', value: '$380T', units: 14.7, tone: 'concrete' },
-  { name: 'Derivados', value: '$1Q', units: 20.3, tone: 'glass' },
+/** State reserves (flag + text: `adoption.states[i]`); `sep` is the language's thousands separator. */
+const stateValues = (sep: string): readonly ReactNode[] => [
+  <><CountUp to={328000} separator={sep} duration={2.2} /> BTC</>,
+  <><CountUp to={7500} separator={sep} duration={2} />+ BTC</>,
+  <>$<CountUp to={16000} separator={sep} duration={2} />M</>,
 ];
 
-const STATES: ReadonlyArray<{ flag: string; value: ReactNode; text: string }> = [
-  { flag: 'EE. UU.', value: <><CountUp to={328000} separator="." duration={2.2} /> BTC</>, text: 'Mayor reserva estatal del mundo.' },
-  { flag: 'El Salvador', value: <><CountUp to={7500} separator="." duration={2} />+ BTC</>, text: 'Primer país con estrategia nacional de acumulación.' },
-  { flag: 'Emiratos Árabes Unidos', value: <>$<CountUp to={16000} separator="." duration={2} />M</>, text: 'Tokenizados: apuesta estatal por el real estate en blockchain.' },
-];
+/** Institution names (texts: `adoption.institutions[i]`). */
+const INSTITUTIONS: readonly string[] = ['BlackRock', 'Fidelity', 'Nasdaq'];
 
-const INSTITUTIONS: ReadonlyArray<{ name: string; text: string }> = [
-  { name: 'BlackRock', text: 'Su fondo tokenizado BUIDL alcanza los US$3 mil millones en activos administrados.' },
-  { name: 'Fidelity', text: 'Lanzamiento del Fidelity Digital Dollar (FIDD) institucional.' },
-  { name: 'Nasdaq', text: 'Asociación estratégica para lanzar acciones tokenizadas en 2027.' },
-];
-
-const COMPARE: ReadonlyArray<{ k: string; old: string; next: string }> = [
-  { k: 'Barrera de entrada', old: 'US$100.000+ requeridos.', next: 'Participación desde US$200.' },
-  { k: 'Liquidez', old: 'Capital bloqueado por meses o años.', next: 'Inmediata, mercados globales 24/7.' },
-  { k: 'Fronteras', old: 'Restricciones locales y burocracia pesada.', next: 'Acceso digital sin fronteras geográficas.' },
-  { k: 'Intermediarios', old: 'Bancos, notarios y comisiones altas.', next: 'Smart contracts con ejecución automática.' },
-];
-
-const PILLARS: ReadonlyArray<{ n: string; t: string; d: string }> = [
-  { n: '01', t: 'Democratizamos el acceso', d: 'Participa en activos de alto valor desde US$200, con la misma información que un institucional.' },
-  { n: '02', t: 'Generamos liquidez', d: 'Financiamos y fondeamos activos para desarrolladores donde la banca tradicional falla.' },
-  { n: '03', t: 'Un club sin fronteras', d: 'Una comunidad de inversión global con la blockchain como columna vertebral.' },
-];
+/** Pillar numbers (texts: `bridge.pillars[i]`). */
+const PILLAR_NUMBERS: readonly string[] = ['01', '02', '03'];
 
 // Photos: Unsplash (free licence), 1600×1067 WebP in public/images/brikme/sectors.
-const SECTORS: ReadonlyArray<{ id: string; t: string; d: string; img: string }> = [
-  { id: 'real-estate', t: 'Real Estate', d: 'Propiedades y hoteles', img: '/images/brikme/sectors/real-estate.webp' },
-  { id: 'mineria', t: 'Minería', d: 'Activos físicos y extracción', img: '/images/brikme/sectors/mineria.webp' },
-  { id: 'agricultura', t: 'Agricultura', d: 'Producción sostenible', img: '/images/brikme/sectors/agricultura.webp' },
-  { id: 'energia', t: 'Energía', d: 'Infraestructura renovable', img: '/images/brikme/sectors/energia.webp' },
-  { id: 'transporte', t: 'Transporte', d: 'Logística global', img: '/images/brikme/sectors/transporte.webp' },
-  { id: 'lujo', t: 'Activos de lujo', d: 'Arte y coleccionables', img: '/images/brikme/sectors/lujo.webp' },
+// Name and description: `sectors.items.<id>`.
+const SECTOR_IMAGES: ReadonlyArray<{ id: string; img: string }> = [
+  { id: 'real-estate', img: '/images/brikme/sectors/real-estate.webp' },
+  { id: 'mineria', img: '/images/brikme/sectors/mineria.webp' },
+  { id: 'agricultura', img: '/images/brikme/sectors/agricultura.webp' },
+  { id: 'energia', img: '/images/brikme/sectors/energia.webp' },
+  { id: 'transporte', img: '/images/brikme/sectors/transporte.webp' },
+  { id: 'lujo', img: '/images/brikme/sectors/lujo.webp' },
 ];
 
-const CLUB_FACTS: ReadonlyArray<{ v: string; k: string }> = [
-  { v: '$200', k: 'Inversión mínima en USD' },
-  { v: '24/7', k: 'Liquidez global' },
-  { v: '0', k: 'Fronteras para invertir' },
-];
+/** Club figures (labels: `club.facts[i]`). */
+const CLUB_VALUES: readonly string[] = ['$200', '24/7', '0'];
 
-const TOKENS: ReadonlyArray<{ t: string; d: string; ex: string; focus?: boolean; faint?: boolean }> = [
-  { t: 'Utility tokens', d: 'Acceso a servicios', ex: 'ETH · GT3 · FIT' },
-  { t: 'Security / E-Money', d: 'Acciones, CBDCs', ex: 'Tokens de capital · CBDC' },
-  { t: 'Stablecoins', d: 'Valor estable', ex: 'USDT · USDC · DAI' },
-  { t: 'RWA — el enfoque Brikme', d: 'Activos del mundo real: valor capturado del mundo tradicional', ex: 'Inmuebles · Oro · Infraestructura', focus: true },
-  { t: 'NFTs / Memecoins', d: 'Coleccionables, especulación', ex: 'Fuera de nuestro foco', faint: true },
-];
-
-const LEADER_POINTS = [
-  '22 años de experiencia escalando negocios en tecnología y real estate.',
-  'Miembro fundador del Colombian Business Council en Dubái (Cámara de Comercio de Dubái).',
-  'Galardonado con el International Visionaries Award 2025 en Dubái.',
+/** Token types (texts: `engine.tokens.<id>`). */
+const TOKENS: ReadonlyArray<{ id: string; focus?: boolean; faint?: boolean }> = [
+  { id: 'utility' },
+  { id: 'security' },
+  { id: 'stable' },
+  { id: 'rwa', focus: true },
+  { id: 'nft', faint: true },
 ];
 
 /* ── Sections ────────────────────────────────────────────────────── */
@@ -216,21 +201,23 @@ const EVO_CUBES: readonly PhysCube[] = [
 
 function Evolution() {
   const hydrated = useHydrated();
+  const { t, raw } = useT('landing');
+  const evolution = raw<{ verb: string; desc: string }[]>('vision.evolution');
   return (
     <div className="bk-evo-x">
       <div className="bk-evo-stage">
         {hydrated
-          ? <Suspense fallback={null}><PhysicsPlayground cubes={EVO_CUBES} zoom={92} className="bk-phys" label="Tres cubos en 3D con física: arrástralos, lánzalos y haz que choquen" /></Suspense>
+          ? <Suspense fallback={null}><PhysicsPlayground cubes={EVO_CUBES} zoom={92} className="bk-phys" label={t('vision.physicsLabel')} /></Suspense>
           : null}
-        <span className="bk-hint bk-hint-evo" aria-hidden="true">Agarra, lanza y apila los cubos</span>
+        <span className="bk-hint bk-hint-evo" aria-hidden="true">{t('vision.hint')}</span>
       </div>
       <div className="bk-evo">
-        {EVOLUTION.map((e, i) => (
-          <motion.div key={e.web} className="bk-evo-col" {...fadeUp(i * 0.15)}>
+        {EVOLUTION_WEBS.map((web, i) => (
+          <motion.div key={web} className="bk-evo-col" {...fadeUp(i * 0.15)}>
             <div className="bk-evo-txt">
-              <span className="bk-evo-web">{e.web}</span>
-              <span className="bk-evo-verb">{e.verb}</span>
-              <span className="bk-evo-desc">{e.desc}</span>
+              <span className="bk-evo-web">{web}</span>
+              <span className="bk-evo-verb">{evolution[i].verb}</span>
+              <span className="bk-evo-desc">{evolution[i].desc}</span>
             </div>
           </motion.div>
         ))}
@@ -250,17 +237,19 @@ const MARKET_CUBES: readonly PhysCube[] = [
 
 function MarketScale() {
   const hydrated = useHydrated();
+  const { t, raw } = useT('landing');
+  const names = raw<string[]>('market.names');
   return (
     <div className="bk-scale">
       <div className="bk-scale-stage">
         {hydrated
-          ? <Suspense fallback={null}><PhysicsPlayground cubes={MARKET_CUBES} zoom={70} fitUnits={20.3} slots={5} dark className="bk-phys" label="Cubos a escala de cada mercado, con física: arrástralos y lánzalos" /></Suspense>
+          ? <Suspense fallback={null}><PhysicsPlayground cubes={MARKET_CUBES} zoom={70} fitUnits={20.3} slots={5} dark className="bk-phys" label={t('market.physicsLabel')} /></Suspense>
           : null}
       </div>
       <div className="bk-scale-row">
         {MARKETS.map((m, i) => (
-          <div key={m.name} className="bk-scale-col">
-            <motion.span className="bk-scale-name" {...fadeUp(0.1 + i * 0.08)}>{m.name}</motion.span>
+          <div key={m.value} className="bk-scale-col">
+            <motion.span className="bk-scale-name" {...fadeUp(0.1 + i * 0.08)}>{names[i]}</motion.span>
             <motion.span className="bk-scale-val" {...fadeUp(0.2 + i * 0.08)}>{m.value}</motion.span>
           </div>
         ))}
@@ -270,6 +259,7 @@ function MarketScale() {
 }
 
 function Bridge() {
+  const { t } = useT('landing');
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 85%', 'end 40%'] });
   const draw = useTransform(scrollYProgress, [0, 1], [0, 1]);
@@ -298,14 +288,15 @@ function Bridge() {
         <path d="M 0 236 L 1200 236" className="bk-bridge-water" />
       </svg>
       <div className="bk-bridge-labels">
-        <span>Capital tradicional</span>
-        <span>Activos tokenizados</span>
+        <span>{t('bridge.oldLabel')}</span>
+        <span>{t('bridge.newLabel')}</span>
       </div>
     </div>
   );
 }
 
 function InfinityLoop() {
+  const { t } = useT('landing');
   const reduce = useReducedMotion();
   const PATH = 'M 300 150 C 380 40, 560 40, 560 150 C 560 260, 380 260, 300 150 C 220 40, 40 40, 40 150 C 40 260, 220 260, 300 150 Z';
   return (
@@ -322,27 +313,28 @@ function InfinityLoop() {
         )}
       </svg>
       <div className="bk-inf-step bk-inf-l">
-        <span className="bk-inf-n">Paso 1</span>
-        <strong>Originación</strong>
+        <span className="bk-inf-n">{t('model.step1.n')}</span>
+        <strong>{t('model.step1.title')}</strong>
         <span className="bk-inf-tag">B2B</span>
-        <p>Estructuración legal y tecnológica del activo físico.</p>
+        <p>{t('model.step1.text')}</p>
       </div>
       <div className="bk-inf-step bk-inf-r">
-        <span className="bk-inf-n">Paso 2</span>
-        <strong>Distribución</strong>
+        <span className="bk-inf-n">{t('model.step2.n')}</span>
+        <strong>{t('model.step2.title')}</strong>
         <span className="bk-inf-tag">B2C</span>
-        <p>Lanzamiento en el Marketplace Brikme a la red global de inversionistas.</p>
+        <p>{t('model.step2.text')}</p>
       </div>
     </div>
   );
 }
 
 function ContractFlow() {
-  const steps = ['Condiciones cumplidas', 'Ejecución automática', 'Transacción registrada en el ledger'];
+  const { raw } = useT('landing');
+  const steps = raw<string[]>('engine.flow');
   return (
     <ol className="bk-flow">
       {steps.map((s, i) => (
-        <motion.li key={s} className="bk-spot" {...fadeUp(i * 0.15)}>
+        <motion.li key={i} className="bk-spot" {...fadeUp(i * 0.15)}>
           <span className="bk-flow-n">{String(i + 1).padStart(2, '0')}</span>
           <span className="bk-flow-t">{s}</span>
         </motion.li>
@@ -363,6 +355,10 @@ type BrikmeLandingProps = {
 export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProps) {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
+  const { t, raw } = useT('landing');
+  const sep = t('format.thousands');
+  const sectors: Sector[] = SECTOR_IMAGES.map(sec => ({ ...sec, ...raw<Text2>(`sectors.items.${sec.id}`) }));
+  const sectorNames = sectors.map(sec => sec.t);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const isMobile = useMobile(900);
@@ -457,18 +453,19 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       <motion.div className="bk-progress" style={{ scaleX: progress }} aria-hidden="true" />
 
       {/* ─── NAV ───────────────────────────────────────────── */}
-      <nav aria-label="Principal" className={`bk-nav${scrolled || showMenu ? ' is-solid' : ''}`}>
+      <nav aria-label={t('nav.aria')} className={`bk-nav${scrolled || showMenu ? ' is-solid' : ''}`}>
         <a href="/" className="bk-nav-logo" onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
           <img src={scrolled || showMenu ? '/logo-light.png' : '/logo-on-dark.png'} alt="BRIKME — Real World Tokenization" width={150} height={48} />
         </a>
         <div className="bk-nav-links">
-          {NAV.map(([l, id]) => <a key={id} href={`#${id}`} onClick={e => goSection(e, id)}>{l}</a>)}
+          {NAV.map(id => <a key={id} href={`#${id}`} onClick={e => goSection(e, id)}>{t(`nav.items.${id}`)}</a>)}
         </div>
         <div className="bk-nav-cta">
-          {onDevEnter && <button type="button" className="bk-dev" onClick={onDevEnter} title="Entrar sin wallet (solo desarrollo)">Entrar dev</button>}
-          <Btn href={LOGIN_PATH} onClick={onEnter} variant="line" arrow={false} className="bk-hide-sm">Iniciar sesión</Btn>
-          <Btn href={MARKET_PATH} onClick={toMarket} variant="solid" className="bk-hide-sm">Invertir</Btn>
-          <button type="button" className="bk-burger" aria-label={showMenu ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={showMenu} aria-controls="bk-menu"
+          <LanguageSwitcher variant={scrolled || showMenu ? 'light' : 'dark'} />
+          {onDevEnter && <button type="button" className="bk-dev" onClick={onDevEnter} title={t('nav.devTitle')}>{t('nav.dev')}</button>}
+          <Btn href={LOGIN_PATH} onClick={onEnter} variant="line" arrow={false} className="bk-hide-sm">{t('nav.login')}</Btn>
+          <Btn href={MARKET_PATH} onClick={toMarket} variant="solid" className="bk-hide-sm">{t('nav.invest')}</Btn>
+          <button type="button" className="bk-burger" aria-label={showMenu ? t('nav.closeMenu') : t('nav.openMenu')} aria-expanded={showMenu} aria-controls="bk-menu"
             onClick={() => setMenuOpen(o => !o)}>
             <span className={showMenu ? 'is-open' : ''} />
           </button>
@@ -478,15 +475,15 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       <AnimatePresence>
         {showMenu && (
           <motion.div id="bk-menu" className="bk-menu" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-            {NAV.map(([l, id], i) => (
+            {NAV.map((id, i) => (
               <motion.a key={id} href={`#${id}`} onClick={e => goSection(e, id)} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.04 * i }}>
-                <span>{String(i + 1).padStart(2, '0')}</span>{l}
+                <span>{String(i + 1).padStart(2, '0')}</span>{t(`nav.items.${id}`)}
               </motion.a>
             ))}
             <div className="bk-menu-cta">
-              <Btn href={MARKET_PATH} onClick={() => { setMenuOpen(false); toMarket(); }}>Invertir</Btn>
-              <Btn href={LOGIN_PATH} onClick={() => { setMenuOpen(false); onEnter(); }} variant="line" arrow={false}>Iniciar sesión</Btn>
-              {onDevEnter && <button type="button" className="bk-dev" onClick={() => { setMenuOpen(false); onDevEnter(); }}>Entrar dev</button>}
+              <Btn href={MARKET_PATH} onClick={() => { setMenuOpen(false); toMarket(); }}>{t('nav.invest')}</Btn>
+              <Btn href={LOGIN_PATH} onClick={() => { setMenuOpen(false); onEnter(); }} variant="line" arrow={false}>{t('nav.login')}</Btn>
+              {onDevEnter && <button type="button" className="bk-dev" onClick={() => { setMenuOpen(false); onDevEnter(); }}>{t('nav.dev')}</button>}
             </div>
           </motion.div>
         )}
@@ -505,14 +502,14 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
         </div>
         <div className="bk-hero3d-top">
           <motion.div className="bk-badge bk-badge-dark" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + o, duration: 0.6 }}>
-            <span className="bk-badge-dot" />Registrada y licenciada en Dubái · VARA
+            <span className="bk-badge-dot" />{t('hero.badge')}
           </motion.div>
           <h1 className="bk-h1d">
-            <Line delay={0.9} play={lit} className="bk-thin">Invierte en lo</Line>
-            <Line delay={1.05} play={lit}><strong>extraordinario.</strong></Line>
+            <Line delay={0.9} play={lit} className="bk-thin">{t('hero.titleThin')}</Line>
+            <Line delay={1.05} play={lit}><strong>{t('hero.titleBold')}</strong></Line>
           </h1>
           <motion.p className="bk-lead-d" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 + o, duration: 0.8 }}>
-            Activos reales tokenizados: de un superdeportivo a una torre en Dubái. Participa desde US$200.
+            {t('hero.lead')}
           </motion.p>
         </div>
         <motion.div className="bk-hero3d-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 + o, duration: 0.8 }}>
@@ -520,36 +517,36 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
             <span className="bk-hero3d-count">{String(heroPos + 1).padStart(2, '0')} / {String(heroN).padStart(2, '0')}</span>
             <AnimatePresence mode="wait">
               <motion.div key={heroItem.key} className="bk-hero3d-name" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.35 }}>
-                <strong>{heroItem.title}</strong>
-                <span>{heroItem.sub}</span>
+                <strong>{t(`hero.items.${heroItem.key}.title`)}</strong>
+                <span>{t(`hero.items.${heroItem.key}.sub`)}</span>
               </motion.div>
             </AnimatePresence>
           </div>
           <div className="bk-hero3d-ctrl">
-            <button type="button" className="bk-sq" aria-label="Activo anterior" disabled={!heroReady} onClick={() => setHeroIdx(x => x - 1)}>←</button>
+            <button type="button" className="bk-sq" aria-label={t('hero.prev')} disabled={!heroReady} onClick={() => setHeroIdx(x => x - 1)}><span className="rtl-flip">←</span></button>
             <ol className="bk-hero3d-dots">
               {HERO_ITEMS.map((it, k) => (
-                <li key={it.key}><button type="button" className={k === heroPos ? 'is-on' : ''} aria-label={it.title} aria-current={k === heroPos} disabled={!heroReady} onClick={() => jumpTo(k)} /></li>
+                <li key={it.key}><button type="button" className={k === heroPos ? 'is-on' : ''} aria-label={t(`hero.items.${it.key}.title`)} aria-current={k === heroPos} disabled={!heroReady} onClick={() => jumpTo(k)} /></li>
               ))}
             </ol>
-            <button type="button" className="bk-sq" aria-label="Activo siguiente" disabled={!heroReady} onClick={() => setHeroIdx(x => x + 1)}>→</button>
+            <button type="button" className="bk-sq" aria-label={t('hero.next')} disabled={!heroReady} onClick={() => setHeroIdx(x => x + 1)}><span className="rtl-flip">→</span></button>
           </div>
           <div className="bk-hero3d-ctas">
-            <Btn href={MARKET_PATH} onClick={toMarket} variant="accent">Explorar proyectos</Btn>
-            <Btn href="#modelo" onClick={() => scrollToId('modelo')} variant="ghost-light">Tokeniza tu activo</Btn>
+            <Btn href={MARKET_PATH} onClick={toMarket} variant="accent">{t('hero.explore')}</Btn>
+            <Btn href="#modelo" onClick={() => scrollToId('modelo')} variant="ghost-light">{t('hero.tokenize')}</Btn>
           </div>
         </motion.div>
-        <span className="bk-hint bk-hint-dark" aria-hidden="true">Arrastra para girar</span>
+        <span className="bk-hint bk-hint-dark" aria-hidden="true">{t('hero.dragHint')}</span>
       </section>
 
       {/* ─── KEY FIGURES ───────────────────────────────────── */}
-      <section className="bk-figures" aria-label="Cifras clave">
+      <section className="bk-figures" aria-label={t('figures.aria')}>
         <div className="bk-wrap">
           <ul className="bk-stats">
-            {HERO_STATS.map(st => (
-              <li key={st.label}>
-                <span className="bk-stat-v">{st.value}</span>
-                <span className="bk-stat-l">{st.label}</span>
+            {HERO_STAT_VALUES.map((value, i) => (
+              <li key={i}>
+                <span className="bk-stat-v">{value}</span>
+                <span className="bk-stat-l">{raw<string[]>('figures.stats')[i]}</span>
               </li>
             ))}
           </ul>
@@ -558,21 +555,21 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
 
       {/* ─── GIANT TYPE (rides the scroll) ─────────────────── */}
       <GiantType rows={[
-        { text: 'Real Estate · Minería · Agricultura · ', dir: 1, variant: 'thin' },
-        { text: 'Energía · Transporte · Activos de lujo · ', dir: -1, variant: 'outline' },
+        { text: `${sectorNames.slice(0, 3).join(' · ')} · `, dir: 1, variant: 'thin' },
+        { text: `${sectorNames.slice(3).join(' · ')} · `, dir: -1, variant: 'outline' },
       ]} />
 
       {/* ─── 01 VISIÓN: la evolución de la propiedad ───────── */}
       <section id="vision" className="bk-sec">
         <div className="bk-wrap">
-          <Head index="01" kicker="El cambio macro"
-            thin="La evolución" bold="de la propiedad."
-            sub="Leer, escribir… y ahora poseer. Internet entra en su tercera era." />
+          <Head index="01" kicker={t('vision.kicker')}
+            thin={t('vision.thin')} bold={t('vision.bold')}
+            sub={t('vision.sub')} />
           <Evolution />
           <motion.blockquote className="bk-quote" {...fadeUp(0.1)}>
             <Corners />
             <ScrollReveal baseOpacity={0.1} enableBlur baseRotation={2} blurStrength={5} containerClassName="bk-reveal" textClassName="bk-reveal-text">
-              Los activos y el dinero se están desmaterializando. Los tokens implican, por primera vez en la historia de internet, PROPIEDAD.
+              {t('vision.quote')}
             </ScrollReveal>
           </motion.blockquote>
         </div>
@@ -582,12 +579,12 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       <section id="mercado" className="bk-sec bk-dark">
         <div className="bk-blueprint bk-blueprint-dark" aria-hidden="true" />
         <div className="bk-wrap">
-          <Head index="02" tone="dark" align="center" kicker="La oportunidad"
-            thin="¿Una oportunidad 100 veces" bold="más grande que Bitcoin?"
-            sub="Cada cubo está a escala: su volumen es el tamaño de cada mercado." />
+          <Head index="02" tone="dark" align="center" kicker={t('market.kicker')}
+            thin={t('market.thin')} bold={t('market.bold')}
+            sub={t('market.sub')} />
           <MarketScale />
           <motion.p className="bk-band" {...fadeUp(0.2)}>
-            El mercado global de tokenización de RWA proyecta alcanzar los <strong>US$24 mil millones en 2025</strong>, creciendo a un <strong>CAGR del 22,7 %</strong> hasta 2030.
+            {t('market.band.lead')}<strong>{t('market.band.strong1')}</strong>{t('market.band.mid')}<strong>{t('market.band.strong2')}</strong>{t('market.band.end')}
           </motion.p>
         </div>
       </section>
@@ -595,34 +592,34 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       {/* ─── 03 ADOPCIÓN ───────────────────────────────────── */}
       <section className="bk-sec">
         <div className="bk-wrap">
-          <Head index="03" kicker="Adopción institucional y estatal"
-            thin="Los gigantes ya están" bold="construyendo la plomería." />
+          <Head index="03" kicker={t('adoption.kicker')}
+            thin={t('adoption.thin')} bold={t('adoption.bold')} />
           <div className="bk-adopt">
             <div>
-              <h3 className="bk-h3">Movimientos estatales</h3>
+              <h3 className="bk-h3">{t('adoption.statesTitle')}</h3>
               <ul className="bk-cards">
-                {STATES.map((s, i) => (
-                  <motion.li key={s.flag} className="bk-card bk-spot" {...fadeUp(i * 0.1)}>
+                {raw<{ flag: string; text: string }[]>('adoption.states').map((s, i) => (
+                  <motion.li key={i} className="bk-card bk-spot" {...fadeUp(i * 0.1)}>
                     <Corners />
                     <span className="bk-card-k">{s.flag}</span>
-                    <span className="bk-card-v">{s.value}</span>
+                    <span className="bk-card-v">{stateValues(sep)[i]}</span>
                     <span className="bk-card-d">{s.text}</span>
                   </motion.li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="bk-h3">El movimiento institucional</h3>
+              <h3 className="bk-h3">{t('adoption.institutionsTitle')}</h3>
               <ul className="bk-inst">
-                {INSTITUTIONS.map((s, i) => (
-                  <motion.li key={s.name} {...fadeUp(i * 0.1)}>
-                    <span className="bk-inst-name">{s.name}</span>
-                    <span className="bk-inst-t">{s.text}</span>
+                {INSTITUTIONS.map((name, i) => (
+                  <motion.li key={name} {...fadeUp(i * 0.1)}>
+                    <span className="bk-inst-name">{name}</span>
+                    <span className="bk-inst-t">{raw<string[]>('adoption.institutions')[i]}</span>
                   </motion.li>
                 ))}
               </ul>
               <motion.p className="bk-insight" {...fadeUp(0.3)}>
-                <strong>Insight.</strong> Si no puedes con tu enemigo, únete a él: los gigantes ya construyen la infraestructura financiera de la próxima década.
+                <strong>{t('adoption.insightLabel')}</strong> {t('adoption.insight')}
               </motion.p>
             </div>
           </div>
@@ -632,16 +629,16 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       {/* ─── 04 EL PROBLEMA / LA SOLUCIÓN ──────────────────── */}
       <section className="bk-sec bk-sec-paper">
         <div className="bk-wrap">
-          <Head index="04" kicker="La problemática vs. la solución"
-            thin="Del viejo mundo" bold="a la nueva era." />
-          <div className="bk-compare" role="table" aria-label="Inversión tradicional frente a inversión tokenizada">
+          <Head index="04" kicker={t('compare.kicker')}
+            thin={t('compare.thin')} bold={t('compare.bold')} />
+          <div className="bk-compare" role="table" aria-label={t('compare.aria')}>
             <div className="bk-compare-head" role="row">
               <span role="columnheader" />
-              <span role="columnheader">El viejo mundo <em>Tradicional</em></span>
-              <span role="columnheader">La nueva era <em>Tokenizado</em></span>
+              <span role="columnheader">{t('compare.oldTitle')} <em>{t('compare.oldTag')}</em></span>
+              <span role="columnheader">{t('compare.newTitle')} <em>{t('compare.newTag')}</em></span>
             </div>
-            {COMPARE.map((r, i) => (
-              <motion.div key={r.k} className="bk-compare-row" role="row" {...fadeUp(i * 0.1)}>
+            {raw<{ k: string; old: string; next: string }[]>('compare.rows').map((r, i) => (
+              <motion.div key={i} className="bk-compare-row" role="row" {...fadeUp(i * 0.1)}>
                 <span role="rowheader" className="bk-compare-k">{r.k}</span>
                 <span role="cell" className="bk-compare-old">
                   <span>{r.old}</span>
@@ -653,7 +650,7 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
           </div>
           <div className="bk-statement">
             <ScrollReveal baseOpacity={0.1} enableBlur baseRotation={2} blurStrength={5} containerClassName="bk-reveal" textClassName="bk-reveal-text">
-              Mientras las grandes instituciones construyen piscinas privadas de liquidez para billonarios, el inversionista retail y el emprendedor siguen bloqueados.
+              {t('compare.statement')}
             </ScrollReveal>
           </div>
         </div>
@@ -662,20 +659,20 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       {/* ─── 05 EL PUENTE DIGITAL ──────────────────────────── */}
       <section className="bk-sec">
         <div className="bk-wrap">
-          <Head index="05" kicker="Presentamos Brikme" align="center"
-            thin="El puente" bold="digital."
-            sub="La primera comunidad y marketplace DeFi de activos del mundo real (RWA)." />
+          <Head index="05" kicker={t('bridge.kicker')} align="center"
+            thin={t('bridge.thin')} bold={t('bridge.bold')}
+            sub={t('bridge.sub')} />
           <Bridge />
           <ol className="bk-pillars">
-            {PILLARS.map((p, i) => (
-              <motion.li key={p.n} className="bk-spot" {...fadeUp(i * 0.12)}>
-                <span className="bk-pillar-n">{p.n}</span>
+            {raw<Text2[]>('bridge.pillars').map((p, i) => (
+              <motion.li key={PILLAR_NUMBERS[i]} className="bk-spot" {...fadeUp(i * 0.12)}>
+                <span className="bk-pillar-n">{PILLAR_NUMBERS[i]}</span>
                 <h3>{p.t}</h3>
                 <p>{p.d}</p>
               </motion.li>
             ))}
           </ol>
-          <motion.p className="bk-tagline" {...fadeUp(0.2)}>Todo en un único marketplace. <strong>Confiable, transparente y global.</strong></motion.p>
+          <motion.p className="bk-tagline" {...fadeUp(0.2)}>{t('bridge.taglineLead')} <strong>{t('bridge.taglineStrong')}</strong></motion.p>
         </div>
       </section>
 
@@ -683,25 +680,25 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       <section className="bk-sec bk-dark">
         <div className="bk-wrap bk-club">
           <div className="bk-club-copy">
-            <Head kicker="Club de inversión sin fronteras" tone="dark"
-              thin="Invierte en" bold="lo real."
-              sub="Cada token es un ladrillo de un activo real, registrado en blockchain y respaldado por un contrato. Construye tu portafolio pieza por pieza." />
+            <Head kicker={t('club.kicker')} tone="dark"
+              thin={t('club.thin')} bold={t('club.bold')}
+              sub={t('club.sub')} />
             <ul className="bk-club-facts">
-              {CLUB_FACTS.map((f, i) => (
-                <motion.li key={f.k} {...fadeUp(0.1 + i * 0.08)}>
-                  <strong>{f.v}</strong>
-                  <span>{f.k}</span>
+              {CLUB_VALUES.map((v, i) => (
+                <motion.li key={v} {...fadeUp(0.1 + i * 0.08)}>
+                  <strong>{v}</strong>
+                  <span>{raw<string[]>('club.facts')[i]}</span>
                 </motion.li>
               ))}
             </ul>
             <motion.div {...fadeUp(0.3)}>
-              <Btn href={MARKET_PATH} onClick={toMarket} variant="accent">Empezar a invertir</Btn>
+              <Btn href={MARKET_PATH} onClick={toMarket} variant="accent">{t('club.cta')}</Btn>
             </motion.div>
           </div>
           <motion.div className="bk-club-stage" {...fadeUp(0.15)}>
             <Corners />
             {hydrated ? <Suspense fallback={null}><Logo3D tone="dark" className="bk-club-3d" /></Suspense> : <BrikmeMark size={200} />}
-            <span className="bk-club-hint" aria-hidden="true">Arrastra para girar</span>
+            <span className="bk-club-hint" aria-hidden="true">{t('club.hint')}</span>
           </motion.div>
         </div>
       </section>
@@ -709,10 +706,10 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       {/* ─── 06 SECTORES ───────────────────────────────────── */}
       <section id="sectores" className="bk-sec bk-sec-paper">
         <div className="bk-wrap">
-          <Head index="06" kicker="Sectores de la economía real"
-            thin="Activos tangibles," bold="no especulación."
-            sub="Respaldados por activos reales: diversificación y trazabilidad legal en cada proyecto." />
-          <SectorExplorer sectors={SECTORS} exploreHref={MARKET_PATH} onExplore={toMarket} />
+          <Head index="06" kicker={t('sectors.kicker')}
+            thin={t('sectors.thin')} bold={t('sectors.bold')}
+            sub={t('sectors.sub')} />
+          <SectorExplorer sectors={sectors} exploreHref={MARKET_PATH} onExplore={toMarket} />
         </div>
       </section>
 
@@ -720,24 +717,24 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       <section className="bk-sec">
         <div className="bk-wrap bk-engine">
           <div>
-            <Head index="07" kicker="El motor Brikme"
-              thin="Smart" bold="contracts."
-              sub="Ejecución automática sin intermediarios. Transparente, inmutable y auditable por cualquier persona en el mundo." />
+            <Head index="07" kicker={t('engine.kicker')}
+              thin={t('engine.thin')} bold={t('engine.bold')}
+              sub={t('engine.sub')} />
             <ContractFlow />
             <motion.div className="bk-seal" {...fadeUp(0.2)}>
               <Corners />
-              <span className="bk-seal-k">Cumplimiento</span>
-              Registrada y licenciada en Dubái <strong>(VARA compliant)</strong>
+              <span className="bk-seal-k">{t('engine.sealLabel')}</span>
+              {t('engine.sealText')} <strong>{t('engine.sealStrong')}</strong>
             </motion.div>
           </div>
           <div>
-            <h3 className="bk-h3">Jerarquía y tipología de tokens</h3>
+            <h3 className="bk-h3">{t('engine.tokensTitle')}</h3>
             <ul className="bk-tokens">
-              {TOKENS.map((t, i) => (
-                <motion.li key={t.t} className={`bk-spot${t.focus ? ' is-focus' : ''}${t.faint ? ' is-faint' : ''}`} {...fadeUp(i * 0.08)}>
-                  <span className="bk-tok-t">{t.t}</span>
-                  <span className="bk-tok-d">{t.d}</span>
-                  <span className="bk-tok-ex">{t.ex}</span>
+              {TOKENS.map((tok, i) => (
+                <motion.li key={tok.id} className={`bk-spot${tok.focus ? ' is-focus' : ''}${tok.faint ? ' is-faint' : ''}`} {...fadeUp(i * 0.08)}>
+                  <span className="bk-tok-t">{t(`engine.tokens.${tok.id}.t`)}</span>
+                  <span className="bk-tok-d">{t(`engine.tokens.${tok.id}.d`)}</span>
+                  <span className="bk-tok-ex">{t(`engine.tokens.${tok.id}.ex`)}</span>
                 </motion.li>
               ))}
             </ul>
@@ -748,39 +745,39 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       {/* ─── 08 MODELO + CASO DUBÁI ────────────────────────── */}
       <section id="modelo" className="bk-sec bk-sec-paper">
         <div className="bk-wrap">
-          <Head index="08" kicker="Para desarrolladores y dueños de activos" align="center"
-            thin="Un modelo híbrido" bold="y escalable."
-            sub="La entrada de mejores activos atrae más liquidez, y más liquidez atrae activos institucionales de mayor grado." />
+          <Head index="08" kicker={t('model.kicker')} align="center"
+            thin={t('model.thin')} bold={t('model.bold')}
+            sub={t('model.sub')} />
           <InfinityLoop />
           <div className="bk-fees">
-            <motion.div className="bk-spot" {...fadeUp(0)}><span className="bk-fee-k">Setup fee</span><p>Curaduría, análisis y digitalización del activo con smart contracts.</p></motion.div>
-            <motion.div className="bk-spot" {...fadeUp(0.1)}><span className="bk-fee-k">Success fee</span><p>Comisión sobre el fondeo exitoso de tu proyecto en el marketplace.</p></motion.div>
+            <motion.div className="bk-spot" {...fadeUp(0)}><span className="bk-fee-k">{t('model.setupFee')}</span><p>{t('model.setupText')}</p></motion.div>
+            <motion.div className="bk-spot" {...fadeUp(0.1)}><span className="bk-fee-k">{t('model.successFee')}</span><p>{t('model.successText')}</p></motion.div>
             <motion.div className="bk-fees-cta" {...fadeUp(0.2)}>
-              <Btn href={LOGIN_PATH} onClick={onEnter}>Tokeniza tu activo</Btn>
+              <Btn href={LOGIN_PATH} onClick={onEnter}>{t('model.cta')}</Btn>
             </motion.div>
           </div>
 
           <div className="bk-case">
             <motion.div className="bk-case-img bk-case-3d" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }}>
               {hydrated && <Suspense fallback={null}><TokenBlock3D className="bk-token-3d" /></Suspense>}
-              <span className="bk-hint bk-hint-case" aria-hidden="true">Pasa el cursor: 1 activo → 40.000 tokens</span>
+              <span className="bk-hint bk-hint-case" aria-hidden="true">{t('model.caseHint')}</span>
               <motion.span className="bk-curtain bk-curtain-x" aria-hidden="true" variants={CURTAIN_X} transition={{ duration: 1.2, ease: [0.77, 0, 0.18, 1] }} />
-              <div className="bk-case-tag"><span>Caso de éxito</span><strong>Proyecto Dubái</strong><em>US$40 millones</em></div>
+              <div className="bk-case-tag"><span>{t('model.caseTag')}</span><strong>{t('model.caseName')}</strong><em>{t('model.caseAmount')}</em></div>
             </motion.div>
             <div className="bk-case-steps">
               <motion.div {...fadeUp(0.1)}>
-                <span className="bk-case-k">La fracción</span>
-                <span className="bk-case-big"><CountUp to={40000} separator="." duration={2} /></span>
-                <span className="bk-case-d">tokens emitidos a <strong>US$1.000</strong> cada uno</span>
+                <span className="bk-case-k">{t('model.fractionTitle')}</span>
+                <span className="bk-case-big"><CountUp to={40000} separator={sep} duration={2} /></span>
+                <span className="bk-case-d">{t('model.fractionLead')}<strong>{t('model.fractionStrong')}</strong>{t('model.fractionEnd')}</span>
               </motion.div>
               <motion.div {...fadeUp(0.2)}>
-                <span className="bk-case-k">El retorno al inversionista</span>
-                <div className="bk-bar"><span>Valorización proyectada</span><b>15% anual</b><i><motion.u initial={{ scaleX: 0 }} whileInView={{ scaleX: 0.75 }} viewport={{ once: true }} transition={{ duration: 1.4, ease: EASE, delay: 0.3 }} /></i></div>
-                <div className="bk-bar"><span>Ingresos por renta</span><b>10% anual</b><i><motion.u className="is-orange" initial={{ scaleX: 0 }} whileInView={{ scaleX: 0.5 }} viewport={{ once: true }} transition={{ duration: 1.4, ease: EASE, delay: 0.45 }} /></i></div>
+                <span className="bk-case-k">{t('model.returnTitle')}</span>
+                <div className="bk-bar"><span>{t('model.appreciation')}</span><b>{t('model.appreciationValue')}</b><i><motion.u initial={{ scaleX: 0 }} whileInView={{ scaleX: 0.75 }} viewport={{ once: true }} transition={{ duration: 1.4, ease: EASE, delay: 0.3 }} /></i></div>
+                <div className="bk-bar"><span>{t('model.rent')}</span><b>{t('model.rentValue')}</b><i><motion.u className="is-orange" initial={{ scaleX: 0 }} whileInView={{ scaleX: 0.5 }} viewport={{ once: true }} transition={{ duration: 1.4, ease: EASE, delay: 0.45 }} /></i></div>
               </motion.div>
             </div>
           </div>
-          <p className="bk-disclaimer">Cifras proyectadas del caso de estudio; no constituyen garantía de rendimientos futuros.</p>
+          <p className="bk-disclaimer">{t('model.disclaimer')}</p>
         </div>
       </section>
 
@@ -788,18 +785,18 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
       <section id="liderazgo" className="bk-sec">
         <div className="bk-wrap bk-leader">
           <motion.figure className="bk-leader-photo" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }}>
-            <img src="/images/brikme/andres-ortiz-oficina.webp" alt="Andrés Ortiz, CEO y fundador de Brikme, en su oficina" loading="lazy" width={1254} height={1254} />
+            <img src="/images/brikme/andres-ortiz-oficina.webp" alt={t('leader.photoAlt')} loading="lazy" width={1254} height={1254} />
             <motion.span className="bk-curtain bk-curtain-y" aria-hidden="true" variants={CURTAIN_Y} transition={{ duration: 1.2, ease: [0.77, 0, 0.18, 1] }} />
             <Corners />
           </motion.figure>
           <div>
-            <Head index="09" kicker="Liderazgo y ejecución"
+            <Head index="09" kicker={t('leader.kicker')}
               thin="Andrés" bold="Ortiz."
-              sub="CEO & Founder" />
+              sub={t('leader.role')} />
             <ul className="bk-leader-pts">
-              {LEADER_POINTS.map((p, i) => <motion.li key={p} {...fadeUp(i * 0.1)}>{p}</motion.li>)}
+              {raw<string[]>('leader.points').map((p, i) => <motion.li key={i} {...fadeUp(i * 0.1)}>{p}</motion.li>)}
             </ul>
-            <motion.blockquote className="bk-leader-quote" {...fadeUp(0.3)}>“La visión institucional requiere una ejecución inquebrantable.”</motion.blockquote>
+            <motion.blockquote className="bk-leader-quote" {...fadeUp(0.3)}>{t('leader.quote')}</motion.blockquote>
           </div>
         </div>
       </section>
@@ -815,17 +812,17 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
             <BrikmeMark size={64} stroke="#ffffff" />
           </motion.div>
           <ScrollReveal baseOpacity={0.12} enableBlur baseRotation={2} blurStrength={6} containerClassName="bk-reveal bk-final-h" textClassName="bk-reveal-text bk-thin">
-            Por primera vez en la historia, la riqueza global no pertenece solo a las instituciones.
+            {t('final.statement')}
           </ScrollReveal>
-          <BlurText text="Asegura tu lugar en el futuro del capital." animateBy="words" direction="bottom" delay={110} className="bk-final-strong" />
+          <BlurText text={t('final.strong')} animateBy="words" direction="bottom" delay={110} className="bk-final-strong" />
           <motion.div className="bk-final-ctas" {...fadeUp(0.4)}>
-            <Btn href={MARKET_PATH} onClick={toMarket} variant="accent">Explorar proyectos</Btn>
-            <Btn href={LOGIN_PATH} onClick={onEnter} variant="ghost-light">Crear mi cuenta</Btn>
+            <Btn href={MARKET_PATH} onClick={toMarket} variant="accent">{t('final.explore')}</Btn>
+            <Btn href={LOGIN_PATH} onClick={onEnter} variant="ghost-light">{t('final.create')}</Btn>
           </motion.div>
           <motion.dl className="bk-contact" {...fadeUp(0.5)}>
-            <div><dt>Email</dt><dd><a href="mailto:hello@brikme.com">hello@brikme.com</a></dd></div>
-            <div><dt>Sede</dt><dd>Zlafa Building, Al Garhoud Office M02, Business Bay Bridge, Dubái — EAU</dd></div>
-            <div><dt>Web</dt><dd><a href="https://www.brikme.com" rel="noopener">www.brikme.com</a></dd></div>
+            <div><dt>{t('final.email')}</dt><dd><a href="mailto:hello@brikme.com">hello@brikme.com</a></dd></div>
+            <div><dt>{t('final.hq')}</dt><dd>{t('final.hqValue')}</dd></div>
+            <div><dt>{t('final.web')}</dt><dd><a href="https://www.brikme.com" rel="noopener">www.brikme.com</a></dd></div>
           </motion.dl>
         </div>
       </section>
@@ -835,18 +832,18 @@ export default function BrikmeLanding({ onEnter, onDevEnter }: BrikmeLandingProp
         <div className="bk-wrap bk-footer-in">
           <div className="bk-footer-brand">
             <img src="/logo-dark.png" alt="BRIKME — Real World Tokenization" width={160} height={51} loading="lazy" />
-            <p>Marketplace de activos del mundo real tokenizados. Registrada y licenciada en Dubái (VARA).</p>
+            <p>{t('footer.about')}</p>
           </div>
           <ul className="bk-footer-links">
-            {FOOTER_LINKS.map(([l, href]) => <li key={href}><a href={href} onClick={e => goPage(e, href)}>{l}</a></li>)}
+            {FOOTER_LINKS.map(([key, href]) => <li key={href}><a href={href} onClick={e => goPage(e, href)}>{t(`links.${key}`)}</a></li>)}
           </ul>
         </div>
         <div className="bk-wrap bk-footer-legal">
           <span>© 2026 Brikme · Real World Tokenization</span>
-          <span>Invertir en activos tokenizados implica riesgos. Los rendimientos proyectados no garantizan resultados futuros.</span>
+          <span>{t('footer.risk')}</span>
         </div>
-        <nav aria-label="Páginas de Brikme" className="sr-only">
-          <ul>{SITE_LINKS.map(([l, href]) => <li key={href}><a href={href} onClick={e => goPage(e, href)}>{l}</a></li>)}</ul>
+        <nav aria-label={t('links.siteAria')} className="sr-only">
+          <ul>{SITE_LINKS.map(([key, href]) => <li key={href}><a href={href} onClick={e => goPage(e, href)}>{t(`links.${key}`)}</a></li>)}</ul>
         </nav>
       </footer>
     </div>

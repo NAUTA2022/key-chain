@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useT } from '~/i18n/useT';
 import { useInView } from './useInView';
 
 export type Sector = { id: string; t: string; d: string; img: string };
@@ -16,6 +17,7 @@ type Props = { sectors: readonly Sector[]; exploreHref: string; onExplore: () =>
  * It cycles on its own while nobody touches it.
  */
 export default function SectorExplorer({ sectors, exploreHref, onExplore }: Props) {
+  const { t } = useT('landing');
   const n = sectors.length;
   const [view, setView] = useState({ active: 0, prev: -1 });
   const [auto, setAuto] = useState(true);
@@ -59,7 +61,7 @@ export default function SectorExplorer({ sectors, exploreHref, onExplore }: Prop
   const s = sectors[active];
   return (
     <div ref={viewRef} className="bk-sx" onPointerEnter={() => { setHover(true); }} onPointerLeave={() => { setHover(false); }}>
-      <div className="bk-sx-list" role="tablist" aria-orientation="vertical" aria-label="Sectores">
+      <div className="bk-sx-list" role="tablist" aria-orientation="vertical" aria-label={t('sectors.aria')}>
         {sectors.map((sec, i) => {
           const on = i === active;
           return (
@@ -94,17 +96,17 @@ export default function SectorExplorer({ sectors, exploreHref, onExplore }: Prop
           <motion.div key={s.id} className="bk-sx-card"
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.35, ease: [0.2, 0.7, 0.2, 1] }}>
-            <span className="bk-sx-card-n">Sector {pad(active + 1)}</span>
+            <span className="bk-sx-card-n">{t('sectors.card', { n: pad(active + 1) })}</span>
             <strong>{s.t}</strong>
             <em>{s.d}</em>
             <a className="bk-sx-link" href={exploreHref} onClick={e => { e.preventDefault(); onExplore(); }}>
-              Ver proyectos <span aria-hidden="true">→</span>
+              {t('sectors.view')} <span className="rtl-flip" aria-hidden="true">→</span>
             </a>
           </motion.div>
         </AnimatePresence>
         <div className="bk-sx-nav">
-          <button type="button" aria-label="Sector anterior" onClick={() => { pick((active - 1 + n) % n); }}>←</button>
-          <button type="button" aria-label="Sector siguiente" onClick={() => { pick((active + 1) % n); }}>→</button>
+          <button type="button" aria-label={t('sectors.prev')} onClick={() => { pick((active - 1 + n) % n); }}><span className="rtl-flip">←</span></button>
+          <button type="button" aria-label={t('sectors.next')} onClick={() => { pick((active + 1) % n); }}><span className="rtl-flip">→</span></button>
         </div>
       </div>
     </div>

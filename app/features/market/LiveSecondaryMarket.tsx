@@ -14,16 +14,15 @@ import { FilterBar, ListingCard, MagnetToolbar, MobileMarketHeader, MobileSummar
 import { type MarketListing, cancelOnchain, shortWallet, useMarketInfo, useMarketListings, useMarketStats, useMyListings } from './api';
 import { SellModal } from './TradeModals';
 import GuideButton from '~/features/guide/GuideButton';
+import { useT } from '~/i18n/useT';
+import { errorText } from './i18n';
 
 type LiveListing = MarketListing & { catalog: CatalogAsset; diff: number };
 
-const fmtTokens = (n: number) => n.toLocaleString('es-AR', { maximumFractionDigits: 4 });
-const fmtVolume = (n: number) => '$' + n.toLocaleString('es-AR', { maximumFractionDigits: n < 10 ? 2 : 0 });
-const STATUS: Record<MarketListing['status'], { label: string; color: 'green' | 'neutral' | 'red' }> = {
-  active: { label: 'Activa', color: 'green' },
-  filled: { label: 'Vendida', color: 'neutral' },
-  cancelled: { label: 'Retirada', color: 'red' },
-};
+const fmtTokens = (n: number, locale: string) => n.toLocaleString(locale, { maximumFractionDigits: 4 });
+const fmtVolume = (n: number, locale: string) => '$' + n.toLocaleString(locale, { maximumFractionDigits: n < 10 ? 2 : 0 });
+/** Tag color of each listing status (the label is `secondary.status.<status>`). */
+const STATUS_COLOR: Record<MarketListing['status'], 'green' | 'neutral' | 'red'> = { active: 'green', filled: 'neutral', cancelled: 'red' };
 const sameWallet = (a: string | null | undefined, b: string | null | undefined) => Boolean(a && b) && a?.toLowerCase() === b?.toLowerCase();
 
 /**
@@ -41,6 +40,7 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
   const stats = useMarketStats();
   const mine = useMyListings();
   const [params, setParams] = useSearchParams();
+  const { t, locale } = useT('market');
 
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortKey>('descuento');
@@ -62,7 +62,7 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
 
   const me = session.user?.walletAddress ?? null;
   const marketInfo = info.data;
-  const unavailable = info.data ? (!info.data.enabled ? 'El mercado secundario no está disponible en esta red.' : info.data.paused ? 'El mercado secundario está pausado temporalmente: no se pueden publicar ni comprar ofertas.' : null) : null;
+  const unavailable = info.data ? (!info.data.enabled ? t('secondary.unavailable') : info.data.paused ? t('secondary.pausedLong') : null) : null;
 
   const refresh = () => {
     listings.reload();
@@ -93,11 +93,11 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
   const s = stats.data;
   const avg = s?.avgDiscountPercent ?? null;
   const kpis: Array<[string, string]> = [
-    ['Volumen 24h', s ? fmtVolume(s.volume24h) : '—'],
-    ['Listados activos', s ? s.activeListings.toString() : '—'],
+    [t('secondary.volume24h'), s ? fmtVolume(s.volume24h, locale) : '—'],
+    [t('secondary.activeListings'), s ? s.activeListings.toString() : '—'],
     // A discount is shown as a negative difference vs. the reference price (like each card).
-    ['Descuento promedio', avg === null ? '—' : `${avg > 0 ? '-' : avg < 0 ? '+' : ''}${Math.abs(avg).toFixed(1)}%`],
-    ['Operaciones 24h', s ? s.trades24h.toString() : '—'],
+    [t('secondary.avgDiscount'), avg === null ? '—' : `${avg > 0 ? '-' : avg < 0 ? '+' : ''}${Math.abs(avg).toFixed(1)}%`],
+    [t('secondary.trades24h'), s ? s.trades24h.toString() : '—'],
   ];
 
   const openSell = () => (session.status === 'authenticated' ? setSelling({ assetId: null }) : nav('login'));
@@ -110,9 +110,9 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
     const quantity = buyable(l);
     if (quantity < 1) return;
     goCheckout(nav, {
-      title: 'Compra en mercado secundario', source: 'Mercado Secundario',
-      items: [{ name: l.catalog.name, img: l.catalog.img, qty: quantity, unit: l.pricePerToken, meta: `Vende ${shortWallet(l.sellerWallet)}` }],
-      back: { route: 'secundario' }, done: { route: 'pertenencias', label: 'Ver en Mis Pertenencias' },
+      title: t('secondary.buyTitle'), source: 'Mercado Secundario',
+      items: [{ name: l.catalog.name, img: l.catalog.img, qty: quantity, unit: l.pricePerToken, meta: t('secondary.soldBy', { seller: shortWallet(l.sellerWallet) }) }],
+      back: { route: 'secundario' }, done: { route: 'pertenencias', label: t('secondary.viewInHoldings') },
       action: { kind: 'secondary', listingId: l.id, quantity },
     });
   };
@@ -123,10 +123,10 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
     setNotice(null);
     try {
       const { synced } = await cancelOnchain({ info: marketInfo, listing: l, account, wallet });
-      setNotice(`Retiraste la oferta. Tus tokens quedan libres en tu wallet.${synced ? '' : ' La lista se actualiza en unos segundos.'}`);
+      setNotice(t('secondary.cancelled') + (synced ? '' : t('secondary.cancelledSync')));
       refresh();
     } catch (e) {
-      setNotice(e instanceof Error ? e.message : 'No se pudo retirar la oferta.');
+      setNotice(errorText(e, t, 'errors.cancelFailed'));
     } finally {
       setCancelling(null);
     }
@@ -144,10 +144,10 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
     <div className="g-page" style={{ padding:'28px 32px 40px', maxWidth:1200, margin:'0 auto' }}>
       {mobile ? <MobileMarketHeader onPublish={openSell} disabled={Boolean(unavailable)} help={<GuideButton tour="secondary" />} /> : (
       <PSection
-        title={<span data-guide="secondary-title">Mercado Secundario</span>}
-        sub="Compra y venta P2P entre inversores. Compara precio pedido vs. precio real del token."
+        title={<span data-guide="secondary-title">{t('secondary.title')}</span>}
+        sub={t('secondary.sub')}
         help={<GuideButton tour="secondary" />}
-        action={<PBtn guide="secondary-sell" variant="primary" onClick={openSell} disabled={Boolean(unavailable)}>+ Publicar venta</PBtn>}
+        action={<PBtn guide="secondary-sell" variant="primary" onClick={openSell} disabled={Boolean(unavailable)}>{t('secondary.publish')}</PBtn>}
       />
       )}
 
@@ -176,7 +176,7 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
       {mobile ? <MagnetToolbar>{filterBar}</MagnetToolbar> : filterBar(false)}
 
       <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:16 }}>
-        {loading ? 'Cargando ofertas…' : `${sorted.length} listado${sorted.length !== 1 ? 's' : ''} activo${sorted.length !== 1 ? 's' : ''}`}
+        {loading ? t('secondary.loadingOffers') : t(sorted.length === 1 ? 'secondary.countOne' : 'secondary.countMany', { count: sorted.length })}
       </div>
 
       {/* Listings */}
@@ -187,20 +187,20 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
           return (
             <motion.div key={l.id} data-guide="listing-card" initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:Math.min(idx, 10)*0.06 }}>
               <ListingCard
-                seller={own ? 'ti (tu oferta)' : shortWallet(l.sellerWallet)}
+                seller={own ? t('secondary.you') : shortWallet(l.sellerWallet)}
                 asset={l.catalog}
-                qty={fmtTokens(l.available)}
+                qty={fmtTokens(l.available, locale)}
                 askPrice={l.pricePerToken}
                 diff={l.diff}
                 onView={() => nav('detalle', l.catalog)}
                 actions={own ? (
                   <PBtn guide="listing-withdraw" variant="secondary" style={{ flex:1 }} small disabled={cancelling === l.id} onClick={() => void cancel(l)}>
-                    {cancelling === l.id ? 'Retirando…' : 'Retirar oferta'}
+                    {cancelling === l.id ? t('secondary.withdrawing') : t('secondary.withdrawOffer')}
                   </PBtn>
                 ) : (
                   <PBtn guide="listing-buy" variant={isDiscount ? 'accent' : 'secondary'} style={{ flex:1 }} small disabled={Boolean(unavailable) || buyable(l) < 1}
                     onClick={() => buy(l)}>
-                    Comprar
+                    {t('secondary.buy')}
                   </PBtn>
                 )}
               />
@@ -212,17 +212,17 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
       {!loading && sorted.length === 0 && (
         <div style={{ textAlign:'center', padding:'60px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:14 }}>
           {listings.failed
-            ? 'No pudimos cargar las ofertas. Intenta de nuevo en unos segundos.'
+            ? t('secondary.emptyFailed')
             : (listings.data?.items.length ?? 0) > 0
-              ? 'No hay listados activos con esos filtros.'
-              : 'Todavía no hay ofertas publicadas. Publica la primera con «+ Publicar venta» o desde Mis Pertenencias.'}
+              ? t('secondary.emptyFiltered')
+              : t('secondary.emptyNone')}
         </div>
       )}
 
       {/* The user's own offers, including sold and withdrawn ones */}
       {myListings.length > 0 && (
         <section style={{ marginTop:36 }}>
-          <h2 style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18, color:'var(--text)', letterSpacing:'-0.02em', margin:'0 0 12px' }}>Mis publicaciones</h2>
+          <h2 style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18, color:'var(--text)', letterSpacing:'-0.02em', margin:'0 0 12px' }}>{t('secondary.myListings')}</h2>
           <PCard style={{ padding:'6px 18px' }}>
             {myListings.map((l, i) => {
               const sold = l.quantity - l.remaining;
@@ -232,14 +232,14 @@ export default function LiveSecondaryMarket({ nav, rubro = 'Todos' }: { nav: Nav
                   <div style={{ flex:'1 1 200px', minWidth:0 }}>
                     <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:14, color:'var(--text)' }}>{l.asset.name}</div>
                     <div style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--sec)', marginTop:2 }}>
-                      {fmtTokens(l.quantity)} tokens a {fmtUSD2(l.pricePerToken)} · vendidos {fmtTokens(sold)}
-                      {stuck && ' · sin saldo o autorización suficiente para venderse'}
+                      {t('secondary.myListingLine', { qty: fmtTokens(l.quantity, locale), price: fmtUSD2(l.pricePerToken), sold: fmtTokens(sold, locale) })}
+                      {stuck && t('secondary.stuck')}
                     </div>
                   </div>
-                  <PTag label={STATUS[l.status].label} color={STATUS[l.status].color} />
+                  <PTag label={t(`secondary.status.${l.status}`)} color={STATUS_COLOR[l.status]} />
                   {l.status === 'active' && (
                     <PBtn variant="secondary" small disabled={cancelling === l.id} onClick={() => void cancel(l)}>
-                      {cancelling === l.id ? 'Retirando…' : 'Retirar'}
+                      {cancelling === l.id ? t('secondary.withdrawing') : t('secondary.withdraw')}
                     </PBtn>
                   )}
                 </div>

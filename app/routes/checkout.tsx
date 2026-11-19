@@ -7,6 +7,8 @@ import { investmentOrder, loadOrder } from '~/lib/checkout';
 import { useNav } from '~/lib/navigation';
 import { useSession } from '~/lib/session';
 import { seo } from '~/lib/seo';
+import { useT } from '~/i18n/useT';
+import { useDataLabel } from '~/features/market/i18n';
 
 export const meta: Route.MetaFunction = () => seo({ title: 'Checkout', path: '/checkout', noindex: true });
 
@@ -24,7 +26,12 @@ export default function Page() {
   // `?activo=<id>&cantidad=<n>`: an investment link (also the fallback when the stored order is gone).
   const asset = byId(params.get('activo') ?? undefined);
   const qty = Math.max(1, Math.floor(Number(params.get('cantidad')) || 1));
-  const linked = useMemo(() => (asset ? investmentOrder(asset, qty, live) : null), [asset, qty, live]);
+  const { t } = useT('market');
+  const label = useDataLabel();
+  const linked = useMemo(
+    () => (asset ? investmentOrder(asset, qty, live, { t, category: c => label('categories', c) }) : null),
+    [asset, qty, live, t, label],
+  );
   const order = stored ?? linked;
   // A new order starts the checkout from its first step.
   return <Checkout key={orderId ?? `${asset?.id ?? ''}:${qty}`} nav={nav} order={order} />;

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useT } from '~/i18n/useT';
 
 /*
  * The "evolution of property" cubes (Web 1 · Web 2 · Web 3) as interactive 3D.
@@ -179,6 +180,7 @@ function GlassScene({ drag, size }: { drag: RefObject<Drag>; size: number }) {
 type EvoCube3DProps = { tone: EvoTone; size: number; className?: string };
 
 export function EvoCube3D({ tone, size, className }: EvoCube3DProps) {
+  const { t } = useT('landing');
   const drag = useRef<Drag>(newDrag());
   const solid = tone !== 'glass';
 
@@ -210,7 +212,7 @@ export function EvoCube3D({ tone, size, className }: EvoCube3DProps) {
 
   return (
     <div className={className} role="img"
-      aria-label={solid ? 'Cubo en 3D: arrástralo hacia arriba y suéltalo' : 'Cubo de vidrio en 3D: pasa el cursor para separar sus bloques'}
+      aria-label={solid ? t('a11y.evoSolid') : t('a11y.evoGlass')}
       style={{ touchAction: solid ? 'none' : 'pan-y', cursor: solid ? 'grab' : 'crosshair' }}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={end} onPointerCancel={end}
       onPointerEnter={() => { drag.current.hover = true; }} onPointerLeave={() => { drag.current.hover = false; }}>

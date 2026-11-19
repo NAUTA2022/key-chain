@@ -1,69 +1,79 @@
 import type { ReactNode } from 'react';
+import { richText, type TFn } from '~/features/market/i18n';
 import type { DemoRun, Progress } from './api';
 import { Dots, HitoReceipt } from './Guide';
 import type { GuideStep, Hito } from './guide-data';
 
-export type GuideContext = { step: GuideStep; ready: boolean; run: DemoRun | null; p: Progress; hito: Hito; mine: number };
+export type GuideContext = { step: GuideStep; ready: boolean; run: DemoRun | null; p: Progress; hito: Hito; mine: number; t: TFn };
 export type GuideContent = { kicker: string; title: string; body: ReactNode; status?: ReactNode };
 
-const strong = (t: ReactNode) => <strong style={{ color: 'var(--text)', fontWeight: 700 }}>{t}</strong>;
-const parts = (n: number) => `${n} ${n === 1 ? 'parte' : 'partes'}`;
+const strong = (text: ReactNode, key?: number) => <strong key={key} style={{ color: 'var(--text)', fontWeight: 700 }}>{text}</strong>;
+/** A translated sentence with its `<b>…</b>` spans in bold. */
+const rich = (text: string) => <>{richText(text, strong)}</>;
 
 /** What the guide says at each moment, in plain words (one idea per step). */
-export function guideContent({ step, ready, run, p, hito, mine }: GuideContext): GuideContent {
+export function guideContent({ step, ready, run, p, hito, mine, t }: GuideContext): GuideContent {
   const others = 5 - mine;
+  const parts = (n: number) => t(n === 1 ? 'demo.guide.partOne' : 'demo.guide.partMany', { count: n });
   switch (step) {
     case 0: return {
-      kicker: 'Proyecto destacado · Demo',
-      title: 'Así funciona invertir en una propiedad',
-      body: <>{strong('Villa Mirador')} es una casa de alquiler dividida en {strong('5 partes')} de {strong('1 USD')}. Quien tiene una parte cobra {strong('1/5 de lo que gane la casa')}. Tú eliges cuántas partes comprar y sigues el dinero en el mapa.</>,
+      kicker: t('demo.guide.s0.kicker'),
+      title: t('demo.guide.s0.title'),
+      body: rich(t('demo.guide.s0.body')),
     };
     case 1: return {
-      kicker: 'Paso 1 de 5',
-      title: ready ? `¡Listo! Tus ${mine} USD llegaron` : 'Pones el dinero',
+      kicker: t('demo.guide.s1.kicker'),
+      title: ready ? t('demo.guide.s1.titleReady', { count: mine }) : t('demo.guide.s1.title'),
       body: ready
-        ? <>Tu dinero ya está en la plataforma. En el mapa sale de la izquierda hacia {mine === 1 ? 'tu wallet (W1)' : `tus ${mine} wallets`}.</>
+        ? rich(t(mine === 1 ? 'demo.guide.s1.bodyReadyOne' : 'demo.guide.s1.bodyReadyMany', { count: mine }))
         : run?.status === 'awaiting_payment'
-          ? <>Envía el pago con estos datos. Apenas llegue, la demo sigue sola.</>
-          : <>Elige {strong('cuántas partes')} quieres y {strong('cómo pagar')}. Si solo quieres mirar, elige {strong('«Ver la demo gratis»')}.</>,
+          ? rich(t('demo.guide.s1.bodyAwaiting'))
+          : rich(t('demo.guide.s1.bodyChoose')),
     };
     case 2: return {
-      kicker: 'Paso 2 de 5',
-      title: 'Se compran las 5 partes',
+      kicker: t('demo.guide.s2.kicker'),
+      title: t('demo.guide.s2.title'),
       body: others > 0
-        ? <>Con tu dinero se compran {strong(`tus ${parts(mine)}`)} (W1{mine > 1 ? `–W${mine}` : ''}). {strong(others === 1 ? 'Otro inversionista' : `Otros ${others} inversionistas`)} compran el resto. Cada compra queda en la blockchain.</>
-        : <>Tus 5 USD compran {strong('las 5 partes')}: eres dueño del {strong('100% de la casa')}. Cada compra queda en la blockchain.</>,
-      status: <Dots done={p.invested} label={`${p.invested} de 5 partes compradas`} />,
+        ? rich(t('demo.guide.s2.bodyShared', {
+            parts: parts(mine),
+            range: `W1${mine > 1 ? `–W${mine}` : ''}`,
+            others: others === 1 ? t('demo.guide.s2.otherOne') : t('demo.guide.s2.otherMany', { count: others }),
+          }))
+        : rich(t('demo.guide.s2.bodyAll')),
+      status: <Dots done={p.invested} label={t('demo.guide.s2.status', { n: p.invested })} />,
     };
     case 3: return {
-      kicker: 'Paso 3 de 5',
-      title: 'La casa genera ganancia',
+      kicker: t('demo.guide.s3.kicker'),
+      title: t('demo.guide.s3.title'),
       body: p.deposit || ready
-        ? <>{hito.story} La empresa puso {strong('5 USD de ganancia')} en el contrato para repartirlos.</>
-        : <>Pasó un mes. Elige {strong('qué pasó en la villa')} y toca {strong('«Repartir la ganancia»')}. Tú haces de empresa dueña del proyecto.</>,
+        ? rich(t('demo.guide.s3.bodyDone', { story: hito.story }))
+        : rich(t('demo.guide.s3.bodyChoose')),
       status: p.deposit || ready ? <HitoReceipt hito={hito} /> : undefined,
     };
     case 4: return {
-      kicker: 'Paso 4 de 5',
-      title: 'El contrato reparte solo',
-      body: <>{strong('5 USD ÷ 5 partes = 1 USD por parte')}. Cada dueño cobra según lo que tiene: a ti te tocan {strong(`${mine} USD`)}. Nadie hace cuentas a mano.</>,
-      status: <Dots done={p.claimed} label={`${p.claimed} de 5 cobraron`} />,
+      kicker: t('demo.guide.s4.kicker'),
+      title: t('demo.guide.s4.title'),
+      body: rich(t('demo.guide.s4.body', { mine })),
+      status: <Dots done={p.claimed} label={t('demo.guide.s4.status', { n: p.claimed })} />,
     };
     case 5: return {
-      kicker: 'Paso 5 de 5',
-      title: 'Tu ganancia llega a tu wallet',
-      body: <>{mine === 1 ? 'Tu parte te envía' : `Tus ${parts(mine)} te envían`} lo que cobraron. {others > 0 ? 'Los otros inversionistas se quedan con lo suyo. ' : ''}Mira tu saldo arriba.</>,
-      status: <Dots done={p.swept} total={mine} label={`+${p.swept} de ${mine} USD en tu wallet`} />,
+      kicker: t('demo.guide.s5.kicker'),
+      title: t('demo.guide.s5.title'),
+      body: rich(t('demo.guide.s5.body', {
+        lead: mine === 1 ? t('demo.guide.s5.sendOne') : t('demo.guide.s5.sendMany', { parts: parts(mine) }),
+        others: others > 0 ? t('demo.guide.s5.othersKeep') : '',
+      })),
+      status: <Dots done={p.swept} total={mine} label={t('demo.guide.s5.status', { n: p.swept, mine })} />,
     };
     default: return {
-      kicker: 'Resumen',
-      title: 'Esto es lo que pasó',
+      kicker: t('demo.guide.s6.kicker'),
+      title: t('demo.guide.s6.title'),
       body: (
         <ul style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 4 }}>
-          <li>Pusiste {strong(`${mine} USD`)} → compraste {strong(`${parts(mine)} de 5`)} ({mine * 20}% de la casa).</li>
-          <li>La casa ganó {strong('5 USD')} ({hito.title.toLowerCase()}) → te tocaron {strong(`${mine} USD`)}.</li>
-          {mine < 5 && <li>Con las 5 partes te habría tocado {strong('todo')}: 5 USD.</li>}
-          {run && !run.simulated && <li>Te devolvemos tus {strong(`${mine} USDT reales`)}.</li>}
+          <li>{rich(t('demo.guide.s6.put', { mine, parts: parts(mine), pct: mine * 20 }))}</li>
+          <li>{rich(t('demo.guide.s6.earned', { hito: hito.title.toLowerCase(), mine }))}</li>
+          {mine < 5 && <li>{rich(t('demo.guide.s6.allParts'))}</li>}
+          {run && !run.simulated && <li>{rich(t('demo.guide.s6.refund', { mine }))}</li>}
         </ul>
       ),
     };

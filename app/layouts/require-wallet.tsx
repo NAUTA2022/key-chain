@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router';
 import { useActiveAccount, useActiveWalletConnectionStatus } from 'thirdweb/react';
 import { ConnectButton } from '~/components/ConnectButton';
 import { PBtn, PCard } from '~/components/ui';
+import { useT } from '~/i18n/useT';
 import { polygon } from 'thirdweb/chains';
 import { appChain } from '~/lib/onchain';
 import { client } from '~/lib/thirdweb';
@@ -58,16 +59,17 @@ export default function RequireWallet() {
 
 /** Shown when the session is alive but its wallet does not reconnect on its own. */
 function ReconnectWallet({ onLogout }: { onLogout: () => void }) {
+  const { t } = useT('common');
   return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 16px' }}>
       <PCard style={{ padding: '28px 26px', maxWidth: 420, width: '100%', textAlign: 'center' }}>
-        <h1 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: 'var(--text)', margin: '0 0 8px' }}>Reconectá tu wallet</h1>
+        <h1 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: 'var(--text)', margin: '0 0 8px' }}>{t('wallet.reconnectTitle')}</h1>
         <p style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--sec)', lineHeight: 1.55, margin: '0 0 20px' }}>
-          Tu sesión sigue abierta, pero la wallet no se reconectó. Abrila o desbloqueala y conectala de nuevo para continuar.
+          {t('wallet.reconnectText')}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
-          <ConnectButton client={client} chain={appChain ?? polygon} connectButton={{ label: 'Conectar wallet' }} />
-          <PBtn variant="ghost" small onClick={onLogout}>Cerrar sesión</PBtn>
+          <ConnectButton client={client} chain={appChain ?? polygon} connectButton={{ label: t('wallet.connect') }} />
+          <PBtn variant="ghost" small onClick={onLogout}>{t('nav.logout')}</PBtn>
         </div>
       </PCard>
     </div>

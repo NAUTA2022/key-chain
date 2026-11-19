@@ -1,0 +1,248 @@
+{
+  "format": {
+    "thousands": ","
+  },
+  "nav": {
+    "aria": "Main",
+    "items": {
+      "vision": "Vision",
+      "mercado": "Market",
+      "sectores": "Sectors",
+      "modelo": "Model",
+      "liderazgo": "Leadership",
+      "contacto": "Contact"
+    },
+    "login": "Log in",
+    "invest": "Invest",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "dev": "Dev login",
+    "devTitle": "Enter without a wallet (development only)"
+  },
+  "links": {
+    "projects": "Projects",
+    "tokenizations": "Tokenizations",
+    "secondary": "Secondary market",
+    "academy": "Academy",
+    "help": "Help center",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "siteAria": "Brikme pages"
+  },
+  "loader": {
+    "preparing": "Preparing the experience"
+  },
+  "hero": {
+    "badge": "Registered and licensed in Dubai · VARA",
+    "titleThin": "Invest in the",
+    "titleBold": "extraordinary.",
+    "lead": "Tokenized real-world assets: from a supercar to a Dubai tower. Start from US$200.",
+    "prev": "Previous asset",
+    "next": "Next asset",
+    "explore": "Explore projects",
+    "tokenize": "Tokenize your asset",
+    "dragHint": "Drag to rotate",
+    "items": {
+      "car": { "title": "Luxury cars", "sub": "Supercars and premium fleets" },
+      "tower": { "title": "Dubai Real Estate", "sub": "Towers and hotels in prime locations" },
+      "watch": { "title": "Collectible watches", "sub": "Fine watchmaking as an asset class" },
+      "turbine": { "title": "Renewable energy", "sub": "Wind and solar infrastructure" },
+      "gold": { "title": "Minerals", "sub": "Tokenized commodities" },
+      "villa": { "title": "Residential", "sub": "High-value villas and homes" }
+    }
+  },
+  "figures": {
+    "aria": "Key figures",
+    "stats": [
+      "USD minimum investment",
+      "Global market, always open",
+      "Real-economy sectors",
+      "Registered and licensed in Dubai"
+    ]
+  },
+  "vision": {
+    "kicker": "The macro shift",
+    "thin": "The evolution",
+    "bold": "of ownership.",
+    "sub": "Read, write… and now own. The internet is entering its third era.",
+    "physicsLabel": "Three 3D cubes with physics: drag them, throw them and make them collide",
+    "hint": "Grab, throw and stack the cubes",
+    "evolution": [
+      { "verb": "Read", "desc": "Consuming information." },
+      { "verb": "Write", "desc": "Creating and interacting." },
+      { "verb": "Own", "desc": "Verified digital ownership." }
+    ],
+    "quote": "Assets and money are dematerializing. For the first time in the history of the internet, tokens mean OWNERSHIP."
+  },
+  "market": {
+    "kicker": "The opportunity",
+    "thin": "An opportunity 100 times",
+    "bold": "bigger than Bitcoin?",
+    "sub": "Every cube is to scale: its volume reflects the size of each market.",
+    "physicsLabel": "Cubes scaled to each market, with physics: drag and throw them",
+    "names": ["DeFi", "Cryptocurrencies", "Stock market", "Global real estate", "Derivatives"],
+    "band": {
+      "lead": "The global RWA tokenization market is projected to reach ",
+      "strong1": "US$24 billion in 2025",
+      "mid": ", growing at a ",
+      "strong2": "22.7% CAGR",
+      "end": " through 2030."
+    }
+  },
+  "adoption": {
+    "kicker": "Institutional and sovereign adoption",
+    "thin": "The giants are already",
+    "bold": "building the plumbing.",
+    "statesTitle": "Sovereign moves",
+    "institutionsTitle": "The institutional shift",
+    "states": [
+      { "flag": "USA", "text": "The world's largest government reserve." },
+      { "flag": "El Salvador", "text": "First country with a national accumulation strategy." },
+      { "flag": "United Arab Emirates", "text": "Tokenized: a sovereign bet on real estate on the blockchain." }
+    ],
+    "institutions": [
+      "Its tokenized BUIDL fund has reached US$3 billion in assets under management.",
+      "Launch of the institutional Fidelity Digital Dollar (FIDD).",
+      "Strategic partnership to launch tokenized equities in 2027."
+    ],
+    "insightLabel": "Insight.",
+    "insight": "If you can't beat them, join them: the giants are already building the financial infrastructure of the next decade."
+  },
+  "compare": {
+    "kicker": "The problem vs. the solution",
+    "thin": "From the old world",
+    "bold": "to the new era.",
+    "aria": "Traditional investing versus tokenized investing",
+    "oldTitle": "The old world",
+    "oldTag": "Traditional",
+    "newTitle": "The new era",
+    "newTag": "Tokenized",
+    "rows": [
+      { "k": "Barrier to entry", "old": "US$100,000+ required.", "next": "Invest from US$200." },
+      { "k": "Liquidity", "old": "Capital locked up for months or years.", "next": "Instant, global markets 24/7." },
+      { "k": "Borders", "old": "Local restrictions and heavy red tape.", "next": "Digital access with no geographic borders." },
+      { "k": "Intermediaries", "old": "Banks, notaries and high fees.", "next": "Smart contracts with automatic execution." }
+    ],
+    "statement": "While large institutions build private liquidity pools for billionaires, retail investors and entrepreneurs remain locked out."
+  },
+  "bridge": {
+    "kicker": "Introducing Brikme",
+    "thin": "The digital",
+    "bold": "bridge.",
+    "sub": "The first DeFi community and marketplace for real-world assets (RWA).",
+    "oldLabel": "Traditional capital",
+    "newLabel": "Tokenized assets",
+    "pillars": [
+      { "t": "We democratize access", "d": "Invest in high-value assets from US$200, with the same information as an institution." },
+      { "t": "We unlock liquidity", "d": "We finance and fund assets for developers where traditional banking falls short." },
+      { "t": "A club without borders", "d": "A global investment community with the blockchain as its backbone." }
+    ],
+    "taglineLead": "All in a single marketplace.",
+    "taglineStrong": "Trusted, transparent and global."
+  },
+  "club": {
+    "kicker": "A borderless investment club",
+    "thin": "Invest in",
+    "bold": "what's real.",
+    "sub": "Every token is a brick of a real asset, recorded on the blockchain and backed by a contract. Build your portfolio piece by piece.",
+    "facts": ["Minimum investment in USD", "Global liquidity", "Borders to investing"],
+    "cta": "Start investing",
+    "hint": "Drag to rotate"
+  },
+  "sectors": {
+    "kicker": "Real-economy sectors",
+    "thin": "Tangible assets,",
+    "bold": "not speculation.",
+    "sub": "Backed by real assets: diversification and legal traceability in every project.",
+    "items": {
+      "real-estate": { "t": "Real Estate", "d": "Properties and hotels" },
+      "mineria": { "t": "Mining", "d": "Physical assets and extraction" },
+      "agricultura": { "t": "Agriculture", "d": "Sustainable production" },
+      "energia": { "t": "Energy", "d": "Renewable infrastructure" },
+      "transporte": { "t": "Transport", "d": "Global logistics" },
+      "lujo": { "t": "Luxury assets", "d": "Art and collectibles" }
+    },
+    "aria": "Sectors",
+    "card": "Sector {{n}}",
+    "view": "View projects",
+    "prev": "Previous sector",
+    "next": "Next sector"
+  },
+  "engine": {
+    "kicker": "The Brikme engine",
+    "thin": "Smart",
+    "bold": "contracts.",
+    "sub": "Automatic execution with no intermediaries. Transparent, immutable and auditable by anyone in the world.",
+    "flow": ["Conditions met", "Automatic execution", "Transaction recorded on the ledger"],
+    "sealLabel": "Compliance",
+    "sealText": "Registered and licensed in Dubai",
+    "sealStrong": "(VARA compliant)",
+    "tokensTitle": "Token hierarchy and types",
+    "tokens": {
+      "utility": { "t": "Utility tokens", "d": "Access to services", "ex": "ETH · GT3 · FIT" },
+      "security": { "t": "Security / E-Money", "d": "Equities, CBDCs", "ex": "Equity tokens · CBDC" },
+      "stable": { "t": "Stablecoins", "d": "Stable value", "ex": "USDT · USDC · DAI" },
+      "rwa": { "t": "RWA — the Brikme focus", "d": "Real-world assets: value captured from the traditional world", "ex": "Real estate · Gold · Infrastructure" },
+      "nft": { "t": "NFTs / Memecoins", "d": "Collectibles, speculation", "ex": "Outside our focus" }
+    }
+  },
+  "model": {
+    "kicker": "For developers and asset owners",
+    "thin": "A hybrid,",
+    "bold": "scalable model.",
+    "sub": "Better assets attract more liquidity, and more liquidity attracts higher-grade institutional assets.",
+    "step1": { "n": "Step 1", "title": "Origination", "text": "Legal and technological structuring of the physical asset." },
+    "step2": { "n": "Step 2", "title": "Distribution", "text": "Launch on the Brikme Marketplace to a global network of investors." },
+    "setupFee": "Setup fee",
+    "setupText": "Curation, analysis and digitization of the asset with smart contracts.",
+    "successFee": "Success fee",
+    "successText": "A commission on the successful funding of your project on the marketplace.",
+    "cta": "Tokenize your asset",
+    "caseHint": "Hover: 1 asset → 40,000 tokens",
+    "caseTag": "Success story",
+    "caseName": "Dubai Project",
+    "caseAmount": "US$40 million",
+    "fractionTitle": "The fraction",
+    "fractionLead": "tokens issued at ",
+    "fractionStrong": "US$1,000",
+    "fractionEnd": " each",
+    "returnTitle": "The investor return",
+    "appreciation": "Projected appreciation",
+    "appreciationValue": "15% per year",
+    "rent": "Rental income",
+    "rentValue": "10% per year",
+    "disclaimer": "Projected figures from the case study; they are not a guarantee of future returns."
+  },
+  "leader": {
+    "kicker": "Leadership and execution",
+    "role": "CEO & Founder",
+    "photoAlt": "Andrés Ortiz, CEO and founder of Brikme, in his office",
+    "points": [
+      "22 years of experience scaling technology and real estate businesses.",
+      "Founding member of the Colombian Business Council in Dubai (Dubai Chamber of Commerce).",
+      "Recipient of the International Visionaries Award 2025 in Dubai."
+    ],
+    "quote": "“Institutional vision demands unwavering execution.”"
+  },
+  "final": {
+    "statement": "For the first time in history, global wealth no longer belongs to institutions alone.",
+    "strong": "Secure your place in the future of capital.",
+    "explore": "Explore projects",
+    "create": "Create my account",
+    "email": "Email",
+    "hq": "Headquarters",
+    "hqValue": "Zlafa Building, Al Garhoud Office M02, Business Bay Bridge, Dubai — UAE",
+    "web": "Web"
+  },
+  "footer": {
+    "about": "A marketplace for tokenized real-world assets. Registered and licensed in Dubai (VARA).",
+    "risk": "Investing in tokenized assets involves risk. Projected returns do not guarantee future results."
+  },
+  "a11y": {
+    "physics": "3D cubes with physics: drag, throw and stack them",
+    "logo3d": "3D Brikme logo: drag to rotate it",
+    "tokenBlock": "An asset split into tokens: hover or tap to fractionalize it",
+    "evoSolid": "3D cube: drag it upwards and let go",
+    "evoGlass": "3D glass cube: hover to separate its blocks"
+  }
+}

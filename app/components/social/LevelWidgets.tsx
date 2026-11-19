@@ -3,6 +3,8 @@ import { motion, useSpring, useTransform } from 'framer-motion';
 import { fmtUSD } from '~/data';
 import AchievementIcon from '~/components/social/AchievementIcon';
 import { achievementsOf, type Achievement, type AchievementInput } from '~/lib/achievements';
+import { useT } from '~/i18n/useT';
+import { useDataText } from '~/i18n/data';
 
 // "Nivel y logros" as a set of widget tiles (weather-app style): level
 // staircase, invested-amount wave, reputation gauge, return scale,
@@ -21,12 +23,13 @@ export type LevelData = AchievementInput & {
   since: string;
 };
 
+// Level names are translated by id (social.level.names.<id>).
 const LEVELS = [
-  { n: 1, name: 'Explorador', min: 0 },
-  { n: 2, name: 'Inversor', min: 3000 },
-  { n: 3, name: 'Constructor', min: 10000 },
-  { n: 4, name: 'Estratega', min: 25000 },
-  { n: 5, name: 'Visionario', min: 50000 },
+  { n: 1, id: 'explorer', min: 0 },
+  { n: 2, id: 'investor', min: 3000 },
+  { n: 3, id: 'builder', min: 10000 },
+  { n: 4, id: 'strategist', min: 25000 },
+  { n: 5, id: 'visionary', min: 50000 },
 ] as const;
 const fmtK = (n: number) => (n >= 1000 ? `$${Math.round(n / 1000)}K` : `$${n}`);
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -78,6 +81,7 @@ const levelAt = (level: number) => LEVELS[Math.min(Math.max(level, 1), 5) - 1];
 // the next one fills with the progress towards it; the current one glows.
 // `hideProgress`: someone else's private amounts (only their level is public).
 function LevelStairs({ d, hideProgress }: { d: LevelData; hideProgress?: boolean }) {
+  const { t } = useT('profile');
   const idx = d.level - 1;
   const next = LEVELS[Math.min(idx + 1, 4)];
   const frac = hideProgress ? 0 : d.level >= 5 ? 1 : clamp((d.invested - levelAt(d.level).min) / (next.min - levelAt(d.level).min));
@@ -103,7 +107,7 @@ function LevelStairs({ d, hideProgress }: { d: LevelData; hideProgress?: boolean
             </div>
             <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', marginTop: 8 }}>
               <div style={{ fontSize: 11.5, color: on ? 'var(--text)' : 'var(--ter)', fontWeight: 700 }}>N{l.n}</div>
-              <div style={{ fontSize: 11, color: on ? 'var(--text)' : 'var(--ter)', fontWeight: on ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.name}</div>
+              <div style={{ fontSize: 11, color: on ? 'var(--text)' : 'var(--ter)', fontWeight: on ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t(`social.level.names.${l.id}`)}</div>
               <div style={{ fontSize: 13, color: reached ? 'var(--text)' : 'var(--sec)', fontWeight: on ? 800 : 600, marginTop: 2 }}>{fmtK(l.min)}</div>
             </div>
           </div>
@@ -150,6 +154,7 @@ function useLiquidTilt() {
 }
 
 function WaveFill({ pct, label, sub }: { pct: number; label: string; sub: string }) {
+  const { t } = useT('profile');
   const h = 22 + pct * 0.5; // % of tile filled
   const wave = 'M0 10 Q 25 0 50 10 T 100 10 T 150 10 T 200 10 V 40 H 0 Z';
   const tilt = useLiquidTilt();
@@ -170,7 +175,7 @@ function WaveFill({ pct, label, sub }: { pct: number; label: string; sub: string
       <div style={{ marginTop: 'auto', position: 'relative', zIndex: 2, pointerEvents: 'none' }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 26, color: '#fff', letterSpacing: '-0.02em', textShadow: '0 1px 2px rgba(0,0,0,0.12)' }}>{label}</div>
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'rgba(255,255,255,0.9)' }}>{sub}</div>
-        {tilt.needsTap && <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Toca para mover el agua con el teléfono</div>}
+        {tilt.needsTap && <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>{t('social.level.tapToMove')}</div>}
       </div>
     </>
   );
@@ -178,6 +183,7 @@ function WaveFill({ pct, label, sub }: { pct: number; label: string; sub: string
 
 // ─── Reputation (pressure-style gauge) ────────────────────────────────────────
 function Gauge({ value: shown, max = 5 }: { value: number | null; max?: number }) {
+  const { t } = useT('profile');
   const value = shown ?? 0;
   const a0 = 150, sweep = 240;
   const r = 40, cx = 50, cy = 50;
@@ -200,7 +206,7 @@ function Gauge({ value: shown, max = 5 }: { value: number | null; max?: number }
       {shown !== null && <Knob color="#fb7185" size={16} style={{ left: `${kx}%`, top: `${(ky / 86) * 100}%` }} />}
       <div style={{ position: 'absolute', left: 0, right: 0, top: '38%', textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 24, color: 'var(--text)', lineHeight: 1 }}>{shown === null ? '—' : value.toFixed(1)}</div>
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 3 }}>{shown === null ? 'Sin datos todavía' : 'de 5 ★'}</div>
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 3 }}>{shown === null ? t('social.level.noData') : t('social.level.outOf5')}</div>
       </div>
     </div>
   );
@@ -208,8 +214,9 @@ function Gauge({ value: shown, max = 5 }: { value: number | null; max?: number }
 
 // ─── Return (UV-index-style scale) ────────────────────────────────────────────
 function ReturnScale({ ret }: { ret: number | null }) {
+  const { t } = useT('profile');
   const pos = clamp(((ret ?? 0) + 10) / 40); // -10% … +30%
-  const label = ret === null ? 'Sin datos todavía' : ret >= 15 ? 'Excelente' : ret >= 8 ? 'Muy bueno' : ret >= 0 ? 'Positivo' : 'Negativo';
+  const label = ret === null ? t('social.level.noData') : ret >= 15 ? t('social.level.retExcellent') : ret >= 8 ? t('social.level.retVeryGood') : ret >= 0 ? t('social.level.retPositive') : t('social.level.retNegative');
   return (
     <>
       <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 26, color: 'var(--text)', letterSpacing: '-0.02em' }}>{ret === null ? '—' : `${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%`}</div>
@@ -226,6 +233,8 @@ function ReturnScale({ ret }: { ret: number | null }) {
 
 // ─── Diversification (wind-style compass) ─────────────────────────────────────
 function Compass({ cats }: { cats: LevelData['cats'] }) {
+  const { t } = useT('profile');
+  const { t: tc } = useT('common');
   const total = cats.reduce((s, [, v]) => s + v, 0) || 1;
   const top = cats.slice(0, 4);
   const dirs = [-90, 0, 90, 180];
@@ -241,7 +250,7 @@ function Compass({ cats }: { cats: LevelData['cats'] }) {
           })}
           {top.map(([c], i) => {
             const a = (dirs[i] * Math.PI) / 180;
-            return <text key={c} x={50 + Math.cos(a) * 48} y={50 + Math.sin(a) * 48 + 3} textAnchor="middle" style={{ fontFamily: 'var(--font-b)', fontSize: 8.5, fontWeight: 700, fill: i === 0 ? '#6366f1' : 'var(--sec)' }}>{c.slice(0, 3).toUpperCase()}</text>;
+            return <text key={c} x={50 + Math.cos(a) * 48} y={50 + Math.sin(a) * 48 + 3} textAnchor="middle" style={{ fontFamily: 'var(--font-b)', fontSize: 8.5, fontWeight: 700, fill: i === 0 ? '#6366f1' : 'var(--sec)' }}>{tc(`categories.${c}`).slice(0, 3).toUpperCase()}</text>;
           })}
           <g transform={`rotate(${needle + 90} 50 50)`}>
             <line x1="50" y1="64" x2="50" y2="26" stroke="#6366f1" strokeWidth="2.6" strokeLinecap="round" />
@@ -252,7 +261,7 @@ function Compass({ cats }: { cats: LevelData['cats'] }) {
         </svg>
       </div>
       <div style={{ marginTop: 'auto', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
-        {cats.length} {cats.length === 1 ? 'rubro' : 'rubros'}{lead ? <span style={{ fontWeight: 500, color: 'var(--ter)', fontSize: 13 }}> · {lead[0]} {Math.round((lead[1] / total) * 100)}%</span> : null}
+        {t(cats.length === 1 ? 'social.level.categoriesOne' : 'social.level.categoriesOther', { count: cats.length })}{lead ? <span style={{ fontWeight: 500, color: 'var(--ter)', fontSize: 13 }}> · {tc(`categories.${lead[0]}`)} {Math.round((lead[1] / total) * 100)}%</span> : null}
       </div>
     </>
   );
@@ -269,15 +278,24 @@ const addMonths = (label: string, n: number) => {
   const t = Number(y) * 12 + i + n;
   return `${MONTHS_ES[t % 12]} ${Math.floor(t / 12)}`;
 };
+// Labels by id (social.level.stops.<id>).
 const STOPS = [
-  { m: 0, label: 'Alta' },
-  { m: 6, label: '6 meses' },
-  { m: 12, label: '1 año' },
-  { m: 24, label: '2 años' },
-  { m: 36, label: '3 años' },
+  { m: 0, id: 'signup' },
+  { m: 6, id: 'm6' },
+  { m: 12, id: 'y1' },
+  { m: 24, id: 'y2' },
+  { m: 36, id: 'y3' },
 ] as const;
 
 function SeniorityTimeline({ months, since }: { months: number; since: string }) {
+  const { t, raw } = useT('profile');
+  // "Mar 2025" labels come in Spanish; show the month in the active language.
+  const monthNames = raw<string[]>('social.months');
+  const localMonth = (label: string) => {
+    const [m, y] = label.split(' ');
+    const i = MONTHS_ES.indexOf(m);
+    return i < 0 || !y ? label : `${monthNames[i] ?? m} ${y}`;
+  };
   const stops = STOPS;
   // Evenly spaced stops; today is placed between the two around it.
   const pos = (mm: number) => {
@@ -291,8 +309,8 @@ function SeniorityTimeline({ months, since }: { months: number; since: string })
   return (
     <div style={{ marginTop: 'auto' }}>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 18 }}>
-        <b style={{ color: 'var(--text)', fontSize: 22, fontFamily: 'var(--font-h)' }}>{months}</b> meses en Brikme
-        {nextStop && <span style={{ color: 'var(--ter)' }}> · próxima insignia: {nextStop.label} en {nextStop.m - months} {nextStop.m - months === 1 ? 'mes' : 'meses'}</span>}
+        <b style={{ color: 'var(--text)', fontSize: 22, fontFamily: 'var(--font-h)' }}>{months}</b> {t(months === 1 ? 'social.level.monthsInBrikmeOne' : 'social.level.monthsInBrikmeOther')}
+        {nextStop && <span style={{ color: 'var(--ter)' }}>{t(nextStop.m - months === 1 ? 'social.level.nextBadgeOne' : 'social.level.nextBadgeOther', { badge: t(`social.level.stops.${nextStop.id}`), count: nextStop.m - months })}</span>}
       </div>
       <div style={{ position: 'relative', height: 26, margin: '0 22px' }}>
         <div style={{ position: 'absolute', left: 0, right: 0, top: 11, height: 4, borderRadius: 99, background: 'var(--surface2)' }} />
@@ -316,8 +334,8 @@ function SeniorityTimeline({ months, since }: { months: number; since: string })
           const done = months >= st.m;
           return (
             <div key={st.m} style={{ position: 'absolute', left: `${(i / (stops.length - 1)) * 100}%`, transform: 'translateX(-50%)', textAlign: 'center', fontFamily: 'var(--font-b)', whiteSpace: 'nowrap' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: done ? 'var(--text)' : 'var(--ter)' }}>{st.label}</div>
-              <div style={{ fontSize: 11, color: 'var(--ter)' }}>{i === 0 ? since : addMonths(since, st.m)}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: done ? 'var(--text)' : 'var(--ter)' }}>{t(`social.level.stops.${st.id}`)}</div>
+              <div style={{ fontSize: 11, color: 'var(--ter)' }}>{localMonth(i === 0 ? since : addMonths(since, st.m))}</div>
             </div>
           );
         })}
@@ -328,6 +346,7 @@ function SeniorityTimeline({ months, since }: { months: number; since: string })
 
 // ─── Achievements ─────────────────────────────────────────────────────────────
 function AchievementTile({ a }: { a: Achievement }) {
+  const { t } = useT('profile');
   const done = a.p >= 1;
   return (
     <div style={{
@@ -347,7 +366,7 @@ function AchievementTile({ a }: { a: Achievement }) {
           <div style={{ width: `${a.p * 100}%`, height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #8247E5, #3b82f6)' }} />
         </div>
         <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 700, color: done ? 'var(--pos)' : 'var(--sec)', minWidth: 72, textAlign: 'right' }}>
-          {done ? '✓ Logrado' : `${Math.round(a.p * 100)}%`}
+          {done ? t('social.level.achieved') : `${Math.round(a.p * 100)}%`}
         </span>
       </div>
     </div>
@@ -364,22 +383,25 @@ type LevelWidgetsProps = {
 };
 
 export default function LevelWidgets({ d, isMobile, achievements: given, privateStats }: LevelWidgetsProps) {
+  const { t } = useT('profile');
+  const dataText = useDataText();
+  const levelTitle = t('social.level.title', { level: d.level, name: t(`social.level.names.${levelAt(d.level).id}`) });
   const next = LEVELS[Math.min(d.level, 4)];
   const toNext = Math.max(0, next.min - d.invested);
   const pctNext = d.level >= 5 ? 100 : clamp(d.invested / next.min) * 100;
-  const achievements = given === undefined ? achievementsOf(d) : given;
+  const achievements = given === undefined ? achievementsOf(d).map(dataText.achievement) : given;
   const doneCount = achievements?.filter(a => a.p >= 1).length ?? 0;
   const cols = isMobile ? 2 : 4;
   if (privateStats) {
     return (
       <div>
         <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: 14 }}>
-          <Tile icon={I.level} color="#8247E5" title={`Nivel ${d.level} · ${levelAt(d.level).name}`} span={cols}>
+          <Tile icon={I.level} color="#8247E5" title={levelTitle} span={cols}>
             <LevelStairs d={d} hideProgress />
           </Tile>
         </div>
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 18 }}>
-          Los montos, el rendimiento y los logros de cada inversor son privados.
+          {t('social.level.privateNote')}
         </div>
       </div>
     );
@@ -387,37 +409,37 @@ export default function LevelWidgets({ d, isMobile, achievements: given, private
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: 14 }}>
-        <Tile icon={I.level} color="#8247E5" title={`Nivel ${d.level} · ${levelAt(d.level).name}`} span={2}>
+        <Tile icon={I.level} color="#8247E5" title={levelTitle} span={2}>
           <LevelStairs d={d} />
         </Tile>
-        <Tile icon={I.wave} color="#14b8a6" title="Invertido">
-          <WaveFill pct={pctNext} label={fmtUSD(d.invested)} sub={d.level >= 5 ? 'Nivel máximo' : `${fmtUSD(toNext)} para N${d.level + 1}`} />
+        <Tile icon={I.wave} color="#14b8a6" title={t('social.level.invested')}>
+          <WaveFill pct={pctNext} label={fmtUSD(d.invested)} sub={d.level >= 5 ? t('social.level.maxLevel') : t('social.level.toNext', { amount: fmtUSD(toNext), level: d.level + 1 })} />
         </Tile>
-        <Tile icon={I.gauge} color="#e11d48" title="Reputación">
+        <Tile icon={I.gauge} color="#e11d48" title={t('social.level.reputation')}>
           <Gauge value={d.rep} />
         </Tile>
-        <Tile icon={I.ret} color="#d946ef" title="Rendimiento">
+        <Tile icon={I.ret} color="#d946ef" title={t('social.level.return')}>
           <ReturnScale ret={d.ret} />
         </Tile>
-        <Tile icon={I.compass} color="#6366f1" title="Diversificación">
+        <Tile icon={I.compass} color="#6366f1" title={t('social.level.diversification')}>
           <Compass cats={d.cats} />
         </Tile>
-        <Tile icon={I.sun} color="#f59e0b" title="Antigüedad" span={2}>
+        <Tile icon={I.sun} color="#f59e0b" title={t('social.level.seniority')} span={2}>
           <SeniorityTimeline months={d.months} since={d.since} />
         </Tile>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '26px 0 12px' }}>
         <span style={{ color: '#f59e0b', display: 'flex' }}>{I.trophy}</span>
-        <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Logros</span>
-        {achievements && <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{doneCount} de {achievements.length} desbloqueados</span>}
+        <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{t('social.level.achievements')}</span>
+        {achievements && <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{t('social.level.unlocked', { done: doneCount, total: achievements.length })}</span>}
       </div>
       {achievements ? (
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'repeat(auto-fill, minmax(250px, 1fr))', gap: 12 }}>
           {achievements.map(a => <AchievementTile key={a.label} a={a} />)}
         </div>
       ) : (
-        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>Todavía no pudimos cargar los logros.</div>
+        <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{t('social.level.loadError')}</div>
       )}
     </div>
   );

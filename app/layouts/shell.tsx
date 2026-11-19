@@ -130,8 +130,8 @@ export default function AppShell() {
         />
       </div>
       <div className="kc-shell-content" style={{
-        marginLeft: collapsed ? 58 : 232,
-        transition: 'margin-left 0.22s cubic-bezier(0.4,0,0.2,1)',
+        marginInlineStart: collapsed ? 58 : 232,
+        transition: 'margin-inline-start 0.22s cubic-bezier(0.4,0,0.2,1)',
         flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0,
         position: 'relative', zIndex: 1,
       }}>

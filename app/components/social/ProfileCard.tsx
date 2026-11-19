@@ -2,10 +2,12 @@ import { HEX_CLIP } from '~/components/ui';
 import { CompanyLogo } from '~/components/social/IdentityAvatar';
 import { fmtCount } from '~/lib/projectFeed';
 import type { CompanyProfile } from '~/lib/social/types';
+import { useT } from '~/i18n/useT';
 
 export function VerifiedBadge({ size = 16, guide }: { size?: number; guide?: string }) {
+  const { t } = useT('profile');
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label="Verificado" data-guide={guide} style={{ flexShrink: 0 }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label={t('social.verified')} data-guide={guide} style={{ flexShrink: 0 }}>
       <path fill="#3b82f6" d="M12 1.5l2.6 1.9 3.2-.1 1 3 2.6 1.9-1 3.1 1 3.1-2.6 1.9-1 3-3.2-.1L12 22.5l-2.6-1.9-3.2.1-1-3-2.6-1.9 1-3.1-1-3.1 2.6-1.9 1-3 3.2.1z"/>
       <path d="M8 12.3l2.6 2.6L16.2 9" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
@@ -17,8 +19,9 @@ type StoryProfile = Pick<CompanyProfile, 'name' | 'logoUrl'>;
 // Mobile version of a featured profile, Instagram-stories style: round
 // photo inside a gradient ring, name underneath.
 export function ProfileStory({ profile, onOpen }: { profile: StoryProfile; onOpen: () => void }) {
+  const { t } = useT('profile');
   return (
-    <button onClick={onOpen} aria-label={`Ver perfil de ${profile.name}`}
+    <button onClick={onOpen} aria-label={t('social.avatar.viewProfileOf', { name: profile.name })}
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: 76, flexShrink: 0, background: 'none', border: 'none', padding: 0, cursor: 'pointer', scrollSnapAlign: 'start' }}>
       {/* Companies are hexagons, so the story ring is one too */}
       <span style={{ padding: 3, clipPath: HEX_CLIP, background: 'conic-gradient(from 200deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #3b82f6)', display: 'flex' }}>
@@ -47,8 +50,9 @@ type ProfileCardProps = {
 // Seguir button, name + verified badge, handle, bio and follow counts.
 // Clicking anywhere but "Seguir" opens the company profile.
 export default function ProfileCard({ profile, following, onFollow, onOpen }: ProfileCardProps) {
+  const { t } = useT('profile');
   return (
-    <div onClick={onOpen} role="button" tabIndex={0} aria-label={`Ver perfil de ${profile.name}`}
+    <div onClick={onOpen} role="button" tabIndex={0} aria-label={t('social.avatar.viewProfileOf', { name: profile.name })}
       onKeyDown={e => { if (e.key === 'Enter') onOpen(); }}
       style={{
         width: 272, flexShrink: 0, borderRadius: 22, overflow: 'hidden', cursor: 'pointer',
@@ -75,7 +79,7 @@ export default function ProfileCard({ profile, following, onFollow, onOpen }: Pr
               background: following ? 'transparent' : 'var(--text)',
               color: following ? 'var(--text)' : 'var(--bg)',
             }}>
-            {following ? 'Siguiendo' : 'Seguir'}
+            {following ? t('social.follow.following') : t('social.follow.follow')}
           </button>
         </div>
 
@@ -90,8 +94,8 @@ export default function ProfileCard({ profile, following, onFollow, onOpen }: Pr
         </div>
 
         <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--font-b)', fontSize: 13 }}>
-          <span><b style={{ color: 'var(--text)' }}>{profile.projects}</b> <span style={{ color: 'var(--ter)' }}>Proyectos</span></span>
-          <span><b style={{ color: 'var(--text)' }}>{fmtCount(profile.followers)}</b> <span style={{ color: 'var(--ter)' }}>Seguidores</span></span>
+          <span><b style={{ color: 'var(--text)' }}>{profile.projects}</b> <span style={{ color: 'var(--ter)' }}>{t('social.card.projects')}</span></span>
+          <span><b style={{ color: 'var(--text)' }}>{fmtCount(profile.followers)}</b> <span style={{ color: 'var(--ter)' }}>{t('social.card.followers')}</span></span>
         </div>
       </div>
     </div>

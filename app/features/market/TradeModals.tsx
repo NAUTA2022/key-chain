@@ -6,7 +6,9 @@ import WalletModal from '~/features/wallet/WalletModal';
 import type { NavFn } from '~/lib/navigation';
 import { type ApiHolding, useHoldings } from '~/lib/onchain';
 import { useSession } from '~/lib/session';
+import { useT } from '~/i18n/useT';
 import { type MarketInfo, type MarketListing, type TradeStep, buyOnchain, feePercent, netOfFee, sellOnchain, sellableTokens, useMyListings } from './api';
+import { errorText } from './i18n';
 
 const label = { fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginBottom: 6, display: 'block' } as const;
 const note = { fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)', lineHeight: 1.5 } as const;
@@ -32,16 +34,18 @@ function ErrorNote({ text }: { text: string | null }) {
 type Gate = { text: string; cta: string; action: () => void } | null;
 
 /** Signed in, profile complete and KYC verified (the token only moves to verified wallets). */
-function useTradeGate(nav: NavFn, verb: string): Gate {
+function useTradeGate(nav: NavFn, side: 'buy' | 'sell'): Gate {
   const { status, user } = useSession();
   const account = useActiveAccount();
-  if (status !== 'authenticated' || !user || !account) return { text: `Conecta tu wallet para ${verb}.`, cta: 'Conectar wallet', action: () => nav('login') };
-  if (!user.onboarded) return { text: `Completa tu perfil para ${verb}.`, cta: 'Completar mi perfil', action: () => nav('perfil') };
+  const { t } = useT('market');
+  const verb = t(side === 'buy' ? 'trade.gate.verbBuy' : 'trade.gate.verbSell');
+  if (status !== 'authenticated' || !user || !account) return { text: t('trade.gate.connect', { verb }), cta: t('trade.gate.connectCta'), action: () => nav('login') };
+  if (!user.onboarded) return { text: t('trade.gate.profile', { verb }), cta: t('trade.gate.profileCta'), action: () => nav('perfil') };
   if (user.kycStatus !== 'verified') {
     const pending = user.kycStatus === 'pending';
     return {
-      text: pending ? 'Tu verificación (KYC) está en revisión. Te avisamos cuando puedas operar.' : `Para ${verb} necesitas verificar tu identidad (KYC): los tokens solo se transfieren entre wallets verificadas.`,
-      cta: pending ? 'Ver estado del KYC' : 'Verificar mi identidad',
+      text: pending ? t('trade.gate.kycPending') : t('trade.gate.kycNeeded', { verb }),
+      cta: pending ? t('trade.gate.kycStatusCta') : t('trade.gate.kycVerifyCta'),
       action: () => nav('perfil'),
     };
   }
@@ -57,11 +61,6 @@ function GateNote({ gate }: { gate: NonNullable<Gate> }) {
   );
 }
 
-const STEP_COPY: Record<'buy' | 'sell', Record<Exclude<TradeStep, 'done'>, string>> = {
-  buy: { approve: 'Aprueba el pago en USDC en tu wallet…', confirm: 'Confirma la compra en tu wallet…', sync: 'Actualizando el mercado…' },
-  sell: { approve: 'Autoriza tus tokens en tu wallet…', confirm: 'Confirma la publicación en tu wallet…', sync: 'Actualizando el mercado…' },
-};
-
 const wholeTokens = (raw: string) => {
   const n = Number(raw);
   return Number.isInteger(n) ? n : 0;
@@ -73,7 +72,8 @@ type BuyModalProps = { nav: NavFn; info: MarketInfo; listing: MarketListing; ass
 export function BuyModal({ nav, info, listing, assetName, onClose, onDone }: BuyModalProps) {
   const account = useActiveAccount();
   const wallet = useActiveWallet();
-  const gate = useTradeGate(nav, 'comprar');
+  const gate = useTradeGate(nav, 'buy');
+  const { t, locale } = useT('market');
   const max = Math.floor(listing.available);
   const [qty, setQty] = useState('1');
   const [step, setStep] = useState<TradeStep | null>(null);
@@ -93,41 +93,41 @@ export function BuyModal({ nav, info, listing, assetName, onClose, onDone }: Buy
       onDone();
     } catch (e) {
       setStep(null);
-      setError(e instanceof Error ? e.message : 'No se pudo completar la compra.');
+      setError(errorText(e, t, 'errors.buyFailed'));
     }
   };
 
   return (
-    <WalletModal title={step === 'done' ? 'Compra completada' : `Comprar ${assetName}`} onClose={busy ? () => undefined : onClose}>
+    <WalletModal title={step === 'done' ? t('trade.buy.doneTitle') : t('trade.buy.title', { name: assetName })} onClose={busy ? () => undefined : onClose}>
       {step === 'done' ? (
         <div>
           <p style={{ ...note, margin: '0 0 16px' }}>
-            Recibiste {quantity} token{quantity !== 1 ? 's' : ''} de {assetName} por {fmtUSD2(total)}. Ya están en tu wallet.
-            {!synced && ' El mercado y tus pertenencias se actualizan en unos segundos.'}
+            {t(quantity === 1 ? 'trade.buy.receivedOne' : 'trade.buy.receivedMany', { count: quantity, name: assetName, total: fmtUSD2(total) })}
+            {!synced && t('trade.buy.notSynced')}
           </p>
           <div style={{ display: 'flex', gap: 10 }}>
-            <PBtn variant="accent" style={{ flex: 1 }} onClick={() => nav('pertenencias')}>Ver mis pertenencias</PBtn>
-            <PBtn variant="ghost" onClick={onClose}>Cerrar</PBtn>
+            <PBtn variant="accent" style={{ flex: 1 }} onClick={() => nav('pertenencias')}>{t('trade.buy.viewHoldings')}</PBtn>
+            <PBtn variant="ghost" onClick={onClose}>{t('trade.buy.close')}</PBtn>
           </div>
         </div>
       ) : gate ? (
         <GateNote gate={gate} />
       ) : (
         <div>
-          <label style={label} htmlFor="buy-qty">Cantidad de tokens (máx. {max.toLocaleString('es-AR')})</label>
-          <PInput type="number" value={qty} onChange={e => setQty(e.target.value)} ariaLabel="Cantidad de tokens" name="buy-qty" />
+          <label style={label} htmlFor="buy-qty">{t('trade.buy.qtyLabel', { max: max.toLocaleString(locale) })}</label>
+          <PInput type="number" value={qty} onChange={e => setQty(e.target.value)} ariaLabel={t('trade.buy.qtyAria')} name="buy-qty" />
           <Summary>
-            <Row k="Precio por token" v={fmtUSD2(listing.pricePerToken)} />
-            <Row k="Precio de referencia" v={fmtUSD2(listing.referencePrice)} />
-            <Row k="Total a pagar (USDC)" v={valid ? fmtUSD2(total) : '—'} strong />
+            <Row k={t('trade.buy.pricePerToken')} v={fmtUSD2(listing.pricePerToken)} />
+            <Row k={t('trade.buy.referencePrice')} v={fmtUSD2(listing.referencePrice)} />
+            <Row k={t('trade.buy.totalToPay')} v={valid ? fmtUSD2(total) : '—'} strong />
           </Summary>
           <p style={{ ...note, margin: '0 0 14px' }}>
-            Pagas exactamente el total: la comisión del mercado ({feePercent(info).toLocaleString('es-AR')}%) la cubre el vendedor. Los tokens y el USDC se intercambian en una sola transacción.
+            {t('trade.buy.feeNote', { fee: feePercent(info).toLocaleString(locale) })}
           </p>
           <ErrorNote text={error} />
-          {busy && <div aria-live="polite" style={{ ...note, marginBottom: 12 }}>{STEP_COPY.buy[step]}</div>}
+          {busy && <div aria-live="polite" style={{ ...note, marginBottom: 12 }}>{t(`trade.steps.buy.${step}`)}</div>}
           <PBtn variant="accent" style={{ width: '100%' }} disabled={!valid || busy} onClick={() => void submit()}>
-            {busy ? 'Procesando…' : valid ? `Comprar por ${fmtUSD2(total)}` : 'Elige una cantidad válida'}
+            {busy ? t('trade.buy.processing') : valid ? t('trade.buy.buyFor', { total: fmtUSD2(total) }) : t('trade.buy.pickValidQty')}
           </PBtn>
         </div>
       )}
@@ -143,7 +143,8 @@ const tradable = (h: ApiHolding, info: MarketInfo) => h.poolStatus === 'active' 
 export function SellModal({ nav, info, initialAssetId, onClose, onDone }: SellModalProps) {
   const account = useActiveAccount();
   const wallet = useActiveWallet();
-  const gate = useTradeGate(nav, 'vender');
+  const gate = useTradeGate(nav, 'sell');
+  const { t, locale } = useT('market');
   const { data: holdings, loading } = useHoldings();
   const options = useMemo(() => (holdings ?? []).filter(h => tradable(h, info)), [holdings, info]);
   const [picked, setPicked] = useState<number | null>(initialAssetId);
@@ -188,7 +189,7 @@ export function SellModal({ nav, info, initialAssetId, onClose, onDone }: SellMo
       onDone();
     } catch (e) {
       setStep(null);
-      setError(e instanceof Error ? e.message : 'No se pudo publicar la venta.');
+      setError(errorText(e, t, 'errors.sellFailed'));
     }
   };
 
@@ -196,64 +197,67 @@ export function SellModal({ nav, info, initialAssetId, onClose, onDone }: SellMo
   if (step === 'done') {
     body = (
       <div>
-        <p style={{ ...note, margin: '0 0 16px' }}>Tu oferta de {quantity} token{quantity !== 1 ? 's' : ''} de {holding?.assetName} a {fmtUSD2(unit)} c/u ya está publicada. Los tokens siguen en tu wallet hasta que alguien compre; puedes retirarla cuando quieras.{!synced && ' Va a aparecer en el mercado en unos segundos.'}</p>
-        <PBtn variant="accent" style={{ width: '100%' }} onClick={onClose}>Listo</PBtn>
+        <p style={{ ...note, margin: '0 0 16px' }}>{t(quantity === 1 ? 'trade.sell.doneOne' : 'trade.sell.doneMany', { count: quantity, name: holding?.assetName ?? '', price: fmtUSD2(unit) })}{!synced && t('trade.sell.notSynced')}</p>
+        <PBtn variant="accent" style={{ width: '100%' }} onClick={onClose}>{t('trade.sell.done')}</PBtn>
       </div>
     );
   } else if (gate) {
     body = <GateNote gate={gate} />;
   } else if (loading && !holdings) {
-    body = <p style={note}>Cargando tus tokens…</p>;
+    body = <p style={note}>{t('trade.sell.loadingTokens')}</p>;
   } else if (!holding) {
     body = (
       <div>
-        <p style={{ ...note, margin: '0 0 16px' }}>No tienes tokens que se puedan vender todavía. Invierte en una tokenización y vas a poder revenderlos aquí.</p>
-        <PBtn variant="accent" style={{ width: '100%' }} onClick={() => nav('primario')}>Ver tokenizaciones</PBtn>
+        <p style={{ ...note, margin: '0 0 16px' }}>{t('trade.sell.noTokens')}</p>
+        <PBtn variant="accent" style={{ width: '100%' }} onClick={() => nav('primario')}>{t('trade.sell.viewTokenizations')}</PBtn>
       </div>
     );
   } else {
     body = (
       <div>
-        <label style={label} htmlFor="sell-asset">Activo</label>
+        <label style={label} htmlFor="sell-asset">{t('trade.sell.asset')}</label>
         <select id="sell-asset" value={holding.assetId} onChange={e => { setPicked(Number(e.target.value)); setPrice(null); setQty('1'); }}
           style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: 12, border: '1.5px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 14, marginBottom: 12 }}>
-          {options.map(h => <option key={h.assetId} value={h.assetId}>{h.assetName} · {h.tokens.toLocaleString('es-AR')} tokens</option>)}
+          {options.map(h => <option key={h.assetId} value={h.assetId}>{t('trade.sell.assetOption', { name: h.assetName, tokens: h.tokens.toLocaleString(locale) })}</option>)}
         </select>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 10 }}>
           <div>
-            <label style={label} htmlFor="sell-qty">Tokens {available !== null ? `(libres: ${available.toLocaleString('es-AR')})` : ''}</label>
-            <PInput type="number" value={qty} onChange={e => setQty(e.target.value)} ariaLabel="Cantidad de tokens" name="sell-qty" />
+            <label style={label} htmlFor="sell-qty">{t('trade.sell.tokens')} {available !== null ? t('trade.sell.free', { n: available.toLocaleString(locale) }) : ''}</label>
+            <PInput type="number" value={qty} onChange={e => setQty(e.target.value)} ariaLabel={t('trade.sell.qtyAria')} name="sell-qty" />
           </div>
           <div>
-            <label style={label} htmlFor="sell-price">Precio por token (USD)</label>
-            <PInput type="number" value={priceText} onChange={e => setPrice(e.target.value)} ariaLabel="Precio por token en USD" name="sell-price" prefix="$" />
+            <label style={label} htmlFor="sell-price">{t('trade.sell.priceLabel')}</label>
+            <PInput type="number" value={priceText} onChange={e => setPrice(e.target.value)} ariaLabel={t('trade.sell.priceAria')} name="sell-price" prefix="$" />
           </div>
         </div>
         <Summary>
-          <Row k="Precio de referencia" v={fmtUSD2(holding.tokenPrice)} />
-          <Row k="Total de la oferta" v={valid ? fmtUSD2(total) : '—'} />
-          <Row k={`Comisión del mercado (${feePercent(info).toLocaleString('es-AR')}%)`} v={valid ? fmtUSD2(total - netOfFee(total, info)) : '—'} />
-          <Row k="Recibirás (USDC)" v={valid ? fmtUSD2(netOfFee(total, info)) : '—'} strong />
+          <Row k={t('trade.sell.referencePrice')} v={fmtUSD2(holding.tokenPrice)} />
+          <Row k={t('trade.sell.offerTotal')} v={valid ? fmtUSD2(total) : '—'} />
+          <Row k={t('trade.sell.marketFee', { fee: feePercent(info).toLocaleString(locale) })} v={valid ? fmtUSD2(total - netOfFee(total, info)) : '—'} />
+          <Row k={t('trade.sell.youReceive')} v={valid ? fmtUSD2(netOfFee(total, info)) : '—'} strong />
         </Summary>
         <p style={{ ...note, margin: '0 0 14px' }}>
-          Tus tokens no salen de tu wallet al publicar: solo autorizas al contrato del mercado a entregarlos cuando un inversor verificado pague el precio.
+          {t('trade.sell.custodyNote')}
         </p>
         {openOffers.length > 0 && (
           <p style={{ ...note, margin: '0 0 14px', color: 'var(--text)' }}>
-            Ya tienes {openOffers.length === 1 ? 'una oferta activa' : `${openOffers.length} ofertas activas`} de este activo ({openOffers.map(l => `${l.remaining.toLocaleString('es-AR')} a ${fmtUSD2(l.pricePerToken)}`).join(', ')}). Siguen vigentes a ese precio: si no quieres venderlas así, retíralas antes en «Mis publicaciones».
+            {t('trade.sell.openOffers', {
+              offers: openOffers.length === 1 ? t('trade.sell.openOne') : t('trade.sell.openMany', { count: openOffers.length }),
+              list: openOffers.map(l => t('trade.sell.openOfferItem', { qty: l.remaining.toLocaleString(locale), price: fmtUSD2(l.pricePerToken) })).join(', '),
+            })}
           </p>
         )}
         <ErrorNote text={error} />
-        {busy && <div aria-live="polite" style={{ ...note, marginBottom: 12 }}>{STEP_COPY.sell[step]}</div>}
+        {busy && <div aria-live="polite" style={{ ...note, marginBottom: 12 }}>{t(`trade.steps.sell.${step}`)}</div>}
         <PBtn variant="accent" style={{ width: '100%' }} disabled={!valid || busy} onClick={() => void submit()}>
-          {busy ? 'Procesando…' : valid ? 'Publicar venta' : !validPrice ? 'Elige un precio válido' : 'Elige una cantidad válida'}
+          {busy ? t('trade.sell.processing') : valid ? t('trade.sell.publish') : !validPrice ? t('trade.sell.pickValidPrice') : t('trade.sell.pickValidQty')}
         </PBtn>
       </div>
     );
   }
 
   return (
-    <WalletModal title={step === 'done' ? 'Oferta publicada' : 'Publicar venta'} onClose={busy ? () => undefined : onClose}>
+    <WalletModal title={step === 'done' ? t('trade.sell.doneTitle') : t('trade.sell.title')} onClose={busy ? () => undefined : onClose}>
       {body}
     </WalletModal>
   );

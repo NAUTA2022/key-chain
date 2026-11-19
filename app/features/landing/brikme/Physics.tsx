@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent } fr
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
+import { useT } from '~/i18n/useT';
 import { useInView } from './useInView';
 
 /*
@@ -252,11 +253,12 @@ function Scene({ cubes, zoom: zoomProp, fitUnits, slots = 5, dark, running }: Pl
 const ON_SCREEN: IntersectionObserverInit = { threshold: 0.15 };
 
 export function PhysicsPlayground(props: PlaygroundProps) {
+  const { t } = useT('landing');
   // Mount the canvas the first time it shows up; simulate (and drop the cubes in) only while on screen.
   const { ref: viewRef, seen, visible: running } = useInView<HTMLDivElement>(ON_SCREEN);
   const stop = (e: ReactPointerEvent<HTMLDivElement>) => e.stopPropagation();
   return (
-    <div ref={viewRef} className={props.className} role="img" aria-label={props.label ?? 'Cubos en 3D con física: arrástralos, lánzalos y apílalos'}
+    <div ref={viewRef} className={props.className} role="img" aria-label={props.label ?? t('a11y.physics')}
       style={{ touchAction: 'pan-y', cursor: 'grab' }} onPointerDown={stop}>
       {seen && <Canvas orthographic shadows flat dpr={[1, 2]} frameloop={running ? 'always' : 'demand'}
         camera={{ position: [40, 40, 40], zoom: props.zoom ?? 100, near: 0.1, far: 200 }} gl={{ antialias: true, alpha: true }} onCreated={({ gl }) => setupShadows(gl)}>

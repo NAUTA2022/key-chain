@@ -4,9 +4,12 @@ import type { IconName, PTagColor } from '~/components/ui';
 import { errorText, MB } from '~/features/profile/api';
 import { isProblem } from '~/lib/api/client';
 import type { paths } from '~/lib/api/schema';
+import type { Translator } from '~/i18n/useT';
 
 // Types, labels, validation (zod mirror of the API) and pure helpers for the live
 // Help Center. No components here, so React Refresh stays happy.
+// User-facing copy lives in the `help` dictionaries: this module only holds keys
+// (validation messages are keys too) and the components translate them.
 
 // ─── API types ───────────────────────────────────────────────────────────────
 
@@ -25,19 +28,14 @@ export type ChatRole = AssistantTurn['role'];
 
 export const TICKET_CATEGORIES = ['account', 'kyc', 'investment', 'payments', 'technical', 'other'] as const satisfies readonly TicketCategory[];
 
-export const CATEGORY_LABEL: Record<TicketCategory, string> = {
-  account: 'Cuenta',
-  kyc: 'Verificación de identidad',
-  investment: 'Inversiones',
-  payments: 'Pagos',
-  technical: 'Problema técnico',
-  other: 'Otro',
-};
+/** Dictionary key (`help` namespace) of a ticket category label. */
+export const categoryKey = (c: TicketCategory) => `tickets.categories.${c}`;
 
+/** Status tag: dictionary key of the label (`help` namespace) and color. */
 export const STATUS_TAG: Record<TicketStatus, { label: string; color: PTagColor }> = {
-  open: { label: 'Abierto', color: 'blue' },
-  answered: { label: 'Respondido', color: 'green' },
-  closed: { label: 'Cerrado', color: 'neutral' },
+  open: { label: 'tickets.status.open', color: 'blue' },
+  answered: { label: 'tickets.status.answered', color: 'green' },
+  closed: { label: 'tickets.status.closed', color: 'neutral' },
 };
 
 /** Attachments a single ticket may hold (mirrors the API). */
@@ -50,22 +48,25 @@ export const newTicketSchema = z.object({
   subject: z
     .string()
     .trim()
-    .min(4, 'Escribe un asunto de al menos 4 caracteres.')
-    .max(SUBJECT_MAX, `El asunto puede tener hasta ${SUBJECT_MAX} caracteres.`),
-  category: z.enum(TICKET_CATEGORIES, { error: 'Elige una categoría.' }),
+    .min(4, 'tickets.errors.subjectMin')
+    .max(SUBJECT_MAX, 'tickets.errors.subjectMax'),
+  category: z.enum(TICKET_CATEGORIES, { error: 'tickets.errors.category' }),
   message: z
     .string()
     .trim()
-    .min(10, 'Cuéntanos un poco más: el mensaje necesita al menos 10 caracteres.')
-    .max(MESSAGE_MAX, `El mensaje puede tener hasta ${MESSAGE_MAX} caracteres.`),
+    .min(10, 'tickets.errors.messageMin')
+    .max(MESSAGE_MAX, 'tickets.errors.messageMax'),
 });
 export type NewTicketInput = z.infer<typeof newTicketSchema>;
 export type NewTicketField = keyof NewTicketInput;
 export type NewTicketErrors = Partial<Record<NewTicketField, string>>;
 
 export const replySchema = z.object({
-  body: z.string().trim().min(1, 'Escribe un mensaje.').max(MESSAGE_MAX, `El mensaje puede tener hasta ${MESSAGE_MAX} caracteres.`),
+  body: z.string().trim().min(1, 'tickets.errors.replyEmpty').max(MESSAGE_MAX, 'tickets.errors.messageMax'),
 });
+
+/** Variables for the validation message keys above: `t(error, VALIDATION_VARS)`. */
+export const VALIDATION_VARS = { subjectMax: SUBJECT_MAX, messageMax: MESSAGE_MAX } as const;
 
 const NEW_TICKET_FIELDS: readonly NewTicketField[] = ['subject', 'category', 'message'];
 
@@ -73,7 +74,7 @@ function isNewTicketField(v: unknown): v is NewTicketField {
   return typeof v === 'string' && (NEW_TICKET_FIELDS as readonly string[]).includes(v);
 }
 
-/** Validates the new-ticket form; returns the parsed body or one Spanish error per field. */
+/** Validates the new-ticket form; returns the parsed body or one error key per field (translate with VALIDATION_VARS). */
 export function validateNewTicket(input: { subject: string; category: string; message: string }):
   | { ok: true; data: NewTicketInput }
   | { ok: false; errors: NewTicketErrors } {
@@ -87,26 +88,26 @@ export function validateNewTicket(input: { subject: string; category: string; me
   return { ok: false, errors };
 }
 
-/** Validates a reply; returns the trimmed body or the Spanish error. */
+/** Validates a reply; returns the trimmed body or the error key (translate with VALIDATION_VARS). */
 export function validateReply(body: string): { ok: true; body: string } | { ok: false; error: string } {
   const r = replySchema.safeParse({ body });
-  return r.success ? { ok: true, body: r.data.body } : { ok: false, error: r.error.issues[0]?.message ?? 'Revisa el mensaje.' };
+  return r.success ? { ok: true, body: r.data.body } : { ok: false, error: r.error.issues[0]?.message ?? 'tickets.errors.replyCheck' };
 }
 
 /**
- * Spanish copy for ticket errors. 409 = closed ticket or attachment limit; `upload`
+ * Copy for ticket errors (translated with `t`). 409 = closed ticket or attachment limit; `upload`
  * adds the file checks, `load` treats a malformed id (400) as "not found".
  */
-export function ticketErrorText(error: unknown, fallback: string, kind: 'write' | 'upload' | 'load' = 'write'): string {
+export function ticketErrorText(t: Translator['t'], error: unknown, fallback: string, kind: 'write' | 'upload' | 'load' = 'write'): string {
   if (isProblem(error) && error.code === 'conflict') {
     return 'max' in error
-      ? `Este ticket ya tiene el máximo de ${MAX_ATTACHMENTS} archivos adjuntos.`
-      : 'Este ticket está cerrado. Si necesitas más ayuda, abre uno nuevo.';
+      ? t('tickets.errors.maxAttachments', { max: MAX_ATTACHMENTS })
+      : t('tickets.errors.closed');
   }
-  const notFound = 'No encontramos este ticket.';
+  const notFound = t('tickets.errors.notFound');
   const reasons: Record<string, string> =
     kind === 'upload'
-      ? { not_found: notFound, bad_request: 'No pudimos procesar el archivo. Usa PDF, PNG, JPG o WebP.', payload_too_large: 'El archivo supera el máximo de 10 MB.' }
+      ? { not_found: notFound, bad_request: t('tickets.errors.badFile'), payload_too_large: t('tickets.errors.tooLarge') }
       : kind === 'load'
         ? { not_found: notFound, http_error: notFound, bad_request: notFound }
         : { not_found: notFound };
@@ -129,10 +130,10 @@ export function faqCategoryKey(category: string): string {
   return category.trim().toLowerCase() || 'general';
 }
 
-/** Human label for an API FAQ category ("general" → "General", "token_kycn" → "Token kycn"). */
-export function faqCategoryLabel(category: string): string {
+/** Human label for an API FAQ category ("general" → "General", "token_kycn" → "Token kycn"); `general` is the translated label. */
+export function faqCategoryLabel(category: string, general = 'General'): string {
   const raw = category.trim();
-  if (!raw || raw.toLowerCase() === 'general') return 'General';
+  if (!raw || raw.toLowerCase() === 'general') return general;
   const s = raw.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
   return s.charAt(0).toLocaleUpperCase('es') + s.slice(1);
 }
@@ -164,8 +165,9 @@ export function faqMatches(faq: FaqItem, terms: readonly string[]): boolean {
   return terms.every(t => haystack.includes(t));
 }
 
-export function countLabel(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`;
+/** Singular/plural dictionary key: `${base}_one` for 1, `${base}_other` otherwise. */
+export function pluralKey(base: string, n: number): string {
+  return `${base}_${n === 1 ? 'one' : 'other'}`;
 }
 
 // ─── Assistant ───────────────────────────────────────────────────────────────

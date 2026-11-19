@@ -2,6 +2,7 @@ import { useEffect, useRef, type CSSProperties, type KeyboardEvent as ReactKeybo
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Icons, PDiv } from '~/components/ui';
+import { useT } from '~/i18n/useT';
 import type { LiveNotificationType } from './useNotifications';
 
 export type PanelItem = {
@@ -41,10 +42,12 @@ type Props = {
   /** Live mode only: header label when there is nothing to mark. */
   live?: boolean;
   loading?: boolean;
+  /** Text when there are no items (default: the translated "no notifications yet"). */
   emptyText?: string;
 };
 
-export default function NotificationsPanel({ onClose, items, mobile, onMarkAll, live, loading, emptyText = 'No tienes notificaciones por ahora.' }: Props) {
+export default function NotificationsPanel({ onClose, items, mobile, onMarkAll, live, loading, emptyText }: Props) {
+  const { t } = useT('common');
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -79,7 +82,7 @@ export default function NotificationsPanel({ onClose, items, mobile, onMarkAll, 
       <motion.div
         ref={panelRef}
         role="dialog"
-        aria-label="Notificaciones"
+        aria-label={t('notifications.title')}
         initial={{ opacity: 0, y: -8, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -8 }}
@@ -93,11 +96,11 @@ export default function NotificationsPanel({ onClose, items, mobile, onMarkAll, 
         }}
       >
         <div style={{ padding: '16px 18px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>Notificaciones</span>
+          <span style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{t('notifications.title')}</span>
           {onMarkAll ? (
-            <button type="button" onClick={onMarkAll} style={{ background: 'none', border: 'none', padding: 0, fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', cursor: 'pointer', fontWeight: 600 }}>Marcar leídas</button>
+            <button type="button" onClick={onMarkAll} style={{ background: 'none', border: 'none', padding: 0, fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', cursor: 'pointer', fontWeight: 600 }}>{t('notifications.markAll')}</button>
           ) : !live && (
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', cursor: 'pointer', fontWeight: 600 }}>Marcar leídas</span>
+            <span style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--accent-text)', cursor: 'pointer', fontWeight: 600 }}>{t('notifications.markAll')}</span>
           )}
         </div>
         <PDiv />
@@ -105,7 +108,7 @@ export default function NotificationsPanel({ onClose, items, mobile, onMarkAll, 
           {items.length === 0 && (
             <div role="status" style={{ padding: '28px 18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, textAlign: 'center' }}>
               <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ter)' }}>{Icons.bell}</div>
-              <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>{loading ? 'Cargando notificaciones…' : emptyText}</span>
+              <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)' }}>{loading ? t('notifications.loading') : (emptyText ?? t('notifications.empty'))}</span>
             </div>
           )}
           {items.map((n, i) => {

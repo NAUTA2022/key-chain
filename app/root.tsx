@@ -5,16 +5,18 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 
 import type { Route } from './+types/root';
 import { PreferencesProvider } from '~/lib/preferences';
+import { I18nProvider } from '~/i18n/I18nProvider';
+import { LANG_STORAGE_KEY } from '~/i18n/config';
 import { DEFAULT_DESCRIPTION, SITE_LANG, SITE_NAME, absoluteUrl } from '~/lib/site';
 import { organizationJsonLd, safeJson, websiteJsonLd } from '~/lib/structured-data';
-import { StatusPage } from '~/components/StatusPage';
+import { RouteErrorPage } from '~/components/StatusPage';
 import '~/styles/global.css';
 
 /** Routes can force a theme (e.g. light-only products) through their `handle`. */
 export type RouteHandle = { theme?: 'dark' | 'light' };
 
 const GOOGLE_FONTS =
-  'https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Inter:wght@400;450;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap';
+  'https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Inter:wght@400;450;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -29,6 +31,9 @@ export const links: Route.LinksFunction = () => [
 // Restores the visitor's saved theme before first paint (no light/dark flash).
 // Only runs on routes that don't force their own theme.
 const THEME_BOOT = `try{var p=JSON.parse(localStorage.getItem('bk_prefs')||'{}'),r=document.documentElement;if(p.theme)r.setAttribute('data-theme',p.theme);if(p.palette)r.setAttribute('data-palette',p.palette)}catch(e){}`;
+
+// Applies the saved language's lang/dir before first paint (Arabic opens right-to-left at once).
+const LANG_BOOT = `try{var q=new URLSearchParams(location.search).get('lang'),l=q||localStorage.getItem('${LANG_STORAGE_KEY}');if(l==='en'||l==='ar'){var r=document.documentElement;r.lang=l;r.dir=l==='ar'?'rtl':'ltr'}}catch(e){}`;
 
 function useForcedTheme(): 'dark' | 'light' | undefined {
   const matches = useMatches();
@@ -54,6 +59,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="format-detection" content="telephone=no" />
         {!forced && <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />}
+        <script dangerouslySetInnerHTML={{ __html: LANG_BOOT }} />
         <Meta />
         <Links />
         <link rel="alternate" type="text/plain" title="LLMs" href={absoluteUrl('/llms.txt')} />
@@ -77,11 +83,13 @@ export const meta: Route.MetaFunction = () => [
 
 export default function App() {
   return (
-    <PreferencesProvider>
-      <Outlet />
-      <Analytics />
-      <SpeedInsights />
-    </PreferencesProvider>
+    <I18nProvider>
+      <PreferencesProvider>
+        <Outlet />
+        <Analytics />
+        <SpeedInsights />
+      </PreferencesProvider>
+    </I18nProvider>
   );
 }
 
@@ -90,9 +98,10 @@ export function HydrateFallback() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  // Texts come from the `common` dictionaries (status.notFound / status.error).
   if (isRouteErrorResponse(error) && error.status === 404) {
-    return <StatusPage code="404" title="Página no encontrada" message="La página que buscas no existe o fue movida." />;
+    return <RouteErrorPage notFound />;
   }
   const detail = import.meta.env.DEV && error instanceof Error ? error.message : undefined;
-  return <StatusPage code="Error" title="Algo salió mal" message="Ocurrió un error inesperado. Prueba recargar la página." detail={detail} />;
+  return <RouteErrorPage notFound={false} detail={detail} />;
 }

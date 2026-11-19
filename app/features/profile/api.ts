@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { SOURCE_MESSAGES, interpolate, lookup } from '~/i18n/messages';
+import type { Translator } from '~/i18n/useT';
 import { API_URL, apiUrl, authHeaders, isProblem } from '~/lib/api/client';
+import { COUNTRY_OPTIONS, countryName, type CountryCode } from '~/lib/countries';
 
 // Small data/IO helpers shared by the live account pages (profile, support,
 // tokenization, academy). No components here, so React Refresh stays happy.
@@ -49,24 +52,52 @@ export function useApi<T>(key: string | null, load: () => Promise<ApiResult<T>>)
   };
 }
 
-const CODE_MESSAGES: Record<string, string> = {
-  rate_limited: 'Demasiados intentos seguidos. Espera unos minutos y vuelve a probar.',
-  payload_too_large: 'El archivo es demasiado grande.',
-  unauthorized: 'Tu sesión expiró. Vuelve a conectar tu wallet.',
-  forbidden: 'No tienes permiso para hacer esto.',
-  service_unavailable: 'El servicio no está disponible en este momento. Prueba más tarde.',
-};
+// ─── i18n ────────────────────────────────────────────────────────────────────
+
+/** A `profile`-namespace translator (from `useT('profile')`). */
+export type ProfileT = Translator['t'];
 
 /**
- * Spanish message for an API problem (RFC 9457). `reasons` maps the problem's `reason`
- * (or `code`) to custom copy; the API's own titles are English, so they are never shown.
+ * Spanish (source) `profile` texts, for helpers called without a translator (callers
+ * outside the profile area keep today's Spanish output).
  */
-export function errorText(error: unknown, fallback: string, reasons: Record<string, string> = {}): string {
-  if (!isProblem(error)) return error instanceof TypeError ? 'No pudimos conectar con el servidor. Revisa tu conexión.' : fallback;
+export const profileSourceT: ProfileT = (key, vars) => {
+  const v = lookup(SOURCE_MESSAGES.profile, key);
+  return typeof v === 'string' ? interpolate(v, vars) : key;
+};
+
+/** Intl locale for numbers/dates: Arabic keeps Western digits, like the rest of the UI. */
+export const intlLocale = (locale: string): string => (locale.startsWith('ar') ? `${locale}-u-nu-latn` : locale);
+
+/** Country name in the active language (Spanish names come from the platform's list). */
+export function countryLabel(code: string | null | undefined, locale = 'es-AR'): string {
+  if (!code || locale.startsWith('es')) return countryName(code);
+  try {
+    return new Intl.DisplayNames([locale], { type: 'region' }).of(code) ?? countryName(code);
+  } catch {
+    return countryName(code);
+  }
+}
+
+/** The onboarding countries as [code, name] in the active language, sorted by name. */
+export function countryOptions(locale = 'es-AR'): Array<[CountryCode, string]> {
+  if (locale.startsWith('es')) return COUNTRY_OPTIONS;
+  return COUNTRY_OPTIONS.map(([c]): [CountryCode, string] => [c, countryLabel(c, locale)]).sort((a, b) => a[1].localeCompare(b[1], locale));
+}
+
+const CODE_MESSAGES = ['rate_limited', 'payload_too_large', 'unauthorized', 'forbidden', 'service_unavailable'];
+
+/**
+ * Message for an API problem (RFC 9457). `reasons` maps the problem's `reason`
+ * (or `code`) to custom copy; the API's own titles are English, so they are never shown.
+ * `t` (profile namespace) translates the generic messages; without it they are Spanish.
+ */
+export function errorText(error: unknown, fallback: string, reasons: Record<string, string> = {}, t: ProfileT = profileSourceT): string {
+  if (!isProblem(error)) return error instanceof TypeError ? t('api.errors.network') : fallback;
   const reason = typeof error.reason === 'string' ? error.reason : null;
   if (reason && reasons[reason]) return reasons[reason];
   if (reasons[error.code]) return reasons[error.code];
-  return CODE_MESSAGES[error.code] ?? fallback;
+  return CODE_MESSAGES.includes(error.code) ? t(`api.errors.${error.code}`) : fallback;
 }
 
 /** Problem `reason` (e.g. "email_unavailable"), when present. */
@@ -80,13 +111,13 @@ export const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const;
 export const DOC_TYPES = [...IMAGE_TYPES, 'application/pdf'] as const;
 export const MB = 1024 * 1024;
 
-/** Client-side check before uploading; returns the Spanish error or null when the file is OK. */
-export function checkFile(file: File, rules: { types: readonly string[]; maxBytes: number }): string | null {
+/** Client-side check before uploading; returns the error (Spanish without `t`) or null when the file is OK. */
+export function checkFile(file: File, rules: { types: readonly string[]; maxBytes: number }, t: ProfileT = profileSourceT): string | null {
   if (!rules.types.includes(file.type)) {
-    return rules.types.includes('application/pdf') ? 'Formato no admitido. Usa PDF, PNG, JPG o WebP.' : 'Formato no admitido. Usa PNG, JPG o WebP.';
+    return rules.types.includes('application/pdf') ? t('api.file.formatDocs') : t('api.file.formatImages');
   }
-  if (file.size > rules.maxBytes) return `El archivo supera el máximo de ${Math.round(rules.maxBytes / MB)} MB.`;
-  if (file.size === 0) return 'El archivo está vacío.';
+  if (file.size > rules.maxBytes) return t('api.file.tooLarge', { mb: Math.round(rules.maxBytes / MB) });
+  if (file.size === 0) return t('api.file.empty');
   return null;
 }
 
@@ -159,29 +190,33 @@ export function toCsv(rows: ReadonlyArray<ReadonlyArray<string | number | null |
 
 // ─── Formatting ──────────────────────────────────────────────────────────────
 
-export function fmtDate(iso: string | null | undefined, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }): string {
+export function fmtDate(iso: string | null | undefined, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }, locale = 'es-AR'): string {
   if (!iso) return '—';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('es-AR', opts);
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString(intlLocale(locale), opts);
 }
 
-export function fmtDateTime(iso: string | null | undefined): string {
+export function fmtDateTime(iso: string | null | undefined, locale = 'es-AR'): string {
   if (!iso) return '—';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString('es-AR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString(intlLocale(locale), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-/** "Hoy, 09:32" / "Hace 3 días" / "12 may 2026", relative to `now` (pass Date.now() from an effect or event). */
-export function fmtRelative(iso: string, now: number): string {
-  const t = Date.parse(iso);
-  if (Number.isNaN(t)) return '—';
-  const days = Math.floor((now - t) / 86_400_000);
-  const time = new Date(t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-  if (days <= 0 && new Date(t).toDateString() === new Date(now).toDateString()) return `Hoy, ${time}`;
-  if (days <= 1) return `Ayer, ${time}`;
-  if (days < 7) return `Hace ${days} días`;
-  if (days < 30) return `Hace ${Math.floor(days / 7)} semana${days >= 14 ? 's' : ''}`;
-  return fmtDate(iso);
+/**
+ * "Hoy, 09:32" / "Hace 3 días" / "12 may 2026", relative to `now` (pass Date.now() from an effect or event).
+ * `t` (profile namespace) and `locale` translate it; without them it is Spanish.
+ */
+export function fmtRelative(iso: string, now: number, t: ProfileT = profileSourceT, locale = 'es-AR'): string {
+  const at = Date.parse(iso);
+  if (Number.isNaN(at)) return '—';
+  const days = Math.floor((now - at) / 86_400_000);
+  const time = new Date(at).toLocaleTimeString(intlLocale(locale), { hour: '2-digit', minute: '2-digit' });
+  if (days <= 0 && new Date(at).toDateString() === new Date(now).toDateString()) return t('api.relative.today', { time });
+  if (days <= 1) return t('api.relative.yesterday', { time });
+  if (days < 7) return t('api.relative.daysAgo', { count: days });
+  const weeks = Math.floor(days / 7);
+  if (days < 30) return t(weeks === 1 ? 'api.relative.weeksAgoOne' : 'api.relative.weeksAgoOther', { count: weeks });
+  return fmtDate(iso, undefined, locale);
 }
 
 /** Human file size: "820 KB", "3.4 MB". */

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useT } from '~/i18n/useT';
 
 // "Explorar por categoría": a row of category tiles that scrolls sideways
 // (arrows on desktop, swipe on touch). Picking a tile filters the market;
@@ -24,7 +25,14 @@ type Props = {
   title?: string;
 };
 
-export default function CategoryCarousel({ categories, value, onChange, title = 'Explorar por categoría' }: Props) {
+export default function CategoryCarousel({ categories, value, onChange, title: titleProp }: Props) {
+  const { t, raw } = useT('common');
+  const title = titleProp ?? t('carousel.title');
+  // Category names are data in Spanish; unknown ones are shown as given.
+  const catLabel = (c: string): string => {
+    const v = raw<unknown>(`categories.${c}`);
+    return typeof v === 'string' ? v : c;
+  };
   const track = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ prev: false, next: false });
 
@@ -50,8 +58,8 @@ export default function CategoryCarousel({ categories, value, onChange, title = 
         <h2>{title}</h2>
         {(edges.prev || edges.next) && (
           <div className="cat-carousel-nav">
-            <button type="button" aria-label="Categorías anteriores" disabled={!edges.prev} onClick={() => { page(-1); }}>←</button>
-            <button type="button" aria-label="Más categorías" disabled={!edges.next} onClick={() => { page(1); }}>→</button>
+            <button type="button" aria-label={t('carousel.prev')} disabled={!edges.prev} onClick={() => { page(-1); }}><span className="rtl-flip">←</span></button>
+            <button type="button" aria-label={t('carousel.next')} disabled={!edges.next} onClick={() => { page(1); }}><span className="rtl-flip">→</span></button>
           </div>
         )}
       </div>
@@ -62,7 +70,7 @@ export default function CategoryCarousel({ categories, value, onChange, title = 
             <button key={c} type="button" className={`cat-tile${on ? ' is-on' : ''}`} aria-pressed={on}
               onClick={() => { onChange(on && c !== 'Todos' ? 'Todos' : c); }}>
               <span className="cat-tile-ico" aria-hidden="true">{ICONS[c] ?? FALLBACK_ICON}</span>
-              {c === 'Todos' ? 'Todas' : c}
+              {catLabel(c)}
             </button>
           );
         })}

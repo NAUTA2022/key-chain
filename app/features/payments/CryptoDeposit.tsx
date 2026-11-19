@@ -4,6 +4,8 @@ import FaucetCard from '~/features/wallet/FaucetCard';
 import { PayModal, TokenNetworkPicker, QRCode, CopyField, Notice, PrimaryBtn, GhostBtn, ProgressSteps, SuccessMark, KV } from './PayKit';
 import { T, Ico } from './payTheme';
 import { LIVE_USDC, PLATFORM_NET } from './live';
+import { useT } from '~/i18n/useT';
+import { richText, type TFn } from '~/features/market/i18n';
 import { TOKENS, DEPOSIT_ADDRESS, tokenBySym, networkById, useWallet, credit, fmtToken, fakeTxHash, shortAddr, type PayNetwork } from '~/lib/wallet';
 
 type Step = 'pick' | 'address' | 'tracking' | 'done';
@@ -27,7 +29,8 @@ type CryptoDepositProps = {
   live?: LiveDeposit;
 };
 
-const TITLES = (sym: string): Record<Step, string> => ({ pick: 'Depositar cripto', address: `Depositar ${sym}`, tracking: 'Recibiendo depósito', done: 'Depósito acreditado' });
+const titleOf = (step: Step, sym: string, t: TFn) => t(`deposit.titles.${step}`, { sym });
+const bold = (c: string, k: number) => <b key={k}>{c}</b>;
 
 // Crypto deposit into the Brikme balance: pick token + network, get the
 // personal deposit address (QR + copy) and track the deposit until it's
@@ -43,6 +46,7 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
   const [amount, setAmount] = useState<number | null>(null);
   const [hash, setHash] = useState('');
   const { balances } = useWallet();
+  const { t } = useT('market');
   const token = tokenBySym(sym);
   const network = networkById(net);
   const received = amount ?? 0;
@@ -55,28 +59,28 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
     setStep('tracking');
   };
   const finish = () => {
-    credit(sym, received, `Depósito ${sym} · ${network.name}`, { net, hash });
+    credit(sym, received, t('deposit.historyLabel', { sym, network: network.name }), { net, hash });
     setStep('done');
     onDone?.(sym, received);
   };
 
   const footer = {
-    pick: <PrimaryBtn onClick={() => setStep('address')}>Continuar</PrimaryBtn>,
+    pick: <PrimaryBtn onClick={() => setStep('address')}>{t('pay.continue')}</PrimaryBtn>,
     address: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <PrimaryBtn onClick={startTracking}>Ya envié los fondos</PrimaryBtn>
-        <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>También lo detectamos solo, aunque cierres esta ventana.</div>
+        <PrimaryBtn onClick={startTracking}>{t('deposit.sentFunds')}</PrimaryBtn>
+        <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t('deposit.autoDetect')}</div>
       </div>
     ),
     tracking: null,
-    done: <PrimaryBtn onClick={close}>Listo</PrimaryBtn>,
+    done: <PrimaryBtn onClick={close}>{t('pay.done')}</PrimaryBtn>,
   }[step];
 
   return (
-    <PayModal open={open} onClose={close} title={TITLES(sym)[step]} onBack={step === 'address' ? () => setStep('pick') : undefined} footer={footer}>
+    <PayModal open={open} onClose={close} title={titleOf(step, sym, t)} onBack={step === 'address' ? () => setStep('pick') : undefined} footer={footer}>
       {step === 'pick' && (
         <>
-          <p style={{ ...T.body, margin: '0 0 18px' }}>Elige qué moneda vas a enviar y por qué red. Te damos tu dirección personal de depósito.</p>
+          <p style={{ ...T.body, margin: '0 0 18px' }}>{t('deposit.pickIntro')}</p>
           <TokenNetworkPicker tokens={TOKENS} sym={sym} setSym={setSym} net={net} setNet={setNet} balances={balances} />
         </>
       )}
@@ -87,14 +91,14 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
             <QRCode value={DEPOSIT_ADDRESS} logo={token.icon} />
           </div>
           <Chips items={[[token.icon, token.sym], [network.icon, network.name]]} />
-          <CopyField label="Tu dirección de depósito" value={DEPOSIT_ADDRESS} />
+          <CopyField label={t('deposit.yourAddress')} value={DEPOSIT_ADDRESS} />
           <div style={{ marginTop: 14 }}>
-            <KV k="Depósito mínimo" v={fmtToken(token.min, sym)} />
-            <KV k="Tiempo estimado" v={network.eta} />
-            <KV k="Confirmaciones" v={network.confirmations} />
+            <KV k={t('deposit.minimum')} v={fmtToken(token.min, sym)} />
+            <KV k={t('deposit.eta')} v={network.eta} />
+            <KV k={t('deposit.confirmations')} v={network.confirmations} />
           </div>
           <div style={{ marginTop: 12 }}>
-            <Notice>Envía solo <b>{sym}</b> por la red <b>{network.name}</b>. Si usas otra moneda o red, los fondos pueden perderse.</Notice>
+            <Notice>{richText(t('deposit.sendOnly', { sym, network: network.name }), bold)}</Notice>
           </div>
         </motion.div>
       )}
@@ -103,13 +107,13 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
         <div>
           <div style={{ textAlign: 'center', marginBottom: 18 }}>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, color: 'var(--text)', letterSpacing: '-0.03em' }}>{fmtToken(received, sym)}</div>
-            <div style={{ ...T.body, fontSize: 12.5 }}>desde {shortAddr('0x9b2C51aE07D6f4E1c8A3b5D29e0F7c41aB6d3E58')} · {network.name}</div>
+            <div style={{ ...T.body, fontSize: 12.5 }}>{t('deposit.from', { address: shortAddr('0x9b2C51aE07D6f4E1c8A3b5D29e0F7c41aB6d3E58'), network: network.name })}</div>
           </div>
           <ProgressSteps onDone={finish} steps={[
-            { label: 'Transacción detectada', sub: `Hash ${shortAddr(hash)}`, ms: 1100 },
-            { label: `Confirmando en ${network.name}`, sub: `${network.confirmations} confirmaciones`, ms: 1800 },
-            { label: 'Verificación de origen', sub: 'Chequeo AML automático', ms: 1000 },
-            { label: 'Acreditando en tu saldo', ms: 800 },
+            { label: t('deposit.detected'), sub: t('pay.hash', { hash: shortAddr(hash) }), ms: 1100 },
+            { label: t('pay.confirmingOn', { network: network.name }), sub: t('pay.confirmations', { count: network.confirmations }), ms: 1800 },
+            { label: t('deposit.originCheck'), sub: t('deposit.amlCheck'), ms: 1000 },
+            { label: t('deposit.crediting'), ms: 800 },
           ]} />
         </div>
       )}
@@ -118,14 +122,14 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
         <div style={{ textAlign: 'center', paddingTop: 6 }}>
           <SuccessMark />
           <div role="status" style={{ ...T.title, fontSize: 24 }}>+{fmtToken(received, sym)}</div>
-          <div style={{ ...T.body, marginBottom: 16 }}>Ya está disponible en tu saldo Brikme.</div>
+          <div style={{ ...T.body, marginBottom: 16 }}>{t('deposit.availableBalance')}</div>
           <div style={{ textAlign: 'left', padding: '6px 14px', borderRadius: 14, background: 'var(--surface2)' }}>
-            <KV k="Red" v={network.name} />
+            <KV k={t('pay.network')} v={network.name} />
             <KV k="Hash" v={shortAddr(hash)} mono />
-            <KV k={`Saldo ${sym}`} v={fmtToken(balances[sym] || 0, sym)} strong />
+            <KV k={t('pay.balanceOf', { sym })} v={fmtToken(balances[sym] || 0, sym)} strong />
           </div>
           <div style={{ marginTop: 10 }}>
-            <GhostBtn onClick={() => { setStep('pick'); setAmount(null); }}>{Ico.down} Hacer otro depósito</GhostBtn>
+            <GhostBtn onClick={() => { setStep('pick'); setAmount(null); }}>{Ico.down} {t('deposit.another')}</GhostBtn>
           </div>
         </div>
       )}
@@ -139,6 +143,7 @@ function DemoDepositFlow({ open, onClose, defaultSym = 'USDC', onDone }: Omit<Cr
 function LiveDepositFlow({ open, onClose, live }: Omit<CryptoDepositProps, 'live'> & { live: LiveDeposit }) {
   const [step, setStep] = useState<Exclude<Step, 'done'>>('pick');
   const [baseline, setBaseline] = useState<number | null>(null);
+  const { t } = useT('market');
   const network = live.network;
   const networks = { [PLATFORM_NET]: network };
   const received = step === 'tracking' && baseline !== null && live.usdc !== null && live.usdc > baseline + 1e-9 ? live.usdc - baseline : null;
@@ -159,22 +164,22 @@ function LiveDepositFlow({ open, onClose, live }: Omit<CryptoDepositProps, 'live
   };
 
   const footer = {
-    pick: <PrimaryBtn onClick={() => setStep('address')}>Continuar</PrimaryBtn>,
+    pick: <PrimaryBtn onClick={() => setStep('address')}>{t('pay.continue')}</PrimaryBtn>,
     address: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <PrimaryBtn disabled={live.usdc === null} onClick={startTracking}>Ya envié los fondos</PrimaryBtn>
-        <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Tu saldo se actualiza solo cuando llega la transferencia.</div>
+        <PrimaryBtn disabled={live.usdc === null} onClick={startTracking}>{t('deposit.sentFunds')}</PrimaryBtn>
+        <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t('deposit.liveAutoUpdate')}</div>
       </div>
     ),
     tracking: null,
-    done: <PrimaryBtn onClick={close}>Listo</PrimaryBtn>,
+    done: <PrimaryBtn onClick={close}>{t('pay.done')}</PrimaryBtn>,
   }[view];
 
   return (
-    <PayModal open={open} onClose={close} title={TITLES('USDC')[view]} onBack={view === 'address' ? () => setStep('pick') : undefined} footer={footer}>
+    <PayModal open={open} onClose={close} title={titleOf(view, 'USDC', t)} onBack={view === 'address' ? () => setStep('pick') : undefined} footer={footer}>
       {view === 'pick' && (
         <>
-          <p style={{ ...T.body, margin: '0 0 18px' }}>Deposita USDC en tu wallet por la red de la plataforma. Te mostramos tu dirección para recibirlos.</p>
+          <p style={{ ...T.body, margin: '0 0 18px' }}>{t('deposit.livePickIntro')}</p>
           <TokenNetworkPicker tokens={[LIVE_USDC]} networks={networks} sym="USDC" setSym={() => undefined} net={PLATFORM_NET} setNet={() => undefined} balances={{ USDC: live.usdc ?? 0 }} />
         </>
       )}
@@ -185,14 +190,14 @@ function LiveDepositFlow({ open, onClose, live }: Omit<CryptoDepositProps, 'live
             <QRCode value={live.address} logo={LIVE_USDC.icon} />
           </div>
           <Chips items={[[LIVE_USDC.icon, 'USDC'], [network.icon, network.name]]} />
-          <CopyField label="Tu dirección de depósito" value={live.address} />
+          <CopyField label={t('deposit.yourAddress')} value={live.address} />
           <div style={{ marginTop: 14 }}>
-            <KV k="Moneda" v="USD Coin (USDC)" />
-            <KV k="Red" v={network.name} />
-            <KV k="Saldo actual" v={live.usdc === null ? '…' : fmtToken(live.usdc, 'USDC')} />
+            <KV k={t('pay.currency')} v={t('pay.usdCoin')} />
+            <KV k={t('pay.network')} v={network.name} />
+            <KV k={t('deposit.currentBalance')} v={live.usdc === null ? '…' : fmtToken(live.usdc, 'USDC')} />
           </div>
           <div style={{ marginTop: 12 }}>
-            <Notice>Envía solo <b>USDC</b> por la red <b>{network.name}</b>. Si usas otra moneda o red, los fondos pueden perderse.</Notice>
+            <Notice>{richText(t('deposit.sendOnly', { sym: 'USDC', network: network.name }), bold)}</Notice>
           </div>
           <div style={{ marginTop: 12 }}>
             <FaucetCard onFunded={live.refresh} />
@@ -204,14 +209,14 @@ function LiveDepositFlow({ open, onClose, live }: Omit<CryptoDepositProps, 'live
         <div>
           <div style={{ textAlign: 'center', marginBottom: 18 }}>
             <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 28, color: 'var(--text)', letterSpacing: '-0.03em' }}>USDC</div>
-            <div style={{ ...T.body, fontSize: 12.5 }}>a {shortAddr(live.address)} · {network.name}</div>
+            <div style={{ ...T.body, fontSize: 12.5 }}>{t('deposit.to', { address: shortAddr(live.address), network: network.name })}</div>
           </div>
           <ProgressSteps current={0} steps={[
-            { label: 'Esperando la transferencia', sub: 'La detectamos cuando llega a tu wallet' },
-            { label: `Confirmando en ${network.name}` },
-            { label: 'Acreditando en tu saldo' },
+            { label: t('deposit.waiting'), sub: t('deposit.waitingSub') },
+            { label: t('pay.confirmingOn', { network: network.name }) },
+            { label: t('deposit.crediting') },
           ]} />
-          <div style={{ marginTop: 10, textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Puedes cerrar esta ventana: tu saldo se actualiza solo.</div>
+          <div style={{ marginTop: 10, textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t('deposit.canClose')}</div>
         </div>
       )}
 
@@ -219,13 +224,13 @@ function LiveDepositFlow({ open, onClose, live }: Omit<CryptoDepositProps, 'live
         <div style={{ textAlign: 'center', paddingTop: 6 }}>
           <SuccessMark />
           <div role="status" style={{ ...T.title, fontSize: 24 }}>+{fmtToken(received, 'USDC')}</div>
-          <div style={{ ...T.body, marginBottom: 16 }}>Ya está disponible en tu wallet.</div>
+          <div style={{ ...T.body, marginBottom: 16 }}>{t('deposit.walletAvailable')}</div>
           <div style={{ textAlign: 'left', padding: '6px 14px', borderRadius: 14, background: 'var(--surface2)' }}>
-            <KV k="Red" v={network.name} />
-            <KV k="Saldo USDC" v={fmtToken(live.usdc ?? 0, 'USDC')} strong />
+            <KV k={t('pay.network')} v={network.name} />
+            <KV k={t('deposit.usdcBalance')} v={fmtToken(live.usdc ?? 0, 'USDC')} strong />
           </div>
           <div style={{ marginTop: 10 }}>
-            <GhostBtn onClick={reset}>{Ico.down} Hacer otro depósito</GhostBtn>
+            <GhostBtn onClick={reset}>{Ico.down} {t('deposit.another')}</GhostBtn>
           </div>
         </div>
       )}

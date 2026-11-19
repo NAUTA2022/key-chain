@@ -1,12 +1,15 @@
 import { useState, useMemo, useRef, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { PCard, PBtn, PSection, PChip } from '~/components/ui';
-import { SECONDARY_LISTINGS, RWA_ASSETS, RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD2, type RwaAsset, type SecondaryListing } from '~/data';
+import { useCatalog } from '~/lib/catalog';
+import { SECONDARY_LISTINGS, RWA_CATS, RWA_COUNTRIES, RWA_COMPANIES, fmtUSD2, type RwaAsset, type SecondaryListing } from '~/data';
 import { goCheckout } from '~/lib/checkout';
 import CategoryCarousel from '~/components/CategoryCarousel';
 import type { NavFn } from '~/lib/navigation';
 import { useMobile } from '~/hooks/useMobile';
 import { useMagnetScroll } from '~/hooks/useMagnetScroll';
+import { useDataLabel } from '~/features/market/i18n';
+import { useT } from '~/i18n/useT';
 
 export type SortKey = 'descuento' | 'prima' | 'reciente';
 type EnrichedListing = SecondaryListing & { asset: RwaAsset | undefined; diff: number };
@@ -24,6 +27,8 @@ export type FilterBarProps = {
 
 export function FilterBar({ search, setSearch, cat, setCat, country, setCountry, company, setCompany, sort, setSort, pinned }: FilterBarProps) {
   const [open, setOpen] = useState(false);
+  const { t } = useT('market');
+  const dataLabel = useDataLabel();
   const hasFilters = cat !== 'Todos' || country !== 'Todos' || company !== 'Todos';
 
   return (
@@ -34,19 +39,19 @@ export function FilterBar({ search, setSearch, cat, setCat, country, setCountry,
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           </span>
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar activo, vendedor, categoría..."
+            placeholder={t('secondary.searchPlaceholder')}
             style={{ width:'100%', boxSizing:'border-box', padding:'10px 14px 10px 38px', borderRadius:12, border:'1.5px solid var(--border)', background:'var(--surface)', color:'var(--text)', fontFamily:'var(--font-b)', fontSize:13.5, outline:'none' }}
           />
         </div>
         <button onClick={() => setOpen(o => !o)}
           style={{ display:'flex', alignItems:'center', gap:7, padding:'10px 16px', borderRadius:12, border:`1.5px solid ${hasFilters ? 'var(--accent)' : 'var(--border)'}`, background: hasFilters ? 'var(--accent-bg)' : 'var(--surface)', color: hasFilters ? 'var(--accent-text)' : 'var(--sec)', cursor:'pointer', fontFamily:'var(--font-b)', fontSize:13, fontWeight:600, flexShrink:0 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-          Filtros {hasFilters && <span style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', display:'inline-block' }}/>}
+          {t('filters.title')} {hasFilters && <span style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', display:'inline-block' }}/>}
         </button>
         {hasFilters && (
           <button onClick={() => { setCat('Todos'); setCountry('Todos'); setCompany('Todos'); }}
             style={{ padding:'10px 14px', borderRadius:12, border:'1.5px solid var(--border)', background:'transparent', color:'var(--ter)', cursor:'pointer', fontSize:12, fontFamily:'var(--font-b)' }}>
-            Limpiar
+            {t('filters.clear')}
           </button>
         )}
       </div>
@@ -55,9 +60,9 @@ export function FilterBar({ search, setSearch, cat, setCat, country, setCountry,
         {open && (
           <motion.div initial={{ height:0, opacity:0 }} animate={{ height:'auto', opacity:1 }} exit={{ height:0, opacity:0 }} style={{ overflow:'hidden' }}>
             <div style={{ padding:'16px 18px', background:'var(--surface)', border:'1.5px solid var(--border)', borderRadius:14, maxHeight: pinned ? '55vh' : undefined, overflowY: pinned ? 'auto' : undefined, display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:16, marginBottom:10 }}>
-              <FilterGroup label="Categoría" value={cat} onChange={setCat} options={RWA_CATS} />
-              <FilterGroup label="País" value={country} onChange={setCountry} options={RWA_COUNTRIES} />
-              <FilterGroup label="Empresa" value={company} onChange={setCompany} options={RWA_COMPANIES} />
+              <FilterGroup label={t('filters.category')} value={cat} onChange={setCat} options={RWA_CATS} labels={RWA_CATS.map(c => dataLabel('categories', c))} />
+              <FilterGroup label={t('filters.country')} value={country} onChange={setCountry} options={RWA_COUNTRIES} labels={RWA_COUNTRIES.map(c => dataLabel('countries', c))} />
+              <FilterGroup label={t('filters.company')} value={company} onChange={setCompany} options={RWA_COMPANIES} labels={RWA_COMPANIES.map(c => (c === 'Todos' ? dataLabel('countries', c) : c))} />
             </div>
           </motion.div>
         )}
@@ -65,9 +70,9 @@ export function FilterBar({ search, setSearch, cat, setCat, country, setCountry,
 
       {/* Sort chips */}
       <div className="no-scrollbar" style={{ display:'flex', gap:8, overflowX:'auto', overflowY:'hidden', margin: pinned ? '0 -14px' : 0, padding: pinned ? '0 14px' : 0 }}>
-        <PChip label="Mayor descuento" active={sort==='descuento'} onClick={() => setSort('descuento')} />
-        <PChip label="Mayor prima"     active={sort==='prima'}     onClick={() => setSort('prima')} />
-        <PChip label="Más recientes"   active={sort==='reciente'}  onClick={() => setSort('reciente')} />
+        <PChip label={t('filters.sortDiscount')} active={sort==='descuento'} onClick={() => setSort('descuento')} />
+        <PChip label={t('filters.sortPremium')} active={sort==='prima'}     onClick={() => setSort('prima')} />
+        <PChip label={t('filters.sortRecent')} active={sort==='reciente'}  onClick={() => setSort('reciente')} />
       </div>
     </div>
   );
@@ -78,17 +83,18 @@ type FilterGroupProps = {
   value: string;
   onChange: (v: string) => void;
   options: readonly string[];
+  labels?: readonly string[];
 };
 
-function FilterGroup({ label, value, onChange, options }: FilterGroupProps) {
+function FilterGroup({ label, value, onChange, options, labels }: FilterGroupProps) {
   return (
     <div>
       <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>{label}</div>
       <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-        {options.map(opt => (
+        {options.map((opt, i) => (
           <button key={opt} onClick={() => onChange(opt)}
             style={{ padding:'5px 11px', borderRadius:999, border:`1.5px solid ${value===opt ? 'var(--accent)' : 'var(--border)'}`, background: value===opt ? 'var(--accent-bg)' : 'transparent', color: value===opt ? 'var(--accent-text)' : 'var(--sec)', cursor:'pointer', fontFamily:'var(--font-b)', fontSize:12, fontWeight: value===opt ? 700 : 400 }}>
-            {opt}
+            {labels ? labels[i] : opt}
           </button>
         ))}
       </div>
@@ -121,19 +127,21 @@ const fmtCompactUSD = (n: number): string =>
   n >= 1e6 ? `$${(n / 1e6).toFixed(1).replace(/\.0$/, '')}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}K` : fmtUSD2(n);
 
 export function ListingCard({ seller, onSeller, asset, qty, askPrice, diff, onView, actions }: ListingCardProps) {
+  const { t } = useT('market');
+  const dataLabel = useDataLabel();
   const below = diff < 0;
   const pct = Math.abs(diff);
-  const vsPrimary = pct < 0.05 ? 'Precio primario' : `${pct.toFixed(pct < 10 ? 1 : 0)}% ${below ? 'bajo' : 'sobre'} primario`;
+  const vsPrimary = pct < 0.05 ? t('listing.primaryPrice') : t(below ? 'listing.belowPrimary' : 'listing.abovePrimary', { pct: pct.toFixed(pct < 10 ? 1 : 0) });
   const issuer = asset.company || 'BRIKME';
   return (
     <article className="sm-card">
       <img className="sm-card-img" src={asset.img} alt="" loading="lazy" decoding="async" draggable={false} />
       <span className="sm-card-shade" aria-hidden="true" />
-      <button type="button" className="sm-card-hit" onClick={onView} aria-label={`Ver ${asset.name}`} />
+      <button type="button" className="sm-card-hit" onClick={onView} aria-label={t('listing.view', { name: asset.name })} />
       <header className="sm-card-top">
         <span className="sm-card-logo" aria-hidden="true">{issuerInitials(issuer)}</span>
-        <span className="sm-card-issuer"><strong>{issuer}</strong><em>{asset.cat}</em></span>
-        <span className="sm-chip sm-chip-trade">En venta</span>
+        <span className="sm-card-issuer"><strong>{issuer}</strong><em>{dataLabel('categories', asset.cat)}</em></span>
+        <span className="sm-chip sm-chip-trade">{t('listing.onSale')}</span>
         <span className={`sm-chip ${below ? 'sm-chip-below' : 'sm-chip-above'}`} title={vsPrimary}>
           <span className="sm-chip-long">{vsPrimary}</span>
           <span className="sm-chip-short">{pct < 0.05 ? '0%' : `${below ? '−' : '+'}${pct.toFixed(pct < 10 ? 1 : 0)}%`}</span>
@@ -142,14 +150,14 @@ export function ListingCard({ seller, onSeller, asset, qty, askPrice, diff, onVi
       <div className="sm-card-body">
         <h3>{asset.name}</h3>
         <p>
-          Vende {onSeller
-            ? <button type="button" className="sm-card-seller" onClick={onSeller} title={`Ver perfil de ${seller}`}>{seller}</button>
-            : seller} · {qty} tokens
+          {t('listing.sellerPrefix')} {onSeller
+            ? <button type="button" className="sm-card-seller" onClick={onSeller} title={t('listing.sellerProfile', { seller })}>{seller}</button>
+            : seller} · {t('listing.tokens', { qty })}
         </p>
         <dl className="sm-card-stats">
-          <div><dt>Precio</dt><dd>{fmtUSD2(askPrice)}</dd></div>
-          <div><dt>APY est.</dt><dd>{asset.apy.toFixed(1)}%</dd></div>
-          <div><dt>Valoración</dt><dd>{fmtCompactUSD(asset.valuation)}</dd></div>
+          <div><dt>{t('listing.price')}</dt><dd>{fmtUSD2(askPrice)}</dd></div>
+          <div><dt>{t('listing.apy')}</dt><dd>{asset.apy.toFixed(1)}%</dd></div>
+          <div><dt>{t('listing.valuation')}</dt><dd>{fmtCompactUSD(asset.valuation)}</dd></div>
         </dl>
         <div className="sm-card-actions">{actions}</div>
       </div>
@@ -185,13 +193,14 @@ export function MobileSummary({ stats }: { stats: ReadonlyArray<readonly [string
 
 /** Mobile page header: title, subtitle and the round "+" (publish a sale). */
 export function MobileMarketHeader({ onPublish, disabled, help }: { onPublish?: () => void; disabled?: boolean; help?: ReactNode }) {
+  const { t } = useT('market');
   return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginBottom:14 }}>
       <div style={{ minWidth:0 }}>
-        <h1 data-guide="secondary-title" style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:22, letterSpacing:'-0.03em', color:'var(--text)' }}>Mercado Secundario</h1>
-        <p style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginTop:2 }}>Compra y vende tokens entre inversores{help}</p>
+        <h1 data-guide="secondary-title" style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:22, letterSpacing:'-0.03em', color:'var(--text)' }}>{t('secondary.title')}</h1>
+        <p style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginTop:2 }}>{t('secondary.subMobile')}{help}</p>
       </div>
-      <button aria-label="Publicar venta" title="Publicar venta" data-guide="secondary-sell" onClick={onPublish} disabled={disabled}
+      <button aria-label={t('secondary.publishAria')} title={t('secondary.publishAria')} data-guide="secondary-sell" onClick={onPublish} disabled={disabled}
         style={{ width:44, height:44, flexShrink:0, borderRadius:14, border:'none', cursor:'pointer', background:'var(--accent)', color:'var(--accent-fg)', fontSize:24, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center' }}>+</button>
     </div>
   );
@@ -228,10 +237,12 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
   const [cat, setCat]         = useState('Todos');
   const [country, setCountry] = useState('Todos');
   const [company, setCompany] = useState('Todos');
+  const { t } = useT('market');
+  const { byId } = useCatalog();
 
   const enriched = useMemo(() => SECONDARY_LISTINGS.map((l): EnrichedListing => ({
     ...l,
-    asset: RWA_ASSETS.find(a => a.id === l.assetId),
+    asset: byId(l.assetId),
     diff: (l.askPrice / l.realPrice - 1) * 100,
   })).filter((l): l is EnrichedListing & { asset: RwaAsset } => {
     const a = l.asset;
@@ -245,7 +256,7 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
       return a.name.toLowerCase().includes(q) || l.seller.toLowerCase().includes(q) || a.cat.toLowerCase().includes(q);
     }
     return true;
-  }), [search, cat, country, company, rubro]);
+  }), [search, cat, country, company, rubro, byId]);
 
   const sorted = useMemo(() => [...enriched].sort((a, b) => {
     if (sort === 'descuento') return a.diff - b.diff;
@@ -256,18 +267,18 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
   const mobile = useMobile();
   const buy = (l: EnrichedListing & { asset: RwaAsset }) => {
     goCheckout(nav, {
-      title: 'Compra en mercado secundario', source: 'Mercado Secundario',
+      title: t('secondary.buyTitle'), source: 'Mercado Secundario',
       // askPrice is per token (the branch divides it by qty again; fixed here as before).
-      items: [{ name: l.asset.name, img: l.asset.img, qty: l.qty, unit: l.askPrice, meta: `Vende ${l.seller}` }],
-      back: { route: 'secundario' }, done: { route: 'pertenencias', label: 'Ver en Mis Pertenencias' },
+      items: [{ name: l.asset.name, img: l.asset.img, qty: l.qty, unit: l.askPrice, meta: t('secondary.soldBy', { seller: l.seller }) }],
+      back: { route: 'secundario' }, done: { route: 'pertenencias', label: t('secondary.viewInHoldings') },
     });
   };
 
   const stats: Array<readonly [string, string]> = [
-    ['Volumen 24h', '$184,200'],
-    ['Listados activos', sorted.length.toString()],
-    ['Descuento promedio', '-5.8%'],
-    ['Operaciones 24h', '142'],
+    [t('secondary.volume24h'), '$184,200'],
+    [t('secondary.activeListings'), sorted.length.toString()],
+    [t('secondary.avgDiscount'), '-5.8%'],
+    [t('secondary.trades24h'), '142'],
   ];
 
   const filterBar = (pinned: boolean) => (
@@ -280,9 +291,9 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
     <div className="g-page" style={{ padding:'28px 32px 40px', maxWidth:1200, margin:'0 auto' }}>
       {mobile ? <MobileMarketHeader /> : (
       <PSection
-        title="Mercado Secundario"
-        sub="Compra y venta P2P entre inversores. Compara precio pedido vs. precio real del token."
-        action={<PBtn variant="primary">+ Publicar venta</PBtn>}
+        title={t('secondary.title')}
+        sub={t('secondary.sub')}
+        action={<PBtn variant="primary">{t('secondary.publish')}</PBtn>}
       />
       )}
 
@@ -305,7 +316,7 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
       {mobile ? <MagnetToolbar>{filterBar}</MagnetToolbar> : filterBar(false)}
 
       <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:16 }}>
-        {sorted.length} listado{sorted.length !== 1 ? 's' : ''} activo{sorted.length !== 1 ? 's' : ''}
+        {t(sorted.length === 1 ? 'secondary.countOne' : 'secondary.countMany', { count: sorted.length })}
       </div>
 
       {/* Listings */}
@@ -325,7 +336,7 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
                 actions={
                   <PBtn variant={isDiscount ? 'accent' : 'secondary'} style={{ flex:1 }} small
                     onClick={isDiscount ? () => buy(l) : undefined}>
-                    {isDiscount ? 'Comprar' : 'Hacer oferta'}
+                    {isDiscount ? t('secondary.buy') : t('secondary.makeOffer')}
                   </PBtn>
                 }
               />
@@ -336,7 +347,7 @@ export default function SecondaryMarket({ nav, rubro = 'Todos' }: SecondaryMarke
 
       {sorted.length === 0 && (
         <div style={{ textAlign:'center', padding:'60px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:14 }}>
-          No hay listados activos con esos filtros.
+          {t('secondary.emptyFiltered')}
         </div>
       )}
     </div>

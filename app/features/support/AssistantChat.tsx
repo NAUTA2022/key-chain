@@ -8,6 +8,7 @@ import { api } from '~/lib/api/client';
 import type { SessionStatus } from '~/lib/session';
 import { ASSISTANT_MAX_CHARS, assistantPayload, plainText, srOnly, type ChatMessage } from './schema';
 import SignInCta from './SignInCta';
+import { useT } from '~/i18n/useT';
 
 // Support assistant (POST /v1/support/assistant). Replies are rendered as plain text only.
 
@@ -15,10 +16,11 @@ type ChatError = { kind: 'unavailable' | 'other'; text: string };
 
 function Bubble({ role, children }: { role: ChatMessage['role']; children: ReactNode }) {
   const mine = role === 'user';
+  const { t } = useT('help');
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
       <div style={{ ...mutedStyle, fontSize: 11.5, fontWeight: 600, marginBottom: 4, color: mine ? 'var(--sec)' : 'var(--accent-text)' }}>
-        {mine ? 'Tú' : 'Asistente'}
+        {mine ? t('shared.you') : t('assistant.name')}
       </div>
       <div
         style={{
@@ -41,6 +43,7 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
   onOpenTicket: (draft: string) => void;
 }) {
   const inputId = useId();
+  const { t } = useT('help');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [pending, setPending] = useState(false);
@@ -67,12 +70,12 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
       const id = seq.current;
       setMessages(m => [...m, { id, role: 'assistant', content: text }]);
     } else if (problemReason(r.error) === 'assistant_unavailable') {
-      setError({ kind: 'unavailable', text: 'El asistente no está disponible ahora; abre un ticket y te respondemos.' });
+      setError({ kind: 'unavailable', text: t('assistant.unavailable') });
     } else {
       setError({
         kind: 'other',
-        text: errorText(r.error, 'No pudimos obtener una respuesta. Prueba de nuevo en un momento.', {
-          rate_limited: 'El asistente recibió muchas consultas seguidas. Espera un momento y vuelve a probar.',
+        text: errorText(r.error, t('assistant.error'), {
+          rate_limited: t('assistant.rateLimited'),
         }),
       });
     }
@@ -82,7 +85,7 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
     const text = input.trim();
     if (!text || pending) return;
     if (text.length > ASSISTANT_MAX_CHARS) {
-      setError({ kind: 'other', text: `Tu mensaje puede tener hasta ${ASSISTANT_MAX_CHARS} caracteres.` });
+      setError({ kind: 'other', text: t('assistant.tooLong', { max: ASSISTANT_MAX_CHARS }) });
       return;
     }
     seq.current += 1;
@@ -99,8 +102,8 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
   if (status === 'anonymous') {
     body = (
       <SignInCta
-        title="Inicia sesión para usar el asistente"
-        text="El asistente está disponible con tu sesión iniciada. Mientras tanto, puedes buscar en las preguntas frecuentes."
+        title={t('assistant.signInTitle')}
+        text={t('assistant.signInText')}
       />
     );
   } else if (!authed) {
@@ -110,10 +113,10 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {messages.length === 0 && (
           <p style={{ ...bodyStyle, margin: 0 }}>
-            Hola, soy el asistente virtual de Brikme. Pregúntame cómo usar la plataforma: tu cuenta, la verificación de identidad, las inversiones o los pagos.
+            {t('assistant.greeting')}
           </p>
         )}
-        <div role="log" aria-live="polite" aria-label="Conversación con el asistente" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div role="log" aria-live="polite" aria-label={t('assistant.log')} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {messages.map(m => (
             <Bubble key={m.id} role={m.role}>
               {paragraphs(m.content).map((p, i) => (
@@ -125,7 +128,7 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
         {pending && (
           <Bubble role="assistant">
             <span role="status" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 20 }}>
-              <span style={srOnly}>El asistente está escribiendo…</span>
+              <span style={srOnly}>{t('assistant.typing')}</span>
               {[0, 1, 2].map(i => (
                 <motion.span
                   key={i}
@@ -141,13 +144,13 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
         {error?.kind === 'unavailable' && (
           <Notice tone="warn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
             <span>{error.text}</span>
-            <PBtn variant="secondary" small onClick={() => onOpenTicket(lastUser)}>Abrir un ticket</PBtn>
+            <PBtn variant="secondary" small onClick={() => onOpenTicket(lastUser)}>{t('helpCenter.openTicket')}</PBtn>
           </Notice>
         )}
         {error?.kind === 'other' && (
           <Notice tone="error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
             <span>{error.text}</span>
-            {awaitingReply && !pending && <PBtn variant="secondary" small onClick={() => void ask(messages)}>Reintentar</PBtn>}
+            {awaitingReply && !pending && <PBtn variant="secondary" small onClick={() => void ask(messages)}>{t('shared.retry')}</PBtn>}
           </Notice>
         )}
         <div ref={endRef} />
@@ -159,19 +162,19 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
     <Modal
       open={open}
       onClose={onClose}
-      title="Asistente de Brikme"
+      title={t('assistant.title')}
       width={560}
       footer={
         authed ? (
           <div style={{ flex: '1 1 100%', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <Field label="Tu consulta" htmlFor={inputId}>
+            <Field label={t('assistant.inputLabel')} htmlFor={inputId}>
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
                 <TextArea
                   id={inputId}
                   value={input}
                   rows={2}
                   maxLength={ASSISTANT_MAX_CHARS}
-                  placeholder="Escribe tu consulta…"
+                  placeholder={t('assistant.placeholder')}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -181,10 +184,10 @@ export default function AssistantChat({ open, status, onClose, onOpenTicket }: {
                   }}
                   style={{ flex: 1, width: 'auto', minWidth: 0, resize: 'none' }}
                 />
-                <PBtn variant="accent" small onClick={send} disabled={pending || !input.trim()}>Enviar</PBtn>
+                <PBtn variant="accent" small onClick={send} disabled={pending || !input.trim()}>{t('assistant.send')}</PBtn>
               </div>
             </Field>
-            <div style={{ ...mutedStyle, fontSize: 11.5 }}>Respuestas automáticas: pueden contener errores. No compartas datos sensibles.</div>
+            <div style={{ ...mutedStyle, fontSize: 11.5 }}>{t('assistant.disclaimer')}</div>
           </div>
         ) : undefined
       }

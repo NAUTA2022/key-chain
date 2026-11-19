@@ -8,6 +8,7 @@ import { useNav, type NavFn, type NavState, type RouteKey } from '~/lib/navigati
 import { breadcrumbs, seo } from '~/lib/seo';
 import AssetPlaceholder from '~/features/asset/AssetPlaceholder';
 import { useResolvedAsset } from '~/features/asset/api';
+import { useDataText } from '~/i18n/data';
 
 function findAsset(id: string | undefined) {
   return RWA_ASSETS.find(a => String(a.id) === id);
@@ -56,8 +57,10 @@ export default function TokenizacionRoute({ params }: Route.ComponentProps) {
   // `?publicacion=<postId>` (links from the global Feed / company profiles): open the Feed tab on that post.
   const [search] = useSearchParams();
   const focusPostId = search.get('publicacion') || null;
+  const dataText = useDataText();
   if (apiEnabled) return <LiveAssetRoute idOrSlug={params.assetId} nav={nav} from={from} focusPostId={focusPostId} />;
-  const asset = findAsset(params.assetId);
-  if (!asset) return <NotFound />;
+  const seed = findAsset(params.assetId);
+  if (!seed) return <NotFound />;
+  const asset = dataText.asset(seed);
   return <ProductDetail key={asset.id} nav={nav} asset={asset} fromRoute={from} focusPostId={focusPostId} />;
 }

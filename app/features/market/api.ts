@@ -7,6 +7,7 @@ import type { paths } from '~/lib/api/schema';
 import { type ApiHolding, appChain, chainFor } from '~/lib/onchain';
 import { useSession } from '~/lib/session';
 import { client } from '~/lib/thirdweb';
+import { MarketError } from './i18n';
 
 // Secondary market (FactorActSecondaryMarket): wallets trade with the contract directly.
 // The seller approves its tokens and lists; the buyer approves USDC and buys; the token
@@ -71,15 +72,15 @@ const same = (a: string | null | undefined, b: string | null | undefined) => Boo
 
 export type TradeStep = 'approve' | 'confirm' | 'sync' | 'done';
 
-/** Wallet/contract failures in plain Spanish (the token's own revert strings first). */
-function tradeError(e: unknown, fallback: string): Error {
+/** Wallet/contract failures in plain words (the token's own revert strings first), as `market` i18n keys. */
+function tradeError(e: unknown, fallbackKey: string): MarketError {
   const msg = e instanceof Error ? e.message : String(e);
-  if (/reject|denied|cancel/i.test(msg)) return new Error('Operación cancelada en la wallet.', { cause: e });
-  if (/Transfer not possible/i.test(msg)) return new Error('El token no permite esta transferencia: tu wallet debe estar verificada (KYC) y habilitada para este activo.', { cause: e });
-  if (/wallet is frozen/i.test(msg)) return new Error('La wallet del vendedor está congelada; esta venta no se puede completar.', { cause: e });
-  if (/paused/i.test(msg)) return new Error('El mercado o el token están pausados en este momento.', { cause: e });
-  if (/exceeds balance|insufficient balance/i.test(msg)) return new Error('No tienes saldo suficiente para esta operación.', { cause: e });
-  return new Error(fallback, { cause: e });
+  if (/reject|denied|cancel/i.test(msg)) return new MarketError('errors.walletCancelled', undefined, { cause: e });
+  if (/Transfer not possible/i.test(msg)) return new MarketError('errors.transferBlocked', undefined, { cause: e });
+  if (/wallet is frozen/i.test(msg)) return new MarketError('errors.sellerFrozen', undefined, { cause: e });
+  if (/paused/i.test(msg)) return new MarketError('errors.tradingPaused', undefined, { cause: e });
+  if (/exceeds balance|insufficient balance/i.test(msg)) return new MarketError('errors.noBalance', undefined, { cause: e });
+  return new MarketError(fallbackKey, undefined, { cause: e });
 }
 
 async function ensureChain(wallet: Wallet | undefined, chain: Chain): Promise<void> {
@@ -87,13 +88,13 @@ async function ensureChain(wallet: Wallet | undefined, chain: Chain): Promise<vo
 }
 
 /** A check that failed before any transaction was sent (shown as is). */
-class PreflightError extends Error {}
+class PreflightError extends MarketError {}
 
 /** The market the API describes, on the network this build runs on. */
 function marketOf(info: MarketInfo | null): { chain: Chain; market: string; usdc: string } {
-  if (!info?.enabled || !info.market || !info.paymentToken) throw new PreflightError('El mercado secundario no está disponible en esta red.');
-  if (info.paused) throw new PreflightError('El mercado secundario está pausado en este momento.');
-  if (appChain && info.chainId !== appChain.id) throw new PreflightError('El mercado está en otra red. No se envió ninguna transacción.');
+  if (!info?.enabled || !info.market || !info.paymentToken) throw new PreflightError('errors.marketUnavailable');
+  if (info.paused) throw new PreflightError('errors.marketPaused');
+  if (appChain && info.chainId !== appChain.id) throw new PreflightError('errors.wrongNetwork');
   return { chain: chainFor(info.chainId), market: info.market, usdc: info.paymentToken };
 }
 
@@ -131,11 +132,11 @@ export async function sellOnchain(o: {
 }): Promise<TradeResult> {
   const { chain, market } = marketOf(o.info);
   const token = o.holding.token;
-  if (!token || o.holding.poolStatus !== 'active') throw new Error('Este activo no se puede negociar ahora.');
-  if (o.holding.chainId !== o.info.chainId) throw new Error('El activo está en otra red.');
-  if (!Number.isInteger(o.quantity) || o.quantity < 1) throw new Error('Elige una cantidad entera de tokens.');
+  if (!token || o.holding.poolStatus !== 'active') throw new MarketError('errors.notTradable');
+  if (o.holding.chainId !== o.info.chainId) throw new MarketError('errors.assetOtherNetwork');
+  if (!Number.isInteger(o.quantity) || o.quantity < 1) throw new MarketError('errors.wholeTokens');
   const priceAtomic = BigInt(Math.round(o.priceUsd * 1e6));
-  if (priceAtomic <= 0n) throw new Error('Elige un precio mayor a cero.');
+  if (priceAtomic <= 0n) throw new MarketError('errors.priceAboveZero');
   const amount = BigInt(o.quantity) * ONE_TOKEN;
 
   let hash: Hex;
@@ -143,9 +144,9 @@ export async function sellOnchain(o: {
     await ensureChain(o.wallet, chain);
     const marketContract = getContract({ client, chain, address: market });
     const allowed = await readContract({ contract: marketContract, method: 'function isTokenAllowed(address token) view returns (bool)', params: [token] });
-    if (!allowed) throw new PreflightError('Este activo todavía no está habilitado en el mercado secundario. Prueba de nuevo en unos minutos.');
+    if (!allowed) throw new PreflightError('errors.tokenNotAllowed');
     const committed = await committedOf(chain, market, o.account.address, token);
-    if (BigInt(o.holding.balanceAtomic) - committed < amount) throw new PreflightError('No tienes tantos tokens libres: parte ya está publicada en otra venta.');
+    if (BigInt(o.holding.balanceAtomic) - committed < amount) throw new PreflightError('errors.notEnoughFree');
     o.onStep('approve');
     const tokenContract = getContract({ client, chain, address: token });
     await sendAndConfirmTransaction({
@@ -160,7 +161,7 @@ export async function sellOnchain(o: {
     hash = receipt.transactionHash;
   } catch (e) {
     if (e instanceof PreflightError) throw e;
-    throw tradeError(e, 'No se pudo publicar la venta.');
+    throw tradeError(e, 'errors.sellFailed');
   }
   o.onStep('sync');
   const result = await syncQuietly(hash);
@@ -179,9 +180,9 @@ export async function buyOnchain(o: {
   info: MarketInfo; listing: MarketListing; quantity: number; account: Account; wallet: Wallet | undefined; onStep: (s: TradeStep) => void;
 }): Promise<TradeResult> {
   const { chain, market, usdc } = marketOf(o.info);
-  if (!same(o.listing.market, market) || o.listing.chainId !== o.info.chainId) throw new Error('La oferta no pertenece al mercado de la plataforma.');
-  if (same(o.listing.sellerWallet, o.account.address)) throw new Error('No puedes comprar tu propia oferta.');
-  if (!Number.isInteger(o.quantity) || o.quantity < 1 || o.quantity > Math.floor(o.listing.available)) throw new Error('Elige una cantidad disponible.');
+  if (!same(o.listing.market, market) || o.listing.chainId !== o.info.chainId) throw new MarketError('errors.foreignListing');
+  if (same(o.listing.sellerWallet, o.account.address)) throw new MarketError('errors.ownOffer');
+  if (!Number.isInteger(o.quantity) || o.quantity < 1 || o.quantity > Math.floor(o.listing.available)) throw new MarketError('errors.pickAvailable');
   const amount = BigInt(o.quantity) * ONE_TOKEN;
   // Whole tokens: the cost is exact (quantity × price); it is also the most the contract may charge.
   const cost = BigInt(o.quantity) * BigInt(o.listing.priceAtomic);
@@ -196,14 +197,14 @@ export async function buyOnchain(o: {
       readContract({ contract: marketContract, method: LISTING_METHOD, params: [BigInt(o.listing.onchainId)] }),
     ]);
     const [seller, , active, token, , remaining, pricePerToken, unit] = onchain;
-    if (!same(paymentToken, usdc)) throw new PreflightError('El token de pago del mercado no coincide. No se envió ninguna aprobación.');
-    if (!active || remaining < amount) throw new PreflightError('Esta oferta ya no está disponible en esa cantidad. Actualiza el mercado.');
+    if (!same(paymentToken, usdc)) throw new PreflightError('errors.paymentTokenMismatch');
+    if (!active || remaining < amount) throw new PreflightError('errors.offerGoneRefresh');
     if (!same(seller, o.listing.sellerWallet) || !same(token, o.listing.token) || pricePerToken !== BigInt(o.listing.priceAtomic) || unit !== ONE_TOKEN) {
-      throw new PreflightError('Los datos de la oferta no coinciden con el contrato. No se envió ninguna aprobación.');
+      throw new PreflightError('errors.offerMismatch');
     }
     const usdcContract = getContract({ client, chain, address: paymentToken });
     const balance = await readContract({ contract: usdcContract, method: 'function balanceOf(address account) view returns (uint256)', params: [o.account.address] });
-    if (balance < cost) throw new PreflightError('No tienes USDC suficiente para esta compra.');
+    if (balance < cost) throw new PreflightError('errors.noUsdc');
     o.onStep('approve');
     await sendAndConfirmTransaction({
       account: o.account,
@@ -217,7 +218,7 @@ export async function buyOnchain(o: {
     hash = receipt.transactionHash;
   } catch (e) {
     if (e instanceof PreflightError) throw e;
-    throw tradeError(e, 'No se pudo completar la compra.');
+    throw tradeError(e, 'errors.buyFailed');
   }
   o.onStep('sync');
   const result = await syncQuietly(hash);
@@ -228,7 +229,7 @@ export async function buyOnchain(o: {
 /** Withdraws one of the user's listings. */
 export async function cancelOnchain(o: { info: MarketInfo; listing: MarketListing; account: Account; wallet: Wallet | undefined }): Promise<TradeResult> {
   const { chain, market } = marketOf({ ...o.info, paused: false }); // cancelling works while paused
-  if (!same(o.listing.market, market)) throw new Error('La oferta no pertenece al mercado de la plataforma.');
+  if (!same(o.listing.market, market)) throw new MarketError('errors.foreignListing');
   let hash: Hex;
   try {
     await ensureChain(o.wallet, chain);
@@ -239,7 +240,7 @@ export async function cancelOnchain(o: { info: MarketInfo; listing: MarketListin
     });
     hash = receipt.transactionHash;
   } catch (e) {
-    throw tradeError(e, 'No se pudo retirar la oferta.');
+    throw tradeError(e, 'errors.cancelFailed');
   }
   return syncQuietly(hash);
 }

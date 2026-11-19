@@ -1,12 +1,12 @@
 import { useState, type CSSProperties, type FormEvent } from 'react';
 import { PBtn, PCard, PTag } from '~/components/ui';
 import KycLive from '~/features/kyc/KycLive';
-import { useApi } from '~/features/profile/api';
+import { countryLabel, useApi } from '~/features/profile/api';
 import { Notice, Skeleton } from '~/features/profile/kit';
 import { useMobile } from '~/hooks/useMobile';
 import { mediaUrl } from '~/lib/catalog';
-import { countryName } from '~/lib/countries';
 import type { NavFn } from '~/lib/navigation';
+import { useT } from '~/i18n/useT';
 import { useSession } from '~/lib/session';
 import CompanyFields from './CompanyFields';
 import {
@@ -31,6 +31,7 @@ const rowLabel: CSSProperties = { fontFamily: 'var(--font-b)', fontSize: 12.5, c
 const rowValue: CSSProperties = { fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--text)', fontWeight: 600, textAlign: 'right', overflowWrap: 'anywhere' };
 
 function CompanyEditor({ initial, existing, onSaved, onCancel }: { initial: CompanyForm; existing: MyCompany | null; onSaved: (c: MyCompany) => void; onCancel?: () => void }) {
+  const { t } = useT('profile');
   const isMobile = useMobile();
   const [form, setForm] = useState(initial);
   const [errors, setErrors] = useState<CompanyErrors>({});
@@ -41,41 +42,43 @@ function CompanyEditor({ initial, existing, onSaved, onCancel }: { initial: Comp
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (saving) return;
-    const parsed = parseCompanyForm(form);
+    const parsed = parseCompanyForm(form, t);
     if (parsed.errors) return setErrors(parsed.errors);
     setErrors({});
     setApiError(null);
     setSaving(true);
-    const r = await saveCompany(parsed.body, form.logo, existing);
+    const r = await saveCompany(parsed.body, form.logo, existing, t);
     setSaving(false);
     if (!r.company) return setApiError(r.error);
     if (r.logoError) setApiError(r.logoError);
     onSaved(r.company);
   }
 
-  const label = !existing ? 'Enviar para verificación' : existing.status === 'rejected' ? 'Reenviar para verificación' : 'Guardar cambios';
+  const label = !existing ? t('company.section.submit') : existing.status === 'rejected' ? t('company.section.resubmit') : t('company.section.saveChanges');
   return (
     <form onSubmit={submit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <CompanyFields form={form} errors={errors} logoUrl={existing?.logoUrl ? mediaUrl(existing.logoUrl) : null}
         onChange={(key, value) => { setForm(f => ({ ...f, [key]: value })); setErrors(er => ({ ...er, [key]: undefined })); }} />
       {apiError && <Notice tone="error">{apiError}</Notice>}
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap', flexDirection: isMobile ? 'column-reverse' : 'row' }}>
-        {onCancel && <PBtn variant="ghost" onClick={e => { e.preventDefault(); onCancel(); }} style={full}>Cancelar</PBtn>}
-        <PBtn variant="accent" disabled={saving} style={full}>{saving ? 'Enviando…' : label}</PBtn>
+        {onCancel && <PBtn variant="ghost" onClick={e => { e.preventDefault(); onCancel(); }} style={full}>{t('company.section.cancel')}</PBtn>}
+        <PBtn variant="accent" disabled={saving} style={full}>{saving ? t('company.section.sending') : label}</PBtn>
       </div>
     </form>
   );
 }
 
-function statusText(c: MyCompany): string {
-  if (c.status === 'verified') return 'Tu empresa está verificada: su página es pública y puedes tokenizar activos a su nombre.';
-  if (c.status === 'rejected') return 'Corrige los datos y completa la verificación de empresa (KYB) para enviarla de nuevo.';
+/** `profile` key of the status explanation. */
+function statusKey(c: MyCompany): string {
+  if (c.status === 'verified') return 'company.section.statusVerified';
+  if (c.status === 'rejected') return 'company.section.statusRejected';
   return c.kyb.status === 'pending' || c.kyb.status === 'verified'
-    ? 'Estamos revisando tu empresa y su verificación (KYB). Te avisamos cuando esté lista.'
-    : 'Para aprobarla necesitamos la verificación de tu empresa (KYB). Complétala abajo.';
+    ? 'company.section.statusReviewing'
+    : 'company.section.statusNeedsKyb';
 }
 
 export default function MyCompanySection({ nav }: { nav: NavFn }) {
+  const { t, locale } = useT('profile');
   const isMobile = useMobile();
   const { user, refresh } = useSession();
   const { data: company, loading, error, reload, mutate } = useApi<MyCompany | null>('me-company', loadMyCompany);
@@ -90,17 +93,17 @@ export default function MyCompanySection({ nav }: { nav: NavFn }) {
   };
 
   if (loading && company === null && !error) return <PCard style={{ padding: '22px 24px' }}><Skeleton rows={4} /></PCard>;
-  if (error) return <PCard style={{ padding: '22px 24px' }}><Notice tone="error">No pudimos cargar tu empresa. <PBtn variant="secondary" small onClick={reload}>Reintentar</PBtn></Notice></PCard>;
+  if (error) return <PCard style={{ padding: '22px 24px' }}><Notice tone="error">{t('company.section.loadError')} <PBtn variant="secondary" small onClick={reload}>{t('company.section.retry')}</PBtn></Notice></PCard>;
 
   if (!company) {
     return (
       <PCard style={{ padding: isMobile ? '20px 18px' : '24px 26px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: registering ? 18 : 0 }}>
-          <h2 style={{ ...cardTitle, margin: 0 }}>Registrar mi empresa</h2>
-          <p style={cardSub}>Crea la cuenta de tu empresa para tokenizar sus activos. La revisamos junto con la verificación de empresa (KYB) y, una vez aprobada, su página se vuelve pública.</p>
+          <h2 style={{ ...cardTitle, margin: 0 }}>{t('company.section.registerTitle')}</h2>
+          <p style={cardSub}>{t('company.section.registerText')}</p>
           {!registering && (
             <div style={{ marginTop: 8 }}>
-              <PBtn variant="accent" onClick={() => setRegistering(true)}>Registrar mi empresa</PBtn>
+              <PBtn variant="accent" onClick={() => setRegistering(true)}>{t('company.section.register')}</PBtn>
             </div>
           )}
         </div>
@@ -112,10 +115,10 @@ export default function MyCompanySection({ nav }: { nav: NavFn }) {
   const tag = COMPANY_STATUS[company.status];
   const editable = company.selfRegistered && company.status !== 'verified';
   const rows: Array<[string, string]> = [
-    ['Razón social', company.name],
-    ['Identificación tributaria', company.taxId ?? '—'],
-    ['País', countryName(company.country)],
-    ['Sitio web', company.website ?? '—'],
+    [t('company.fields.legalName'), company.name],
+    [t('company.fields.taxId'), company.taxId ?? '—'],
+    [t('company.section.country'), countryLabel(company.country, locale)],
+    [t('company.fields.website'), company.website ?? '—'],
   ];
 
   return (
@@ -127,18 +130,18 @@ export default function MyCompanySection({ nav }: { nav: NavFn }) {
             : <span aria-hidden="true" style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 700, color: 'var(--sec)' }}>{company.name.slice(0, 1)}</span>}
           <div style={{ flex: 1, minWidth: 160 }}>
             <h2 style={{ ...cardTitle, margin: 0, overflowWrap: 'anywhere' }}>{company.name}</h2>
-            <div style={{ marginTop: 6 }}><PTag label={tag.label} color={tag.color} /></div>
+            <div style={{ marginTop: 6 }}><PTag label={t(tag.labelKey)} color={tag.color} /></div>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', width: isMobile ? '100%' : undefined }}>
-            <PBtn variant="secondary" small onClick={() => nav('empresa', company.slug)}>Ver página</PBtn>
-            <PBtn variant="accent" small onClick={() => nav('wizard')}>Tokenizar mi activo</PBtn>
+            <PBtn variant="secondary" small onClick={() => nav('empresa', company.slug)}>{t('company.section.viewPage')}</PBtn>
+            <PBtn variant="accent" small onClick={() => nav('wizard')}>{t('company.section.tokenize')}</PBtn>
           </div>
         </div>
 
         {company.status === 'rejected' && company.rejectionReason && (
-          <Notice tone="error" style={{ marginBottom: 12 }}>Rechazada: {company.rejectionReason}</Notice>
+          <Notice tone="error" style={{ marginBottom: 12 }}>{t('company.section.rejectedReason', { reason: company.rejectionReason })}</Notice>
         )}
-        <p style={{ ...cardSub, marginBottom: 16 }} role="status">{statusText(company)}</p>
+        <p style={{ ...cardSub, marginBottom: 16 }} role="status">{t(statusKey(company))}</p>
 
         {editing ? (
           <CompanyEditor initial={companyFormOf(company)} existing={company} onSaved={onSaved} onCancel={() => setEditing(false)} />
@@ -155,7 +158,7 @@ export default function MyCompanySection({ nav }: { nav: NavFn }) {
             </div>
             {editable && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
-                <PBtn variant="secondary" small onClick={() => setEditing(true)}>{company.status === 'rejected' ? 'Corregir datos' : 'Editar datos'}</PBtn>
+                <PBtn variant="secondary" small onClick={() => setEditing(true)}>{company.status === 'rejected' ? t('company.section.fixData') : t('company.section.editData')}</PBtn>
               </div>
             )}
           </>
@@ -163,13 +166,13 @@ export default function MyCompanySection({ nav }: { nav: NavFn }) {
       </PCard>
 
       {company.selfRegistered && (
-        <section aria-label="Verificación de empresa (KYB)" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <section aria-label={t('company.section.kybTitle')} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div>
-            <h3 style={{ ...cardTitle, margin: 0 }}>Verificación de empresa (KYB)</h3>
+            <h3 style={{ ...cardTitle, margin: 0 }}>{t('company.section.kybTitle')}</h3>
             <p style={{ ...cardSub, fontSize: 13 }}>
               {company.kyb.status === 'none' || company.kyb.status === 'rejected'
-                ? 'Completa la verificación con los datos legales de la empresa: es lo que revisamos para aprobarla.'
-                : 'La verificación de tu cuenta ya fue enviada.'}
+                ? t('company.section.kybTodo')
+                : t('company.section.kybSent')}
             </p>
           </div>
           <KycLive key={company.id} onSubmitted={reload}

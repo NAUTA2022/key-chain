@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
 import { useMobile } from '~/hooks/useMobile';
+import { useT } from '~/i18n/useT';
 import { useSession } from '~/lib/session';
 import { safeBannerHref, usePublicSettings, type PlatformBanner } from './platform';
 
@@ -38,13 +39,15 @@ const WARN_ICON = (
 const linkStyle: CSSProperties = { color: 'var(--text)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 2, whiteSpace: 'nowrap' };
 
 function BannerLink({ banner }: { banner: PlatformBanner }) {
+  const { t } = useT('common');
   const target = safeBannerHref(banner.href);
   if (!target) return null;
-  if (target.kind === 'internal') return <Link to={target.href} style={linkStyle}>Ver más</Link>;
-  return <a href={target.href} target="_blank" rel="noopener noreferrer" style={linkStyle}>Ver más</a>;
+  if (target.kind === 'internal') return <Link to={target.href} style={linkStyle}>{t('banners.more')}</Link>;
+  return <a href={target.href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{t('banners.more')}</a>;
 }
 
 export default function PlatformBanners() {
+  const { t } = useT('common');
   const { status } = useSession();
   const settings = usePublicSettings();
   const isMobile = useMobile();
@@ -71,8 +74,8 @@ export default function PlatformBanners() {
         <div role="status" style={{ ...bar, background: 'var(--neg-bg)', color: 'var(--neg)' }}>
           {WARN_ICON}
           <span style={{ flex: 1, minWidth: 0 }}>
-            <strong style={{ fontWeight: 700 }}>Inversiones pausadas temporalmente.</strong>{' '}
-            <span style={{ color: 'var(--sec)' }}>{settings.maintenanceMessage || 'Estamos haciendo tareas de mantenimiento. Tus tokens y fondos no se ven afectados.'}</span>
+            <strong style={{ fontWeight: 700 }}>{t('banners.paused')}</strong>{' '}
+            <span style={{ color: 'var(--sec)' }}>{settings.maintenanceMessage || t('banners.maintenance')}</span>
           </span>
         </div>
       )}
@@ -86,7 +89,7 @@ export default function PlatformBanners() {
           <button
             type="button"
             onClick={() => dismiss(b.id)}
-            aria-label="Cerrar aviso"
+            aria-label={t('banners.dismiss')}
             style={{ width: 26, height: 26, borderRadius: 8, border: 'none', background: 'transparent', color: 'var(--ter)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: 0 }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>

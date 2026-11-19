@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Icons, PBtn, PTag } from '~/components/ui';
 import { kycStatusTag } from '~/features/kyc/status';
 import { useMobile } from '~/hooks/useMobile';
-import { countryName } from '~/lib/countries';
+import { useT } from '~/i18n/useT';
 import { useKyc } from '~/lib/onchain';
-import { fmtDate } from './api';
+import { countryLabel, fmtDate } from './api';
 import { Notice, Section, Skeleton } from './kit';
 import { downloadStatementCsv } from './statements';
 import { mutedStyle } from './styles';
@@ -15,6 +15,7 @@ import { mutedStyle } from './styles';
 const row = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--border-l)', paddingBottom: 10 } as const;
 
 export default function DocumentsTab({ years, onOpenYear }: { years: number[]; onOpenYear: (y: number) => void }) {
+  const { t, locale } = useT('profile');
   const isMobile = useMobile();
   const { data: kyc, loading } = useKyc();
   const [busyYear, setBusyYear] = useState<number | null>(null);
@@ -25,55 +26,55 @@ export default function DocumentsTab({ years, onOpenYear }: { years: number[]; o
   async function download(y: number) {
     setBusyYear(y);
     setFailed(null);
-    const ok = await downloadStatementCsv(y);
+    const ok = await downloadStatementCsv(y, t);
     setBusyYear(null);
     if (!ok) setFailed(y);
   }
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16, alignItems: 'start' }}>
-      <Section title="Verificación de identidad" action={<PTag label={loading && !kyc ? '…' : tag.label} color={tag.color} />}>
+      <Section title={t('documents.identityTitle')} action={<PTag label={loading && !kyc ? '…' : t(tag.labelKey)} color={tag.color} />}>
         {loading && !kyc ? (
           <Skeleton rows={4} />
         ) : !kyc || kyc.status === 'none' ? (
-          <div style={mutedStyle}>Todavía no enviaste tus datos de identidad. Complétalos en la pestaña KYC / Identidad.</div>
+          <div style={mutedStyle}>{t('documents.notSubmitted')}</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {([
-              ['Tipo', kyc.type === 'business' ? 'Empresa (KYB)' : 'Persona (KYC)'],
-              [kyc.type === 'business' ? 'Razón social' : 'Nombre completo', kyc.legalName ?? '—'],
-              ['País de residencia', countryName(kyc.country)],
-              ['Enviado', fmtDate(kyc.submittedAt)],
-              ['Identidad on-chain', identity ? `${identity.slice(0, 6)}…${identity.slice(-4)}` : '—'],
+              [t('kyc.fields.type'), kyc.type === 'business' ? t('kyc.fields.business') : t('kyc.fields.individual')],
+              [kyc.type === 'business' ? t('kyc.fields.legalName') : t('kyc.fields.fullName'), kyc.legalName ?? '—'],
+              [t('kyc.fields.country'), countryLabel(kyc.country, locale)],
+              [t('kyc.fields.submitted'), fmtDate(kyc.submittedAt, undefined, locale)],
+              [t('kyc.fields.onchainIdentity'), identity ? `${identity.slice(0, 6)}…${identity.slice(-4)}` : '—'],
             ] as const).map(([k, v]) => (
               <div key={k} style={row}>
                 <div style={mutedStyle}>{k}</div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--text)', fontWeight: 600, textAlign: 'right', overflowWrap: 'anywhere' }}>{v}</div>
               </div>
             ))}
-            {kyc.status === 'rejected' && kyc.rejectionReason && <Notice tone="error">Motivo del rechazo: {kyc.rejectionReason}</Notice>}
-            <div style={{ ...mutedStyle, fontSize: 12 }}>Por seguridad, los documentos de identidad no se pueden volver a descargar desde la plataforma.</div>
+            {kyc.status === 'rejected' && kyc.rejectionReason && <Notice tone="error">{t('documents.rejectionReason', { reason: kyc.rejectionReason })}</Notice>}
+            <div style={{ ...mutedStyle, fontSize: 12 }}>{t('documents.noRedownload')}</div>
           </div>
         )}
       </Section>
 
-      <Section title="Resúmenes anuales">
+      <Section title={t('documents.statementsTitle')}>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {years.map(y => (
             <li key={y} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 14, border: '1.5px solid var(--border-l)', background: 'var(--surface2)', flexWrap: 'wrap' }}>
               <div aria-hidden="true" style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-text)', flexShrink: 0 }}>{Icons.doc}</div>
               <div style={{ flex: 1, minWidth: 140 }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)' }}>Resumen {y}</div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2 }}>Inversiones y dividendos del año</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)' }}>{t('documents.statementYear', { year: y })}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2 }}>{t('documents.statementDesc')}</div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <PBtn variant="ghost" small onClick={() => onOpenYear(y)}>Ver</PBtn>
-                <PBtn variant="secondary" small disabled={busyYear !== null} onClick={() => void download(y)}>{busyYear === y ? 'Descargando…' : 'CSV'}</PBtn>
+                <PBtn variant="ghost" small onClick={() => onOpenYear(y)}>{t('documents.view')}</PBtn>
+                <PBtn variant="secondary" small disabled={busyYear !== null} onClick={() => void download(y)}>{busyYear === y ? t('documents.downloading') : t('documents.csv')}</PBtn>
               </div>
             </li>
           ))}
         </ul>
-        {failed !== null && <Notice tone="error" style={{ marginTop: 12 }}>No pudimos descargar el resumen {failed}. Prueba de nuevo.</Notice>}
+        {failed !== null && <Notice tone="error" style={{ marginTop: 12 }}>{t('documents.downloadError', { year: failed })}</Notice>}
       </Section>
     </div>
   );

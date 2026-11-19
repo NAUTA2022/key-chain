@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback, type MouseEvent, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PDonut, PTag, Icons } from '~/components/ui';
-import { MY_HOLDINGS, MY_BALANCES, RWA_ASSETS, fmtUSD2 } from '~/data';
+import { MY_HOLDINGS, MY_BALANCES, fmtUSD2 } from '~/data';
 import InvestAdvisor from '~/features/invest-advisor/InvestAdvisor';
 import type { NavFn } from '~/lib/navigation';
 import type { Balance, Holding } from '~/data';
@@ -10,9 +10,10 @@ import { useDividends, useHoldings } from '~/lib/onchain';
 import { useSession } from '~/lib/session';
 import { useAcademyFeed, useMeStats, usePortfolioHistory, type HistoryRange } from '~/features/portfolio/api';
 import { allocationByCategory, assetInfoFor, type AssetInfo } from '~/features/portfolio/holdings';
-import { fmtLongDate, fmtMonthYear, fmtShortDate, frequencyDays, shortAddress, signedPct, signedUSD, tone } from '~/features/portfolio/format';
+import { fmtLongDate, fmtMonthYear, fmtShortDate, frequencyDays, plural, shortAddress, signedPct, signedUSD, tone } from '~/features/portfolio/format';
 import { useNow } from '~/features/wallet/chain';
 import GuideButton from '~/features/guide/GuideButton';
+import { useT, type Translator } from '~/i18n/useT';
 
 /** Divisor that never makes a ratio NaN/Infinity on an empty portfolio. */
 const nz = (n: number) => n || 1;
@@ -26,6 +27,7 @@ const PERIOD_RANGE: Record<PerfPeriod, HistoryRange> = { '3M': '3m', '6M': '6m',
 type PortfolioChartProps = { data: PerfSeries; period: PerfPeriod };
 
 function PortfolioChart({ data, period }: PortfolioChartProps) {
+  const { t } = useT('portfolio');
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,9 +65,9 @@ function PortfolioChart({ data, period }: PortfolioChartProps) {
     : '';
 
   // Y-axis ticks
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({
-    val: minV + t * range,
-    y: PAD_T + cH - t * cH,
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => ({
+    val: minV + f * range,
+    y: PAD_T + cH - f * cH,
   }));
 
   const fmtK = (v: number) => v >= 1000 ? `$${(v / 1000).toFixed(0)}K` : `$${Math.round(v)}`;
@@ -161,11 +163,11 @@ function PortfolioChart({ data, period }: PortfolioChartProps) {
       {/* Bottom stats */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
         <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>
-          Hace {period} · {fmtK(data.start)}
+          {t('dashboard.chart.ago', { period: t(`dashboard.chart.periods.${period}`), value: fmtK(data.start) })}
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)' }}>
-            Min {fmtK(minPt)} · Max {fmtK(maxPt)}
+            {t('dashboard.chart.minMax', { min: fmtK(minPt), max: fmtK(maxPt) })}
           </span>
           <span style={{
             fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 700,
@@ -191,6 +193,7 @@ type AirdropBoxProps = {
 };
 
 function AirdropBox({ tokens, symbol, claimed, future, onClaim }: AirdropBoxProps) {
+  const { t } = useT('portfolio');
   const [dropping, setDrop] = useState(false);
   const [done, setDone] = useState(claimed);
 
@@ -233,7 +236,7 @@ function AirdropBox({ tokens, symbol, claimed, future, onClaim }: AirdropBoxProp
             {tokens.toLocaleString()} {symbol}
           </div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, color: 'var(--ter)' }}>
-            {done ? 'Reclamado' : future ? 'Próximamente' : 'Tap para reclamar'}
+            {done ? t('dashboard.roadmap.airdrop.claimed') : future ? t('shared.comingSoon') : t('dashboard.roadmap.airdrop.tapToClaim')}
           </div>
         </div>
       </motion.button>
@@ -243,6 +246,7 @@ function AirdropBox({ tokens, symbol, claimed, future, onClaim }: AirdropBoxProp
 
 /* ── Full-width horizontal roadmap ── */
 function RoadmapKYCN() {
+  const { t } = useT('portfolio');
   const [active, setActive] = useState<number | null>(null);
   const [claimed, setClaimed] = useState<Record<number, boolean>>({});
   const doneCount = ROADMAP.filter(r => r.done).length;
@@ -253,13 +257,13 @@ function RoadmapKYCN() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Roadmap BRIK</div>
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{t('dashboard.roadmap.title')}</div>
           <div style={{ padding: '3px 10px', borderRadius: 6, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)' }}>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: 'var(--pos)' }}>{doneCount}/{ROADMAP.length} completados</span>
+            <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: 'var(--pos)' }}>{t('dashboard.roadmap.completedCount', { done: doneCount, total: ROADMAP.length })}</span>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>Progreso global</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t('dashboard.roadmap.globalProgress')}</div>
           <div style={{ width: 120, height: 5, background: 'var(--gl-bg3)', borderRadius: 3, overflow: 'hidden' }}>
             <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.4 }}
               style={{ height: '100%', background: 'linear-gradient(90deg, #3078ff, #4ade80)', borderRadius: 3 }} />
@@ -310,7 +314,7 @@ function RoadmapKYCN() {
 
                 {/* Quarter label */}
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, fontWeight: 700, color: r.done ? 'var(--pos)' : isCurrent ? '#3078ff' : 'var(--ter)', marginTop: 8, letterSpacing: '0.04em' }}>{r.q}</div>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 12, color: r.done || isCurrent ? 'var(--text)' : 'var(--sec)', marginTop: 2, textAlign: 'center', lineHeight: 1.2 }}>{r.label}</div>
+                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 12, color: r.done || isCurrent ? 'var(--text)' : 'var(--sec)', marginTop: 2, textAlign: 'center', lineHeight: 1.2 }}>{t(`dashboard.roadmap.items.${r.id}.label`)}</div>
               </div>
             );
           })}
@@ -343,28 +347,28 @@ function RoadmapKYCN() {
                   <div style={{ flex: '1 1 240px', minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                       <div style={{ padding: '3px 10px', borderRadius: 6, background: `${accentColor}20`, border: `1px solid ${accentColor}40` }}>
-                        <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: r.done ? 'var(--pos)' : isCurrent ? '#3078ff' : 'var(--ter)' }}>{r.q} · {r.done ? 'Completado' : isCurrent ? 'En curso' : 'Pendiente'}</span>
+                        <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700, color: r.done ? 'var(--pos)' : isCurrent ? '#3078ff' : 'var(--ter)' }}>{r.q} · {t(`dashboard.roadmap.status.${r.done ? 'done' : isCurrent ? 'current' : 'pending'}`)}</span>
                       </div>
                     </div>
-                    <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--text)', marginBottom: 6 }}>{r.label}</div>
-                    <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.6 }}>{r.detail}</div>
+                    <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--text)', marginBottom: 6 }}>{t(`dashboard.roadmap.items.${r.id}.label`)}</div>
+                    <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.6 }}>{t(`dashboard.roadmap.items.${r.id}.detail`)}</div>
 
                     {/* Claim reward */}
-                    {r.claim > 0 && (
+                    {r.claim > 0 && r.claimLabel && (
                       <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: claimed[active] ? 'rgba(74,222,128,0.08)' : 'rgba(48,120,255,0.1)', border: `1px solid ${claimed[active] ? 'rgba(74,222,128,0.25)' : 'rgba(48,120,255,0.25)'}` }}>
                         <span style={{ fontSize: 20 }}>💰</span>
                         <div>
                           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16, color: claimed[active] ? 'var(--pos)' : 'var(--text)' }}>
-                            {claimed[active] ? '¡Cobrado!' : `$${r.claim.toFixed(2)} USDC`}
+                            {claimed[active] ? t('dashboard.roadmap.claimed') : `$${r.claim.toFixed(2)} USDC`}
                           </div>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)' }}>{r.claimLabel}</div>
+                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)' }}>{t(`dashboard.roadmap.claimLabels.${r.claimLabel}`)}</div>
                         </div>
                         {!claimed[active] && (
                           <motion.button
                             whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                             onClick={() => setClaimed(c => ({ ...c, [active]: true }))}
                             style={{ marginLeft: 8, padding: '7px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', background: '#3078ff', color: '#fff', fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 12 }}
-                          >Cobrar →</motion.button>
+                          >{t('dashboard.roadmap.claim')}</motion.button>
                         )}
                       </div>
                     )}
@@ -373,7 +377,7 @@ function RoadmapKYCN() {
                   {/* Airdrop box */}
                   {r.airdrop && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, minWidth: 160 }}>
-                      <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 2 }}>Airdrop de fase</div>
+                      <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 2 }}>{t('dashboard.roadmap.phaseAirdrop')}</div>
                       <AirdropBox
                         tokens={r.airdrop.tokens}
                         symbol={r.airdrop.symbol}
@@ -395,33 +399,41 @@ function RoadmapKYCN() {
 
 /* ── Live: BRIK rewards are not active yet (no fake claims) ── */
 function RewardsSoon() {
+  const { t } = useT('portfolio');
   return (
     <div className="glow-card glass-card" style={{ padding: '24px 28px', borderRadius: 20, marginBottom: 16, minHeight: 120, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
-        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Recompensas BRIK</div>
-        <PTag label="Próximamente" color="purple" />
+        <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{t('dashboard.rewards.title')}</div>
+        <PTag label={t('shared.comingSoon')} color="purple" />
       </div>
       <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.6, maxWidth: 680 }}>
-        El programa de recompensas y airdrops del token BRIK todavía no está activo. Cuando se habilite vas a ver aquí tus hitos y lo que te corresponda reclamar.
+        {t('dashboard.rewards.body')}
       </div>
     </div>
   );
 }
 
-const ROADMAP = [
-  { q: 'Q4 2025', label: 'Seed Round',    done: true,  desc: 'Financiación inicial completada.', detail: 'Ronda seed cerrada con inversores estratégicos. Capital utilizado para desarrollo core y auditorías de smart contracts.', claim: 120.50, claimLabel: 'USDC de rendimiento', airdrop: { tokens: 500, symbol: 'BRIK', claimed: true } },
-  { q: 'Q1 2026', label: 'Ronda Privada', done: true,  desc: 'Emisión privada · $3M captados.', detail: 'Ronda privada oversubscribed en 2x. Se incorporaron 14 inversores institucionales de LATAM y España.', claim: 280.00, claimLabel: 'USDC pendiente de cobrar', airdrop: { tokens: 1200, symbol: 'BRIK', claimed: false } },
-  { q: 'Q2 2026', label: 'ICO Pública',   done: true,  desc: 'Venta pública activa · $5M goal.', detail: 'Token BRIK disponible al público general. Más de 4.200 wallets participantes en la primera semana.', claim: 0, claimLabel: null, airdrop: null },
-  { q: 'Q3 2026', label: 'DEX Listing',   done: false, desc: 'QuickSwap + Uniswap v3.', detail: 'Listado en los principales DEX de Polygon. Provisión de liquidez inicial de $2M. Farming incentivado con BRIK.', claim: 0, claimLabel: null, airdrop: { tokens: 800, symbol: 'BRIK', claimed: false, future: true } },
-  { q: 'Q4 2026', label: 'Gobernanza',    done: false, desc: 'DAO + votaciones on-chain.', detail: 'Lanzamiento del módulo de gobernanza descentralizada. Los holders de BRIK podrán votar proyectos, fees y upgrades.', claim: 0, claimLabel: null, airdrop: null },
-  { q: 'Q1 2027', label: 'V2 Platform',   done: false, desc: 'Multi-chain + nuevos RWA.', detail: 'Expansión a Ethereum mainnet y Arbitrum. Incorporación de nuevas categorías de activos reales: deuda corporativa y arte.', claim: 0, claimLabel: null, airdrop: null },
+// Demo roadmap: texts in portfolio:dashboard.roadmap.items.<id> (label, detail) and .claimLabels.<claimLabel>.
+type RoadmapStep = {
+  id: 'seed' | 'private' | 'ico' | 'dex' | 'governance' | 'v2';
+  q: string; done: boolean; claim: number; claimLabel: 'yield' | 'pending' | null;
+  airdrop: { tokens: number; symbol: string; claimed: boolean; future?: boolean } | null;
+};
+const ROADMAP: RoadmapStep[] = [
+  { id: 'seed',       q: 'Q4 2025', done: true,  claim: 120.50, claimLabel: 'yield',   airdrop: { tokens: 500, symbol: 'BRIK', claimed: true } },
+  { id: 'private',    q: 'Q1 2026', done: true,  claim: 280.00, claimLabel: 'pending', airdrop: { tokens: 1200, symbol: 'BRIK', claimed: false } },
+  { id: 'ico',        q: 'Q2 2026', done: true,  claim: 0,      claimLabel: null,      airdrop: null },
+  { id: 'dex',        q: 'Q3 2026', done: false, claim: 0,      claimLabel: null,      airdrop: { tokens: 800, symbol: 'BRIK', claimed: false, future: true } },
+  { id: 'governance', q: 'Q4 2026', done: false, claim: 0,      claimLabel: null,      airdrop: null },
+  { id: 'v2',         q: 'Q1 2027', done: false, claim: 0,      claimLabel: null,      airdrop: null },
 ];
+// Demo academy articles: titles in portfolio:dashboard.academy.demoArticles.<id>, categories in .categories.<cat>.
 const ACADEMY_ARTS = [
-  { title: '¿Qué es RWA?',              cat: 'Tokenización', read: 8,  done: true  },
-  { title: 'Cómo invertir paso a paso', cat: 'Guías',        read: 6,  done: false },
-  { title: 'Vesting y cliffs',           cat: 'DeFi',         read: 7,  done: false },
-  { title: 'Gobernanza on-chain',        cat: 'DeFi',         read: 5,  done: false },
-  { title: 'Pools de liquidez',          cat: 'DeFi',         read: 9,  done: false },
+  { id: 'rwa',         cat: 'tokenization', read: 8,  done: true  },
+  { id: 'howToInvest', cat: 'guides',       read: 6,  done: false },
+  { id: 'vesting',     cat: 'defi',         read: 7,  done: false },
+  { id: 'governance',  cat: 'defi',         read: 5,  done: false },
+  { id: 'pools',       cat: 'defi',         read: 9,  done: false },
 ];
 
 // Animated counter hook
@@ -493,47 +505,47 @@ function Flip({ val }: FlipProps) {
 type AcademyRow = { key: string; title: string; cat: string; read: number; done: boolean; open: () => void };
 
 type KpiView = { v: string; sub: string; pos: boolean | null };
-type Kpi = { k: string; icon: ReactNode; views: KpiView[] };
+type Kpi = { id: string; k: string; icon: ReactNode; views: KpiView[] };
 
 /** Live KPI cards: real positions, 30-day change and dividends (never invented deltas). */
 function liveKpis(d: {
   holdTotal: number; investedTotal: number; holdingsCount: number;
   change: { abs: number; pct: number } | null; unclaimed: number; claimed: number;
   earned: number | null; memberSince: string | null;
-}): Kpi[] {
+}, t: Translator['t'], locale: string): Kpi[] {
   const pnlAbs = d.holdTotal - d.investedTotal;
   const earned = d.earned ?? d.claimed + d.unclaimed;
   return [
     {
-      k: 'Patrimonio total', icon: Icons.wallet,
+      id: 'wealth', k: t('dashboard.kpi.totalWealth'), icon: Icons.wallet,
       views: [
-        { v: fmtUSD2(d.holdTotal), sub: `${d.change ? signedPct(d.change.pct) : '—'} en 30 días`, pos: tone(d.change?.pct) },
-        { v: d.change ? signedPct(d.change.pct) : '—', sub: d.change ? `${signedUSD(d.change.abs)} en 30 días` : 'sin datos de 30 días', pos: tone(d.change?.pct) },
-        { v: fmtUSD2(d.unclaimed), sub: 'dividendos por cobrar', pos: null },
+        { v: fmtUSD2(d.holdTotal), sub: t('dashboard.kpi.in30Days', { value: d.change ? signedPct(d.change.pct) : '—' }), pos: tone(d.change?.pct) },
+        { v: d.change ? signedPct(d.change.pct) : '—', sub: d.change ? t('dashboard.kpi.in30Days', { value: signedUSD(d.change.abs) }) : t('dashboard.kpi.no30DayData'), pos: tone(d.change?.pct) },
+        { v: fmtUSD2(d.unclaimed), sub: t('dashboard.kpi.dividendsToCollect'), pos: null },
       ],
     },
     {
-      k: 'Invertido en RWA', icon: Icons.primary,
+      id: 'invested', k: t('dashboard.kpi.investedRwa'), icon: Icons.primary,
       views: [
-        { v: fmtUSD2(d.holdTotal), sub: `${d.holdingsCount} proyectos`, pos: null },
-        { v: `${d.holdingsCount}`, sub: 'activos en portafolio', pos: null },
-        { v: fmtUSD2(d.holdTotal / nz(d.holdingsCount)), sub: 'promedio por activo', pos: null },
+        { v: fmtUSD2(d.holdTotal), sub: plural(t, 'shared.projects', d.holdingsCount), pos: null },
+        { v: `${d.holdingsCount}`, sub: t('dashboard.kpi.assetsInPortfolio'), pos: null },
+        { v: fmtUSD2(d.holdTotal / nz(d.holdingsCount)), sub: t('dashboard.kpi.avgPerAsset'), pos: null },
       ],
     },
     {
-      k: 'Dividendos ganados', icon: Icons.receive,
+      id: 'dividends', k: t('dashboard.kpi.dividendsEarned'), icon: Icons.receive,
       views: [
-        { v: fmtUSD2(earned), sub: d.memberSince ? `miembro desde ${fmtMonthYear(d.memberSince)}` : 'dividendos on-chain', pos: tone(earned) },
-        { v: d.investedTotal ? `${((earned / d.investedTotal) * 100).toFixed(1)}%` : '—', sub: 'retorno sobre capital', pos: tone(earned) },
-        { v: fmtUSD2(d.claimed), sub: `cobrados · ${fmtUSD2(d.unclaimed)} por cobrar`, pos: tone(d.claimed) },
+        { v: fmtUSD2(earned), sub: d.memberSince ? t('dashboard.kpi.memberSince', { date: fmtMonthYear(d.memberSince, locale) }) : t('shared.onchainDividends'), pos: tone(earned) },
+        { v: d.investedTotal ? `${((earned / d.investedTotal) * 100).toFixed(1)}%` : '—', sub: t('dashboard.kpi.returnOnCapital'), pos: tone(earned) },
+        { v: fmtUSD2(d.claimed), sub: t('dashboard.kpi.collectedAndPending', { amount: fmtUSD2(d.unclaimed) }), pos: tone(d.claimed) },
       ],
     },
     {
-      k: 'P&L no realizado', icon: Icons.dash,
+      id: 'pnl', k: t('dashboard.kpi.unrealizedPnl'), icon: Icons.dash,
       views: [
         { v: d.investedTotal ? signedPct((pnlAbs / d.investedTotal) * 100) : '—', sub: signedUSD(pnlAbs), pos: tone(pnlAbs) },
-        { v: signedUSD(pnlAbs), sub: pnlAbs < 0 ? 'pérdida no realizada' : 'ganancia no realizada', pos: tone(pnlAbs) },
-        { v: fmtUSD2(d.investedTotal), sub: 'capital invertido inicial', pos: null },
+        { v: signedUSD(pnlAbs), sub: pnlAbs < 0 ? t('dashboard.kpi.unrealizedLoss') : t('dashboard.kpi.unrealizedGain'), pos: tone(pnlAbs) },
+        { v: fmtUSD2(d.investedTotal), sub: t('dashboard.kpi.initialCapital'), pos: null },
       ],
     },
   ];
@@ -542,14 +554,16 @@ function liveKpis(d: {
 type DashboardProps = { nav: NavFn };
 
 export default function Dashboard({ nav }: DashboardProps) {
+  const { t, raw, locale } = useT('portfolio');
+  const { t: tc } = useT('common');
   const [period, setPeriod] = useState<PerfPeriod>('12M');
   const [advisorOpen, setAdvisorOpen] = useState(false);
   const [expandedHolding, setExpandedHolding] = useState<number | null>(null);
   const [allocView, setAllocView] = useState<'rwa' | 'total'>('total');
   const [, setAllocHover] = useState<number | null>(null);
-  const [acadCat] = useState('Todos');
-  // Keyed by article title (the list reads readDone[art.title]).
-  const [readDone] = useState<Record<string, boolean>>(() => Object.fromEntries(ACADEMY_ARTS.filter(a => a.done).map(a => [a.title, true])));
+  const [acadCat] = useState('all');
+  // Keyed by article id (the list reads readDone[art.id]).
+  const [readDone] = useState<Record<string, boolean>>(() => Object.fromEntries(ACADEMY_ARTS.filter(a => a.done).map(a => [a.id, true])));
   const [kpiFlip, setKpiFlip] = useState<Record<number, number>>({});
   useRipple();
   const [, setLineProgress] = useState(0);
@@ -567,7 +581,7 @@ export default function Dashboard({ nav }: DashboardProps) {
   const now = useNow(60_000);
   // Asset behind a position: demo data, or the catalog / the holding itself (live).
   const assetOf = useCallback((assetId: number): AssetInfo | undefined => {
-    if (!live) return RWA_ASSETS.find(x => x.id === assetId);
+    if (!live) return byId(assetId);
     const h = liveHoldings?.find(x => x.assetId === assetId);
     return h ? assetInfoFor(h, byId(assetId)) : byId(assetId);
   }, [live, liveHoldings, byId]);
@@ -585,7 +599,7 @@ export default function Dashboard({ nav }: DashboardProps) {
   // Greeting: the user's name (or wallet) and today's date.
   const firstName = session.user?.displayName?.trim().split(/\s+/)[0];
   const greetingName = live ? (firstName || (session.user ? shortAddress(session.user.walletAddress) : null)) : 'Max';
-  const todayLabel = now ? fmtLongDate(new Date(now)) : null;
+  const todayLabel = now ? fmtLongDate(new Date(now), locale) : null;
 
   const { holdTotal, investedTotal, yieldTotal, cashTotal } = useMemo(() => ({
     holdTotal:     holdings.reduce((s, h) => s + h.current, 0),
@@ -598,17 +612,19 @@ export default function Dashboard({ nav }: DashboardProps) {
   const liveSeries = useMemo((): PerfSeries | null => {
     const points = history.data?.points ?? [];
     if (points.length < 2 || !points.some(p => p.value > 0)) return null;
-    return { pts: points.map(p => p.value), labels: points.map(p => fmtShortDate(p.date)), start: points[0].value };
-  }, [history.data]);
+    return { pts: points.map(p => p.value), labels: points.map(p => fmtShortDate(p.date, locale)), start: points[0].value };
+  }, [history.data, locale]);
 
+  // Short month names (Jan…Dec) of the active language, for the demo chart.
+  const months = raw<string[]>('dashboard.chart.months');
   const perfData = useMemo((): Record<PerfPeriod, PerfSeries> => {
     const T = holdTotal + cashTotal;
     return {
-      '3M':  { pts: [T*0.912,T*0.934,T*0.947,T*0.958,T*0.951,T*0.962,T*0.971,T*0.982,T*0.978,T*0.989,T*0.994,T], labels: ['Mar','Abr','May','Jun'], start: T*0.912 },
-      '6M':  { pts: [T*0.823,T*0.841,T*0.858,T*0.876,T*0.889,T*0.901,T*0.912,T*0.934,T*0.947,T*0.962,T*0.982,T], labels: ['Ene','Feb','Mar','Abr','May','Jun'], start: T*0.823 },
-      '12M': { pts: [T*0.681,T*0.704,T*0.723,T*0.718,T*0.747,T*0.771,T*0.793,T*0.812,T*0.836,T*0.865,T*0.901,T], labels: ['Jul','Ago','Sep','Oct','Nov','Dic','Ene','Feb','Mar','Abr','May','Jun'], start: T*0.681 },
+      '3M':  { pts: [T*0.912,T*0.934,T*0.947,T*0.958,T*0.951,T*0.962,T*0.971,T*0.982,T*0.978,T*0.989,T*0.994,T], labels: months.slice(2, 6), start: T*0.912 },
+      '6M':  { pts: [T*0.823,T*0.841,T*0.858,T*0.876,T*0.889,T*0.901,T*0.912,T*0.934,T*0.947,T*0.962,T*0.982,T], labels: months.slice(0, 6), start: T*0.823 },
+      '12M': { pts: [T*0.681,T*0.704,T*0.723,T*0.718,T*0.747,T*0.771,T*0.793,T*0.812,T*0.836,T*0.865,T*0.901,T], labels: [...months.slice(6), ...months.slice(0, 6)], start: T*0.681 },
     };
-  }, [holdTotal, cashTotal]);
+  }, [holdTotal, cashTotal, months]);
 
   const { allocRWA, allocTotal, grandTotal, diversification } = useMemo(() => {
     const walletTotal = balances.reduce((s, b) => s + b.usd, 0);
@@ -622,12 +638,13 @@ export default function Dashboard({ nav }: DashboardProps) {
         return a ? [{ cat: a.cat, value: h.current, apy: a.apy }] : [];
       });
       const { slices, index } = allocationByCategory(items);
-      return { allocRWA: slices, allocTotal: slices, grandTotal: holdTotal, diversification: index };
+      const named = slices.map(s => ({ label: tc(`categories.${s.label}`), value: s.value, amount: s.amount, color: s.color }));
+      return { allocRWA: named, allocTotal: named, grandTotal: holdTotal, diversification: index };
     }
     const catColors: Record<string, string> = { Campos: '#4ade80', Autos: '#3078ff', Drones: '#f5a623', Edificios: '#8247E5', Inmuebles: '#2775CA' };
     const byCat: Record<string, { val: number; apySum: number; count: number }> = {};
     holdings.forEach(h => {
-      const a = RWA_ASSETS.find(x => x.id === h.assetId);
+      const a = byId(h.assetId);
       if (!a) return;
       if (!byCat[a.cat]) byCat[a.cat] = { val: 0, apySum: 0, count: 0 };
       byCat[a.cat].val += h.current;
@@ -635,64 +652,63 @@ export default function Dashboard({ nav }: DashboardProps) {
       byCat[a.cat].count += 1;
     });
     const allocRWA = Object.entries(byCat).map(([cat, d]) => ({
-      label: cat,
+      label: tc(`categories.${cat}`),
       value: Math.round(d.val / nz(holdTotal) * 100),
       amount: d.val,
       color: catColors[cat] || '#aaa',
-      sub: `APY prom. ${(d.apySum / d.count).toFixed(1)}%`,
     }));
 
     // Full portfolio breakdown
-    const kycn = balances.find(b => b.sym === 'BRIK') || { usd: 0, qty: 0 };
+    const kycn = balances.find(b => b.sym === 'BRIK') || { usd: 0 };
     const usdc = balances.find(b => b.sym === 'USDC') || { usd: 0 };
     const cryptoAmt = balances.filter(b => b.sym !== 'BRIK' && b.sym !== 'USDC').reduce((s, b) => s + b.usd, 0);
     const allocTotal = [
-      { label: 'RWA Activos',   value: Math.round(holdTotal / nz(grand) * 100),  amount: holdTotal,  color: '#3078ff', sub: `${holdings.length} proyectos activos` },
-      { label: 'USDC Líquido',  value: Math.round(usdc.usd / nz(grand) * 100),   amount: usdc.usd,   color: '#2775CA', sub: 'Disponible para invertir' },
-      { label: 'Token BRIK',    value: Math.round(kycn.usd / nz(grand) * 100),   amount: kycn.usd,   color: '#f5a623', sub: `${kycn.qty.toLocaleString()} tokens` },
-      { label: 'Crypto',        value: Math.round(cryptoAmt / nz(grand) * 100),  amount: cryptoAmt,  color: '#8247E5', sub: 'MATIC + ETH' },
+      { label: t('dashboard.allocation.rwaAssets'),  value: Math.round(holdTotal / nz(grand) * 100),  amount: holdTotal,  color: '#3078ff' },
+      { label: t('dashboard.allocation.usdcLiquid'), value: Math.round(usdc.usd / nz(grand) * 100),   amount: usdc.usd,   color: '#2775CA' },
+      { label: t('dashboard.allocation.brikToken'),  value: Math.round(kycn.usd / nz(grand) * 100),   amount: kycn.usd,   color: '#f5a623' },
+      { label: t('dashboard.allocation.crypto'),     value: Math.round(cryptoAmt / nz(grand) * 100),  amount: cryptoAmt,  color: '#8247E5' },
     ];
     return { allocRWA, allocTotal, grandTotal: grand, diversification: 7.4 };
-  }, [live, assetOf, holdTotal, holdings, balances]);
+  }, [live, assetOf, byId, holdTotal, holdings, balances, t, tc]);
 
   // KPI views: value | change | detail
-  const kpis = useMemo(() => live ? liveKpis({
+  const kpis = useMemo((): Kpi[] => live ? liveKpis({
     holdTotal, investedTotal, holdingsCount: holdings.length, change: change30d, unclaimed: unclaimedTotal, claimed: yieldTotal,
     earned: stats.data?.dividendsEarned ?? null, memberSince: stats.data?.memberSince ?? null,
-  }) : [
+  }, t, locale) : [
     {
-      k: 'Patrimonio total', icon: Icons.wallet,
+      id: 'wealth', k: t('dashboard.kpi.totalWealth'), icon: Icons.wallet,
       views: [
-        { v: fmtUSD2(holdTotal + cashTotal), sub: '+8.4% este mes', pos: true },
-        { v: '+8.4%', sub: `vs mes anterior`, pos: true },
-        { v: fmtUSD2(cashTotal), sub: 'en efectivo disponible', pos: null },
+        { v: fmtUSD2(holdTotal + cashTotal), sub: t('dashboard.kpi.thisMonth', { value: '+8.4%' }), pos: true },
+        { v: '+8.4%', sub: t('dashboard.kpi.vsLastMonth'), pos: true },
+        { v: fmtUSD2(cashTotal), sub: t('dashboard.kpi.cashAvailable'), pos: null },
       ],
     },
     {
-      k: 'Invertido en RWA', icon: Icons.primary,
+      id: 'invested', k: t('dashboard.kpi.investedRwa'), icon: Icons.primary,
       views: [
-        { v: fmtUSD2(holdTotal), sub: `${holdings.length} proyectos`, pos: null },
-        { v: `${holdings.length}`, sub: 'activos en portafolio', pos: null },
-        { v: fmtUSD2(holdTotal / nz(holdings.length)), sub: 'promedio por activo', pos: null },
+        { v: fmtUSD2(holdTotal), sub: plural(t, 'shared.projects', holdings.length), pos: null },
+        { v: `${holdings.length}`, sub: t('dashboard.kpi.assetsInPortfolio'), pos: null },
+        { v: fmtUSD2(holdTotal / nz(holdings.length)), sub: t('dashboard.kpi.avgPerAsset'), pos: null },
       ],
     },
     {
-      k: 'Yield cobrado', icon: Icons.receive,
+      id: 'yield', k: t('shared.yieldCollected'), icon: Icons.receive,
       views: [
-        { v: fmtUSD2(yieldTotal), sub: 'desde Mar 2025', pos: true },
-        { v: `${((yieldTotal / nz(investedTotal)) * 100).toFixed(1)}%`, sub: 'retorno sobre capital', pos: true },
-        { v: fmtUSD2(yieldTotal / 15), sub: 'promedio mensual', pos: true },
+        { v: fmtUSD2(yieldTotal), sub: t('shared.sinceDemo'), pos: true },
+        { v: `${((yieldTotal / nz(investedTotal)) * 100).toFixed(1)}%`, sub: t('dashboard.kpi.returnOnCapital'), pos: true },
+        { v: fmtUSD2(yieldTotal / 15), sub: t('dashboard.kpi.monthlyAvg'), pos: true },
       ],
     },
     {
-      k: 'P&L no realizado', icon: Icons.dash,
+      id: 'pnl', k: t('dashboard.kpi.unrealizedPnl'), icon: Icons.dash,
       views: [
         { v: `${holdTotal >= investedTotal ? '+' : ''}${(((holdTotal / nz(investedTotal)) - (investedTotal ? 1 : 0)) * 100).toFixed(1)}%`, sub: fmtUSD2(holdTotal - investedTotal), pos: true },
-        { v: fmtUSD2(holdTotal - investedTotal), sub: 'ganancia no realizada', pos: true },
-        { v: fmtUSD2(investedTotal), sub: 'capital invertido inicial', pos: null },
+        { v: fmtUSD2(holdTotal - investedTotal), sub: t('dashboard.kpi.unrealizedGain'), pos: true },
+        { v: fmtUSD2(investedTotal), sub: t('dashboard.kpi.initialCapital'), pos: null },
       ],
     },
-  ], [live, holdTotal, cashTotal, yieldTotal, investedTotal, holdings.length, change30d, unclaimedTotal, stats.data]);
+  ], [live, holdTotal, cashTotal, yieldTotal, investedTotal, holdings.length, change30d, unclaimedTotal, stats.data, t, locale]);
 
   // Live: the nearest scheduled distribution among the positions.
   const nextDist = useMemo(() => {
@@ -714,7 +730,7 @@ export default function Dashboard({ nav }: DashboardProps) {
     const d = new Date(now);
     return new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime();
   }, [now]);
-  const demoTargetLabel = demoTarget ? new Date(demoTarget).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '') : '';
+  const demoTargetLabel = demoTarget ? new Date(demoTarget).toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '') : '';
   const countdown = useCountdown(live ? (nextDist?.at ?? 0) : demoTarget);
 
   // Animated counter for big number
@@ -726,7 +742,7 @@ export default function Dashboard({ nav }: DashboardProps) {
     return () => clearTimeout(t);
   }, []);
 
-  const filteredArts = acadCat === 'Todos' ? ACADEMY_ARTS : ACADEMY_ARTS.filter(a => a.cat === acadCat);
+  const filteredArts = acadCat === 'all' ? ACADEMY_ARTS : ACADEMY_ARTS.filter(a => a.cat === acadCat);
   // Academy widget rows: demo articles, or the latest published posts with the user's reads.
   const readSlugs = new Set(academy.readSlugs);
   const acadRows: AcademyRow[] = live
@@ -734,7 +750,10 @@ export default function Dashboard({ nav }: DashboardProps) {
         key: post.slug, title: post.title, cat: post.category, read: post.readMinutes, done: readSlugs.has(post.slug),
         open: () => nav('articulo', { slug: post.slug }),
       }))
-    : filteredArts.slice(0, 5).map(art => ({ key: art.title, title: art.title, cat: art.cat, read: art.read, done: Boolean(readDone[art.title]), open: () => nav('articulo') }));
+    : filteredArts.slice(0, 5).map(art => ({
+        key: art.id, title: t(`dashboard.academy.demoArticles.${art.id}`), cat: t(`dashboard.academy.categories.${art.cat}`),
+        read: art.read, done: Boolean(readDone[art.id]), open: () => nav('articulo'),
+      }));
   const acadRead = live ? (academy.posts ?? []).filter(post => readSlugs.has(post.slug)).length : Object.values(readDone).filter(Boolean).length;
   const acadTotal = live ? (academy.posts?.length ?? 0) : filteredArts.length;
 
@@ -749,10 +768,10 @@ export default function Dashboard({ nav }: DashboardProps) {
             initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
             style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 24, color: 'var(--text)', letterSpacing: '-0.02em' }}
           >
-            {greetingName ? `Hola, ${greetingName} 👋` : 'Hola 👋'}
+            {greetingName ? t('dashboard.greeting', { name: greetingName }) : t('dashboard.greetingNoName')}
           </motion.div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 3 }}>
-            {todayLabel ? `Resumen de tu posición al ${todayLabel}.` : 'Resumen de tu posición.'}
+            {todayLabel ? t('dashboard.summaryAt', { date: todayLabel }) : t('dashboard.summary')}
             <GuideButton tour="welcome" />
           </div>
         </div>
@@ -766,18 +785,18 @@ export default function Dashboard({ nav }: DashboardProps) {
             boxShadow: '0 0 20px rgba(48,120,255,0.35)',
           }}
         >
-          + Nueva inversión
+          {t('dashboard.newInvestment')}
         </motion.button>
       </div>
 
       {/* KPI cards — click to cycle views */}
       <div className="g-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 22 }}>
-        {kpis.map(({ k, icon, views }, idx) => {
+        {kpis.map(({ id, k, icon, views }, idx) => {
           const vi = kpiFlip[idx] || 0;
           const { v, sub, pos } = views[vi];
           return (
             <motion.div
-              key={k}
+              key={id}
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.07 }}
               whileHover={{ y: -2 }}
@@ -819,13 +838,13 @@ export default function Dashboard({ nav }: DashboardProps) {
         <div className="glow-card glass-card" style={{ padding: '20px 22px', borderRadius: 20, marginBottom: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 6 }}>
             <div>
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600, marginBottom: 4 }}>Portafolio total</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600, marginBottom: 4 }}>{t('dashboard.chart.title')}</div>
               <div className="glow-text" style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 30, letterSpacing: '-0.04em' }}>
                 ${totalAnimated.toLocaleString()}
               </div>
               <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: live ? (change30d ? (change30d.pct >= 0 ? 'var(--pos)' : 'var(--neg)') : 'var(--ter)') : 'var(--pos)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
                 {(!live || (change30d && change30d.pct >= 0)) && <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="var(--pos)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                {live ? `${change30d ? signedPct(change30d.pct) : '—'} en 30 días` : '+8.4% este mes'}
+                {live ? t('dashboard.kpi.in30Days', { value: change30d ? signedPct(change30d.pct) : '—' }) : t('dashboard.kpi.thisMonth', { value: '+8.4%' })}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 4 }}>
@@ -837,7 +856,7 @@ export default function Dashboard({ nav }: DashboardProps) {
                     background: period === p ? 'var(--gl-prd-a)' : 'var(--gl-prd-i)',
                     color: period === p ? 'var(--gl-prd-ca)' : 'var(--gl-prd-ci)',
                     fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 600, cursor: 'pointer',
-                  }}>{p}</motion.button>
+                  }}>{t(`dashboard.chart.periods.${p}`)}</motion.button>
               ))}
             </div>
           </div>
@@ -845,21 +864,21 @@ export default function Dashboard({ nav }: DashboardProps) {
           {live && liveSeries && <PortfolioChart data={liveSeries} period={period} />}
           {live && !liveSeries && (
             <div role="status" style={{ height: 236, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 16px', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>
-              {history.loading ? 'Cargando historial…' : 'Todavía no hay historial de tu portafolio. Aparece a partir de tu primera inversión.'}
+              {history.loading ? t('shared.loadingHistory') : t('shared.noHistory')}
             </div>
           )}
         </div>
 
         {/* Próxima distribución — live countdown */}
         <div className="glow-card glass-card" style={{ padding: '20px 18px', display: 'flex', flexDirection: 'column', borderRadius: 20 }}>
-          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 2 }}>Próxima distribución</div>
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 2 }}>{t('dashboard.distribution.title')}</div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)', marginBottom: 14 }}>
-            {!live ? demoTargetLabel : nextDist ? `${assetOf(nextDist.assetId)?.name ?? nextDist.name} · ${fmtShortDate(new Date(nextDist.at))}` : 'Dividendos on-chain por cobrar'}
+            {!live ? demoTargetLabel : nextDist ? `${assetOf(nextDist.assetId)?.name ?? nextDist.name} · ${fmtShortDate(new Date(nextDist.at), locale)}` : t('dashboard.distribution.onchainPending')}
           </div>
 
           {live && !nextDist && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 52, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid var(--gl-div)', marginBottom: 14, fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', textAlign: 'center' }}>
-              Sin distribución programada
+              {t('dashboard.distribution.noneScheduled')}
             </div>
           )}
 
@@ -871,7 +890,7 @@ export default function Dashboard({ nav }: DashboardProps) {
                 <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 18, color: 'var(--text)', lineHeight: 1 }}>
                   <Flip val={val} />
                 </div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t(`dashboard.distribution.units.${label}`)}</div>
               </div>
             ))}
           </div>
@@ -890,7 +909,7 @@ export default function Dashboard({ nav }: DashboardProps) {
               estimate below, weighted by each holding's current value */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             {live && holdings.length === 0 && (
-              <div style={{ padding: '7px 0', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{holdingsLoading ? 'Cargando inversiones…' : 'Todavía no tienes inversiones.'}</div>
+              <div style={{ padding: '7px 0', fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{holdingsLoading ? t('shared.loadingInvestments') : t('shared.noInvestmentsYet')}</div>
             )}
             {holdings.map((h, i, arr) => {
               const asset = assetOf(h.assetId);
@@ -911,7 +930,7 @@ export default function Dashboard({ nav }: DashboardProps) {
           </div>
 
           <div style={{ marginTop: 14, padding: '12px 14px', background: 'var(--gl-bg4)', borderRadius: 12, border: '1px solid var(--gl-bd)' }}>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', marginBottom: 2 }}>{live ? 'Por cobrar' : 'Estimado'}</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', marginBottom: 2 }}>{live ? t('dashboard.distribution.toCollect') : t('dashboard.distribution.estimated')}</div>
             <div className="glow-text" style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20 }}>{live ? fmtUSD2(unclaimedTotal) : '$1,278.00'}</div>
           </div>
         </div>
@@ -923,19 +942,19 @@ export default function Dashboard({ nav }: DashboardProps) {
         {/* Mis inversiones */}
         <div className="glow-card glass-card" style={{ padding: '20px 22px', borderRadius: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>Mis inversiones</div>
-            <motion.button whileHover={{ scale: 1.05 }} onClick={() => nav('pertenencias')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--gl-link)', fontWeight: 600 }}>Ver todo →</motion.button>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{t('dashboard.investments.title')}</div>
+            <motion.button whileHover={{ scale: 1.05 }} onClick={() => nav('pertenencias')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--gl-link)', fontWeight: 600 }}>{t('shared.seeAll')}</motion.button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {live && holdings.length === 0 && holdingsLoading && (
-              <div role="status" style={{ padding: '18px 0', textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>Cargando inversiones…</div>
+              <div role="status" style={{ padding: '18px 0', textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{t('shared.loadingInvestments')}</div>
             )}
             {live && holdings.length === 0 && !holdingsLoading && (
               <div style={{ padding: '18px 0', textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 12 }}>Todavía no tienes inversiones.</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 12 }}>{t('shared.noInvestmentsYet')}</div>
                 <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => nav('primario')}
                   style={{ padding: '8px 14px', borderRadius: 8, border: 'none', background: 'var(--accent)', color: 'var(--accent-fg)', fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>
-                  Explorar tokenizaciones
+                  {t('dashboard.investments.explore')}
                 </motion.button>
               </div>
             )}
@@ -953,7 +972,7 @@ export default function Dashboard({ nav }: DashboardProps) {
                       <img src={a?.img} alt="" style={{ width: 34, height: 34, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a?.name}</div>
-                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', marginTop: 1 }}>{h.tokens} tokens · {pct}% cartera</div>
+                        <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', marginTop: 1 }}>{t('dashboard.investments.rowMeta', { tokens: h.tokens, pct })}</div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                         <div style={{ textAlign: 'right' }}>
@@ -977,11 +996,11 @@ export default function Dashboard({ nav }: DashboardProps) {
                         <div style={{ paddingBottom: 10 }}>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 10 }}>
                             {[
-                              ['APY', `${a?.apy ?? '–'}%`],
-                              ['Invertido', fmtUSD2(h.invested)],
-                              ['Rendimiento', `+${fmtUSD2(h.yieldEarned)}`],
-                            ].map(([label, val]) => (
-                              <div key={label} style={{ background: 'var(--gl-bg4)', borderRadius: 8, padding: '7px 9px', border: '1px solid var(--gl-bd)' }}>
+                              ['apy', t('dashboard.investments.apy'), `${a?.apy ?? '–'}%`],
+                              ['invested', t('shared.invested'), fmtUSD2(h.invested)],
+                              ['yield', t('dashboard.investments.yield'), `+${fmtUSD2(h.yieldEarned)}`],
+                            ].map(([id, label, val]) => (
+                              <div key={id} style={{ background: 'var(--gl-bg4)', borderRadius: 8, padding: '7px 9px', border: '1px solid var(--gl-bd)' }}>
                                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, color: 'var(--ter)', marginBottom: 2 }}>{label}</div>
                                 <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 12, color: 'var(--text)' }}>{val}</div>
                               </div>
@@ -992,7 +1011,7 @@ export default function Dashboard({ nav }: DashboardProps) {
                               onClick={e => { e.stopPropagation(); nav('detalle', a); }}
                               style={{ padding: '8px', borderRadius: 8, border: '1px solid var(--gl-bd)', background: 'var(--gl-bg4)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              Ver completo
+                              {t('dashboard.investments.viewFull')}
                             </motion.button>
                             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                               onClick={e => {
@@ -1004,7 +1023,7 @@ export default function Dashboard({ nav }: DashboardProps) {
                               }}
                               style={{ padding: '8px', borderRadius: 8, border: 'none', background: 'var(--accent)', color: 'var(--accent-fg)', fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/></svg>
-                              Invertir 10 más · {fmtUSD2(10*a.tokenPrice)}
+                              {t('dashboard.investments.investMore', { amount: fmtUSD2(10*a.tokenPrice) })}
                             </motion.button>
                           </div>
                         </div>
@@ -1020,10 +1039,10 @@ export default function Dashboard({ nav }: DashboardProps) {
         {/* Diversificación */}
         <div className="glow-card glass-card" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', borderRadius: 20, overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>Diversificación</div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{t('dashboard.allocation.title')}</div>
             {!live && (
             <div style={{ display: 'flex', gap: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: 3 }}>
-              {([['RWA', 'rwa'], ['Total', 'total']] as const).map(([lbl, key]) => (
+              {([[t('dashboard.allocation.viewRwa'), 'rwa'], [t('dashboard.allocation.viewTotal'), 'total']] as const).map(([lbl, key]) => (
                 <motion.button key={key} onClick={() => { setAllocView(key); setAllocHover(null); }}
                   whileTap={{ scale: 0.94 }}
                   style={{ padding: '3px 9px', borderRadius: 6, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 10.5, fontWeight: 700,
@@ -1036,10 +1055,10 @@ export default function Dashboard({ nav }: DashboardProps) {
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0, justifyContent: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-              <PDonut segments={live && allocRWA.length === 0 ? [{ value: 100, color: 'var(--gl-div)' }] : allocView === 'rwa' ? allocRWA : allocTotal} size={130} label={`$${Math.round(allocView === 'rwa' ? holdTotal : grandTotal).toLocaleString()}`} sub={allocView === 'rwa' || live ? 'en RWA' : 'total'} />
+              <PDonut segments={live && allocRWA.length === 0 ? [{ value: 100, color: 'var(--gl-div)' }] : allocView === 'rwa' ? allocRWA : allocTotal} size={130} label={`$${Math.round(allocView === 'rwa' ? holdTotal : grandTotal).toLocaleString()}`} sub={allocView === 'rwa' || live ? t('dashboard.allocation.inRwa') : t('dashboard.allocation.total')} />
             </div>
             {live && allocRWA.length === 0 && (
-              <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>Sin inversiones todavía.</div>
+              <div style={{ textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{t('dashboard.allocation.empty')}</div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {(allocView === 'rwa' ? allocRWA : allocTotal).map((seg, i) => (
@@ -1061,11 +1080,11 @@ export default function Dashboard({ nav }: DashboardProps) {
           </div>
           <div style={{ marginTop: 'auto', paddingTop: 14, borderTop: '1px solid var(--gl-div)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'var(--ter)', marginBottom: 2 }}>Índice de diversificación</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'var(--ter)', marginBottom: 2 }}>{t('dashboard.allocation.index')}</div>
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: 'var(--text)' }}>{diversification === null ? '—' : diversification.toFixed(1)} <span style={{ fontSize: 12, color: 'var(--ter)', fontWeight: 400 }}>/ 10</span></div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'var(--ter)', marginBottom: 2 }}>Sectores activos</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 10, color: 'var(--ter)', marginBottom: 2 }}>{t('dashboard.allocation.sectors')}</div>
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 20, color: 'var(--text)' }}>{(allocView === 'rwa' ? allocRWA : allocTotal).length}</div>
             </div>
           </div>
@@ -1074,14 +1093,14 @@ export default function Dashboard({ nav }: DashboardProps) {
         {/* Academia */}
         <div className="glow-card glass-card" style={{ padding: '20px 22px', borderRadius: 20, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>Academia</div>
-            <motion.button whileHover={{ scale: 1.05 }} onClick={() => nav('academia')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--gl-link)', fontWeight: 600 }}>Ver todo →</motion.button>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{t('dashboard.academy.title')}</div>
+            <motion.button whileHover={{ scale: 1.05 }} onClick={() => nav('academia')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--gl-link)', fontWeight: 600 }}>{t('shared.seeAll')}</motion.button>
           </div>
           {/* Progress bar overall */}
           <div style={{ padding: '10px 12px', background: 'var(--gl-bg4)', borderRadius: 10, border: '1px solid var(--gl-bd)', marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)' }}>Progreso general</span>
-              <span style={{ fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, color: '#3078ff' }}>{acadRead}/{acadTotal} leídos</span>
+              <span style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)' }}>{t('dashboard.academy.progress')}</span>
+              <span style={{ fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 700, color: '#3078ff' }}>{t('dashboard.academy.readCount', { read: acadRead, total: acadTotal })}</span>
             </div>
             <div style={{ height: 5, background: 'var(--gl-div)', borderRadius: 3, overflow: 'hidden' }}>
               <motion.div initial={{ width: 0 }} animate={{ width: `${Math.round(acadRead / Math.max(acadTotal, 1) * 100)}%` }}
@@ -1092,7 +1111,7 @@ export default function Dashboard({ nav }: DashboardProps) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1 }}>
             {live && acadRows.length === 0 && (
               <div role="status" style={{ padding: '9px 0', fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>
-                {academy.loading ? 'Cargando artículos…' : 'Todavía no hay artículos publicados.'}
+                {academy.loading ? t('dashboard.academy.loading') : t('dashboard.academy.empty')}
               </div>
             )}
             {acadRows.map((art, i, arr) => (
@@ -1108,7 +1127,7 @@ export default function Dashboard({ nav }: DashboardProps) {
                   <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 11.5, color: art.done ? 'var(--ter)' : 'var(--text)', textDecoration: art.done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{art.title}</div>
                   <div style={{ display: 'flex', gap: 5, alignItems: 'center', marginTop: 3 }}>
                     <span style={{ padding: '1px 6px', borderRadius: 3, background: 'rgba(48,120,255,0.12)', fontFamily: 'var(--font-b)', fontSize: 8.5, color: 'rgba(80,150,255,0.9)', fontWeight: 600 }}>{art.cat}</span>
-                    <span style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, color: 'var(--ter)' }}>· {art.read} min lectura</span>
+                    <span style={{ fontFamily: 'var(--font-b)', fontSize: 9.5, color: 'var(--ter)' }}>{t('dashboard.academy.readTime', { min: art.read })}</span>
                   </div>
                 </div>
               </div>

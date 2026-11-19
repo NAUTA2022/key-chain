@@ -2,10 +2,12 @@ import { useMenuFilter } from '~/lib/demoMenu';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from '~/components/ui';
+import { useT } from '~/i18n/useT';
 import { pathFor, type NavFn, type RouteKey } from '~/lib/navigation';
 import type { Role } from '~/lib/preferences';
 
-type MobileTab = { id: RouteKey; label: string; icon: ReactNode };
+/** `labelKey`: key of the tab's name in the `common` dictionaries. */
+type MobileTab = { id: RouteKey; labelKey: string; icon: ReactNode };
 
 type MobileNavBarProps = {
   nav: NavFn;
@@ -29,26 +31,27 @@ const ProfileIcon = (
 );
 
 const INVESTOR_TABS: MobileTab[] = [
-  { id: 'feed',         label: 'Feed',      icon: Icons.feed  },
-  { id: 'dashboard',    label: 'Dashboard', icon: Icons.dash  },
-  { id: 'primario',     label: 'Tokens',    icon: HexIcon     },
-  { id: 'pertenencias', label: 'Wallet',    icon: Icons.wallet},
-  { id: 'perfil',       label: 'Perfil',    icon: ProfileIcon },
+  { id: 'feed',         labelKey: 'mobileNav.feed',         icon: Icons.feed  },
+  { id: 'dashboard',    labelKey: 'mobileNav.dashboard',    icon: Icons.dash  },
+  { id: 'primario',     labelKey: 'mobileNav.primario',     icon: HexIcon     },
+  { id: 'pertenencias', labelKey: 'mobileNav.pertenencias', icon: Icons.wallet},
+  { id: 'perfil',       labelKey: 'mobileNav.perfil',       icon: ProfileIcon },
 ];
 
 // Admins are investors too: every investor tab plus the admin panel (icon-only tabs leave room for six).
 const ADMIN_TABS: MobileTab[] = [
   ...INVESTOR_TABS.slice(0, -1),
-  { id: 'admin',        label: 'Admin',     icon: Icons.admin },
+  { id: 'admin',        labelKey: 'mobileNav.admin',        icon: Icons.admin },
   ...INVESTOR_TABS.slice(-1),
 ];
 
 export default function MobileNavBar({ nav, route, role }: MobileNavBarProps) {
+  const { t } = useT('common');
   const menu = useMenuFilter();
   const tabs = menu(role === 'admin' ? ADMIN_TABS : INVESTOR_TABS);
 
   return (
-    <nav aria-label="Navegación" style={{
+    <nav aria-label={t('mobileNav.label')} style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
       background: 'var(--gl-panel)',
       backdropFilter: 'blur(40px) saturate(180%)',
@@ -57,16 +60,17 @@ export default function MobileNavBar({ nav, route, role }: MobileNavBarProps) {
       display: 'flex', height: 68,
       paddingBottom: 'env(safe-area-inset-bottom, 0px)',
     }}>
-      {tabs.map(t => {
-        const active = route === t.id;
+      {tabs.map(tab => {
+        const label = t(tab.labelKey);
+        const active = route === tab.id;
         return (
           <motion.a
-            key={t.id}
-            href={pathFor(t.id)}
+            key={tab.id}
+            href={pathFor(tab.id)}
             aria-current={active ? 'page' : undefined}
-            aria-label={t.label} title={t.label}
-            data-guide={`mnav-${t.id}`}
-            onClick={(e) => { e.preventDefault(); nav(t.id); }}
+            aria-label={label} title={label}
+            data-guide={`mnav-${tab.id}`}
+            onClick={(e) => { e.preventDefault(); nav(tab.id); }}
             whileTap={{ scale: 0.82 }}
             style={{
               textDecoration: 'none',
@@ -88,7 +92,7 @@ export default function MobileNavBar({ nav, route, role }: MobileNavBarProps) {
                 }}
               />
             )}
-            <span className="mnav-ico" style={{ display: 'flex', color: 'inherit' }}>{t.icon}</span>
+            <span className="mnav-ico" style={{ display: 'flex', color: 'inherit' }}>{tab.icon}</span>
           </motion.a>
         );
       })}

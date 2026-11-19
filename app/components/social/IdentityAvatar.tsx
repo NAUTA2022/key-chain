@@ -1,5 +1,6 @@
 import { PAvatar, CompanyAvatar, HEX_CLIP } from '~/components/ui';
 import { identicon } from '~/lib/social/identity';
+import { useT } from '~/i18n/useT';
 
 /**
  * A person drawn as an initial on a gradient (demo users, company owners, the viewer).
@@ -12,9 +13,10 @@ const hasLiveFace = (user: AvatarUser): boolean => !!user.avatarUrl || !!user.an
 
 // Mirrored 5×5 pattern for people who keep their profile private.
 export function Identicon({ seed, size }: { seed: string; size: number }) {
+  const { t } = useT('profile');
   const { cells, hue } = identicon(seed);
   return (
-    <svg width={size} height={size} viewBox="-1 -1 7 7" role="img" aria-label="Inversor" style={{ borderRadius: '50%', flexShrink: 0, display: 'block', background: `hsl(${hue} 45% 92%)` }}>
+    <svg width={size} height={size} viewBox="-1 -1 7 7" role="img" aria-label={t('social.anonymous')} style={{ borderRadius: '50%', flexShrink: 0, display: 'block', background: `hsl(${hue} 45% 92%)` }}>
       {cells.map((on, i) => on && <rect key={i} x={i % 5} y={Math.floor(i / 5)} width={1.02} height={1.02} fill={`hsl(${hue} 55% 45%)`} />)}
     </svg>
   );
@@ -70,10 +72,11 @@ type IdentityAvatarProps = {
 // right: company view = big hexagon + small round user; personal view = big
 // round user + small hexagon company. Tapping the badge switches identity.
 export default function IdentityAvatar({ mode, company, companyLogoUrl, size, onSwap, ring = 'var(--surface)', user, self, badge: withBadge = true }: IdentityAvatarProps) {
+  const { t } = useT('profile');
   const badge = Math.round(size * 0.38);
   const pad = Math.max(3, Math.round(size * 0.05));
   const isCompany = mode === 'company';
-  const label = isCompany ? `Ver perfil de ${self ? 'mi cuenta personal' : user.name}` : `Ver perfil de ${company}`;
+  const label = t('social.avatar.viewProfileOf', { name: isCompany ? (self ? t('social.avatar.myPersonalAccount') : user.name) : company ?? '' });
 
   return (
     <div style={{ position: 'relative', width: size + pad * 2, height: size + pad * 2, flexShrink: 0 }}>

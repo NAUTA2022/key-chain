@@ -70,6 +70,7 @@ public/               estáticos (imágenes WebP, modelos .glb, íconos, manifes
 - Código que toque `window`/`document`/`localStorage` va en efectos o con `useSyncExternalStore` (el prerender corre en Node). Librerías que tocan `window` al importarse (Leaflet) se cargan con `lazy()`.
 - `VITE_*` se incrusta en el bundle público: **nunca secretos**. Claves de APIs (Anthropic, thirdweb secret) solo en el backend.
 - Marca: el nombre en metadatos es `BRIKME` (`SITE_NAME` en `app/lib/site.ts`). El token de plataforma se muestra como BRIK (provisorio, sección oculta): confirmar con el cliente antes de activarla.
+- **Idiomas** (español fuente, inglés y árabe RTL): ningún texto fijo en la interfaz; todo sale de `useT('namespace')` y de los JSON en `app/i18n/locales/<idioma>/`. Al agregar o cambiar textos, actualizar los tres idiomas y correr `npm run i18n:check`. Reglas completas y cómo conectar un sistema de traducción en `docs/i18n.md`.
 - Comentarios y commits en inglés; explicaciones al usuario en español.
 
 ## Verificación visual

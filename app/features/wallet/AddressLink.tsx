@@ -3,6 +3,7 @@ import { isAddress } from 'thirdweb/utils';
 import { Icons } from '~/components/ui';
 import { appChain, explorerUrl } from '~/lib/onchain';
 import { shortAddress } from '~/features/portfolio/format';
+import { useT } from '~/i18n/useT';
 import { useChainInfo } from './chain';
 
 type AddressLinkProps = {
@@ -18,14 +19,15 @@ const TX_HASH = /^0x[0-9a-fA-F]{64}$/;
  * block explorer, or copies the value where there is no explorer (devnet).
  */
 export default function AddressLink({ value, kind = 'address', style = {} }: AddressLinkProps) {
+  const { t } = useT('portfolio');
   const [copied, setCopied] = useState(false);
   const info = useChainInfo();
   // The platform network decides the explorer (none on the devnet → copy instead).
   const chainId = appChain?.id ?? info.data?.chainId;
   useEffect(() => {
     if (!copied) return;
-    const t = setTimeout(() => setCopied(false), 1600);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setCopied(false), 1600);
+    return () => clearTimeout(timer);
   }, [copied]);
 
   const valid = kind === 'address' ? isAddress(value) : TX_HASH.test(value);
@@ -49,7 +51,7 @@ export default function AddressLink({ value, kind = 'address', style = {} }: Add
     <button
       type="button"
       title={value}
-      aria-label={copied ? 'Copiado' : `Copiar ${kind === 'tx' ? 'hash de la transacción' : 'dirección'} ${value}`}
+      aria-label={copied ? t('wallet.address.copied') : kind === 'tx' ? t('wallet.address.copyTx', { value }) : t('wallet.address.copyAddress', { value })}
       onClick={e => {
         e.stopPropagation();
         void navigator.clipboard?.writeText(value).then(() => setCopied(true), () => undefined);
@@ -57,7 +59,7 @@ export default function AddressLink({ value, kind = 'address', style = {} }: Add
       style={{ ...pill, cursor: 'pointer' }}
     >
       {dot}{shortAddress(value)}
-      <span style={{ fontSize: 11, opacity: 0.85 }}>{copied ? 'Copiado ✓' : 'Copiar'}</span>
+      <span style={{ fontSize: 11, opacity: 0.85 }}>{copied ? t('wallet.address.copiedCheck') : t('wallet.address.copy')}</span>
     </button>
   );
 }

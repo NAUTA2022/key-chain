@@ -12,10 +12,12 @@ import { TERMS_VERSION } from '~/pages/legal-content';
 import CompanyFields from '~/features/company/CompanyFields';
 import { emptyCompanyForm, parseCompanyForm, saveCompany, type CompanyErrors, type CompanyForm, type MyCompany } from '~/features/company/company';
 import { confirmError, isAlreadyVerified, needsNewCode, onboardingError, sendOutcome, type SendOutcome } from './messages';
+import { useT, type Translator } from '~/i18n/useT';
 
 // First-login onboarding (live mode): profile + terms (+ the company, for
 // company accounts) → optional email verification → suggestion to complete
 // the KYC (or the company's KYB).
+// Copy: `help:onboarding.*` (validation messages below are dictionary keys).
 
 type OnboardedUser = paths['/v1/me/onboarding']['post']['responses'][200]['content']['application/json'];
 type Step = 'profile' | 'email' | 'done';
@@ -25,12 +27,12 @@ const COUNTRY_CODES = COUNTRY_OPTIONS.map(([code]) => code) as [CountryCode, ...
 
 const profileSchema = z.object({
   displayName: z.string().trim()
-    .min(2, 'Ingresa al menos 2 caracteres.')
-    .max(80, 'Usa como máximo 80 caracteres.')
-    .regex(/^[^\p{Cc}]+$/u, 'El nombre tiene caracteres no permitidos.'),
-  email: z.string().trim().min(1, 'Ingresa tu email.').max(200, 'El email es demasiado largo.').pipe(z.email('Ingresa un email válido.')),
-  country: z.enum(COUNTRY_CODES, 'Elige tu país.'),
-  acceptTerms: z.literal(true, 'Tienes que aceptar los Términos y la Política de privacidad.'),
+    .min(2, 'onboarding.errors.nameMin')
+    .max(80, 'onboarding.errors.nameMax')
+    .regex(/^[^\p{Cc}]+$/u, 'onboarding.errors.nameChars'),
+  email: z.string().trim().min(1, 'onboarding.errors.emailRequired').max(200, 'onboarding.errors.emailTooLong').pipe(z.email('onboarding.errors.emailInvalid')),
+  country: z.enum(COUNTRY_CODES, 'onboarding.errors.country'),
+  acceptTerms: z.literal(true, 'onboarding.errors.terms'),
 });
 
 type ProfileField = 'displayName' | 'email' | 'country' | 'acceptTerms';
@@ -62,13 +64,15 @@ function Note({ children }: { children: ReactNode }) {
   );
 }
 
-const STEPS: ReadonlyArray<readonly [Step, string]> = [['profile', 'Tus datos'], ['email', 'Email'], ['done', 'Listo']];
+/** Step order; labels are `help:onboarding.steps.<id>`. */
+const STEPS: readonly Step[] = ['profile', 'email', 'done'];
 
 function Steps({ step }: { step: Step }) {
-  const current = STEPS.findIndex(([id]) => id === step);
+  const { t } = useT('help');
+  const current = STEPS.indexOf(step);
   return (
-    <ol aria-label="Pasos" style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-      {STEPS.map(([id, label], i) => {
+    <ol aria-label={t('onboarding.stepsLabel')} style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+      {STEPS.map((id, i) => {
         const done = i < current;
         const active = i === current;
         return (
@@ -78,7 +82,7 @@ function Steps({ step }: { step: Step }) {
               fontFamily: 'var(--font-b)', fontSize: 11.5, fontWeight: 700,
               background: active || done ? 'var(--accent)' : 'var(--surface2)', color: active || done ? 'var(--accent-fg)' : 'var(--ter)',
             }}>{done ? Icons.check : i + 1}</span>
-            <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: active ? 700 : 500, color: active ? 'var(--text)' : 'var(--ter)' }}>{label}</span>
+            <span style={{ fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: active ? 700 : 500, color: active ? 'var(--text)' : 'var(--ter)' }}>{t(`onboarding.steps.${id}`)}</span>
             {i < STEPS.length - 1 && <span aria-hidden="true" style={{ width: 22, height: 1, background: 'var(--border)', marginLeft: 2 }} />}
           </li>
         );
@@ -89,18 +93,17 @@ function Steps({ step }: { step: Step }) {
 
 // ─── Step 1: profile and terms ──────────────────────────────────────────────
 
-const USAGES: ReadonlyArray<readonly [Usage, string, string]> = [
-  ['person', 'Persona', 'Invierto en activos reales con mi wallet.'],
-  ['company', 'Empresa', 'Registro mi empresa para tokenizar sus activos.'],
-];
+/** Account usages; copy is `help:onboarding.usage.<id>.title` / `.text`. */
+const USAGES: readonly Usage[] = ['person', 'company'];
 
 function UsageChoice({ value, onChange }: { value: Usage; onChange: (u: Usage) => void }) {
   const isMobile = useMobile();
+  const { t } = useT('help');
   return (
     <fieldset style={{ border: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
-      <legend style={{ ...labelText, padding: 0, marginBottom: 8 }}>¿Cómo vas a usar Brikme?</legend>
+      <legend style={{ ...labelText, padding: 0, marginBottom: 8 }}>{t('onboarding.usage.legend')}</legend>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
-        {USAGES.map(([id, title, text]) => {
+        {USAGES.map(id => {
           const active = value === id;
           return (
             <label key={id} style={{
@@ -110,8 +113,8 @@ function UsageChoice({ value, onChange }: { value: Usage; onChange: (u: Usage) =
               <input type="radio" name="usage" value={id} checked={active} onChange={() => onChange(id)}
                 style={{ width: 16, height: 16, marginTop: 2, accentColor: 'var(--accent)', flexShrink: 0, cursor: 'pointer' }} />
               <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontFamily: 'var(--font-b)', fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-                <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)', lineHeight: 1.45 }}>{text}</span>
+                <span style={{ fontFamily: 'var(--font-b)', fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t(`onboarding.usage.${id}.title`)}</span>
+                <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)', lineHeight: 1.45 }}>{t(`onboarding.usage.${id}.text`)}</span>
               </span>
             </label>
           );
@@ -123,6 +126,8 @@ function UsageChoice({ value, onChange }: { value: Usage; onChange: (u: Usage) =
 
 function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: OnboardedUser, company: MyCompany | null) => void }) {
   const isMobile = useMobile();
+  const { t } = useT('help');
+  const { t: tp } = useT('profile');
   const countryId = useId();
   const [form, setForm] = useState<ProfileForm>(() => ({
     displayName: user.displayName ?? '',
@@ -146,7 +151,7 @@ function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: Onboar
     e.preventDefault();
     if (saving) return;
     const parsed = profileSchema.safeParse(form);
-    const companyParsed = usage === 'company' ? parseCompanyForm(company) : null;
+    const companyParsed = usage === 'company' ? parseCompanyForm(company, tp) : null;
     setCompanyErrors(companyParsed?.errors ?? {});
     if (!parsed.success) {
       const next: Partial<Record<ProfileField, string>> = {};
@@ -164,12 +169,12 @@ function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: Onboar
     try {
       const { data, error } = await api.POST('/v1/me/onboarding', { body: { ...parsed.data, termsVersion: TERMS_VERSION } });
       if (!data) {
-        setApiError(onboardingError(error));
+        setApiError(onboardingError(t, error));
         return;
       }
       // Company accounts: the profile is saved first; a failed registration can be retried from this same step.
       if (companyParsed?.body) {
-        const saved = await saveCompany(companyParsed.body, company.logo, null);
+        const saved = await saveCompany(companyParsed.body, company.logo, null, tp);
         if (!saved.company) {
           setApiError(saved.error);
           return;
@@ -179,7 +184,7 @@ function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: Onboar
       }
       onSaved(data, null);
     } catch {
-      setApiError(onboardingError(null));
+      setApiError(onboardingError(t, null));
     } finally {
       setSaving(false);
     }
@@ -188,39 +193,39 @@ function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: Onboar
   return (
     <form onSubmit={submit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <h2 style={titleStyle}>Cuéntanos quién eres</h2>
-        <p style={helpText}>Usamos estos datos para tu cuenta y para avisarte sobre tus inversiones. Puedes cambiarlos después desde tu perfil.</p>
+        <h2 style={titleStyle}>{t('onboarding.profile.title')}</h2>
+        <p style={helpText}>{t('onboarding.profile.help')}</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
-          <span style={labelText}>Nombre</span>
-          <PInput name="displayName" autoComplete="name" maxLength={80} ariaLabel="Nombre" placeholder="Cómo quieres que te llamemos" value={form.displayName} onChange={e => set('displayName', e.target.value)} />
-          {errors.displayName && <span role="alert" style={errorText}>{errors.displayName}</span>}
+          <span style={labelText}>{t('onboarding.profile.name')}</span>
+          <PInput name="displayName" autoComplete="name" maxLength={80} ariaLabel={t('onboarding.profile.name')} placeholder={t('onboarding.profile.namePlaceholder')} value={form.displayName} onChange={e => set('displayName', e.target.value)} />
+          {errors.displayName && <span role="alert" style={errorText}>{t(errors.displayName)}</span>}
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
-          <span style={labelText}>Email</span>
-          <PInput name="email" type="email" autoComplete="email" maxLength={200} ariaLabel="Email" placeholder="tu@ejemplo.com" value={form.email} onChange={e => set('email', e.target.value)} />
-          {errors.email && <span role="alert" style={errorText}>{errors.email}</span>}
+          <span style={labelText}>{t('onboarding.profile.email')}</span>
+          <PInput name="email" type="email" autoComplete="email" maxLength={200} ariaLabel={t('onboarding.profile.email')} placeholder={t('onboarding.profile.emailPlaceholder')} value={form.email} onChange={e => set('email', e.target.value)} />
+          {errors.email && <span role="alert" style={errorText}>{t(errors.email)}</span>}
         </label>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <label htmlFor={countryId} style={labelText}>País de residencia</label>
+        <label htmlFor={countryId} style={labelText}>{t('onboarding.profile.country')}</label>
         <select id={countryId} name="country" autoComplete="country" value={form.country} onChange={e => set('country', e.target.value in COUNTRY_NAMES ? (e.target.value as CountryCode) : '')} style={{ ...selectStyle, color: form.country ? 'var(--text)' : 'var(--ter)' }}>
-          <option value="" disabled>Selecciona tu país</option>
+          <option value="" disabled>{t('onboarding.profile.countryPlaceholder')}</option>
           {COUNTRY_OPTIONS.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
         </select>
-        {errors.country && <span role="alert" style={errorText}>{errors.country}</span>}
+        {errors.country && <span role="alert" style={errorText}>{t(errors.country)}</span>}
       </div>
 
       <UsageChoice value={usage} onChange={setUsage} />
 
       {usage === 'company' && (
-        <section aria-label="Datos de la empresa" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 4 }}>
+        <section aria-label={t('onboarding.profile.companySection')} style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 4 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <h3 style={{ ...titleStyle, fontSize: 16 }}>Datos de la empresa</h3>
-            <p style={{ ...helpText, fontSize: 13 }}>La revisamos junto con la verificación de empresa (KYB). Hasta que la aprobemos, su página no es pública.</p>
+            <h3 style={{ ...titleStyle, fontSize: 16 }}>{t('onboarding.profile.companySection')}</h3>
+            <p style={{ ...helpText, fontSize: 13 }}>{t('onboarding.profile.companyHelp')}</p>
           </div>
           <CompanyFields form={company} errors={companyErrors}
             onChange={(key, value) => { setCompany(c => ({ ...c, [key]: value })); setCompanyErrors(er => ({ ...er, [key]: undefined })); }} />
@@ -237,17 +242,20 @@ function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: Onboar
             style={{ width: 17, height: 17, marginTop: 2, accentColor: 'var(--accent)', flexShrink: 0, cursor: 'pointer' }}
           />
           <span>
-            Acepto los <a href="/terminos" target="_blank" rel="noopener noreferrer" style={linkStyle}>Términos</a> y la{' '}
-            <a href="/privacidad" target="_blank" rel="noopener noreferrer" style={linkStyle}>Política de privacidad</a>.
+            {t('onboarding.profile.termsBefore')}
+            <a href="/terminos" target="_blank" rel="noopener noreferrer" style={linkStyle}>{t('onboarding.profile.terms')}</a>
+            {t('onboarding.profile.termsMiddle')}
+            <a href="/privacidad" target="_blank" rel="noopener noreferrer" style={linkStyle}>{t('onboarding.profile.privacy')}</a>
+            {t('onboarding.profile.termsAfter')}
           </span>
         </label>
-        {errors.acceptTerms && <span role="alert" style={errorText}>{errors.acceptTerms}</span>}
+        {errors.acceptTerms && <span role="alert" style={errorText}>{t(errors.acceptTerms)}</span>}
       </div>
 
       {apiError && <Alert>{apiError}</Alert>}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <PBtn variant="accent" disabled={saving} style={isMobile ? { width: '100%' } : undefined}>{saving ? 'Guardando…' : 'Continuar'}</PBtn>
+        <PBtn variant="accent" disabled={saving} style={isMobile ? { width: '100%' } : undefined}>{saving ? t('onboarding.profile.saving') : t('onboarding.profile.continue')}</PBtn>
       </div>
     </form>
   );
@@ -257,17 +265,18 @@ function ProfileStep({ user, onSaved }: { user: SessionUser; onSaved: (u: Onboar
 
 type SendState = SendOutcome | { kind: 'sending' };
 
-async function requestCode(): Promise<SendOutcome> {
+async function requestCode(t: Translator['t']): Promise<SendOutcome> {
   try {
     const { data, error } = await api.POST('/v1/me/email/verification');
-    return data ? { kind: 'sent', sentTo: data.sentTo, expiresInSeconds: data.expiresInSeconds } : sendOutcome(error);
+    return data ? { kind: 'sent', sentTo: data.sentTo, expiresInSeconds: data.expiresInSeconds } : sendOutcome(t, error);
   } catch {
-    return sendOutcome(null);
+    return sendOutcome(t, null);
   }
 }
 
 function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
   const isMobile = useMobile();
+  const { t } = useT('help');
   const { refresh } = useSession();
   const [send, setSend] = useState<SendState>({ kind: 'sending' });
   // The code form appears only once a code was really sent (no flash while the first request is in flight).
@@ -277,9 +286,9 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [canResend, setCanResend] = useState(false);
   const started = useRef(false);
-  const latest = useRef({ refresh, onDone });
+  const latest = useRef({ refresh, onDone, t });
   useEffect(() => {
-    latest.current = { refresh, onDone };
+    latest.current = { refresh, onDone, t };
   });
 
   const finishVerified = async () => {
@@ -291,7 +300,7 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    void requestCode().then(outcome => {
+    void requestCode(latest.current.t).then(outcome => {
       setSend(outcome);
       if (outcome.kind === 'sent') setCodeRequested(true);
       if (outcome.kind === 'verified') void latest.current.refresh().then(() => latest.current.onDone());
@@ -301,8 +310,8 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
   // A new code can be requested 30 s after the last one was sent.
   useEffect(() => {
     if (send.kind !== 'sent') return;
-    const t = window.setTimeout(() => setCanResend(true), 30_000);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => setCanResend(true), 30_000);
+    return () => window.clearTimeout(timer);
   }, [send]);
 
   async function resend() {
@@ -310,7 +319,7 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
     setError(null);
     setCode('');
     setSend({ kind: 'sending' });
-    const outcome = await requestCode();
+    const outcome = await requestCode(t);
     setSend(outcome);
     if (outcome.kind === 'verified') await finishVerified();
   }
@@ -319,7 +328,7 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
     e.preventDefault();
     if (checking) return;
     if (!/^\d{6}$/.test(code)) {
-      setError('Ingresa los 6 dígitos del código.');
+      setError(t('onboarding.email.enterCode'));
       return;
     }
     setChecking(true);
@@ -330,13 +339,13 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
         await finishVerified();
         return;
       }
-      setError(confirmError(problem));
+      setError(confirmError(t, problem));
       if (needsNewCode(problem)) {
         setCode('');
         setCanResend(true);
       }
     } catch {
-      setError(confirmError(null));
+      setError(confirmError(t, null));
     } finally {
       setChecking(false);
     }
@@ -344,8 +353,8 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
 
   const header = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <h2 style={titleStyle}>Verifica tu email</h2>
-      <p style={helpText}>Así confirmamos que <strong style={{ color: 'var(--text)', overflowWrap: 'anywhere' }}>{email || 'tu email'}</strong> es tuyo. Es opcional: puedes hacerlo más tarde.</p>
+      <h2 style={titleStyle}>{t('onboarding.email.title')}</h2>
+      <p style={helpText}>{t('onboarding.email.helpBefore')}<strong style={{ color: 'var(--text)', overflowWrap: 'anywhere' }}>{email || t('onboarding.email.yourEmail')}</strong>{t('onboarding.email.helpAfter')}</p>
     </div>
   );
 
@@ -353,7 +362,7 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         {header}
-        <Note>Preparando la verificación de tu email…</Note>
+        <Note>{t('onboarding.email.preparing')}</Note>
       </div>
     );
   }
@@ -362,9 +371,9 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         {header}
-        <Note>La verificación por email estará disponible pronto. Puedes seguir usando la plataforma con normalidad.</Note>
+        <Note>{t('onboarding.email.unavailable')}</Note>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <PBtn variant="accent" onClick={onDone} style={isMobile ? { width: '100%' } : undefined}>Continuar</PBtn>
+          <PBtn variant="accent" onClick={onDone} style={isMobile ? { width: '100%' } : undefined}>{t('onboarding.email.continue')}</PBtn>
         </div>
       </div>
     );
@@ -374,23 +383,23 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
     <form onSubmit={confirm} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       {header}
 
-      {send.kind === 'sending' && <Note>Enviando un código de 6 dígitos…</Note>}
+      {send.kind === 'sending' && <Note>{t('onboarding.email.sending')}</Note>}
       {send.kind === 'sent' && (
         <p style={{ ...helpText, fontSize: 13 }}>
-          Te enviamos un código a <strong style={{ color: 'var(--text)' }}>{send.sentTo}</strong>. Vence en {Math.max(1, Math.round(send.expiresInSeconds / 60))} minutos. Revisa también la carpeta de spam.
+          {t('onboarding.email.sentBefore')}<strong style={{ color: 'var(--text)' }}>{send.sentTo}</strong>{t('onboarding.email.sentAfter', { minutes: Math.max(1, Math.round(send.expiresInSeconds / 60)) })}
         </p>
       )}
       {send.kind === 'error' && <Alert>{send.message}</Alert>}
 
       {send.kind !== 'error' && (
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: isMobile ? undefined : 260 }}>
-          <span style={labelText}>Código de verificación</span>
+          <span style={labelText}>{t('onboarding.email.codeLabel')}</span>
           <PInput
             name="code"
             type="tel"
             autoComplete="one-time-code"
             maxLength={6}
-            ariaLabel="Código de verificación de 6 dígitos"
+            ariaLabel={t('onboarding.email.codeAria')}
             placeholder="000000"
             value={code}
             onChange={e => {
@@ -405,17 +414,17 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
       {error && <Alert>{error}</Alert>}
 
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', flexDirection: isMobile ? 'column-reverse' : 'row', justifyContent: 'flex-end' }}>
-        <PBtn variant="ghost" onClick={e => { e.preventDefault(); onDone(); }} style={isMobile ? { width: '100%' } : undefined}>Omitir por ahora</PBtn>
+        <PBtn variant="ghost" onClick={e => { e.preventDefault(); onDone(); }} style={isMobile ? { width: '100%' } : undefined}>{t('onboarding.email.skip')}</PBtn>
         {send.kind === 'error' ? (
-          <PBtn variant="secondary" onClick={e => { e.preventDefault(); void resend(); }} style={isMobile ? { width: '100%' } : undefined}>Reintentar</PBtn>
+          <PBtn variant="secondary" onClick={e => { e.preventDefault(); void resend(); }} style={isMobile ? { width: '100%' } : undefined}>{t('shared.retry')}</PBtn>
         ) : (
           <PBtn variant="secondary" disabled={!canResend || send.kind === 'sending'} onClick={e => { e.preventDefault(); void resend(); }} style={isMobile ? { width: '100%' } : undefined}>
-            Reenviar código
+            {t('onboarding.email.resend')}
           </PBtn>
         )}
         {send.kind !== 'error' && (
           <PBtn variant="accent" disabled={checking || send.kind === 'sending' || code.length !== 6} style={isMobile ? { width: '100%' } : undefined}>
-            {checking ? 'Verificando…' : 'Verificar'}
+            {checking ? t('onboarding.email.verifying') : t('onboarding.email.verify')}
           </PBtn>
         )}
       </div>
@@ -427,23 +436,24 @@ function EmailStep({ email, onDone }: { email: string; onDone: () => void }) {
 
 function CompanyDone({ company, onFinish }: { company: MyCompany; onFinish: (path: string) => void }) {
   const isMobile = useMobile();
+  const { t } = useT('help');
   const full = isMobile ? { width: '100%' } : undefined;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <span aria-hidden="true" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--accent-bg)', color: 'var(--accent-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{Icons.check}</span>
-        <h2 style={titleStyle}>Registramos {company.name}</h2>
-        <p style={helpText}>Tu empresa quedó pendiente de verificación. Completa la verificación de empresa (KYB) para que podamos aprobarla; mientras tanto ya puedes preparar la tokenización de tus activos.</p>
+        <h2 style={titleStyle}>{t('onboarding.done.companyTitle', { name: company.name })}</h2>
+        <p style={helpText}>{t('onboarding.done.companyText')}</p>
       </div>
       <Note>
         <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <PTag label="Pendiente de verificación" color="blue" />
-          Hasta que la aprobemos, la página de la empresa no es pública.
+          <PTag label={t('onboarding.done.pendingTag')} color="blue" />
+          {t('onboarding.done.pendingNote')}
         </span>
       </Note>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end', flexDirection: isMobile ? 'column-reverse' : 'row' }}>
-        <PBtn variant="secondary" onClick={() => onFinish('/panel')} style={full}>Ir al panel</PBtn>
-        <PBtn variant="accent" onClick={() => onFinish('/perfil?seccion=empresa')} style={full}>Completar KYB</PBtn>
+        <PBtn variant="secondary" onClick={() => onFinish('/panel')} style={full}>{t('onboarding.done.toPanel')}</PBtn>
+        <PBtn variant="accent" onClick={() => onFinish('/perfil?seccion=empresa')} style={full}>{t('onboarding.done.completeKyb')}</PBtn>
       </div>
     </div>
   );
@@ -451,6 +461,7 @@ function CompanyDone({ company, onFinish }: { company: MyCompany; onFinish: (pat
 
 function DoneStep({ user, onFinish }: { user: SessionUser; onFinish: (path: string) => void }) {
   const isMobile = useMobile();
+  const { t } = useT('help');
   const name = user.displayName?.trim();
   const needsKyc = user.kycStatus === 'none' || user.kycStatus === 'rejected';
   const full = isMobile ? { width: '100%' } : undefined;
@@ -458,32 +469,32 @@ function DoneStep({ user, onFinish }: { user: SessionUser; onFinish: (path: stri
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <span aria-hidden="true" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--accent-bg)', color: 'var(--accent-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{Icons.check}</span>
-        <h2 style={titleStyle}>{name ? `¡Listo, ${name}!` : '¡Listo!'}</h2>
+        <h2 style={titleStyle}>{name ? t('onboarding.done.titleNamed', { name }) : t('onboarding.done.title')}</h2>
         <p style={helpText}>
-          {user.emailVerified ? 'Tu cuenta está configurada y tu email verificado.' : 'Tu cuenta está configurada.'}{' '}
+          {user.emailVerified ? t('onboarding.done.configuredVerified') : t('onboarding.done.configured')}{' '}
           {needsKyc
-            ? 'Para invertir necesitas verificar tu identidad (KYC). Te lleva unos minutos y habilita tu wallet on-chain.'
+            ? t('onboarding.done.needsKyc')
             : user.kycStatus === 'pending'
-              ? 'Tu verificación de identidad está en revisión: te avisamos cuando esté lista.'
-              : 'Tu identidad ya está verificada: puedes empezar a invertir.'}
+              ? t('onboarding.done.kycPending')
+              : t('onboarding.done.kycDone')}
         </p>
       </div>
       {needsKyc && (
         <Note>
           <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <PTag label="KYC pendiente" color="neutral" />
-            Sin KYC puedes explorar proyectos, pero no invertir ni cobrar rendimientos.
+            <PTag label={t('onboarding.done.kycTag')} color="neutral" />
+            {t('onboarding.done.kycNote')}
           </span>
         </Note>
       )}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end', flexDirection: isMobile ? 'column-reverse' : 'row' }}>
         {needsKyc ? (
           <>
-            <PBtn variant="secondary" onClick={() => onFinish('/panel')} style={full}>Ir al panel</PBtn>
-            <PBtn variant="accent" onClick={() => onFinish('/perfil')} style={full}>Completar KYC</PBtn>
+            <PBtn variant="secondary" onClick={() => onFinish('/panel')} style={full}>{t('onboarding.done.toPanel')}</PBtn>
+            <PBtn variant="accent" onClick={() => onFinish('/perfil')} style={full}>{t('onboarding.done.completeKyc')}</PBtn>
           </>
         ) : (
-          <PBtn variant="accent" onClick={() => onFinish('/panel')} style={full}>Ir al panel</PBtn>
+          <PBtn variant="accent" onClick={() => onFinish('/panel')} style={full}>{t('onboarding.done.toPanel')}</PBtn>
         )}
       </div>
     </div>
@@ -502,6 +513,7 @@ type Props = {
 
 export default function Onboarding({ user, onStarted, onFinished }: Props) {
   const isMobile = useMobile();
+  const { t } = useT('help');
   const navigate = useNavigate();
   const { refresh } = useSession();
   const [step, setStep] = useState<Step>(user.onboarded && !user.emailVerified ? 'email' : 'profile');
@@ -524,7 +536,7 @@ export default function Onboarding({ user, onStarted, onFinished }: Props) {
   return (
     // data-guide-block: guided tours wait until the onboarding flow is over.
     <div className="g-page" data-guide-block="" style={{ padding: '28px 32px 40px', maxWidth: 640, margin: '0 auto' }}>
-      <PSection title="Bienvenido a Brikme" sub="Completa tu perfil para empezar a invertir en activos reales." />
+      <PSection title={t('onboarding.title')} sub={t('onboarding.sub')} />
       <Steps step={step} />
       <motion.div key={step} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
         <PCard style={{ padding: isMobile ? '22px 18px' : '28px 30px' }}>

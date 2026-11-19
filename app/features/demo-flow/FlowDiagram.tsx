@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { animate, AnimatePresence, motion, useMotionTemplate, useMotionValue, useReducedMotion } from 'framer-motion';
+import { useT } from '~/i18n/useT';
 import type { DemoRunStatus, Progress, WalletState } from './api';
 
 /**
@@ -32,7 +33,7 @@ const MOBILE: Layout = {
 export type FlowSource = { title: string; sub: string; accent?: string };
 
 type NodeKey = 'source' | 'wallets' | 'project' | 'company' | 'account';
-const STEP_LABEL: Record<StepKey, string> = { 1: 'Recarga', 2: 'Inversión', 3: 'Ganancia', 4: 'Reparto', 5: 'Tu cuenta' };
+// Step names: `demo.map.steps.<step>`.
 /** What each step involves: framed by the camera and kept bright while the rest dims. */
 const STEP_NODES: Record<StepKey, readonly NodeKey[]> = {
   1: ['source', 'wallets'], 2: ['wallets', 'project'], 3: ['company', 'project'], 4: ['project', 'wallets'], 5: ['wallets', 'account'],
@@ -109,15 +110,14 @@ function Card({ at, w, h, caption, title, sub, accent, active }: { at: Pt; w: nu
   );
 }
 
-const WALLET_LABEL: Record<WalletState, string> = { idle: 'Vacía', funded: '1 USD', holding: '1 parte', paid: '+1 USD', swept: 'Enviado' };
-
 function WalletNode({ at, index, state, address, mine }: { at: Pt; index: number; state: WalletState; address: string | undefined; mine: boolean }) {
+  const { t } = useT('market');
   const lit = state !== 'idle';
   const paid = state === 'paid' || state === 'swept';
   const ring = paid ? 'var(--pos)' : lit ? 'var(--text)' : 'var(--border)';
   return (
     <g transform={`translate(${at.x},${at.y})`}>
-      {address && <title>{`Wallet ${index + 1}: ${address}`}</title>}
+      {address && <title>{t('demo.map.walletTitle', { n: index + 1, address })}</title>}
       <circle r={42} filter="url(#df-shadow)" style={{ fill: 'var(--bg)' }} />
       <circle r={42} style={{ fill: 'var(--surface)', stroke: ring, strokeWidth: lit ? 2 : 1, transition: 'stroke .4s' }} />
       {/* Wallet glyph */}
@@ -137,11 +137,11 @@ function WalletNode({ at, index, state, address, mine }: { at: Pt; index: number
               : <text y={4.5} textAnchor="middle" style={{ fill: '#fff', font: '800 13px var(--font-h)' }}>$</text>}
         </g>
       )}
-      <text y={22} textAnchor="middle" style={{ fill: paid ? 'var(--pos)' : lit ? 'var(--text)' : 'var(--ter)', font: '600 13px var(--font-b)', transition: 'fill .3s' }}>{WALLET_LABEL[state]}</text>
+      <text y={22} textAnchor="middle" style={{ fill: paid ? 'var(--pos)' : lit ? 'var(--text)' : 'var(--ter)', font: '600 13px var(--font-b)', transition: 'fill .3s' }}>{t(`demo.map.wallet.${state}`)}</text>
       {/* Whose part this is: yours (bought with your money) or another investor's. */}
       <g transform="translate(54,0)">
         <rect y={-12} width={mine ? 52 : 70} height={24} rx={12} style={{ fill: mine ? 'var(--text)' : 'var(--surface2)', stroke: mine ? 'none' : 'var(--border)' }} />
-        <text x={mine ? 26 : 35} y={4.5} textAnchor="middle" style={{ fill: mine ? 'var(--surface)' : 'var(--sec)', font: '700 11.5px var(--font-b)' }}>{mine ? 'Tuya' : 'Otro inv.'}</text>
+        <text x={mine ? 26 : 35} y={4.5} textAnchor="middle" style={{ fill: mine ? 'var(--surface)' : 'var(--sec)', font: '700 11.5px var(--font-b)' }}>{mine ? t('demo.map.yours') : t('demo.map.other')}</text>
       </g>
     </g>
   );
@@ -151,8 +151,10 @@ type MarkerState = 'pending' | 'current' | 'done';
 
 /** A step, written on the map: number, name and what moves in it. */
 function Marker({ at, step, detail, state }: { at: Pt; step: StepKey; detail: string; state: MarkerState }) {
+  const { t } = useT('market');
+  const label = t(`demo.map.steps.${step}`);
   // Only the current step spells out what moves; the rest stay short so the map stays clean.
-  const text = state === 'current' ? `${STEP_LABEL[step]} · ${detail}` : STEP_LABEL[step];
+  const text = state === 'current' ? `${label} · ${detail}` : label;
   const w = text.length * 8.7 + 56;
   const current = state === 'current';
   const done = state === 'done';
@@ -186,6 +188,7 @@ type Props = {
 
 export default function FlowDiagram({ mobile, status, p, wallets, image, simulated, source, payoutUsdt, focus, controls, mine, fill, anchor }: Props) {
   const still = useReducedMotion() ?? false;
+  const { t } = useT('market');
   const [follow, setFollow] = useState(true);
   const l = mobile ? MOBILE : DESKTOP;
   const ws = l.wallets;
@@ -290,7 +293,7 @@ export default function FlowDiagram({ mobile, status, p, wallets, image, simulat
   const R = 90;
   const dim = (n: NodeKey) => ({ opacity: lit(n) ? 1 : 0.32, transition: 'opacity .6s' });
   const markers: Array<{ step: StepKey; detail: string }> = [
-    { step: 1, detail: `${mine} USD tuyos` }, { step: 2, detail: '1 parte c/u' }, { step: 3, detail: '+5 USD' }, { step: 4, detail: '1 USD por parte' }, { step: 5, detail: `${p.swept}/${mine} USD` },
+    { step: 1, detail: t('demo.map.detail.1', { mine }) }, { step: 2, detail: t('demo.map.detail.2') }, { step: 3, detail: t('demo.map.detail.3') }, { step: 4, detail: t('demo.map.detail.4') }, { step: 5, detail: t('demo.map.detail.5', { swept: p.swept, mine }) },
   ];
 
   // The step's card sits in the corner away from what that step shows (the camera frames it).
@@ -310,13 +313,13 @@ export default function FlowDiagram({ mobile, status, p, wallets, image, simulat
           <motion.div key={step ?? (done ? 'done' : 'all')} initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} transition={{ duration: 0.25, ease: EASE }}
             style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
             <span aria-hidden style={{ width: 8, height: 8, borderRadius: 999, background: step ? 'var(--text)' : done ? 'var(--pos)' : 'var(--ter)' }} />
-            {step ? `Paso ${step} de 5 · ${STEP_LABEL[step]}` : done ? 'Recorrido completo' : 'Mapa del recorrido'}
+            {step ? t('demo.map.stepOf', { n: step, label: t(`demo.map.steps.${step}`) }) : done ? t('demo.map.complete') : t('demo.map.overview')}
           </motion.div>
         </AnimatePresence>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {controls}
-        <div role="group" aria-label="Cámara" style={{ display: 'flex', background: 'var(--surface2)', borderRadius: 999, padding: 3 }}>
-          {([[true, 'Seguir el dinero'], [false, 'Ver todo']] as const).map(([v, label]) => (
+        <div role="group" aria-label={t('demo.map.camera')} style={{ display: 'flex', background: 'var(--surface2)', borderRadius: 999, padding: 3 }}>
+          {([[true, t('demo.map.follow')], [false, t('demo.map.all')]] as const).map(([v, label]) => (
             <button key={label} type="button" aria-pressed={follow === v} onClick={() => setFollow(v)}
               style={{ border: 'none', cursor: 'pointer', borderRadius: 999, padding: '5px 11px', fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 700, background: follow === v ? 'var(--surface)' : 'transparent', color: follow === v ? 'var(--text)' : 'var(--sec)', boxShadow: follow === v ? 'var(--sh-sm)' : 'none', transition: 'background .2s, color .2s' }}>
               {label}
@@ -326,7 +329,7 @@ export default function FlowDiagram({ mobile, status, p, wallets, image, simulat
         </div>
       </div>
       <div style={{ position: 'relative', ...(fill ? { flex: 1, minHeight: 0 } : {}) }}>
-      <motion.svg className="df-map" ref={svgRef} {...pan} onPointerCancel={pan.onPointerUp} viewBox={viewBox} width="100%" role="img" aria-label={`Mapa del flujo${step ? `, paso ${step}: ${STEP_LABEL[step]}` : ''}`}
+      <motion.svg className="df-map" ref={svgRef} {...pan} onPointerCancel={pan.onPointerUp} viewBox={viewBox} width="100%" role="img" aria-label={step ? t('demo.map.ariaStep', { n: step, label: t(`demo.map.steps.${step}`) }) : t('demo.map.aria')}
         style={{ display: 'block', borderRadius: 18, background: 'var(--bg)', cursor: 'grab', touchAction: 'none', userSelect: 'none', ...(fill ? { height: '100%' } : { aspectRatio: `${l.w} / ${l.h}` }) }}>
         <defs>
           <pattern id="df-dots" width={22} height={22} patternUnits="userSpaceOnUse">
@@ -354,13 +357,13 @@ export default function FlowDiagram({ mobile, status, p, wallets, image, simulat
         {!simulated && <Edge d={curve(l.account, l.source, l.payoutBend)} state={payout} tone="in" still={still} />}
 
         <g style={dim('source')}>
-          <Card at={l.source} w={236} h={110} caption="Entra el dinero" title={source.title} sub={paying ? 'Esperando tu pago' : p.payout ? `Te devolvimos ${payoutUsdt} USDT` : source.sub} accent={source.accent} active={step === 1} />
+          <Card at={l.source} w={236} h={110} caption={t('demo.map.moneyIn')} title={source.title} sub={paying ? t('demo.map.waitingPayment') : p.payout ? t('demo.map.refunded', { amount: payoutUsdt }) : source.sub} accent={source.accent} active={step === 1} />
         </g>
         <g style={dim('company')}>
-          <Card at={l.company} w={236} h={110} caption="Dueña del proyecto" title="Empresa" sub={p.deposit ? '+5 USD cargados' : 'Carga la ganancia'} active={step === 3} />
+          <Card at={l.company} w={236} h={110} caption={t('demo.map.projectOwner')} title={t('demo.map.company')} sub={p.deposit ? t('demo.map.profitLoaded') : t('demo.map.loadsProfit')} active={step === 3} />
         </g>
         <g style={dim('account')}>
-          <Card at={l.account} w={236} h={110} caption="Tu wallet" title="Tu cuenta" sub={p.swept ? `+${p.swept} USD recibidos` : 'Aquí se junta todo'} active={step === 5 || done} />
+          <Card at={l.account} w={236} h={110} caption={t('demo.map.yourWallet')} title={t('demo.map.yourAccount')} sub={p.swept ? t('demo.map.received', { n: p.swept }) : t('demo.map.gathers')} active={step === 5 || done} />
         </g>
 
         <g transform={`translate(${l.project.x},${l.project.y})`} style={dim('project')}>
@@ -373,7 +376,7 @@ export default function FlowDiagram({ mobile, status, p, wallets, image, simulat
             <rect x={-R} y={R * 0.12} width={R * 2} height={R} style={{ fill: 'rgba(8,8,10,0.6)' }} />
           </g>
           <text y={R * 0.47} textAnchor="middle" style={{ fill: '#fff', font: '800 19px var(--font-h)' }}>Villa Mirador</text>
-          <text y={R * 0.47 + 21} textAnchor="middle" style={{ fill: 'rgba(255,255,255,0.82)', font: '600 14px var(--font-b)', fontVariantNumeric: 'tabular-nums' }}>{`${p.invested} de 5 partes`}</text>
+          <text y={R * 0.47 + 21} textAnchor="middle" style={{ fill: 'rgba(255,255,255,0.82)', font: '600 14px var(--font-b)', fontVariantNumeric: 'tabular-nums' }}>{t('demo.map.partsOf', { n: p.invested })}</text>
         </g>
 
         <g style={dim('wallets')}>
@@ -387,12 +390,12 @@ export default function FlowDiagram({ mobile, status, p, wallets, image, simulat
         {manual && (
           <button type="button" onClick={() => setManualKey(null)}
             style={{ border: '1px solid var(--text)', background: 'var(--text)', color: 'var(--bg)', borderRadius: 999, padding: '7px 13px', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 700, boxShadow: 'var(--sh-md)' }}>
-            ↺ Retomar la explicación
+            {t('demo.map.resume')}
           </button>
         )}
-        {([['+', 'Acercar', 1 / 1.3], ['−', 'Alejar', 1.3]] as const).map(([t, label, f]) => (
-          <button key={t} type="button" aria-label={label} onClick={() => zoomAt(f)}
-            style={{ width: 34, height: 34, borderRadius: 999, border: '1px solid var(--border)', background: 'linear-gradient(var(--surface), var(--surface)), var(--bg)', color: 'var(--text)', cursor: 'pointer', fontSize: 18, fontWeight: 700, lineHeight: 1, boxShadow: 'var(--sh-sm)' }}>{t}</button>
+        {([['+', t('demo.map.zoomIn'), 1 / 1.3], ['−', t('demo.map.zoomOut'), 1.3]] as const).map(([sym, label, f]) => (
+          <button key={sym} type="button" aria-label={label} onClick={() => zoomAt(f)}
+            style={{ width: 34, height: 34, borderRadius: 999, border: '1px solid var(--border)', background: 'linear-gradient(var(--surface), var(--surface)), var(--bg)', color: 'var(--text)', cursor: 'pointer', fontSize: 18, fontWeight: 700, lineHeight: 1, boxShadow: 'var(--sh-sm)' }}>{sym}</button>
         ))}
       </div>
       {anchor && (

@@ -19,19 +19,17 @@ import LiveTokenomics from '~/features/asset/LiveTokenomics';
 import { usePublicSettings } from '~/features/asset/api';
 import AddressLink from '~/features/wallet/AddressLink';
 import GuideButton from '~/features/guide/GuideButton';
+import { useDataLabel, type TFn } from '~/features/market/i18n';
+import { useT } from '~/i18n/useT';
 
 /** Why a signed-in user can't invest yet (completed on the profile page). */
+/** Its copy is `gate.<gate>.cta` / `gate.<gate>.note`. */
 type InvestGate = 'onboarding' | 'none' | 'pending' | 'rejected';
-const GATE_COPY: Record<InvestGate, { cta: string; note: string }> = {
-  onboarding: { cta: 'Completar mi perfil', note: 'Completa tu perfil para poder invertir.' },
-  none: { cta: 'Verificar mi identidad', note: 'Para invertir necesitas verificar tu identidad (KYC).' },
-  pending: { cta: 'Ver estado del KYC', note: 'Tu verificación está en revisión. Te avisamos cuando puedas invertir.' },
-  rejected: { cta: 'Revisar mi KYC', note: 'Tu verificación fue rechazada. Revisa tus datos en el perfil.' },
-};
 
-const DEMO_TRUST = [['Contrato auditado por CertiK', Icons.shield], ['Activo asegurado · cobertura total', Icons.check], ['Custodia institucional regulada', Icons.lock]] as const;
+/** Trust badge icons; their texts are the `trust.demo` / `trust.live` lists, in the same order. */
+const DEMO_TRUST_ICONS = [Icons.shield, Icons.check, Icons.lock] as const;
 // Live: only what the platform's contracts actually guarantee.
-const LIVE_TRUST = [['Token de seguridad ERC-3643 con identidad verificada', Icons.shield], ['Fondos custodiados en un vault on-chain', Icons.lock], ['Dividendos con prueba Merkle on-chain', Icons.check]] as const;
+const LIVE_TRUST_ICONS = [Icons.shield, Icons.lock, Icons.check] as const;
 
 // ─── Media carousel ───────────────────────────────────────────────────────────
 type MediaCarouselProps = { images?: string[]; height?: number };
@@ -39,6 +37,7 @@ type MediaCarouselProps = { images?: string[]; height?: number };
 function MediaCarousel({ images = [], height = 340 }: MediaCarouselProps) {
   const [idx, setIdx] = useState(0);
   const [dir, setDir] = useState(1);
+  const { t } = useT('market');
   const media: Array<string | null> = images.length > 0 ? images : [null];
 
   const go = (next: number) => {
@@ -92,7 +91,7 @@ function MediaCarousel({ images = [], height = 340 }: MediaCarouselProps) {
       {media.length > 1 && (
         <div style={{ display:'flex', gap:8, padding:'10px 12px', background:'var(--surface)', overflowX:'auto' }}>
           {media.map((src, i) => (
-            <button key={i} onClick={() => go(i)} aria-label={`Ver imagen ${i + 1} de ${media.length}`} aria-current={i === idx ? 'true' : undefined}
+            <button key={i} onClick={() => go(i)} aria-label={t('gallery.imageOf', { n: i + 1, total: media.length })} aria-current={i === idx ? 'true' : undefined}
               style={{ flexShrink:0, width:72, height:50, borderRadius:10, overflow:'hidden', border:`2px solid ${i===idx ? 'var(--accent)' : 'transparent'}`, padding:0, cursor:'pointer', transition:'border-color 0.15s', background:'var(--surface2)' }}>
               <img src={src ?? undefined} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
             </button>
@@ -166,6 +165,7 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { t } = useT('market');
   const issuerName = issuerNameOf(a);
   const canPublish = Boolean(text.trim() || img || uploads.length > 0) && !publishing;
 
@@ -178,8 +178,8 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
     const room = MAX_FEED_MEDIA - uploads.length;
     const accepted = valid.slice(0, Math.max(room, 0));
     setUploadError(
-      valid.length < files.length ? 'Solo se pueden subir fotos o videos.'
-      : accepted.length < valid.length ? `Máximo ${MAX_FEED_MEDIA} archivos por publicación.`
+      valid.length < files.length ? t('feed.onlyMedia')
+      : accepted.length < valid.length ? t('feed.maxFiles', { max: MAX_FEED_MEDIA })
       : ''
     );
     setUploads(u => [...u, ...accepted.map((f): Upload => ({
@@ -225,17 +225,17 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
       {/* Composer — only the project's owner gets to post here (isMine) */}
       {canPost && (
       <PCard style={{ padding:'18px 20px', marginBottom:18 }}>
-        <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:12 }}>Panel del emisor · Publicar como {issuerName}</div>
+        <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:12 }}>{t('feed.issuerPanel', { issuer: issuerName })}</div>
         <div style={{ display:'flex', gap:12 }}>
           <CompanyAvatar company={issuerName} size={36} />
           <div style={{ flex:1, minWidth:0 }}>
-            <textarea value={text} onChange={e => setText(e.target.value)} rows={3} aria-label="Actualización para tus inversores"
-              placeholder="Escribe una actualización para tus inversores..."
+            <textarea value={text} onChange={e => setText(e.target.value)} rows={3} aria-label={t('feed.composerAria')}
+              placeholder={t('feed.composerPlaceholder')}
               style={{ width:'100%', resize:'vertical', border:'1px solid var(--border-l)', borderRadius:12, padding:'10px 12px', fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--text)', background:'var(--surface)', outline:'none', boxSizing:'border-box' }} />
             {imageChoices.length > 1 && (
               <div style={{ display:'flex', gap:8, marginTop:10 }}>
                 {imageChoices.map(src => (
-                  <button key={src} onClick={() => setImg(img === src ? null : src)} aria-pressed={img === src} aria-label="Adjuntar esta foto del proyecto"
+                  <button key={src} onClick={() => setImg(img === src ? null : src)} aria-pressed={img === src} aria-label={t('feed.attachPhoto')}
                     style={{ width:50, height:38, borderRadius:8, overflow:'hidden', border:`2px solid ${img===src ? 'var(--accent)' : 'transparent'}`, padding:0, cursor:'pointer', flexShrink:0 }}>
                     <img src={src} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
                   </button>
@@ -250,9 +250,9 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
                       ? <video src={m.url} muted playsInline preload="metadata" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
                       : <img src={m.url} alt={m.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />}
                     {m.type === 'video' && (
-                      <span style={{ position:'absolute', left:5, bottom:4, padding:'1px 5px', borderRadius:5, background:'rgba(0,0,0,0.65)', color:'#fff', fontFamily:'var(--font-b)', fontSize:9.5, fontWeight:700 }}>▶ Video</span>
+                      <span style={{ position:'absolute', left:5, bottom:4, padding:'1px 5px', borderRadius:5, background:'rgba(0,0,0,0.65)', color:'#fff', fontFamily:'var(--font-b)', fontSize:9.5, fontWeight:700 }}>{t('feed.video')}</span>
                     )}
-                    <button onClick={() => removeUpload(m.id)} aria-label={`Quitar ${m.name}`}
+                    <button onClick={() => removeUpload(m.id)} aria-label={t('feed.remove', { name: m.name })}
                       style={{ position:'absolute', top:4, right:4, width:18, height:18, borderRadius:6, border:'none', background:'rgba(0,0,0,0.65)', color:'#fff', cursor:'pointer', fontSize:10, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', padding:0 }}>
                       ✕
                     </button>
@@ -269,14 +269,14 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
               <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
                 <button onClick={() => fileRef.current?.click()} disabled={uploads.length >= MAX_FEED_MEDIA}
                   style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:10, border:'1px solid var(--border-l)', background:'var(--surface2)', color:'var(--text)', fontFamily:'var(--font-b)', fontSize:12.5, fontWeight:600, cursor: uploads.length >= MAX_FEED_MEDIA ? 'not-allowed' : 'pointer', opacity: uploads.length >= MAX_FEED_MEDIA ? 0.5 : 1 }}>
-                  {Icons.plus} Fotos / videos
+                  {Icons.plus} {t('feed.addMedia')}
                 </button>
                 <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>
                   <input type="checkbox" checked={milestone} onChange={e => setMilestone(e.target.checked)} />
-                  Marcar como hito
+                  {t('feed.markMilestone')}
                 </label>
               </div>
-              <PBtn variant="accent" small disabled={!canPublish} onClick={() => void publish()} style={{ opacity: canPublish ? 1 : 0.5 }}>{publishing ? 'Publicando…' : 'Publicar'}</PBtn>
+              <PBtn variant="accent" small disabled={!canPublish} onClick={() => void publish()} style={{ opacity: canPublish ? 1 : 0.5 }}>{publishing ? t('feed.publishing') : t('feed.publish')}</PBtn>
             </div>
             {publishError && <div role="alert" style={{ marginTop:8, fontFamily:'var(--font-b)', fontSize:12, color:'var(--neg)' }}>{publishError}</div>}
           </div>
@@ -286,13 +286,13 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
 
       {!canPost && (
         <div style={{ marginBottom:18, fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>
-          Actualizaciones publicadas por {issuerName}.
+          {t('feed.publishedBy', { issuer: issuerName })}
         </div>
       )}
 
       {live && posts.length === 0 && (
         <div role="status" style={{ textAlign:'center', padding:'32px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:13.5 }}>
-          {status === 'loading' ? 'Cargando publicaciones…' : status === 'error' ? 'No se pudieron cargar las publicaciones.' : 'Todavía no hay publicaciones en este proyecto.'}
+          {status === 'loading' ? t('feed.loading') : status === 'error' ? t('feed.loadFailed') : t('feed.empty')}
         </div>
       )}
 
@@ -316,24 +316,24 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
               </div>
               {post.milestone && (
                 <span style={{ display:'flex', alignItems:'center', gap:4, padding:'3px 9px', borderRadius:999, background:'var(--accent-bg)', color:'var(--accent-text)', fontFamily:'var(--font-b)', fontWeight:700, fontSize:10.5, flexShrink:0 }}>
-                  ★ Hito
+                  {t('feed.milestone')}
                 </span>
               )}
             </div>
             {post.text && <div style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--text)', lineHeight:1.55, marginBottom: post.media.length ? 12 : 10 }}>{post.text}</div>}
             <PostMedia media={post.media} />
             <div style={{ display:'flex', alignItems:'center', gap:18, paddingTop:8, borderTop:'1px solid var(--border-l)' }}>
-              <button onClick={() => onToggleLike(post.id)} aria-pressed={post.liked} aria-label={post.liked ? 'Quitar me gusta' : 'Me gusta'} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: post.liked ? 'var(--neg)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
+              <button onClick={() => onToggleLike(post.id)} aria-pressed={post.liked} aria-label={post.liked ? t('feed.unlike') : t('feed.like')} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: post.liked ? 'var(--neg)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
                 {post.liked ? '♥' : '♡'} {post.likes}
               </button>
               <button onClick={() => toggleComments(post.id)} aria-expanded={commentsOpen}
                 style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color: commentsOpen ? 'var(--text)' : 'var(--sec)', fontFamily:'var(--font-b)', fontSize:12.5, padding:0 }}>
-                {Icons.comment} {count ? `${count} ${count === 1 ? 'comentario' : 'comentarios'}` : 'Comentar'}
+                {Icons.comment} {count ? t(count === 1 ? 'feed.commentsOne' : 'feed.commentsMany', { count }) : t('feed.comment')}
               </button>
             </div>
             {commentsOpen && (post.comments
-              ? <PostComments comments={post.comments} onAdd={t => onAddComment(post.id, t)} issuerName={issuerName} isOwner={!!a.isMine} />
-              : <div role="status" style={{ marginTop:12, fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>Cargando comentarios…</div>)}
+              ? <PostComments comments={post.comments} onAdd={text => onAddComment(post.id, text)} issuerName={issuerName} isOwner={!!a.isMine} />
+              : <div role="status" style={{ marginTop:12, fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>{t('feed.loadingComments')}</div>)}
           </div>
           );
         })}
@@ -341,7 +341,7 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
 
       {live && hasMore && (
         <div style={{ display:'flex', justifyContent:'center', marginTop:16 }}>
-          <PBtn variant="secondary" small disabled={status === 'loading'} onClick={onMore}>{status === 'loading' ? 'Cargando…' : 'Ver más publicaciones'}</PBtn>
+          <PBtn variant="secondary" small disabled={status === 'loading'} onClick={onMore}>{status === 'loading' ? t('feed.loadingMore') : t('feed.more')}</PBtn>
         </div>
       )}
     </motion.div>
@@ -352,23 +352,22 @@ function ProjectFeed({ a, posts, status, live, canPost, imageChoices, onToggleLi
 // Developer-only (DEV_MODE, demo mode): spells out which state a project is in
 // and what the page should show because of it, so every asset is
 // self-explanatory while testing.
-const ISSUER_LABEL: Record<RwaAsset['issuer'], string> = { keychain: 'BRIKME', verified: 'Verificado', community: 'Comunidad' };
-
-function projectState(a: RwaAsset, { isLive, holding }: { isLive: boolean; holding: { tokens: number } | null | undefined }): Array<readonly [string, string]> {
-  const funding = a.sold <= 0 ? 'Nuevo · sin financiamiento'
-    : a.sold >= 100 ? 'Financiado 100%'
-    : a.stage === 'Operativo' ? `${a.sold}% de tokens vendidos`
-    : `En financiamiento · ${a.sold}%`;
+function projectState(a: RwaAsset, { isLive, holding }: { isLive: boolean; holding: { tokens: number } | null | undefined }, t: TFn, stageLabel: string): Array<readonly [string, string]> {
+  const funding = a.sold <= 0 ? t('dev.fundingNew')
+    : a.sold >= 100 ? t('dev.fundingFull')
+    : a.stage === 'Operativo' ? t('dev.fundingSold', { sold: a.sold })
+    : t('dev.fundingRaising', { sold: a.sold });
   const feedWhy = a.stage === 'Operativo' ? 'stage="Operativo"'
     : a.sold >= 100 ? 'sold>=100'
     : a.feedEnabled ? 'feedEnabled=true'
-    : 'sold<100 y feedEnabled=false';
+    : t('dev.feedNotLive');
+  const issuer = a.issuer === 'keychain' ? 'BRIKME' : a.issuer ? t(`issuer.${a.issuer}`) : '—';
   return [
-    ['Etapa', `${a.stage} — ${funding}`],
-    ['Feed y Actualizaciones', `${isLive ? 'Visibles' : 'Ocultos'} (${feedWhy})`],
-    ['Publicar en el Feed', a.isMine ? 'Sí — es mi proyecto (isMine)' : 'No — solo lectura'],
-    ['Mi inversión', holding ? `Sí — ${holding.tokens} tokens${isLive ? ', con "Ver avances"' : ', sin "Ver avances"'}` : 'No'],
-    ['Emisor', ISSUER_LABEL[a.issuer] || a.issuer || '—'],
+    [t('dev.stage'), `${stageLabel} — ${funding}`],
+    [t('dev.feed'), `${isLive ? t('dev.visible') : t('dev.hidden')} (${feedWhy})`],
+    [t('dev.postToFeed'), a.isMine ? t('dev.mine') : t('dev.readOnly')],
+    [t('dev.myInvestment'), holding ? t(isLive ? 'dev.holdingWithUpdates' : 'dev.holdingNoUpdates', { tokens: holding.tokens }) : t('dev.no')],
+    [t('dev.issuer'), issuer],
   ];
 }
 
@@ -400,6 +399,8 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
   const live = session.status !== 'disabled';
   const mobile = useMobile();
   const navigate = useNavigate();
+  const { t, raw, locale } = useT('market');
+  const dataLabel = useDataLabel();
   const isLive = isFeedLive(a);
   // Coming from the global Feed? Open straight on this project's Feed tab,
   // scrolled to the post that was clicked.
@@ -407,10 +408,10 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
   const [tokens, setTokens] = useState(10);
   const left = a.totalTokens - Math.round(a.totalTokens * a.sold / 100);
   const tabs: Array<readonly [ProductDetailTab, string]> = [
-    ['resumen','Resumen'],
-    ...(isLive ? [['feed','Feed'] as const] : []),
-    ['tokenomics','Tokenomics'], ['docs','Documentos'],
-    ...(isLive ? [['updates','Actualizaciones'] as const] : []),
+    ['resumen', t('detail.tabs.resumen')],
+    ...(isLive ? [['feed', t('detail.tabs.feed')] as const] : []),
+    ['tokenomics', t('detail.tabs.tokenomics')], ['docs', t('detail.tabs.docs')],
+    ...(isLive ? [['updates', t('detail.tabs.updates')] as const] : []),
   ];
   const images = a.images || [a.img];
   // Came in from Mercado Secundario (or anywhere else)? Go back there —
@@ -473,8 +474,8 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
     if (!live) {
       setProjectPosts(a, p => p.map(post => post.id === postId
         ? { ...post, comments: [...(post.comments || []), {
-            id: String(Date.now()), date: 'Ahora', text,
-            author: a.isMine ? issuerName : 'Vos', isIssuer: !!a.isMine,
+            id: String(Date.now()), date: t('feed.now'), text,
+            author: a.isMine ? issuerName : t('feed.you'), isIssuer: !!a.isMine,
           }] }
         : post));
       return;
@@ -488,13 +489,13 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
   const publishPost = (draft: FeedDraft): Promise<string | null> | null => {
     if (!live) {
       const media: MediaItem[] = [...(draft.img ? [{ id: draft.img, type: 'image' as const, url: draft.img }] : []), ...draft.uploads.map(({ id, type, url }) => ({ id, type, url }))];
-      setProjectPosts(a, p => [{ id: String(Date.now()), ts: Date.now(), date: 'Ahora', text: draft.text, milestone: draft.milestone, media, likes: 0, liked: false, comments: [] }, ...p]);
+      setProjectPosts(a, p => [{ id: String(Date.now()), ts: Date.now(), date: t('feed.now'), text: draft.text, milestone: draft.milestone, media, likes: 0, liked: false, comments: [] }, ...p]);
       return null;
     }
-    if (!liveSource) return Promise.resolve('El feed no está disponible en este momento.');
+    if (!liveSource) return Promise.resolve(t('feed.unavailable'));
     return liveSource.createPost({ assetId: a.id, text: draft.text, milestone: draft.milestone, files: draft.uploads.map(u => u.file) }).then(
       item => { setCreated(c => [item, ...c]); return null; },
-      (e: unknown) => (e instanceof Error && e.message ? e.message : 'No se pudo publicar la actualización.'),
+      (e: unknown) => (e instanceof Error && e.message ? e.message : t('feed.publishFailed')),
     );
   };
   // The owner posts (live: platform admins too; the API checks it again).
@@ -519,8 +520,8 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setHighlightId(el ? scrollToId : null);
     setScrollToId(null);
-    const t = setTimeout(() => setHighlightId(null), 1800);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setHighlightId(null), 1800);
+    return () => clearTimeout(timer);
   }, [tab, scrollToId, feedStatus]);
   // Already holding this asset? Surface an investor summary (position,
   // P&L, yield collected) instead of treating every visitor as a first-time buyer.
@@ -533,14 +534,14 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
   const holding = live
     ? liveHolding && {
         assetId: a.id, tokens: liveHolding.tokens, invested: liveHolding.invested, current: liveHolding.value, since: '',
-        yieldEarned: liveDividends?.filter(d => d.assetId === a.id && d.claimed).reduce((t, d) => t + d.amount, 0) ?? 0,
+        yieldEarned: liveDividends?.filter(d => d.assetId === a.id && d.claimed).reduce((sum, d) => sum + d.amount, 0) ?? 0,
       }
     : MY_HOLDINGS.find(h => h.assetId === a.id);
   // Live: platform fee shown to the investor and admin pauses (GET /v1/settings/public).
   const settings = usePublicSettings();
   const feePct = live ? (settings.data?.displayFeePercent ?? null) : 0.5;
   const paused = live && settings.data?.investmentsPaused === true;
-  const pauseNote = settings.data?.maintenanceMessage || 'Las inversiones están pausadas temporalmente.';
+  const pauseNote = settings.data?.maintenanceMessage || t('buy.pausedNote');
   const user = session.user;
   const gate: InvestGate | null = !live || session.status !== 'authenticated' || !user
     ? null
@@ -548,17 +549,17 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
   // Live: what keeps the buy button from investing right now (null = can invest).
   let liveBlock: { label: string; note: string; action: (() => void) | null } | null = null;
   if (live) {
-    if (paused) liveBlock = { label: 'Inversiones pausadas', note: pauseNote, action: null };
+    if (paused) liveBlock = { label: t('buy.paused'), note: pauseNote, action: null };
     else if (!onchainPool) {
       liveBlock = {
-        label: 'Todavía no disponible',
+        label: t('buy.notYet'),
         note: pool?.status === 'deploying' || pool?.status === 'granting_roles'
-          ? 'El activo se está desplegando on-chain. Vuelve en unos minutos.'
-          : 'Este activo todavía no está tokenizado on-chain.',
+          ? t('buy.deploying')
+          : t('buy.notTokenized'),
         action: null,
       };
-    } else if (gate) liveBlock = { label: GATE_COPY[gate].cta, note: GATE_COPY[gate].note, action: () => nav('perfil') };
-    else if (tokens > left) liveBlock = { label: `Quedan ${left.toLocaleString()} tokens`, note: 'Elige una cantidad menor o igual a los tokens disponibles.', action: null };
+    } else if (gate) liveBlock = { label: t(`gate.${gate}.cta`), note: t(`gate.${gate}.note`), action: () => nav('perfil') };
+    else if (tokens > left) liveBlock = { label: t('buy.tokensLeft', { count: left.toLocaleString() }), note: t('buy.pickLess'), action: null };
   }
   // Every "Invertir" goes through Brikme's checkout. Live: the checkout runs
   // the on-chain investment (the API prices it; the fee is inside the price).
@@ -566,9 +567,9 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
     if (liveBlock) return liveBlock.action?.();
     if (live && session.status !== 'authenticated') return nav('login');
     goCheckout(nav, {
-      title: holding ? 'Compra de tokens' : 'Inversión', source: 'Tokenizaciones', fee: live ? 0 : tokens*a.tokenPrice*0.005,
-      items: [{ name: a.name, img: a.img, qty: tokens, unit: a.tokenPrice, meta: `${a.apy}% APY · ${a.cat}` }],
-      back: { route: 'detalle', data: a }, done: { route: 'pertenencias', label: 'Ver en Mis Pertenencias' },
+      title: holding ? t('order.tokenPurchase') : t('order.investment'), source: 'Tokenizaciones', fee: live ? 0 : tokens*a.tokenPrice*0.005,
+      items: [{ name: a.name, img: a.img, qty: tokens, unit: a.tokenPrice, meta: t('order.investmentMeta', { apy: a.apy, cat: dataLabel('categories', a.cat) }) }],
+      back: { route: 'detalle', data: a }, done: { route: 'pertenencias', label: t('order.viewInHoldings') },
       ...(live && { action: { kind: 'primary' as const, assetId: a.id, quantity: tokens } }),
     });
   };
@@ -576,8 +577,8 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
   const sell = () => (live ? navigate(`${pathFor('secundario')}?vender=${a.id}`) : nav('secundario'));
   const subtotal = tokens * a.tokenPrice;
   const feeRow: readonly [string, string] = live
-    ? (feePct === null ? ['Fee plataforma', '—'] : [`Fee (${feePct.toLocaleString('es-AR', { maximumFractionDigits: 2 })}%, incluida)`, fmtUSD2(subtotal * feePct / 100)])
-    : ['Fee (0.5%)', fmtUSD2(tokens*a.tokenPrice*0.005)];
+    ? (feePct === null ? [t('buy.platformFee'), '—'] : [t('buy.feeIncluded', { pct: feePct.toLocaleString(locale, { maximumFractionDigits: 2 }) }), fmtUSD2(subtotal * feePct / 100)])
+    : [t('buy.feeDemo'), fmtUSD2(tokens*a.tokenPrice*0.005)];
   const holdingPnlPct = holding ? ((holding.invested ? holding.current / holding.invested - 1 : 0) * 100).toFixed(1) : null;
   const holdingIsPos = holding ? holding.current >= holding.invested : null;
 
@@ -586,7 +587,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
       {/* Back */}
       <button onClick={() => (backRoute === 'empresa' ? nav('empresa', issuerName) : nav(backRoute))}
         style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color:'var(--sec)', fontFamily:'var(--font-b)', fontSize:13.5, marginBottom:18, padding:0 }}>
-        {Icons.back} Volver al mercado
+        {Icons.back} {t('detail.back')}
       </button>
 
       {/* Two-column grid — both columns start at the same top */}
@@ -606,7 +607,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
                 {Icons.location}
                 <span style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--sec)' }}>{a.location}</span>
                 <span style={{ color:'var(--ter)', margin:'0 4px' }}>·</span>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--sec)' }}>Vida útil: {a.lifespan}</span>
+                <span style={{ fontFamily:'var(--font-b)', fontSize:13.5, color:'var(--sec)' }}>{t('detail.lifespan', { value: a.lifespan })}</span>
                 <GuideButton tour="project" />
               </div>
               {a.company && <CompanyTag company={a.company} cat={a.cat} size="sm" />}
@@ -630,7 +631,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
             <motion.div key="res" initial={{ opacity:0 }} animate={{ opacity:1 }}>
               <div style={{ fontFamily:'var(--font-b)', fontSize:14.5, color:'var(--sec)', lineHeight:1.7, marginBottom:22 }}>{a.desc}</div>
               <div style={{ display:'grid', gridTemplateColumns: mobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: mobile ? 10 : 14, marginBottom:22 }}>
-                {[['Valuación',fmtUSD(a.valuation)],['Categoría',a.cat],['Etapa',a.stage],['Vida útil',a.lifespan]].map(([k,v]) => (
+                {[[t('detail.valuation'),fmtUSD(a.valuation)],[t('detail.category'),dataLabel('categories', a.cat)],[t('detail.stage'),dataLabel('stages', a.stage)],[t('detail.lifespanLabel'),a.lifespan]].map(([k,v]) => (
                   <div key={k} style={{ background:'var(--surface)', border:'1px solid var(--border-l)', borderRadius:14, padding:'14px 16px' }}>
                     <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:4 }}>{k}</div>
                     <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:15.5, color:'var(--text)' }}>{v}</div>
@@ -638,11 +639,11 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
                 ))}
               </div>
               <PCard style={{ padding:'20px 22px' }}>
-                <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)', marginBottom:4 }}>Rendimiento histórico</div>
-                <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:14 }}>{live ? 'Precio de referencia publicado por el emisor' : 'Últimos 12 meses · precio de referencia'}</div>
+                <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)', marginBottom:4 }}>{t('detail.performance')}</div>
+                <div style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:14 }}>{live ? t('detail.perfLive') : t('detail.perfDemo')}</div>
                 {a.perf.length >= 2
                   ? <PArea data={a.perf} height={120} id={`det${a.id}`} />
-                  : <div style={{ height:120, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-b)', fontSize:13, color:'var(--ter)' }}>Todavía no hay historial de rendimiento.</div>}
+                  : <div style={{ height:120, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-b)', fontSize:13, color:'var(--ter)' }}>{t('detail.noPerformance')}</div>}
               </PCard>
             </motion.div>
           )}
@@ -657,12 +658,12 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
             <motion.div key="tok" initial={{ opacity:0 }} animate={{ opacity:1 }}>
               <PCard style={{ padding:'22px 24px' }}>
                 <div style={{ display:'flex', gap:30, alignItems:'center', marginBottom:20 }}>
-                  <PDonut size={150} label={`${a.sold}%`} sub="vendido" segments={[
+                  <PDonut size={150} label={`${a.sold}%`} sub={t('tokenomics.sold')} segments={[
                     { value:a.sold, color:'var(--accent)' },
                     { value:100-a.sold, color:'var(--surface2)' },
                   ]} />
                   <div style={{ flex:1, display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-                    {[['Supply total',a.totalTokens.toLocaleString()],['Vendidos',Math.round(a.totalTokens*a.sold/100).toLocaleString()],['Disponibles',left.toLocaleString()],['Precio token',fmtUSD(a.tokenPrice)],['Min. inversión','1 token'],['Fee plataforma','0.5%'],['Distribución','Mensual · USDC'],['Estándar','ERC-20 · Polygon']].map(([k,v]) => (
+                    {[[t('tokenomics.totalSupply'),a.totalTokens.toLocaleString()],[t('tokenomics.soldCount'),Math.round(a.totalTokens*a.sold/100).toLocaleString()],[t('tokenomics.available'),left.toLocaleString()],[t('tokenomics.tokenPrice'),fmtUSD(a.tokenPrice)],[t('tokenomics.minInvestment'),t('tokenomics.oneToken')],[t('tokenomics.platformFee'),'0.5%'],[t('tokenomics.distribution'),t('tokenomics.monthlyUsdc')],[t('tokenomics.standard'),'ERC-20 · Polygon']].map(([k,v]) => (
                       <div key={k}>
                         <div style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'var(--ter)', marginBottom:3 }}>{k}</div>
                         <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:16, color:'var(--text)' }}>{v}</div>
@@ -672,7 +673,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
                 </div>
                 <PDiv style={{ margin:'6px 0 16px' }} />
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                  <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--sec)' }}>Contrato verificado en Polygon</span>
+                  <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--sec)' }}>{t('tokenomics.verifiedOnPolygon')}</span>
                   <PScanLink contract={a.contract} />
                 </div>
               </PCard>
@@ -683,7 +684,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
 
           {tab==='docs' && !live && (
             <motion.div key="docs" initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              {['Informe de tasación independiente','Certificado de seguro','Título de propiedad / escritura','Auditoría del smart contract (CertiK)','Contrato de administración','Términos y condiciones de la emisión'].map(doc => (
+              {raw<string[]>('docs.demo').map(doc => (
                 <div key={doc} style={{ background:'var(--surface)', border:'1px solid var(--border-l)', borderRadius:14, padding:'15px 18px', display:'flex', alignItems:'center', gap:13, cursor:'pointer' }}>
                   <span style={{ color:'var(--sec)' }}>{Icons.doc}</span>
                   <span style={{ flex:1, fontFamily:'var(--font-b)', fontSize:14, color:'var(--text)' }}>{doc}</span>
@@ -704,7 +705,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
           {tab==='updates' && (
             <motion.div key="upd" initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ display:'flex', flexDirection:'column' }}>
               {feedPosts.filter(p => p.milestone).length === 0 && (
-                <div style={{ textAlign:'center', padding:'40px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:13.5 }}>Todavía no hay hitos marcados en el feed.</div>
+                <div style={{ textAlign:'center', padding:'40px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:13.5 }}>{t('detail.noMilestones')}</div>
               )}
               {feedPosts.filter(p => p.milestone).map((post, i, arr) => (
                 <div key={post.id} onClick={() => goToPost(post.id)} style={{ display:'flex', gap:16, cursor:'pointer' }}>
@@ -730,13 +731,13 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
           {/* Dev-only state banner — demo mode in development builds (DEV_MODE). */}
           {DEV_MODE && !live && devNoteOpen && (
             <div style={{ position:'relative', marginBottom:14, padding:'14px 38px 14px 16px', borderRadius:14, background:'rgba(245,158,11,0.12)', border:'1.5px dashed rgba(245,158,11,0.55)' }}>
-              <button onClick={() => setDevNoteOpen(false)} aria-label="Cerrar aviso"
+              <button onClick={() => setDevNoteOpen(false)} aria-label={t('dev.close')}
                 style={{ position:'absolute', top:10, right:10, width:22, height:22, borderRadius:7, border:'none', background:'rgba(245,158,11,0.18)', color:'#f59e0b', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, lineHeight:1 }}>
                 ✕
               </button>
-              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:11, color:'#f59e0b', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>⚠ Aviso para desarrolladores · Estado del proyecto</div>
+              <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:11, color:'#f59e0b', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>{t('dev.title')}</div>
               <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', columnGap:10, rowGap:4 }}>
-                {projectState(a, { isLive, holding }).map(([k, v]) => (
+                {projectState(a, { isLive, holding }, t, dataLabel('stages', a.stage)).map(([k, v]) => (
                   <div key={k} style={{ display:'contents' }}>
                     <span style={{ fontFamily:'var(--font-b)', fontSize:11.5, color:'var(--ter)', whiteSpace:'nowrap' }}>{k}</span>
                     <span style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--text)', fontWeight:600, lineHeight:1.45 }}>{v}</span>
@@ -750,35 +751,35 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
           {holding && (
             <PCard style={{ padding:'20px 22px', marginBottom:14, border:'1.5px solid var(--accent)' }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
-                <span style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:14, color:'var(--text)' }}>Tu inversión</span>
-                <PTag label={holding.since ? `Desde ${holding.since}` : 'On-chain'} />
+                <span style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:14, color:'var(--text)' }}>{t('position.title')}</span>
+                <PTag label={holding.since ? t('position.since', { date: holding.since }) : t('position.onchain')} />
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:16 }}>
                 <div>
-                  <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', marginBottom:3 }}>Tokens</div>
+                  <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', marginBottom:3 }}>{t('position.tokens')}</div>
                   <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:17, color:'var(--text)' }}>{holding.tokens}</div>
                 </div>
                 <div>
-                  <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', marginBottom:3 }}>Valor actual</div>
+                  <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', marginBottom:3 }}>{t('position.currentValue')}</div>
                   <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:17, color:'var(--text)' }}>{fmtUSD2(holding.current)}</div>
                 </div>
                 <div>
-                  <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', marginBottom:3 }}>Invertido</div>
+                  <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', marginBottom:3 }}>{t('position.invested')}</div>
                   <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:17, color:'var(--text)' }}>{fmtUSD2(holding.invested)}</div>
                 </div>
                 <div>
-                  <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', marginBottom:3 }}>P&L</div>
+                  <div style={{ fontFamily:'var(--font-b)', fontSize:11, color:'var(--ter)', marginBottom:3 }}>{t('position.pnl')}</div>
                   <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:17, color: holdingIsPos ? 'var(--pos)' : 'var(--neg)' }}>{holdingIsPos ? '+' : ''}{holdingPnlPct}%</div>
                 </div>
               </div>
               <PDiv style={{ marginBottom:14 }} />
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>Rendimiento cobrado</span>
+                <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>{t('position.yieldCollected')}</span>
                 <span style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:14, color:'var(--pos)' }}>+{fmtUSD2(holding.yieldEarned)}</span>
               </div>
               <div style={{ display:'flex', gap:8 }}>
-                {isLive && <PBtn variant="secondary" style={{ flex:1, padding:'10px', fontSize:13 }} onClick={() => setTab('updates')}>Ver avances</PBtn>}
-                {(!live || onchainPool) && <PBtn variant="ghost" style={{ flex:1, padding:'10px', fontSize:13 }} onClick={sell}>Vender</PBtn>}
+                {isLive && <PBtn variant="secondary" style={{ flex:1, padding:'10px', fontSize:13 }} onClick={() => setTab('updates')}>{t('position.seeProgress')}</PBtn>}
+                {(!live || onchainPool) && <PBtn variant="ghost" style={{ flex:1, padding:'10px', fontSize:13 }} onClick={sell}>{t('position.sell')}</PBtn>}
               </div>
             </PCard>
           )}
@@ -786,23 +787,23 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
           <PCard style={{ padding:'22px 24px' }}>
             <div data-guide="project-price" style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:4 }}>
               <span style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:28, color:'var(--text)', letterSpacing:'-0.03em' }}>{fmtUSD(a.tokenPrice)}</span>
-              <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--ter)' }}>por token</span>
+              <span style={{ fontFamily:'var(--font-b)', fontSize:13, color:'var(--ter)' }}>{t('buy.perToken')}</span>
             </div>
             <div data-guide="project-apy" style={{ display:'flex', alignItems:'center', gap:6, marginBottom:18 }}>
-              <PTag label={`${a.apy}% APY estimado`} color="green" />
+              <PTag label={t('buy.estApy', { apy: a.apy })} color="green" />
             </div>
 
             <div data-guide="project-funded" style={{ marginBottom:16 }}>
               <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>Financiado {a.sold}%</span>
-                <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>{left.toLocaleString()} disponibles</span>
+                <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>{t('buy.funded', { sold: a.sold })}</span>
+                <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>{t('buy.available', { count: left.toLocaleString() })}</span>
               </div>
               <PProgress value={a.sold} />
             </div>
 
             <PDiv style={{ marginBottom:16 }} />
 
-            <div style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>Cantidad de tokens</div>
+            <div style={{ fontFamily:'var(--font-b)', fontSize:12, color:'var(--ter)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>{t('buy.tokenQty')}</div>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
               <button onClick={() => setTokens(Math.max(1, tokens - 5))} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid var(--border)', background:'transparent', cursor:'pointer', color:'var(--text)', fontSize:16 }}>−</button>
               <div style={{ flex:1, textAlign:'center', fontFamily:'var(--font-h)', fontWeight:800, fontSize:26, color:'var(--text)' }}>{tokens}</div>
@@ -821,7 +822,7 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
             </div>
 
             <div style={{ background:'var(--surface2)', borderRadius:13, padding:'13px 16px', marginBottom:16 }}>
-              {[['Subtotal',fmtUSD2(tokens*a.tokenPrice)],feeRow,['Rendimiento anual est.',fmtUSD2(tokens*a.tokenPrice*a.apy/100)]].map(([k,v],i) => (
+              {[[t('buy.subtotal'),fmtUSD2(tokens*a.tokenPrice)],feeRow,[t('buy.annualYield'),fmtUSD2(tokens*a.tokenPrice*a.apy/100)]].map(([k,v],i) => (
                 <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'4px 0' }}>
                   <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>{k}</span>
                   <span style={{ fontFamily:'var(--font-h)', fontWeight:600, fontSize:13, color: i===2 ? 'var(--accent-text)' : 'var(--text)' }}>{v}</span>
@@ -830,17 +831,17 @@ export default function ProductDetail({ nav, asset: a, fromRoute, apiAsset = nul
             </div>
 
             <PBtn guide="project-invest" variant="accent" disabled={liveBlock !== null && !liveBlock.action} style={{ width:'100%', padding:'14px', fontSize:15, marginBottom:10 }} onClick={invest}>
-              {liveBlock ? liveBlock.label : <>{holding ? 'Comprar más' : 'Invertir'} · {fmtUSD2(tokens*a.tokenPrice*(live ? 1 : 1.005))}</>}
+              {liveBlock ? liveBlock.label : <>{holding ? t('buy.buyMore') : t('buy.invest')} · {fmtUSD2(tokens*a.tokenPrice*(live ? 1 : 1.005))}</>}
             </PBtn>
             <div role="status" aria-live="polite" style={{ textAlign:'center', fontFamily:'var(--font-b)', fontSize:11.5, color:'var(--ter)' }}>
-              {liveBlock?.note ?? 'Pago con USDC · Liquidación on-chain inmediata'}
+              {liveBlock?.note ?? t('buy.payNote')}
             </div>
           </PCard>
 
           <PCard style={{ padding:'16px 20px', marginTop:14 }}>
-            {(live ? LIVE_TRUST : DEMO_TRUST).map(([txt,ic],i,arr) => (
+            {raw<string[]>(live ? 'trust.live' : 'trust.demo').map((txt, i, arr) => (
               <div key={txt} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom: i<arr.length-1 ? '1px solid var(--border-l)' : 'none' }}>
-                <span style={{ color:'var(--accent-text)', display:'flex' }}>{ic}</span>
+                <span style={{ color:'var(--accent-text)', display:'flex' }}>{(live ? LIVE_TRUST_ICONS : DEMO_TRUST_ICONS)[i]}</span>
                 <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--sec)' }}>{txt}</span>
               </div>
             ))}

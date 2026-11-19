@@ -1,0 +1,372 @@
+{
+  "assets": {
+    "1": {
+      "name": "Flota Tesla Model 3",
+      "location": "Los Ángeles, EE.UU.",
+      "desc": "Flota de 10 Tesla Model 3 operando en plataforma de ride-hailing. Ingresos mensuales distribuidos pro-rata entre holders.",
+      "lifespan": "6 años"
+    },
+    "2": {
+      "name": "Porsche 911 Carrera",
+      "location": "Miami, EE.UU.",
+      "desc": "Vehículo de colección con renta premium para eventos y producciones. Apreciación histórica del 4% anual.",
+      "lifespan": "8 años"
+    },
+    "3": {
+      "name": "Campo Agrícola Pergamino",
+      "location": "Buenos Aires, Argentina",
+      "desc": "240 hectáreas de soja y maíz en zona núcleo. Rinde auditado por consultora agronómica independiente.",
+      "lifespan": "25 años"
+    },
+    "4": {
+      "name": "Viñedo Valle de Uco",
+      "location": "Mendoza, Argentina",
+      "desc": "85 hectáreas de Malbec premium con bodega boutique. Contrato de compra garantizado con exportadora.",
+      "lifespan": "30 años"
+    },
+    "5": {
+      "name": "Flota Drones Agrícolas DJI",
+      "location": "Córdoba, Argentina",
+      "desc": "20 drones DJI Agras T40 para pulverización de precisión. Contratos de servicio con 14 productores.",
+      "lifespan": "4 años"
+    },
+    "6": {
+      "name": "Edificio Corporativo Palermo",
+      "location": "CABA, Argentina",
+      "desc": "Torre AAA de 12 pisos con 94% de ocupación. Inquilinos corporativos con contratos a 5 años.",
+      "lifespan": "50 años"
+    },
+    "7": {
+      "name": "Complejo Residencial Madrid",
+      "location": "Madrid, España",
+      "desc": "16 unidades en alquiler de larga estadía en Chamberí. Rentabilidad estable con demanda sostenida.",
+      "lifespan": "40 años"
+    },
+    "8": {
+      "name": "Torre Logística Miami",
+      "location": "Miami, EE.UU.",
+      "desc": "Centro de distribución last-mile de 18.000 m². Pre-alquilado a operador logístico internacional.",
+      "lifespan": "45 años"
+    },
+    "9": {
+      "name": "Flota Uber Toyota Corolla Híbrido",
+      "location": "Chicago, EE.UU.",
+      "desc": "Flota de 15 Toyota Corolla híbridos operando en plataformas de ride-hailing. Mantenimiento incluido y seguro full cobertura.",
+      "lifespan": "8 años"
+    },
+    "10": {
+      "name": "Ferrari 488 GTB Edición Limitada",
+      "location": "Los Ángeles, EE.UU.",
+      "desc": "Superdeportivo de colección con renta premium para eventos y sesiones fotográficas. Apreciación histórica sostenida.",
+      "lifespan": "7 años"
+    },
+    "11": {
+      "name": "Flota BYD Eléctrica Delivery",
+      "location": "Buenos Aires, Argentina",
+      "desc": "Flota de 20 utilitarios eléctricos BYD para logística de última milla en CABA y GBA.",
+      "lifespan": "7 años"
+    },
+    "12": {
+      "name": "Lamborghini Huracán Evo",
+      "location": "Madrid, España",
+      "desc": "Vehículo de alta gama para renta de eventos exclusivos y turismo de lujo en la Costa del Sol.",
+      "lifespan": "4 años"
+    },
+    "13": {
+      "name": "Flota Pickup Ford Ranger Agro",
+      "location": "Córdoba, Argentina",
+      "desc": "Flota de pickups 4x4 alquiladas a contratistas rurales para la campaña agrícola.",
+      "lifespan": "7 años"
+    },
+    "14": {
+      "name": "Mercedes-Benz Clase G Blindado",
+      "location": "Miami, EE.UU.",
+      "desc": "Unidad blindada nivel B6 en renta corporativa para ejecutivos y diplomáticos.",
+      "lifespan": "7 años"
+    },
+    "15": {
+      "name": "Flota Taxis Eléctricos BYD",
+      "location": "Barcelona, España",
+      "desc": "Flota de 25 taxis eléctricos homologados operando bajo licencia municipal.",
+      "lifespan": "8 años"
+    },
+    "16": {
+      "name": "Range Rover Sport Colección",
+      "location": "Buenos Aires, Argentina",
+      "desc": "SUV premium en renta ejecutiva de largo plazo para empresas y turismo corporativo.",
+      "lifespan": "10 años"
+    },
+    "17": {
+      "name": "Campo Sojero Rosario",
+      "location": "Rosario, Argentina",
+      "desc": "380 hectáreas de soja de primera en zona núcleo santafesina. Arrendado a productor de trayectoria.",
+      "lifespan": "15 años"
+    },
+    "18": {
+      "name": "Viñedo Cafayate Premium",
+      "location": "Salta, Argentina",
+      "desc": "60 hectáreas de Torrontés y Malbec de altura con bodega propia y exportación directa.",
+      "lifespan": "20 años"
+    },
+    "19": {
+      "name": "Olivar Andaluz Centenario",
+      "location": "Jaén, España",
+      "desc": "Plantación de olivos centenarios con producción de aceite de oliva virgen extra premiado.",
+      "lifespan": "25 años"
+    },
+    "20": {
+      "name": "Campo Ganadero Corrientes",
+      "location": "Corrientes, Argentina",
+      "desc": "1.200 hectáreas de pastizal natural para cría e invernada de ganado bovino.",
+      "lifespan": "30 años"
+    },
+    "21": {
+      "name": "Huerta de Cítricos Tucumán",
+      "location": "Tucumán, Argentina",
+      "desc": "150 hectáreas de limón fino con planta de empaque propia y exportación a Europa.",
+      "lifespan": "40 años"
+    },
+    "22": {
+      "name": "Campo Maicero Pergamino Norte",
+      "location": "Pergamino, Argentina",
+      "desc": "210 hectáreas de maíz en rotación con soja, riego complementario por pivote central.",
+      "lifespan": "15 años"
+    },
+    "23": {
+      "name": "Viñedo Uco Valley Reserva",
+      "location": "Mendoza, Argentina",
+      "desc": "45 hectáreas de Malbec de altura, línea reserva con contratos de exportación a EE.UU.",
+      "lifespan": "30 años"
+    },
+    "24": {
+      "name": "Viñedo Rioja Alta",
+      "location": "La Rioja, España",
+      "desc": "Bodega boutique de 30 hectáreas en denominación de origen calificada Rioja.",
+      "lifespan": "20 años"
+    },
+    "25": {
+      "name": "Drones de Inspección Solar",
+      "location": "Austin, EE.UU.",
+      "desc": "Flota de 12 drones térmicos para inspección de parques solares utility-scale.",
+      "lifespan": "3 años"
+    },
+    "26": {
+      "name": "Flota Drones de Delivery Urbano",
+      "location": "Valencia, España",
+      "desc": "Operación de delivery last-mile con drones certificados en zona urbana autorizada.",
+      "lifespan": "6 años"
+    },
+    "27": {
+      "name": "Drones de Mapeo Catastral",
+      "location": "Buenos Aires, Argentina",
+      "desc": "Servicio de relevamiento topográfico y catastral con drones RTK de alta precisión.",
+      "lifespan": "4 años"
+    },
+    "28": {
+      "name": "Flota Drones de Seguridad Perimetral",
+      "location": "Houston, EE.UU.",
+      "desc": "Vigilancia autónoma 24/7 de predios industriales con drones de patrullaje.",
+      "lifespan": "6 años"
+    },
+    "29": {
+      "name": "Drones Fumigadores de Precisión",
+      "location": "Córdoba, Argentina",
+      "desc": "Flota de drones agrícolas para aplicación variable de agroquímicos de precisión.",
+      "lifespan": "3 años"
+    },
+    "30": {
+      "name": "Flota Drones Topográficos Mineros",
+      "location": "San Juan, Argentina",
+      "desc": "Relevamiento volumétrico de pilas de mineral en operaciones mineras a cielo abierto.",
+      "lifespan": "6 años"
+    },
+    "31": {
+      "name": "Drones de Filmación Cinematográfica",
+      "location": "Los Ángeles, EE.UU.",
+      "desc": "Equipo de drones cinema-grade en renta para producciones audiovisuales.",
+      "lifespan": "5 años"
+    },
+    "32": {
+      "name": "Flota Drones Forestales Anti-incendio",
+      "location": "Girona, España",
+      "desc": "Drones de detección temprana de incendios forestales con cámaras térmicas.",
+      "lifespan": "5 años"
+    },
+    "33": {
+      "name": "Drones de Inspección de Torres Eléctricas",
+      "location": "Mendoza, Argentina",
+      "desc": "Inspección autónoma de líneas de alta tensión para distribuidoras eléctricas.",
+      "lifespan": "4 años"
+    },
+    "34": {
+      "name": "Apartamentos Barcelona Eixample",
+      "location": "Barcelona, España",
+      "desc": "12 apartamentos turísticos en el Eixample con ocupación promedio del 85%.",
+      "lifespan": "25 años"
+    },
+    "35": {
+      "name": "Residencial Miami Brickell",
+      "location": "Miami, EE.UU.",
+      "desc": "Torre residencial de 40 unidades en el distrito financiero de Brickell.",
+      "lifespan": "20 años"
+    },
+    "36": {
+      "name": "Condominio Puerto Madero",
+      "location": "CABA, Argentina",
+      "desc": "Complejo de 24 departamentos premium frente al río en Puerto Madero.",
+      "lifespan": "35 años"
+    },
+    "37": {
+      "name": "Departamentos Valencia Playa",
+      "location": "Valencia, España",
+      "desc": "18 departamentos de alquiler vacacional a metros de la Playa de la Malvarrosa.",
+      "lifespan": "20 años"
+    },
+    "38": {
+      "name": "Residencial Brooklyn Heights",
+      "location": "Nueva York, EE.UU.",
+      "desc": "Edificio residencial de 30 unidades en uno de los barrios más demandados de NY.",
+      "lifespan": "30 años"
+    },
+    "39": {
+      "name": "Dúplex Premium Palermo Soho",
+      "location": "CABA, Argentina",
+      "desc": "10 dúplex de diseño en el corazón de Palermo Soho con renta corta estadía.",
+      "lifespan": "40 años"
+    },
+    "40": {
+      "name": "Apartamentos Sevilla Centro",
+      "location": "Sevilla, España",
+      "desc": "14 apartamentos turísticos totalmente reformados en el casco histórico.",
+      "lifespan": "30 años"
+    },
+    "41": {
+      "name": "Residencial Austin Tech District",
+      "location": "Austin, EE.UU.",
+      "desc": "22 unidades residenciales orientadas a profesionales del sector tecnológico.",
+      "lifespan": "40 años"
+    },
+    "42": {
+      "name": "Loft Industrial Chicago",
+      "location": "Chicago, EE.UU.",
+      "desc": "16 lofts reconvertidos de una ex fábrica textil en el West Loop.",
+      "lifespan": "40 años"
+    },
+    "43": {
+      "name": "Torre Oficinas Puerto Madero",
+      "location": "CABA, Argentina",
+      "desc": "Torre AAA de 18 pisos con certificación LEED Gold y ocupación del 88%.",
+      "lifespan": "30 años"
+    },
+    "44": {
+      "name": "Centro Comercial Rosario",
+      "location": "Rosario, Argentina",
+      "desc": "Shopping de 22.000 m² con 90 locales y anclas nacionales de primer nivel.",
+      "lifespan": "45 años"
+    },
+    "45": {
+      "name": "Torre Corporativa Houston",
+      "location": "Houston, EE.UU.",
+      "desc": "Edificio corporativo de 24 pisos alquilado a firmas del sector energético.",
+      "lifespan": "30 años"
+    },
+    "46": {
+      "name": "Edificio de Oficinas Madrid",
+      "location": "Madrid, España",
+      "desc": "Oficinas clase A en el distrito financiero de AZCA, ocupación plena.",
+      "lifespan": "45 años"
+    },
+    "47": {
+      "name": "Depósito Industrial Córdoba",
+      "location": "Córdoba, Argentina",
+      "desc": "Centro de distribución de 12.000 m² pre-alquilado a operador logístico nacional.",
+      "lifespan": "30 años"
+    },
+    "48": {
+      "name": "Torre Financiera Miami",
+      "location": "Miami, EE.UU.",
+      "desc": "Torre financiera de 30 pisos con inquilinos del sector bancario internacional.",
+      "lifespan": "45 años"
+    },
+    "49": {
+      "name": "Centro de Datos Madrid",
+      "location": "Madrid, España",
+      "desc": "Data center Tier III de 8.000 m² con contratos a 10 años con hyperscalers.",
+      "lifespan": "30 años"
+    },
+    "50": {
+      "name": "Edificio Boutique Palermo Hollywood",
+      "location": "CABA, Argentina",
+      "desc": "Edificio de oficinas boutique de 6 pisos en polo creativo y tecnológico.",
+      "lifespan": "30 años"
+    }
+  },
+  "academy": {
+    "1": {
+      "title": "¿Qué es la tokenización de activos reales (RWA)?",
+      "excerpt": "La guía definitiva para entender cómo los activos físicos se convierten en tokens digitales negociables."
+    },
+    "2": {
+      "title": "Cómo invertir en tu primer proyecto paso a paso",
+      "excerpt": "Desde conectar tu wallet hasta recibir tu primera distribución de rendimientos."
+    },
+    "3": {
+      "title": "Campos agrícolas: el RWA con mayor demanda en LATAM",
+      "excerpt": "Por qué la tierra productiva es el activo estrella de la tokenización en la región."
+    },
+    "4": {
+      "title": "Vesting y cliffs: entiende el calendario de tu token",
+      "excerpt": "TGE, cliff, vesting lineal — todos los términos que necesitas dominar antes de un ICO."
+    },
+    "5": {
+      "title": "Mercado secundario: cuándo comprar con descuento",
+      "excerpt": "Cómo evaluar listados P2P, comparar precio real vs. precio pedido y detectar oportunidades."
+    },
+    "6": {
+      "title": "Smart contracts en Polygon: así protegemos tu inversión",
+      "excerpt": "Auditorías, custodia y la arquitectura on-chain detrás de cada proyecto de Brikme."
+    }
+  },
+  "achievements": {
+    "trophy": {
+      "label": "Primera inversión",
+      "desc": "Invertiste en tu primer proyecto"
+    },
+    "shield": {
+      "label": "KYC completo",
+      "desc": "Identidad verificada"
+    },
+    "star": {
+      "label": "6 meses activo",
+      "desc": "Medio año invirtiendo"
+    },
+    "compass": {
+      "label": "Diversificado",
+      "desc": "Proyectos en 3 rubros o más"
+    },
+    "drop": {
+      "label": "Primer $1K de yield",
+      "desc": "Rentas cobradas acumuladas"
+    },
+    "calendar": {
+      "label": "1 año en Brikme",
+      "desc": "Doce meses de antigüedad"
+    },
+    "diamond": {
+      "label": "$50K invertido",
+      "desc": "Llega al Nivel 5"
+    },
+    "rocket": {
+      "label": "10 proyectos",
+      "desc": "Un portafolio amplio"
+    }
+  },
+  "activity": {
+    "1": "Distribución de renta — Campo Agrícola Pergamino",
+    "2": "Liberación de escrow P2P Fiat — recibido por Pavlo",
+    "3": "Distribución de renta — Flota Tesla Model 3",
+    "4": "Compra de tokens — Edificio Corporativo Palermo",
+    "5": "Liberación de escrow — Contenedor 40ft #118",
+    "6": "Transferencia a @sofia_g"
+  }
+}

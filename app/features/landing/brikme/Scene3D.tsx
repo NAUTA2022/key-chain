@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent, typ
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { MARK_H, MARK_HOLES, MARK_OUTER, MARK_W, type Pt } from './mark';
+import { useT } from '~/i18n/useT';
 import { useInView } from './useInView';
 
 /*
@@ -106,11 +107,12 @@ function MarkScene({ input, tone }: { input: RefObject<Input>; tone: 'light' | '
 
 type Logo3DProps = { tone?: 'light' | 'dark'; className?: string; onReady?: () => void; label?: string };
 
-export function Logo3D({ tone = 'light', className, onReady, label = 'Logo de Brikme en 3D: arrastra para girarlo' }: Logo3DProps) {
+export function Logo3D({ tone = 'light', className, onReady, label }: Logo3DProps) {
+  const { t } = useT('landing');
   const { input, handlers } = usePointerRig();
   const { ref: viewRef, seen, visible } = useInView<HTMLDivElement>();
   return (
-    <div ref={viewRef} className={className} role="img" aria-label={label} style={{ touchAction: 'pan-y', cursor: 'grab' }} {...handlers}>
+    <div ref={viewRef} className={className} role="img" aria-label={label ?? t('a11y.logo3d')} style={{ touchAction: 'pan-y', cursor: 'grab' }} {...handlers}>
       {seen && (
         <Canvas dpr={[1, 2]} flat frameloop={visible ? 'always' : 'never'} camera={{ position: [0, 0, 175], fov: 36, near: 1, far: 1000 }}
           gl={{ antialias: true, alpha: true }} onCreated={() => onReady?.()}>
@@ -193,11 +195,12 @@ function BlockScene({ input, autoSplit }: { input: RefObject<Input>; autoSplit: 
 
 type TokenBlock3DProps = { className?: string; autoSplit?: boolean; label?: string };
 
-export function TokenBlock3D({ className, autoSplit = false, label = 'Un activo dividido en tokens: pasa el cursor o toca para fraccionarlo' }: TokenBlock3DProps) {
+export function TokenBlock3D({ className, autoSplit = false, label }: TokenBlock3DProps) {
+  const { t } = useT('landing');
   const { input, handlers } = usePointerRig();
   const { ref: viewRef, seen, visible } = useInView<HTMLDivElement>();
   return (
-    <div ref={viewRef} className={className} role="img" aria-label={label} style={{ touchAction: 'pan-y', cursor: 'grab' }} {...handlers}>
+    <div ref={viewRef} className={className} role="img" aria-label={label ?? t('a11y.tokenBlock')} style={{ touchAction: 'pan-y', cursor: 'grab' }} {...handlers}>
       {seen && (
         <Canvas dpr={[1, 2]} frameloop={visible ? 'always' : 'never'} camera={{ position: [0, 0, 150], fov: 38, near: 1, far: 1000 }}
           gl={{ antialias: true, alpha: true }}>

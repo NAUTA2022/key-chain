@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { motion, type Transition } from 'framer-motion';
+import { useT } from '~/i18n/useT';
 
 // Mobile menu button. Lives above the drawer: when the drawer opens, the
 // hamburger glides to the drawer's right edge and its bars morph into an X
@@ -18,8 +19,9 @@ type MenuToggleProps = {
 };
 
 export default function MenuToggle({ open, onToggle }: MenuToggleProps) {
+  const { t } = useT('common');
   return (
-    <motion.button type="button" onClick={onToggle} aria-label={open ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={open}
+    <motion.button type="button" onClick={onToggle} aria-label={open ? t('menu.close') : t('menu.open')} aria-expanded={open}
       initial={false} animate={{ x: open ? OPEN_X : 0 }} transition={SPRING}
       style={{
         position: 'fixed', top: 10, left: LEFT, zIndex: 310, width: SIZE, height: SIZE, padding: 0,

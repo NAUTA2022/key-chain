@@ -34,7 +34,10 @@ import { fmtCount } from '~/lib/projectFeed';
 import { useSession } from '~/lib/session';
 import { useFollowToggle, useSocialQuery, useSocialSource } from '~/lib/social/source';
 import type { CompanyRef, FollowEntry, FollowTarget, PersonProfile, SocialAsset, SocialSource } from '~/lib/social/types';
+import { localMonthLabel } from '~/lib/social/identity';
 import GuideButton from '~/features/guide/GuideButton';
+import { useT, type Translator } from '~/i18n/useT';
+import { useDataText } from '~/i18n/data';
 
 // Personal profile — mine (/perfil) or someone else's (/usuarios/:slug).
 // Same layout as the company profile: cover card with the round photo (the
@@ -48,36 +51,22 @@ import GuideButton from '~/features/guide/GuideButton';
 type AccountTab = 'kyc' | 'docs' | '2fa' | 'tax' | 'priv';
 type Section = 'resumen' | 'inversiones' | 'logros' | 'actividad' | 'cuenta' | 'empresa';
 
-const TABS: ReadonlyArray<readonly [AccountTab, string]> = [
-  ['kyc',  'KYC / Identidad'],
-  ['docs', 'Documentos'     ],
-  ['2fa',  'Seguridad'      ],
-  ['tax',  'Impuestos'      ],
-  ['priv', 'Privacidad'     ],
-];
+/** Account sub-tabs; labels at `page.accountTabs.<id>`. */
+const TABS: readonly AccountTab[] = ['kyc', 'docs', '2fa', 'tax', 'priv'];
 
 type ActivityTone = 'pos' | 'invest' | 'kyc' | 'support' | 'account';
 type ActivityRow = { key: string; label: string; amount: string | null; time: ReactNode; type: ActivityTone };
 
-const ACTIVITY: ActivityRow[] = [
-  { key: 'a1', label: 'Yield cobrado — Edificio Palermo',  amount: '+$780',  time: 'Hoy, 09:32',       type: 'pos'    },
-  { key: 'a2', label: 'Inversión — La Rural Lotes SRL',    amount: '-$5,000',time: 'Hace 3 días',       type: 'invest' },
-  { key: 'a3', label: 'KYC verificado por Sumsub',         amount: null,     time: 'Hace 1 semana',     type: 'kyc'    },
-  { key: 'a4', label: 'Yield cobrado — AutoFleet AR',      amount: '+$620',  time: 'Hace 2 semanas',    type: 'pos'    },
-  { key: 'a5', label: 'Inversión — AutoFleet AR',          amount: '-$3,000',time: 'Hace 3 semanas',    type: 'invest' },
-];
-
-const KYC_CHECKS = [
-  'Verificación de identidad (documento)',
-  'Verificación facial (liveness)',
-  'Prueba de domicilio',
-  'Verificación PEP / Sanciones',
-  'Verificación de fondos',
+/** The design's demo history (project names are data). */
+const demoActivity = (t: TFn): ActivityRow[] => [
+  { key: 'a1', label: t('page.demo.activity.yield', { name: 'Edificio Palermo' }),      amount: '+$780',   time: t('page.demo.time.today', { time: '09:32' }),  type: 'pos'    },
+  { key: 'a2', label: t('page.demo.activity.investment', { name: 'La Rural Lotes SRL' }), amount: '-$5,000', time: t('page.demo.time.daysAgo', { count: 3 }),     type: 'invest' },
+  { key: 'a3', label: t('page.demo.activity.kyc'),                                        amount: null,      time: t('page.demo.time.weekAgo'),                   type: 'kyc'    },
+  { key: 'a4', label: t('page.demo.activity.yield', { name: 'AutoFleet AR' }),            amount: '+$620',   time: t('page.demo.time.weeksAgo', { count: 2 }),    type: 'pos'    },
+  { key: 'a5', label: t('page.demo.activity.investment', { name: 'AutoFleet AR' }),       amount: '-$3,000', time: t('page.demo.time.weeksAgo', { count: 3 }),    type: 'invest' },
 ];
 
 const activityColor: Record<ActivityTone, string> = { pos: '#22c55e', invest: '#8247E5', kyc: '#3b82f6', support: '#F5A623', account: '#5BC4BE' };
-
-const ACCOUNT_NOTE = 'Solo tú ves esta sección.';
 
 const CATEGORY_LABEL: Record<Stats['categories'][number]['category'], AssetCategory> = {
   autos: 'Autos', campos: 'Campos', drones: 'Drones', inmuebles: 'Inmuebles', edificios: 'Edificios',
@@ -87,13 +76,17 @@ const ACHIEVEMENT_ICON: Record<Stats['achievements'][number]['id'], AchievementI
   yield_1k: 'drop', one_year: 'calendar', invested_50k: 'diamond', ten_projects: 'rocket',
 };
 const LIVE_RING = 'linear-gradient(135deg, #8247E5, #3b82f6)';
-const MONTH_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+/** Month labels of the data format ("Mar 2025"), not shown as-is. */
+const MONTHS_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 const ACTIVITY_PAGE = 6;
+
+type TFn = Translator['t'];
+type LevelStatId = 'invested' | 'seniority' | 'reputation';
 
 /** One project in the person's portfolio. Amounts are null when they are private (someone else, live). */
 type Investment = { asset: SocialAsset; since?: string; invested: number | null; current: number | null };
 
-type Kpi = { label: string; value: string; sub: string; icon: ReactNode; tone?: 'pos' | 'neg' };
+type Kpi = { id: string; label: string; value: string; sub: string; icon: ReactNode; tone?: 'pos' | 'neg' };
 
 type ProfileProps = {
   nav: NavFn;
@@ -105,9 +98,10 @@ type ProfileProps = {
   onBack?: () => void;
 };
 
-const monthLabel = (iso: string | null | undefined): string => {
+/** "Mar 2025" in the active language; `months` = the 12 short month names (`raw('social.months')`). */
+const monthLabel = (iso: string | null | undefined, months: readonly string[]): string => {
   const d = iso ? new Date(iso) : null;
-  return d && !Number.isNaN(d.getTime()) ? `${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}` : '—';
+  return d && !Number.isNaN(d.getTime()) ? `${months[d.getMonth()]} ${d.getFullYear()}` : '—';
 };
 const monthsBetween = (iso: string | null | undefined, now: number): number => {
   if (!iso) return 0;
@@ -115,7 +109,7 @@ const monthsBetween = (iso: string | null | undefined, now: number): number => {
   if (Number.isNaN(d.getTime())) return 0;
   return Math.max(0, (n.getFullYear() - d.getFullYear()) * 12 + n.getMonth() - d.getMonth() - (n.getDate() < d.getDate() ? 1 : 0));
 };
-const monthsText = (m: number) => (m < 1 ? 'Menos de 1 mes' : `${m} ${m === 1 ? 'mes' : 'meses'}`);
+const monthsText = (m: number, t: TFn) => (m < 1 ? t('page.levelInfo.monthsLess') : t(m === 1 ? 'page.levelInfo.monthsOne' : 'page.levelInfo.monthsOther', { count: m }));
 const toAchievement = (a: Stats['achievements'][number]): Achievement => ({
   icon: ACHIEVEMENT_ICON[a.id], label: a.label, desc: a.description, p: a.done ? 1 : Math.max(0, Math.min(1, a.progress)),
 });
@@ -124,6 +118,9 @@ const categoriesOf = (rows: readonly Investment[], value: (r: Investment) => num
   Object.entries(rows.reduce<Record<string, number>>((m, r) => ({ ...m, [r.asset.cat]: (m[r.asset.cat] || 0) + value(r) }), {})).sort((x, y) => y[1] - x[1]);
 
 export default function Profile({ nav, person, onCompany, onBack }: ProfileProps) {
+  const { t, raw, locale } = useT('profile');
+  const dataText = useDataText();
+  const months12 = raw<string[]>('social.months');
   const isMobile = useMobile();
   const source = useSocialSource();
   const { status, user: sessionUser } = useSession();
@@ -174,7 +171,7 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
     ? person
     : live
       ? (() => {
-          const name = sessionUser?.displayName || shortWallet || 'Mi perfil';
+          const name = sessionUser?.displayName || shortWallet || t('page.myProfile');
           return { name, initial: name.slice(0, 1).toUpperCase(), gradient: LIVE_RING, id: sessionUser?.id, avatarUrl: sessionUser?.avatarUrl ? mediaUrl(sessionUser.avatarUrl) : null };
         })()
       : ME;
@@ -182,7 +179,7 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
 
   // ─── Portfolio ────────────────────────────────────────────────────────────
   const investments: Investment[] | null = !live
-    ? holdingsOf(isMe ? ME : { name: user.name }).map(h => ({ asset: h.asset, since: h.since, invested: h.invested, current: h.current }))
+    ? holdingsOf(isMe ? ME : { name: user.name }).map(h => ({ asset: dataText.asset(h.asset), since: h.since, invested: h.invested, current: h.current }))
     : isMe
       ? (liveHoldings ?? []).filter(h => h.tokens > 0).map(h => ({
           asset: byId(h.assetId) ?? fallbackAsset(h.assetId, h.assetName, CATEGORY_LABEL[h.category], h.location, h.imageUrl),
@@ -213,16 +210,16 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
   const rep = live ? null : isMe ? 4.8 : (person?.rep ?? 4.8);
   const levelHint = live
     ? isMe
-      ? !stats ? (statsLoading ? 'Cargando…' : 'Sin datos por ahora') : stats.level.nextLevelAt !== null ? `${fmtUSD(Math.max(0, stats.level.nextLevelAt - stats.invested))} para Nivel ${stats.level.level + 1}` : 'Nivel máximo'
-      : level === null ? 'Privado' : level >= 5 ? 'Nivel máximo' : `Nivel ${level} de 5`
-    : isMe ? '$9,880 para Nivel 5' : demoLevel >= 5 ? 'Nivel máximo' : `Nivel ${demoLevel} de 5`;
-  const levelStats: ReadonlyArray<readonly [string, string]> = live
+      ? !stats ? (statsLoading ? t('page.levelInfo.loading') : t('page.levelInfo.noData')) : stats.level.nextLevelAt !== null ? t('page.levelInfo.toNext', { amount: fmtUSD(Math.max(0, stats.level.nextLevelAt - stats.invested)), level: stats.level.level + 1 }) : t('page.levelInfo.max')
+      : level === null ? t('page.levelInfo.private') : level >= 5 ? t('page.levelInfo.max') : t('page.levelInfo.ofTotal', { level })
+    : isMe ? t('page.levelInfo.toNext', { amount: '$9,880', level: 5 }) : demoLevel >= 5 ? t('page.levelInfo.max') : t('page.levelInfo.ofTotal', { level: demoLevel });
+  const levelStats: ReadonlyArray<readonly [string, LevelStatId]> = live
     ? isMe
-      ? [[stats ? fmtUSD(stats.invested) : '—', 'invertido total'], [stats ? monthsText(months) : '—', 'antigüedad'], ['—', 'reputación']]
-      : [['—', 'invertido total'], [personLive?.memberSince ? `desde ${monthLabel(personLive.memberSince)}` : '—', 'antigüedad'], ['—', 'reputación']]
+      ? [[stats ? fmtUSD(stats.invested) : '—', 'invested'], [stats ? monthsText(months, t) : '—', 'seniority'], ['—', 'reputation']]
+      : [['—', 'invested'], [personLive?.memberSince ? t('page.levelInfo.since', { date: monthLabel(personLive.memberSince, months12) }) : '—', 'seniority'], ['—', 'reputation']]
     : isMe
-      ? [[fmtUSD(40120), 'invertido total'], ['16 meses', 'antigüedad'], ['4.8', 'reputación']]
-      : [[fmtUSD(pf.invested), 'invertido total'], [demoHoldings[0]?.since ? `desde ${demoHoldings[0].since}` : '—', 'antigüedad'], [(person?.rep ?? 4.8).toFixed(1), 'reputación']];
+      ? [[fmtUSD(40120), 'invested'], [monthsText(16, t), 'seniority'], ['4.8', 'reputation']]
+      : [[fmtUSD(pf.invested), 'invested'], [demoHoldings[0]?.since ? t('page.levelInfo.since', { date: localMonthLabel(demoHoldings[0].since, months12) }) : '—', 'seniority'], [(person?.rep ?? 4.8).toFixed(1), 'reputation']];
   const levelData: LevelData = {
     level: level ?? 1,
     holdings: live && isMe ? stats?.assetsCount ?? holdings.length : holdings.length,
@@ -232,17 +229,18 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
     yieldEarned: yieldEarned ?? 0,
     rep,
     months,
-    since: live ? monthLabel(isMe ? stats?.memberSince ?? sessionUser?.createdAt : personLive?.memberSince) : isMe ? 'Mar 2025' : firstSince || '—',
+    // Data format ("Mar 2025", Spanish months): LevelWidgets parses it and shows it in the active language.
+    since: live ? monthLabel(isMe ? stats?.memberSince ?? sessionUser?.createdAt : personLive?.memberSince, MONTHS_ES) : isMe ? 'Mar 2025' : firstSince || '—',
   };
   // Live: the API's achievements (mine only; other people's are private).
-  const achievements: Achievement[] | null = live ? (isMe && stats ? stats.achievements.map(toAchievement) : null) : achievementsOf(levelData);
+  const achievements: Achievement[] | null = live ? (isMe && stats ? stats.achievements.map(toAchievement) : null) : achievementsOf(levelData).map(dataText.achievement);
 
   // ─── Header data ──────────────────────────────────────────────────────────
   const kyc = live
     ? isMe
-      ? (() => { const t = kycStatusTag(sessionUser?.kycStatus); return sessionUser?.kycStatus === 'verified' ? { label: 'KYC ✓', color: t.color } : { label: `KYC · ${t.label}`, color: t.color }; })()
-      : personLive?.kycVerified ? { label: 'KYC ✓', color: 'green' as const } : null
-    : { label: 'KYC ✓', color: 'green' as const };
+      ? (() => { const tag = kycStatusTag(sessionUser?.kycStatus); return sessionUser?.kycStatus === 'verified' ? { label: t('kyc.tagVerified'), color: tag.color } : { label: t('kyc.tag', { status: t(tag.labelKey) }), color: tag.color }; })()
+      : personLive?.kycVerified ? { label: t('kyc.tagVerified'), color: 'green' as const } : null
+    : { label: t('kyc.tagVerified'), color: 'green' as const };
   const followTarget: FollowTarget | null = person ? { kind: 'person', id: person.id } : null;
   const followKey = person ? `person-${person.id}` : '';
   const followBase = { following: person?.isFollowing ?? false, followers: social?.followersCount ?? 0 };
@@ -251,61 +249,62 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
   const followingCount = social?.followingCount ?? 0;
   const investmentsCount = investments ? String(holdings.length) : '—';
   const bio = live
-    ? company ? `Responsable de ${company.name}.` : holdings.length ? 'Inversor en activos reales tokenizados.' : ''
-    : isMe ? 'Inversor en activos reales tokenizados.' : company ? `Fundador y CEO de ${company.name}.` : person?.bio ?? '';
+    ? company ? t('page.bio.manager', { company: company.name }) : holdings.length ? t('page.bio.investor') : ''
+    : isMe ? t('page.bio.investor') : company ? t('page.bio.founder', { company: company.name }) : person?.bio ?? '';
 
   const avatar = isMobile ? 84 : 112;
   const sections: ReadonlyArray<readonly [Section, string]> = [
-    ['resumen', 'Resumen'],
-    ['inversiones', `Inversiones (${investmentsCount})`],
-    ['logros', 'Nivel y logros'],
-    ...(isMe ? [['actividad', 'Actividad'], ['cuenta', 'Cuenta y seguridad']] as const : []),
+    ['resumen', t('page.sections.summary')],
+    ['inversiones', t('page.sections.investments', { count: investmentsCount })],
+    ['logros', t('page.sections.achievements')],
+    ...(isMe ? [['actividad', t('page.sections.activity')], ['cuenta', t('page.sections.account')]] as const : []),
     // Live only: company account (register / status / KYB). Demo keeps the design's tabs.
-    ...(isMe && live ? [['empresa', sessionUser?.company ? 'Mi empresa' : 'Registrar mi empresa']] as const : []),
+    ...(isMe && live ? [['empresa', sessionUser?.company ? t('page.sections.myCompany') : t('page.sections.registerCompany')]] as const : []),
   ];
   const loadingMine = live && isMe && (holdingsLoading || statsLoading);
   const money = (v: number | null) => (v === null ? (loadingMine ? '…' : '—') : fmtUSD(v));
+  const privateText = t('page.kpis.private');
   const kpis: Kpi[] = [
-    { label: 'Portafolio RWA', value: money(current), sub: !amountsKnown ? 'Privado' : isMe ? 'Valor actual' : `Invertido ${fmtUSD(pf.invested)}`, icon: Icons.wallet },
-    { label: 'Rendimiento total', value: ret === null || !amountsKnown ? (loadingMine ? '…' : '—') : `${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%`, tone: ret !== null && amountsKnown ? (ret >= 0 ? 'pos' : 'neg') : undefined, sub: amountsKnown ? 'Valorización + rentas' : 'Privado', icon: IC.chart },
-    { label: 'Yield cobrado', value: money(yieldEarned), sub: amountsKnown ? 'Rentas en USDC' : 'Privado', icon: Icons.receive },
-    { label: 'Inversiones', value: investmentsCount, sub: investments ? `${cats.length} ${cats.length === 1 ? 'rubro' : 'rubros'}` : 'Privado', icon: IC.grid },
+    { id: 'portfolio', label: t('page.kpis.portfolio'), value: money(current), sub: !amountsKnown ? privateText : isMe ? t('page.kpis.currentValue') : t('page.kpis.investedAmount', { amount: fmtUSD(pf.invested) }), icon: Icons.wallet },
+    { id: 'return', label: t('page.kpis.return'), value: ret === null || !amountsKnown ? (loadingMine ? '…' : '—') : `${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%`, tone: ret !== null && amountsKnown ? (ret >= 0 ? 'pos' : 'neg') : undefined, sub: amountsKnown ? t('page.kpis.returnSub') : privateText, icon: IC.chart },
+    { id: 'yield', label: t('page.kpis.yield'), value: money(yieldEarned), sub: amountsKnown ? t('page.kpis.yieldSub') : privateText, icon: Icons.receive },
+    { id: 'investments', label: t('page.kpis.investments'), value: investmentsCount, sub: investments ? t(cats.length === 1 ? 'page.kpis.categoryOne' : 'page.kpis.categoryOther', { count: cats.length }) : privateText, icon: IC.grid },
   ];
-  const counts: ReadonlyArray<readonly [string, string, () => void]> = [
-    [investmentsCount, 'Inversiones', () => setSection('inversiones')],
-    [fmtCount(followersCount), 'Seguidores', () => setListTab('followers')],
-    [fmtCount(followingCount), 'Seguidos', () => setListTab('following')],
+  const counts: ReadonlyArray<readonly [string, string, string, () => void]> = [
+    ['investments', investmentsCount, t('page.counts.investments'), () => setSection('inversiones')],
+    ['followers', fmtCount(followersCount), t('page.counts.followers'), () => setListTab('followers')],
+    ['following', fmtCount(followingCount), t('page.counts.following'), () => setListTab('following')],
   ];
   const levelCard = <LevelCard lv={level} hint={levelHint} stats={levelStats} onOpen={() => setSection('logros')} />;
   const achCard = achievements
     ? <AchievementsCard achievements={achievements.slice(0, 6)} onOpen={() => setSection('logros')} />
-    : <PCard style={{ padding: '20px 20px' }}><div style={cardTitle}>Logros</div><div style={cardSub}>{live && isMe ? (statsLoading ? 'Cargando…' : 'No pudimos cargar tus logros.') : 'Los logros de cada inversor son privados.'}</div></PCard>;
-  const liveActivity: ActivityRow[] | null = activity ? activity.map(a => toActivityRow(a, now)) : null;
+    : <PCard style={{ padding: '20px 20px' }}><div style={cardTitle}>{t('page.achievements.title')}</div><div style={cardSub}>{live && isMe ? (statsLoading ? t('page.achievements.loading') : t('page.achievements.error')) : t('page.achievements.private')}</div></PCard>;
+  const liveActivity: ActivityRow[] | null = activity ? activity.map(a => toActivityRow(a, now, t, locale)) : null;
   const subtitle: ReactNode = live
     ? isMe
       ? sessionUser && (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <span title={sessionUser.walletAddress} style={{ fontVariantNumeric: 'tabular-nums' }}>{shortWallet}</span>
-          <CopyButton value={sessionUser.walletAddress} label="Copiar" />
+          <CopyButton value={sessionUser.walletAddress} label={t('page.copy')} />
           {sessionUser.email && (
             <>
               <span aria-hidden="true">·</span>
               <span style={{ overflowWrap: 'anywhere' }}>{sessionUser.email}</span>
               {!sessionUser.emailVerified && (
-                <button type="button" onClick={() => setEditing(true)} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label="Verificar email">
-                  <PTag label="Sin verificar" color="neutral" />
+                <button type="button" onClick={() => setEditing(true)} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label={t('page.verifyEmail')}>
+                  <PTag label={t('page.unverified')} color="neutral" />
                 </button>
               )}
             </>
           )}
           <span aria-hidden="true">·</span>
-          <span>Miembro desde {fmtDate(stats?.memberSince ?? sessionUser.createdAt, { month: 'long', year: 'numeric' })}</span>
+          <span>{t('page.memberSince', { date: fmtDate(stats?.memberSince ?? sessionUser.createdAt, { month: 'long', year: 'numeric' }, locale) })}</span>
         </span>
       )
       : personLive?.isPublic
-        ? personLive.memberSince ? `Miembro desde ${fmtDate(personLive.memberSince, { month: 'long', year: 'numeric' })}` : ''
-        : 'Perfil privado'
-    : isMe ? '@maxrodriguez · 0x4a9fE2b8…d82c · Miembro desde Mar 2025' : `@${person?.handle ?? ''}`;
+        ? personLive.memberSince ? t('page.memberSince', { date: fmtDate(personLive.memberSince, { month: 'long', year: 'numeric' }, locale) }) : ''
+        : t('page.privateProfile')
+    : isMe ? `@maxrodriguez · 0x4a9fE2b8…d82c · ${t('page.memberSince', { date: localMonthLabel('Mar 2025', months12) })}` : `@${person?.handle ?? ''}`;
 
   return (
     <div className="g-page" style={{ padding: isMobile ? '16px 16px 40px' : '24px 32px 40px', maxWidth: 1280, margin: '0 auto' }}>
@@ -314,7 +313,7 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14, minHeight: 28 }}>
           <button onClick={onBack}
             style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--sec)', fontFamily: 'var(--font-b)', fontSize: 13 }}>
-            {Icons.back} Volver
+            {Icons.back} {t('page.back')}
           </button>
         </div>
       )}
@@ -333,13 +332,13 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
         <div style={{ padding: isMobile ? '12px 16px 18px' : '14px 28px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', minHeight: avatar / 2 - 6 }}>
             {isMe
-              ? <PBtn variant="secondary" small onClick={live ? () => setEditing(true) : undefined}>Editar perfil</PBtn>
+              ? <PBtn variant="secondary" small onClick={live ? () => setEditing(true) : undefined}>{t('page.editProfile')}</PBtn>
               : person && followTarget && <FollowButton following={followState.following} onToggle={() => follow.toggle(followKey, followTarget, followBase)} />}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
             <h1 style={{ margin: 0, fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 22 : 26, color: 'var(--text)', letterSpacing: '-0.02em', overflowWrap: 'anywhere' }}>{user.name}</h1>
             {kyc && <PTag label={kyc.label} color={kyc.color} />}
-            {level !== null && <PTag label={`Nivel ${level}`} />}
+            {level !== null && <PTag label={t('page.levelTag', { level })} />}
           </div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--ter)', marginBottom: 12 }}>{subtitle}{isMe && <GuideButton tour="profile" />}</div>
           {avatarActions.error && <div role="alert" style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--neg)', marginBottom: 8 }}>{avatarActions.error}</div>}
@@ -348,8 +347,8 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
           )}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 18, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', fontFamily: 'var(--font-b)', fontSize: 14 }}>
-              {counts.map(([v, l, onClick]) => (
-                <button key={l} onClick={onClick} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
+              {counts.map(([id, v, l, onClick]) => (
+                <button key={id} onClick={onClick} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
                   <b style={{ color: 'var(--text)' }}>{v}</b> <span style={{ color: 'var(--ter)' }}>{l}</span>
                 </button>
               ))}
@@ -387,7 +386,7 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) 360px', gap: isMobile ? 14 : 20, alignItems: 'start' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 14 : 18, minWidth: 0 }}>
               <RecentInvestments holdings={holdings} nav={nav} isMe={isMe} onMore={() => setSection('inversiones')}
-                emptyText={investments ? undefined : 'Este inversor no muestra sus inversiones.'} loading={live && isMe && holdingsLoading && !liveHoldings} />
+                emptyText={investments ? undefined : t('page.investments.hidden')} loading={live && isMe && holdingsLoading && !liveHoldings} />
               {holdings.length > 0 && amountsKnown && <CategoryBreakdown holdings={holdings} />}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 14 : 18, minWidth: 0 }}>
@@ -400,31 +399,31 @@ export default function Profile({ nav, person, onCompany, onBack }: ProfileProps
       )}
 
       {section === 'inversiones' && (
-        <ProjectBrowser items={holdings} nav={nav} isMobile={isMobile} placeholder="Buscar en mis inversiones…"
-          emptyText={investments ? 'Todavía no tiene inversiones' : 'Este inversor no muestra sus inversiones'} />
+        <ProjectBrowser items={holdings} nav={nav} isMobile={isMobile} placeholder={t('page.investments.searchPlaceholder')}
+          emptyText={investments ? t('page.investments.browserEmpty') : t('page.investments.browserHidden')} />
       )}
 
       {section === 'logros' && (
         live && !isMe
           ? level === null
-            ? <PCard style={{ padding: '22px 24px' }}><div style={cardTitle}>Nivel y logros</div><div style={cardSub}>Este perfil es privado.</div></PCard>
+            ? <PCard style={{ padding: '22px 24px' }}><div style={cardTitle}>{t('page.sections.achievements')}</div><div style={cardSub}>{t('page.levelSection.privateProfile')}</div></PCard>
             : <LevelWidgets isMobile={isMobile} d={levelData} privateStats />
           : live && !stats
-            ? <PCard style={{ padding: '22px 24px' }}>{statsLoading ? <Skeleton rows={3} /> : <Notice tone="error">No pudimos cargar tu nivel y tus logros.</Notice>}</PCard>
+            ? <PCard style={{ padding: '22px 24px' }}>{statsLoading ? <Skeleton rows={3} /> : <Notice tone="error">{t('page.levelSection.error')}</Notice>}</PCard>
             : <LevelWidgets isMobile={isMobile} d={levelData} achievements={live ? achievements : undefined} />
       )}
 
       {section === 'actividad' && isMe && (
         live
           ? <ActivityCard items={liveActivity} loading={activityLoading} error={Boolean(activityError)} paged />
-          : <ActivityCard items={ACTIVITY} />
+          : <ActivityCard items={demoActivity(t)} />
       )}
 
       {section === 'empresa' && isMe && live && <MyCompanySection nav={nav} />}
 
       {section === 'cuenta' && isMe && (
         <>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 12 }}>{ACCOUNT_NOTE}</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 12 }}>{t('page.accountNote')}</div>
           <AccountTabs live={live} isMobile={isMobile} tab={tab} setTab={setTab} twofa={twofa} setTwofa={setTwofa} priv={priv} setPriv={setPriv}
             years={years} taxYear={taxYear ?? years[0] ?? new Date(now).getFullYear()} setTaxYear={setTaxYear} />
         </>
@@ -442,13 +441,13 @@ function fallbackAsset(id: number, name: string, cat: AssetCategory, location: s
   };
 }
 
-function toActivityRow(a: ActivityItem, now: number): ActivityRow {
+function toActivityRow(a: ActivityItem, now: number, t: TFn, locale: string): ActivityRow {
   const type: ActivityTone = a.type === 'dividend' ? 'pos' : a.type === 'investment' ? 'invest' : a.type;
   return {
     key: a.id,
     label: a.detail ? `${a.title} — ${a.detail}` : a.title,
     amount: a.amount === null ? null : `${a.type === 'dividend' ? '+' : ''}${fmtUSD(a.amount)}`,
-    time: <time dateTime={a.at}>{fmtRelative(a.at, now)}</time>,
+    time: <time dateTime={a.at}>{fmtRelative(a.at, now, t, locale)}</time>,
     type,
   };
 }
@@ -466,6 +465,7 @@ type FollowListsProps = {
 };
 
 function PersonFollowLists({ source, person, title, initialTab, followers, following, nav, onClose }: FollowListsProps) {
+  const { t } = useT('profile');
   const target: FollowTarget = { kind: 'person', id: person.id };
   const followersQ = useSocialQuery(source, `followers:${person.id}:${followers}`, s => s.followers(target), src => src.listFollowers(target, null));
   const followingQ = useSocialQuery(source, `following:${person.id}:${following}`, s => s.following(target), src => src.listFollowing(target, null));
@@ -486,8 +486,8 @@ function PersonFollowLists({ source, person, title, initialTab, followers, follo
     <FollowListModal title={title} initialTab={initialTab} onClose={onClose} onOpen={open}
       onToggleFollow={e => follow.toggle(keyOf(e), targetOf(e), { following: e.isFollowing, followers: 0 })}
       tabs={[
-        { id: 'followers', label: `Seguidores (${fmtCount(followersCount)})`, items: followerItems, more: followersCount - followerItems.length, loading: followersQ.loading },
-        { id: 'following', label: `Seguidos (${fmtCount(followingCount)})`, items: followingItems, loading: followingQ.loading },
+        { id: 'followers', label: t('page.followTabs.followers', { count: fmtCount(followersCount) }), items: followerItems, more: followersCount - followerItems.length, loading: followersQ.loading },
+        { id: 'following', label: t('page.followTabs.following', { count: fmtCount(followingCount) }), items: followingItems, loading: followingQ.loading },
       ]} />
   );
 }
@@ -503,9 +503,10 @@ function monthsSince(label: string | undefined): number {
 // Compact level system for the profile header: badge, 5-step track and
 // what's left for the next level. Opens the "Nivel y logros" tab.
 function LevelMini({ lv, hint, onOpen, full }: { lv: number | null; hint: string; onOpen: () => void; full: boolean }) {
+  const { t } = useT('profile');
   const level = lv ?? 0;
   return (
-    <button onClick={onOpen} title="Ver nivel y logros"
+    <button onClick={onOpen} title={t('page.levelInfo.open')}
       style={{ display: 'flex', alignItems: 'center', gap: 12, width: full ? '100%' : 340, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
       <div style={{
         width: 40, height: 40, borderRadius: 12, flexShrink: 0, background: 'var(--text)',
@@ -513,14 +514,14 @@ function LevelMini({ lv, hint, onOpen, full }: { lv: number | null; hint: string
       }}>{lv ?? '—'}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6, fontFamily: 'var(--font-b)' }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Nivel de inversor</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('page.levelInfo.title')}</span>
           <span style={{ fontSize: 11.5, color: 'var(--ter)' }}>{hint}</span>
         </div>
         <div style={{ display: 'flex', gap: 3 }}>
           {[1, 2, 3, 4, 5].map(n => (
             <div key={n} style={{ flex: 1 }}>
               <div style={{ height: 6, borderRadius: 99, background: n <= level ? 'var(--text)' : 'var(--surface2)', opacity: n < level ? 0.55 : 1 }} />
-              <div style={{ marginTop: 4, fontFamily: 'var(--font-b)', fontSize: 10, textAlign: 'center', color: n === level ? 'var(--text)' : 'var(--ter)', fontWeight: n === level ? 700 : 400 }}>N{n}</div>
+              <div style={{ marginTop: 4, fontFamily: 'var(--font-b)', fontSize: 10, textAlign: 'center', color: n === level ? 'var(--text)' : 'var(--ter)', fontWeight: n === level ? 700 : 400 }}>{t('page.levelInfo.short', { n })}</div>
             </div>
           ))}
         </div>
@@ -543,7 +544,7 @@ function KpiRow({ kpis, isMobile }: { kpis: readonly Kpi[]; isMobile: boolean })
   return (
     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(4, minmax(0,1fr))', gap: isMobile ? 10 : 14, marginBottom: 20 }}>
       {kpis.map((k, i) => (
-        <motion.div key={k.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+        <motion.div key={k.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
           <PCard style={{ padding: isMobile ? '14px 14px' : '16px 18px', height: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <span style={{ width: 30, height: 30, borderRadius: 10, background: 'var(--surface2)', color: 'var(--sec)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{k.icon}</span>
@@ -563,24 +564,26 @@ function KpiRow({ kpis, isMobile }: { kpis: readonly Kpi[]; isMobile: boolean })
 function RecentInvestments({ holdings, nav, onMore, isMe, emptyText, loading }: {
   holdings: readonly Investment[]; nav: NavFn; onMore: () => void; isMe: boolean; emptyText?: string; loading?: boolean;
 }) {
+  const { t } = useT('profile');
+  const { t: tc } = useT('common');
   const rows = [...holdings].sort((a, b) => monthsSince(a.since) - monthsSince(b.since)).slice(0, 4);
   return (
     <PCard style={{ padding: '20px 20px 8px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
         <div>
-          <div style={cardTitle}>{isMe ? 'Mis inversiones' : 'Inversiones'}</div>
-          <div style={cardSub}>Las más recientes</div>
+          <div style={cardTitle}>{isMe ? t('page.investments.mine') : t('page.investments.title')}</div>
+          <div style={cardSub}>{t('page.investments.recent')}</div>
         </div>
         {holdings.length > 0 && (
           <button onClick={onMore} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border-l)', borderRadius: 999, padding: '6px 12px', cursor: 'pointer', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap' }}>
-            Ver todas ({holdings.length}) {IC.arrowR}
+            {t('page.investments.seeAll', { count: holdings.length })} {IC.arrowR}
           </button>
         )}
       </div>
       {holdings.length === 0 && (
         loading
           ? <div style={{ padding: '12px 0 16px' }}><Skeleton rows={2} /></div>
-          : <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '12px 0 16px' }}>{emptyText ?? 'Todavía no tiene inversiones.'}</div>
+          : <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', padding: '12px 0 16px' }}>{emptyText ?? t('page.investments.none')}</div>
       )}
       {rows.map((h, i) => {
         const a = h.asset;
@@ -591,7 +594,7 @@ function RecentInvestments({ holdings, nav, onMore, isMe, emptyText, loading }: 
             <img src={a.img} alt="" style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.cat} · {a.location}</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tc(`categories.${a.cat}`)} · {a.location}</div>
             </div>
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{a.apy}% <span style={{ fontFamily: 'var(--font-b)', fontWeight: 500, fontSize: 11, color: 'var(--ter)' }}>APY</span></div>
@@ -605,10 +608,11 @@ function RecentInvestments({ holdings, nav, onMore, isMe, emptyText, loading }: 
 }
 
 function StagePill({ stage }: { stage: SocialAsset['stage'] }) {
+  const { t: tc } = useT('common');
   const op = stage === 'Operativo';
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 4, fontFamily: 'var(--font-b)', fontSize: 11, fontWeight: 600, color: op ? 'var(--pos)' : 'var(--sec)' }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: op ? 'var(--pos)' : '#f5a623' }} />{stage}
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: op ? 'var(--pos)' : '#f5a623' }} />{tc(`stages.${stage}`)}
     </span>
   );
 }
@@ -616,12 +620,14 @@ function StagePill({ stage }: { stage: SocialAsset['stage'] }) {
 // Where the portfolio is, by category: one stacked bar + legend.
 const CAT_COLORS = ['#3b82f6', '#22c55e', '#f5a623', '#a78bfa', '#ef4444', '#06b6d4', '#ec4899'];
 function CategoryBreakdown({ holdings }: { holdings: readonly Investment[] }) {
+  const { t } = useT('profile');
+  const { t: tc } = useT('common');
   const total = holdings.reduce((s, h) => s + (h.current ?? 0), 0) || 1;
   const byCat = categoriesOf(holdings, h => h.current ?? 0);
   return (
     <PCard style={{ padding: '20px 20px' }}>
-      <div style={cardTitle}>Distribución por rubro</div>
-      <div style={{ ...cardSub, marginBottom: 14 }}>Porcentaje del valor actual</div>
+      <div style={cardTitle}>{t('page.breakdown.title')}</div>
+      <div style={{ ...cardSub, marginBottom: 14 }}>{t('page.breakdown.sub')}</div>
       <div style={{ display: 'flex', height: 10, borderRadius: 99, overflow: 'hidden', gap: 2, marginBottom: 14 }}>
         {byCat.map(([cat, v], i) => <div key={cat} style={{ width: `${(v / total) * 100}%`, background: CAT_COLORS[i % CAT_COLORS.length] }} />)}
       </div>
@@ -629,7 +635,7 @@ function CategoryBreakdown({ holdings }: { holdings: readonly Investment[] }) {
         {byCat.map(([cat, v], i) => (
           <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-b)', fontSize: 13 }}>
             <span style={{ width: 8, height: 8, borderRadius: 3, background: CAT_COLORS[i % CAT_COLORS.length], flexShrink: 0 }} />
-            <span style={{ flex: 1, color: 'var(--text)', fontWeight: 600 }}>{cat}</span>
+            <span style={{ flex: 1, color: 'var(--text)', fontWeight: 600 }}>{tc(`categories.${cat}`)}</span>
             <span style={{ color: 'var(--ter)' }}>{fmtUSD(v)}</span>
             <b style={{ color: 'var(--text)', minWidth: 38, textAlign: 'right' }}>{((v / total) * 100).toFixed(0)}%</b>
           </div>
@@ -649,16 +655,17 @@ const ACT_ICON: Record<ActivityTone, ReactNode> = {
 
 // `items` null: still loading (live) or failed; `paged`: long histories show the first rows with "Ver toda".
 function ActivityCard({ items, loading, error, paged }: { items: readonly ActivityRow[] | null; loading?: boolean; error?: boolean; paged?: boolean }) {
+  const { t } = useT('profile');
   const [all, setAll] = useState(false);
   const list = items ?? [];
   const shown = paged && !all ? list.slice(0, ACTIVITY_PAGE) : list;
   return (
         <PCard style={{ padding: '22px 24px' }}>
-          <h2 style={{ ...cardTitle, margin: '0 0 12px' }}>Actividad reciente</h2>
+          <h2 style={{ ...cardTitle, margin: '0 0 12px' }}>{t('page.activity.title')}</h2>
           {!items ? (
-            loading ? <Skeleton rows={4} /> : error ? <Notice tone="error">No pudimos cargar tu actividad. Prueba recargar la página.</Notice> : null
+            loading ? <Skeleton rows={4} /> : error ? <Notice tone="error">{t('page.activity.error')}</Notice> : null
           ) : list.length === 0 ? (
-            <EmptyState title="Todavía no hay movimientos" text="Aquí vas a ver tus inversiones, dividendos, verificaciones y consultas de soporte." />
+            <EmptyState title={t('page.activity.emptyTitle')} text={t('page.activity.emptyText')} />
           ) : (
           <ul style={{ display: 'flex', flexDirection: 'column', listStyle: 'none', margin: 0, padding: 0 }}>
             {shown.map((a, i) => (
@@ -678,7 +685,7 @@ function ActivityCard({ items, loading, error, paged }: { items: readonly Activi
           )}
           {paged && list.length > ACTIVITY_PAGE && (
             <button type="button" onClick={() => setAll(v => !v)} aria-expanded={all} style={{ marginTop: 12, border: 'none', background: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, color: 'var(--accent-text)' }}>
-              {all ? 'Ver menos' : `Ver toda la actividad (${list.length})`}
+              {all ? t('page.activity.showLess') : t('page.activity.showAll', { count: list.length })}
             </button>
           )}
         </PCard>
@@ -687,7 +694,8 @@ function ActivityCard({ items, loading, error, paged }: { items: readonly Activi
 
 // Level: badge, segmented track with the current step highlighted, and
 // the three headline stats. Plain card, no rainbow border.
-function LevelCard({ lv, hint, stats, onOpen }: { lv: number | null; hint: string; stats: ReadonlyArray<readonly [string, string]>; onOpen?: () => void }) {
+function LevelCard({ lv, hint, stats, onOpen }: { lv: number | null; hint: string; stats: ReadonlyArray<readonly [string, LevelStatId]>; onOpen?: () => void }) {
+  const { t } = useT('profile');
   const level = lv ?? 0;
   return (
     <PCard style={{ padding: '20px 20px' }}>
@@ -695,11 +703,11 @@ function LevelCard({ lv, hint, stats, onOpen }: { lv: number | null; hint: strin
         <div style={{ width: 46, height: 46, borderRadius: 14, background: 'var(--text)', color: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 19, flexShrink: 0 }}>{lv ?? '—'}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={cardTitle}>Nivel de inversor</div>
+          <div style={cardTitle}>{t('page.levelInfo.title')}</div>
           <div style={{ ...cardSub, marginTop: 2 }}>{hint}</div>
         </div>
         {onOpen && (
-          <button onClick={onOpen} aria-label="Ver nivel y logros" style={{ width: 32, height: 32, borderRadius: 10, border: '1px solid var(--border-l)', background: 'var(--surface2)', color: 'var(--sec)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IC.arrowR}</button>
+          <button onClick={onOpen} aria-label={t('page.levelInfo.open')} style={{ width: 32, height: 32, borderRadius: 10, border: '1px solid var(--border-l)', background: 'var(--surface2)', color: 'var(--sec)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{IC.arrowR}</button>
         )}
       </div>
       <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
@@ -709,16 +717,16 @@ function LevelCard({ lv, hint, stats, onOpen }: { lv: number | null; hint: strin
       </div>
       <div style={{ display: 'flex', marginBottom: 16 }}>
         {[1, 2, 3, 4, 5].map(n => (
-          <div key={n} style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 10.5, color: n === level ? 'var(--text)' : 'var(--ter)', fontWeight: n === level ? 700 : 500 }}>N{n}</div>
+          <div key={n} style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 10.5, color: n === level ? 'var(--text)' : 'var(--ter)', fontWeight: n === level ? 700 : 500 }}>{t('page.levelInfo.short', { n })}</div>
         ))}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
         {stats.map(([v, l]) => (
           <div key={l} style={{ background: 'var(--surface2)', borderRadius: 12, padding: '10px 12px', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {l === 'reputación' && v !== '—' ? <>{v}<span style={{ color: '#f5a623', display: 'flex' }}>{IC.star}</span></> : v}
+              {l === 'reputation' && v !== '—' ? <>{v}<span style={{ color: '#f5a623', display: 'flex' }}>{IC.star}</span></> : v}
             </div>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', marginTop: 2 }}>{l}</div>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', marginTop: 2 }}>{t(`page.levelInfo.stats.${l}`)}</div>
           </div>
         ))}
       </div>
@@ -728,13 +736,14 @@ function LevelCard({ lv, hint, stats, onOpen }: { lv: number | null; hint: strin
 
 // Achievement tiles with line icons; locked ones show a lock and progress.
 function AchievementsCard({ achievements, onOpen }: { achievements: readonly Achievement[]; onOpen: () => void }) {
+  const { t } = useT('profile');
   const done = achievements.filter(a => a.p >= 1).length;
   return (
     <PCard style={{ padding: '20px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-        <div style={cardTitle}>Logros</div>
+        <div style={cardTitle}>{t('page.achievements.title')}</div>
         <button onClick={onOpen} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>
-          <b style={{ color: 'var(--text)' }}>{done}</b> de {achievements.length}
+          <b style={{ color: 'var(--text)' }}>{done}</b> {t('page.achievements.ofTotal', { total: achievements.length })}
         </button>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 8 }}>
@@ -742,7 +751,7 @@ function AchievementsCard({ achievements, onOpen }: { achievements: readonly Ach
           const ok = a.p >= 1;
           return (
             <motion.div key={a.label} initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 + i * 0.05 }}
-              aria-label={`${a.label}: ${ok ? 'logrado' : `${Math.round(a.p * 100)}%`}`}
+              aria-label={t('page.achievements.aria', { label: a.label, state: ok ? t('page.achievements.achievedAria') : `${Math.round(a.p * 100)}%` })}
               style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 10px', borderRadius: 14, background: 'var(--surface2)', minWidth: 0 }}>
               <span style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: ok ? 'var(--text)' : 'transparent', color: ok ? 'var(--surface)' : 'var(--ter)', border: ok ? 'none' : '1px dashed var(--border)' }}>
@@ -750,7 +759,7 @@ function AchievementsCard({ achievements, onOpen }: { achievements: readonly Ach
               </span>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, fontWeight: 700, color: ok ? 'var(--text)' : 'var(--sec)', lineHeight: 1.25 }}>{a.label}</div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', marginTop: 2 }}>{ok ? 'Logrado' : `${Math.round(a.p * 100)}%`}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)', marginTop: 2 }}>{ok ? t('page.achievements.achieved') : `${Math.round(a.p * 100)}%`}</div>
               </div>
             </motion.div>
           );
@@ -761,25 +770,26 @@ function AchievementsCard({ achievements, onOpen }: { achievements: readonly Ach
 }
 
 function QuickLinks({ nav, live }: { nav: NavFn; live: boolean }) {
+  const { t } = useT('profile');
   return (
     <>
         <PCard style={{ padding: '18px 20px' }}>
-          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 14 }}>Accesos rápidos</div>
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 14 }}>{t('page.quickLinks.title')}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {([
-              ['Mis inversiones',   () => nav('pertenencias'), 'var(--accent-bg)', 'var(--accent-text)'],
-              ['Panel principal',   () => nav('dashboard'),    'var(--surface2)',  'var(--sec)'         ],
-              ['Academia Brikme',() => nav('academia'),     'var(--surface2)',  'var(--sec)'         ],
-              ['Centro de ayuda',   () => nav('ayuda'),        'var(--surface2)',  'var(--sec)'         ],
-            ] as const).map(([label, action, bg, color]) => (
-              <button key={label} onClick={action} style={{
+              ['investments', () => nav('pertenencias'), 'var(--accent-bg)', 'var(--accent-text)'],
+              ['dashboard',   () => nav('dashboard'),    'var(--surface2)',  'var(--sec)'         ],
+              ['academy',     () => nav('academia'),     'var(--surface2)',  'var(--sec)'         ],
+              ['help',        () => nav('ayuda'),        'var(--surface2)',  'var(--sec)'         ],
+            ] as const).map(([id, action, bg, color]) => (
+              <button key={id} onClick={action} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '12px 14px', borderRadius: 12, border: 'none',
                 background: bg, color, cursor: 'pointer',
                 fontFamily: 'var(--font-b)', fontSize: 13.5, fontWeight: 600,
                 transition: 'opacity 0.15s',
               }}>
-                {label}
+                {t(`page.quickLinks.${id}`)}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
             ))}
@@ -793,9 +803,9 @@ function QuickLinks({ nav, live }: { nav: NavFn; live: boolean }) {
           background: 'linear-gradient(135deg, oklch(0.20 0.03 265) 0%, oklch(0.28 0.08 270) 100%)',
           color: '#fff', position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16, marginBottom: 6 }}>Invita un amigo</div>
+          <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{t('page.referral.title')}</div>
           <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, opacity: 0.7, lineHeight: 1.55, marginBottom: 14 }}>
-            Gana $50 en USDC cuando tu referido haga su primera inversión.
+            {t('page.referral.text')}
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{
@@ -807,7 +817,7 @@ function QuickLinks({ nav, live }: { nav: NavFn; live: boolean }) {
               padding: '9px 14px', borderRadius: 10, border: 'none',
               background: 'rgba(255,255,255,0.18)', color: '#fff',
               fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
-            }}>Copiar</button>
+            }}>{t('page.referral.copy')}</button>
           </div>
         </div>
         )}
@@ -831,14 +841,19 @@ type AccountTabsProps = {
 };
 
 function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPriv, years, taxYear, setTaxYear }: AccountTabsProps) {
+  const { t, raw } = useT('profile');
+  const { t: tc } = useT('common');
+  const months12 = raw<string[]>('social.months');
+  const kycChecks = raw<string[]>('page.demo.kyc.checks');
+  const privacyItems = raw<{ label: string; desc: string }[]>('page.demo.privacy.items');
   const openYear = (y: number) => {
     setTaxYear(y);
     setTab('tax');
   };
   return (
         <div style={{ marginTop: 28 }}>
-          <div role="tablist" aria-label="Cuenta y seguridad" style={{ display: 'flex', gap: 3, background: 'var(--surface2)', borderRadius: 14, padding: 4, width: 'fit-content', marginBottom: 20, ...(isMobile ? { maxWidth: '100%', overflowX: 'auto', scrollbarWidth: 'none' } : null) }}>
-            {TABS.map(([id, label]) => (
+          <div role="tablist" aria-label={t('page.accountTabs.aria')} style={{ display: 'flex', gap: 3, background: 'var(--surface2)', borderRadius: 14, padding: 4, width: 'fit-content', marginBottom: 20, ...(isMobile ? { maxWidth: '100%', overflowX: 'auto', scrollbarWidth: 'none' } : null) }}>
+            {TABS.map(id => (
               <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} style={{
                 padding: '9px 18px', borderRadius: 11, border: 'none', cursor: 'pointer',
                 background: tab === id ? 'var(--surface)' : 'transparent',
@@ -846,7 +861,7 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
                 fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: tab === id ? 600 : 500,
                 boxShadow: tab === id ? 'var(--sh-sm)' : 'none', transition: 'all 0.16s',
                 ...(isMobile ? { flexShrink: 0, whiteSpace: 'nowrap', padding: '9px 14px' } : null),
-              }}>{label}</button>
+              }}>{t(`page.accountTabs.${id}`)}</button>
             ))}
           </div>
 
@@ -859,26 +874,26 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
                   <PCard style={{ padding: '22px 24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Estado KYC</div>
-                      <PTag label="Verificado ✓" color="green" />
+                      <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{t('page.demo.kyc.title')}</div>
+                      <PTag label={t('page.demo.kyc.verified')} color="green" />
                     </div>
-                    {KYC_CHECKS.map((c, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: i < KYC_CHECKS.length - 1 ? '1px solid var(--border-l)' : 'none' }}>
+                    {kycChecks.map((c, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: i < kycChecks.length - 1 ? '1px solid var(--border-l)' : 'none' }}>
                         <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#22c55e20', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l5 5L20 7" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </div>
                         <span style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--text)' }}>{c}</span>
                       </div>
                     ))}
-                    <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 14 }}>Verificado por Sumsub · 1 Jun 2026</div>
+                    <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 14 }}>{t('page.demo.kyc.verifiedBy', { date: localMonthLabel('1 Jun 2026', months12) })}</div>
                   </PCard>
 
                   <PCard style={{ padding: '22px 24px' }}>
-                    <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>Información personal</div>
+                    <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>{t('page.demo.kyc.personalInfo')}</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                      {[['Nombre completo','Maximiliano Rodríguez'],['Fecha de nacimiento','14 Mar 1991'],['Nacionalidad','Argentina'],['Tipo de documento','DNI'],['Número de documento','38.421.764'],['País de residencia','Argentina']].map(([k,v]) => (
+                      {([['fullName','Maximiliano Rodríguez'],['birthDate',localMonthLabel('14 Mar 1991', months12)],['nationality',tc('countries.Argentina')],['docType','DNI'],['docNumber','38.421.764'],['residence',tc('countries.Argentina')]] as const).map(([k,v]) => (
                         <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--border-l)', paddingBottom: 10 }}>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{k}</div>
+                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{t(`page.demo.kyc.fields.${k}`)}</div>
                           <div style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: 'var(--text)', fontWeight: 600 }}>{v}</div>
                         </div>
                       ))}
@@ -894,14 +909,14 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
               <motion.div key="docs" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 {live ? <DocumentsTab years={years} onOpenYear={openYear} /> : (
                 <PCard style={{ padding: '22px 24px' }}>
-                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>Documentos subidos</div>
+                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>{t('page.demo.docs.title')}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 12 }}>
-                    {[['Documento — frente','Documento de identidad','28 May 2026'],['Documento — reverso','Documento de identidad','28 May 2026'],['Prueba de domicilio','Factura de servicio','30 May 2026'],['Selfie con documento','Verificación facial','28 May 2026']].map(([name, type, date], i) => (
+                    {([['idFront','id','28 May 2026'],['idBack','id','28 May 2026'],['address','utility','30 May 2026'],['selfie','face','28 May 2026']] as const).map(([name, type, date], i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 14, border: '1.5px solid var(--border-l)', background: 'var(--surface2)' }}>
                         <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-text)', flexShrink: 0 }}>{Icons.doc}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)' }}>{name}</div>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2 }}>{type} · {date}</div>
+                          <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 13.5, color: 'var(--text)' }}>{t(`page.demo.docs.items.${name}`)}</div>
+                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 2 }}>{t(`page.demo.docs.types.${type}`)} · {localMonthLabel(date, months12)}</div>
                         </div>
                         <PTag label="✓" color="green" />
                       </div>
@@ -917,12 +932,12 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
               <motion.div key="2fa" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 {live ? <SecurityTab /> : (
                 <PCard style={{ padding: '22px 24px' }}>
-                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 20 }}>Autenticación de dos factores</div>
+                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 20 }}>{t('page.demo.twofa.title')}</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {([
-                      ['totp',    'Autenticador TOTP',     'Google Authenticator, Authy, 1Password', '🔐'],
-                      ['passkey', 'Passkey / Biométrico',  'Face ID, Touch ID, llave de seguridad',  '🪪'],
-                      ['sms',     'SMS',                   'Código enviado a +54 9 11 XXXX XXXX',    '📱'],
+                      ['totp',    t('page.demo.twofa.totp'),    t('page.demo.twofa.totpSub'),                                  '🔐'],
+                      ['passkey', t('page.demo.twofa.passkey'), t('page.demo.twofa.passkeySub'),                               '🪪'],
+                      ['sms',     t('page.demo.twofa.sms'),     t('page.demo.twofa.smsSub', { phone: '+54 9 11 XXXX XXXX' }), '📱'],
                     ] as const).map(([id, label, sub, icon]) => (
                       <div key={id} style={{
                         display: 'flex', alignItems: 'center', gap: 16, padding: '16px 18px',
@@ -936,9 +951,9 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
                           <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{label}</div>
                           <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginTop: 2 }}>{sub}</div>
                         </div>
-                        {twofa[id] && <PTag label="Activo" color="green" />}
+                        {twofa[id] && <PTag label={t('page.demo.twofa.active')} color="green" />}
                         <PBtn variant={twofa[id] ? 'secondary' : 'accent'} small onClick={() => setTwofa(p => ({...p,[id]:!p[id]}))}>
-                          {twofa[id] ? 'Desactivar' : 'Activar'}
+                          {twofa[id] ? t('page.demo.twofa.disable') : t('page.demo.twofa.enable')}
                         </PBtn>
                       </div>
                     ))}
@@ -953,23 +968,23 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
               <motion.div key="tax" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 {live ? <StatementsTab year={taxYear} years={years} onYear={setTaxYear} /> : (<>
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
-                  {[['2025','$4,590','rendimiento RWA'],['2024','$2,130','rendimiento RWA']].map(([year, amount, desc]) => (
+                  {[['2025','$4,590',t('page.demo.tax.yieldRwa')],['2024','$2,130',t('page.demo.tax.yieldRwa')]].map(([year, amount, desc]) => (
                     <PCard key={year} style={{ padding: '24px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                         <div>
-                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Año fiscal</div>
+                          <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>{t('page.demo.tax.fiscalYear')}</div>
                           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 900, fontSize: 32, color: 'var(--text)', letterSpacing: '-0.03em' }}>{year}</div>
                         </div>
-                        <PTag label="Disponible" color="green" />
+                        <PTag label={t('page.demo.tax.available')} color="green" />
                       </div>
                       <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 4 }}>{desc}</div>
                       <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 22, color: 'var(--text)', letterSpacing: '-0.02em', marginBottom: 18 }}>{amount}</div>
-                      <PBtn variant="secondary" small style={{ width: '100%', justifyContent: 'center' }}>Descargar PDF</PBtn>
+                      <PBtn variant="secondary" small style={{ width: '100%', justifyContent: 'center' }}>{t('page.demo.tax.download')}</PBtn>
                     </PCard>
                   ))}
                 </div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', marginTop: 14, lineHeight: 1.65, padding: '0 4px' }}>
-                  Los reportes incluyen todas las distribuciones recibidas, ganancias/pérdidas realizadas y costos de transacción deducibles. Consulta un asesor fiscal para tu situación particular.
+                  {t('page.demo.tax.note')}
                 </div>
                 </>)}
               </motion.div>
@@ -980,14 +995,9 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
               <motion.div key="priv" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 {live ? <PrivacyTab /> : (<>
                 <PCard style={{ padding: '22px 24px', marginBottom: 16 }}>
-                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>Privacidad y datos</div>
-                  {[
-                    ['Portafolio público',          'Otros inversores pueden ver el valor de tus posiciones'],
-                    ['Notificaciones de marketing', 'Recibir noticias, lanzamientos y promociones de Brikme'],
-                    ['Compartir datos con Sumsub',  'Necesario para mantener la verificación KYC activa'],
-                    ['Analítica de uso',             'Ayudar a mejorar la plataforma con datos anónimos'],
-                  ].map(([label, desc], i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '13px 0', borderBottom: i < 3 ? '1px solid var(--border-l)' : 'none' }}>
+                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 18 }}>{t('page.demo.privacy.title')}</div>
+                  {privacyItems.map(({ label, desc }, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '13px 0', borderBottom: i < privacyItems.length - 1 ? '1px solid var(--border-l)' : 'none' }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontFamily: 'var(--font-b)', fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{label}</div>
                         <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginTop: 3 }}>{desc}</div>
@@ -1004,11 +1014,11 @@ function AccountTabs({ live, isMobile, tab, setTab, twofa, setTwofa, priv, setPr
                 </PCard>
 
                 <PCard style={{ padding: '22px 24px', border: '1.5px solid var(--neg)' }}>
-                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--neg)', marginBottom: 6 }}>Zona de peligro</div>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 16 }}>Estas acciones son irreversibles. Procede con cuidado.</div>
+                  <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--neg)', marginBottom: 6 }}>{t('page.demo.privacy.danger')}</div>
+                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', marginBottom: 16 }}>{t('page.demo.privacy.dangerText')}</div>
                   <div style={{ display: 'flex', gap: 12, flexWrap: isMobile ? 'wrap' : undefined }}>
-                    <PBtn variant="secondary" small style={{ borderColor: 'var(--neg)', color: 'var(--neg)' }}>Descargar mis datos</PBtn>
-                    <PBtn variant="secondary" small style={{ borderColor: 'var(--neg)', color: 'var(--neg)' }}>Eliminar cuenta</PBtn>
+                    <PBtn variant="secondary" small style={{ borderColor: 'var(--neg)', color: 'var(--neg)' }}>{t('page.demo.privacy.download')}</PBtn>
+                    <PBtn variant="secondary" small style={{ borderColor: 'var(--neg)', color: 'var(--neg)' }}>{t('page.demo.privacy.delete')}</PBtn>
                   </div>
                 </PCard>
                 </>)}

@@ -1,0 +1,764 @@
+{
+  "shared": {
+    "retry": "Try again",
+    "signIn": "Sign in",
+    "you": "You"
+  },
+  "login": {
+    "back": "Back",
+    "title": "Sign in to Brikme",
+    "subtitle": "Connect your wallet to invest in tokenized real-world assets.",
+    "benefits": {
+      "kyc": {
+        "title": "Verify once",
+        "desc": "Complete KYC once and you're cleared to invest, buy on the secondary market and take part in the ICO."
+      },
+      "balance": {
+        "title": "Your balance and your investments",
+        "desc": "Deposit and withdraw crypto, pay for your investments and collect income in USDC, all in one place."
+      }
+    },
+    "footnote": "By connecting your wallet, you agree to verify your identity (KYC) to use Brikme."
+  },
+  "academy": {
+    "title": "Academy",
+    "sub": "Learn about tokenization, RWAs and decentralized finance.",
+    "emptyTitle": "No articles published yet",
+    "emptyText": "Soon you'll find guides here on tokenization, real-world assets and decentralized finance.",
+    "featured": "Featured article",
+    "readTime": "{{time}} read",
+    "readTimeShort": "{{time}} read",
+    "read": "Read ✓",
+    "cats": {
+      "Todos": "All",
+      "Tokenización": "Tokenization",
+      "Guías": "Guides",
+      "RWA": "RWA",
+      "DeFi": "DeFi"
+    }
+  },
+  "article": {
+    "back": "Back to Academy",
+    "readTime": "{{time}} read",
+    "ctaTitle": "Ready to invest?",
+    "ctaText": "Explore the projects available on the Primary Market.",
+    "ctaButton": "View projects",
+    "related": "Keep reading",
+    "markedRead": "Marked as read ✓",
+    "comingSoon": "The full article will be available soon.",
+    "loadError": "We couldn't load the article. Please try again in a few minutes."
+  },
+  "legal": {
+    "version": "Version {{version}}",
+    "draft": "Draft pending legal review"
+  },
+  "helpCenter": {
+    "title": "Help Center",
+    "sub": "Find answers to the most frequently asked questions.",
+    "searchLabel": "Search the help center",
+    "searchPlaceholder": "Search the help center…",
+    "topics": {
+      "invest": "How to invest",
+      "wallet": "Wallet and funds",
+      "kyc": "KYC and security",
+      "token": "BRIK token",
+      "swap": "Swap and DeFi",
+      "secondary": "Secondary market"
+    },
+    "articles_one": "{{count}} article",
+    "articles_other": "{{count}} articles",
+    "faqTitle": "Frequently asked questions",
+    "contactTitle": "Didn't find what you were looking for?",
+    "contactTextDemo": "Our support team replies within 4 business hours.",
+    "contactText": "Write to us and we'll reply here; you'll see the answer in My tickets.",
+    "openTicket": "Open a ticket",
+    "liveChat": "Live chat",
+    "ticketCreated": "We created your ticket. We'll reply here and you'll see the answer in My tickets.",
+    "ticketCreatedAttachmentError": "We created your ticket, but couldn't attach the file: {{error}} You can try again from here."
+  },
+  "faqs": [
+    {
+      "q": "How does asset tokenization work?",
+      "a": "Each real-world asset is represented by an ERC-3643 security token. When you invest, you receive tokens in proportion to your USDC contribution, and only wallets with a verified identity can hold or receive them."
+    },
+    {
+      "q": "How do I receive returns?",
+      "a": "When a project distributes dividends, the platform publishes the distribution on-chain with a Merkle proof. We let you know and you claim it in USDC from My holdings, straight to your wallet."
+    },
+    {
+      "q": "How can I sell my tokens?",
+      "a": "The secondary market between investors is in development. If an asset is liquidated, you claim your capital from My holdings at the liquidation price."
+    },
+    {
+      "q": "What is the KYC process?",
+      "a": "It's the identity verification required by anti-money-laundering rules. You fill in your details under Profile → KYC, the team reviews them and, once approved, we register your identity on-chain to enable your investments."
+    },
+    {
+      "q": "What is the minimum investment?",
+      "a": "One token. The price of each token is shown on each project's page, along with the amount available."
+    },
+    {
+      "q": "What are the risks of investing?",
+      "a": "Any investment in real-world assets can lose value, and estimated returns are not guaranteed. Review each project's documents before investing, and diversify."
+    },
+    {
+      "q": "What is the BRIK token?",
+      "a": "BRIK is Brikme's utility token. Its presale hasn't opened yet; the planned benefits are fee discounts, early access to projects and participation in governance."
+    },
+    {
+      "q": "Am I using real money?",
+      "a": "Not while the platform is in its test environment: the USDC and POL are test tokens with no value. You can request test funds from My holdings."
+    }
+  ],
+  "faq": {
+    "loadError": "We couldn't load the frequently asked questions.",
+    "emptyTitle": "No frequently asked questions yet",
+    "emptyText": "If you have a question, write to us and we'll reply here.",
+    "noResultsTitle": "No results found",
+    "noResultsText": "Try different words, or open a ticket and we'll help you.",
+    "clearSearch": "Clear search",
+    "filterByCategory": "Filter by category",
+    "general": "General",
+    "questions_one": "{{count}} question",
+    "questions_other": "{{count}} questions",
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results",
+    "resultsIn_one": "{{count}} result in {{category}}",
+    "resultsIn_other": "{{count}} results in {{category}}"
+  },
+  "assistant": {
+    "title": "Brikme Assistant",
+    "name": "Assistant",
+    "unavailable": "The assistant isn't available right now; open a ticket and we'll get back to you.",
+    "error": "We couldn't get a response. Please try again in a moment.",
+    "rateLimited": "The assistant received too many questions in a row. Wait a moment and try again.",
+    "tooLong": "Your message can be up to {{max}} characters long.",
+    "signInTitle": "Sign in to use the assistant",
+    "signInText": "The assistant is available once you're signed in. In the meantime, you can search the frequently asked questions.",
+    "greeting": "Hi, I'm Brikme's virtual assistant. Ask me how to use the platform: your account, identity verification, investments or payments.",
+    "log": "Conversation with the assistant",
+    "typing": "The assistant is typing…",
+    "inputLabel": "Your question",
+    "placeholder": "Type your question…",
+    "send": "Send",
+    "disclaimer": "Automated answers may contain mistakes. Don't share sensitive information."
+  },
+  "tickets": {
+    "categories": {
+      "account": "Account",
+      "kyc": "Identity verification",
+      "investment": "Investments",
+      "payments": "Payments",
+      "technical": "Technical issue",
+      "other": "Other"
+    },
+    "status": {
+      "open": "Open",
+      "answered": "Answered",
+      "closed": "Closed"
+    },
+    "listTitle": "My tickets",
+    "signInListTitle": "Sign in to see your tickets",
+    "signInListText": "Once signed in, you can open tickets, attach files and follow the team's replies.",
+    "loadListError": "We couldn't load your tickets.",
+    "emptyTitle": "You haven't opened any tickets yet",
+    "emptyText": "When you open one, you'll see the team's replies here.",
+    "newReply": "New reply",
+    "openTicket": "Open a ticket",
+    "cancel": "Cancel",
+    "sending": "Sending…",
+    "submit": "Send ticket",
+    "signInNewTitle": "Sign in to open a ticket",
+    "signInNewText": "That way we can reply to you, and you'll see the answer in My tickets.",
+    "newIntro": "Tell us what happened in as much detail as possible. We'll reply here and you'll see the answer in My tickets.",
+    "subject": "Subject",
+    "subjectPlaceholder": "E.g.: I can't see my investment",
+    "category": "Category",
+    "categoryPlaceholder": "Choose a category",
+    "message": "Message",
+    "messageHint": "{{count}}/{{max}} characters · minimum 10",
+    "messagePlaceholder": "Describe the problem, what you tried and, if relevant, the asset or transaction.",
+    "attachmentOptional": "Attachment (optional)",
+    "removeFile": "Remove {{name}}",
+    "remove": "Remove",
+    "attachFile": "Attach file",
+    "fileTypes": "PDF, PNG, JPG or WebP · up to 10 MB.",
+    "sendingTicket": "Sending ticket…",
+    "createError": "We couldn't create the ticket. Please try again in a few minutes.",
+    "uploadError": "We couldn't upload the file.",
+    "sent": "Message sent. We'll let you know when the team replies.",
+    "sendError": "We couldn't send the message. Please try again.",
+    "closedOk": "You closed the ticket.",
+    "closeError": "We couldn't close the ticket. Please try again.",
+    "attached": "We attached {{name}}.",
+    "uploadRetryError": "We couldn't upload the file. Please try again.",
+    "downloadError": "We couldn't download {{name}}. Please try again.",
+    "signInDetailTitle": "Sign in to see this ticket",
+    "signInDetailText": "Tickets are private: only you and the support team can see them.",
+    "loadError": "We couldn't load the ticket.",
+    "openedOn": "Opened on",
+    "messagesLabel": "Ticket messages",
+    "staff": "Brikme team",
+    "attachments": "Attachments ({{count}}/{{max}})",
+    "downloading": "Downloading…",
+    "download": "Download",
+    "closedNotice": "This ticket is closed and read-only. If you need more help, open a new one.",
+    "openNew": "Open a new ticket",
+    "replyLabel": "Your reply",
+    "limitReached": "You've reached the maximum of {{max}} files for this ticket.",
+    "replyHint": "You can attach PDF, PNG, JPG or WebP files up to 10 MB.",
+    "replyPlaceholder": "Type your message…",
+    "sendingMessage": "Sending message…",
+    "uploadingFile": "Uploading file…",
+    "closingTicket": "Closing ticket…",
+    "fallbackTitle": "Support ticket",
+    "uploading": "Uploading…",
+    "close": "Close ticket",
+    "send": "Send",
+    "confirmTitle": "Close this ticket?",
+    "confirmText": "You'll still be able to read it, but you won't be able to reply or attach files. If you need help later, open a new ticket.",
+    "errors": {
+      "subjectMin": "Enter a subject of at least 4 characters.",
+      "subjectMax": "The subject can be up to {{subjectMax}} characters long.",
+      "category": "Choose a category.",
+      "messageMin": "Tell us a bit more: the message needs at least 10 characters.",
+      "messageMax": "The message can be up to {{messageMax}} characters long.",
+      "replyEmpty": "Write a message.",
+      "replyCheck": "Check your message.",
+      "maxAttachments": "This ticket already has the maximum of {{max}} attachments.",
+      "closed": "This ticket is closed. If you need more help, open a new one.",
+      "notFound": "We couldn't find this ticket.",
+      "badFile": "We couldn't process the file. Use PDF, PNG, JPG or WebP.",
+      "tooLarge": "The file exceeds the 10 MB limit."
+    }
+  },
+  "guide": {
+    "howItWorks": "How does it work?",
+    "reset": {
+      "title": "Platform guides",
+      "text": "Replay the walkthroughs that explain each section, just like the first time. This applies on all your devices.",
+      "saving": "Saving…",
+      "button": "Show the guides again",
+      "ok": "Done: each section will show you its guide the next time you visit.",
+      "error": "We couldn't save the change. Please try again."
+    },
+    "list": {
+      "title": "Step-by-step guides",
+      "lead": "Short walkthroughs that show you how each section works. You can watch them as many times as you like.",
+      "seen": "Viewed",
+      "rearmed": "Done: you'll see it next time.",
+      "showAgain": "Show again",
+      "view": "View guide"
+    },
+    "glossary": {
+      "title": "Glossary",
+      "lead": "The new words you'll come across in Brikme, explained without jargon.",
+      "less": "Show less",
+      "all": "See the full glossary ({{count}})"
+    },
+    "overlay": {
+      "progress": "Step {{current}} of {{total}}",
+      "skip": "Skip guide",
+      "back": "Back",
+      "done": "Got it",
+      "next": "Next",
+      "announce": "Step {{current}} of {{total}}: {{title}}"
+    }
+  },
+  "tours": {
+    "welcome": {
+      "title": "Welcome to Brikme",
+      "summary": "What Brikme is, your wallet, USDC, KYC and where to see your investments.",
+      "steps": {
+        "intro": {
+          "title": "Welcome to Brikme",
+          "body": "Here you can invest in real-world assets (real estate, farmland, energy) by buying small shares called tokens. In a minute we'll show you the basics."
+        },
+        "wallet": {
+          "title": "Your wallet: your account and your purse",
+          "body": "Your wallet lets you sign in to Brikme without a password, and it's where you keep your money and your tokens. Nobody else can move them: you authorize every transaction with a signature."
+        },
+        "usdc": {
+          "title": "USDC, the digital dollar",
+          "body": "You invest and get paid in USDC: each USDC is worth 1 US dollar, 1 to 1. You deposit it into your wallet from My Holdings."
+        },
+        "kyc": {
+          "title": "Verify your identity (KYC)",
+          "body": "Before you invest, we ask you to verify who you are. It's required by law for real-world assets and protects everyone from fraud. You do it just once from your Profile."
+        },
+        "holdings": {
+          "title": "Where to see your investments",
+          "body": "In My Holdings you'll see your balance, your tokens, dividends to claim and all your transactions."
+        },
+        "help": {
+          "title": "Help whenever you need it",
+          "body": "Every section has a “How does it work?” button to review its guide. The Help Center has all the guides and a glossary of new terms."
+        }
+      }
+    },
+    "feed": {
+      "title": "Feed",
+      "summary": "Company updates, milestones, following, commenting and filtering.",
+      "steps": {
+        "news": {
+          "title": "Company updates",
+          "body": "Here you'll see what the companies behind each project post: progress, results and announcements. Posts marked “Milestone” are major achievements."
+        },
+        "follow": {
+          "title": "Follow companies",
+          "body": "Tap “Follow” on a company so you never miss its updates or upcoming projects."
+        },
+        "comment": {
+          "title": "Comment and ask",
+          "body": "You can like and comment. It's a great way to ask the company about its project before investing."
+        },
+        "filter": {
+          "title": "Filter what interests you",
+          "body": "Search by company or project and filter by post type to see only what matters to you."
+        },
+        "project": {
+          "title": "From post to project",
+          "body": "“View project” takes you to the full project page to review the numbers and, if you like, invest."
+        }
+      }
+    },
+    "tokenizations": {
+      "title": "Tokenizations",
+      "summary": "What tokenizing means, what a token is, estimated APY and % funded.",
+      "steps": {
+        "what": {
+          "title": "What does tokenizing an asset mean?",
+          "body": "It means dividing a real-world asset (a building, a farm, a solar plant) into many digital shares called tokens. That way you can invest with little money, and your share is recorded on the blockchain."
+        },
+        "card": {
+          "title": "Each card is a project",
+          "body": "A token represents a share of the asset and entitles you to your share of its returns. Tap the card to see the full project page."
+        },
+        "apy": {
+          "title": "Estimated APY",
+          "body": "It's the estimated annual return: how much your investment could earn in a year. It's a projection, not a guarantee."
+        },
+        "funded": {
+          "title": "% funded",
+          "body": "Shows how much of the issuance other investors have already bought. When it reaches 100%, the initial sale closes."
+        },
+        "filter": {
+          "title": "Filter and compare",
+          "body": "Filter by asset type or return to find projects that suit you."
+        }
+      }
+    },
+    "project": {
+      "title": "Project page",
+      "summary": "Price per token, estimated return, documents, how to invest and risks.",
+      "where": "Shown when you open a project.",
+      "steps": {
+        "intro": {
+          "title": "The project page",
+          "body": "Everything you need to decide is here: what the asset is, who manages it, how much it could return and its documents."
+        },
+        "price": {
+          "title": "Price per token",
+          "body": "It's what each share of the asset costs, in USDC (1 USDC = 1 dollar). You can start with a single token."
+        },
+        "apy": {
+          "title": "Estimated return (APY)",
+          "body": "It's an estimate of how much it could return in a year. It isn't guaranteed: it depends on how the asset performs."
+        },
+        "funded": {
+          "title": "Funding progress",
+          "body": "The percentage of tokens already sold. Once it reaches 100%, tokens can only be bought on the secondary market."
+        },
+        "docs": {
+          "title": "Documents and updates",
+          "body": "These tabs hold the token structure, the legal documents and the company's updates. Read them before investing."
+        },
+        "invest": {
+          "title": "How to invest",
+          "body": "Choose how many tokens you want, tap Invest and confirm in your wallet. You need a verified identity and USDC in your balance."
+        },
+        "risks": {
+          "title": "Keep the risks in mind",
+          "body": "Every investment carries risk: the asset may return less than estimated, and selling your tokens may take time. Only invest what you can hold."
+        }
+      }
+    },
+    "checkout": {
+      "title": "Checkout",
+      "summary": "Why your wallet asks for two signatures, what gas is and what happens next.",
+      "where": "Shown when you invest in a project.",
+      "steps": {
+        "review": {
+          "title": "Review your purchase",
+          "body": "Here you'll see how many tokens you're buying, the price and the total in USDC before you pay."
+        },
+        "signatures": {
+          "title": "Your wallet will ask for two signatures",
+          "body": "First you authorize the exact USDC amount for this purchase, not a cent more. Then you confirm the transaction."
+        },
+        "gas": {
+          "title": "What is gas?",
+          "body": "Every blockchain transaction pays a small network fee, called gas. Brikme doesn't charge it: your wallet shows you the amount before you confirm."
+        },
+        "after": {
+          "title": "What happens next?",
+          "body": "Once the network confirms, the tokens arrive in your wallet and you'll see them in My Holdings, where you also claim your dividends."
+        }
+      }
+    },
+    "secondary": {
+      "title": "Secondary market",
+      "summary": "Buying and selling between investors, discount or premium, fees and offers.",
+      "steps": {
+        "intro": {
+          "title": "Buying and selling between investors",
+          "body": "Here investors buy and sell tokens with each other after the issuance. Every trade happens directly between wallets."
+        },
+        "price": {
+          "title": "Asking price vs. real price",
+          "body": "Each offer shows the seller's asking price and the token's reference value. If they ask less, it's a discount; if they ask more, a premium."
+        },
+        "buy": {
+          "title": "Buy",
+          "body": "Your wallet approves the exact USDC amount and confirms the purchase. The tokens go straight to your wallet."
+        },
+        "sell": {
+          "title": "Sell your tokens",
+          "body": "List a sale by choosing the amount and price. When it sells, the seller's fee is deducted, and you'll see it before confirming."
+        },
+        "withdraw": {
+          "title": "Your tokens stay in your wallet",
+          "body": "Listing a sale doesn't take the tokens out of your wallet: they only move when someone buys. You can withdraw your offer whenever you like."
+        }
+      }
+    },
+    "holdings": {
+      "title": "My Holdings",
+      "summary": "USDC balance, deposits, withdrawals, dividends, capital and transactions.",
+      "steps": {
+        "balance": {
+          "title": "Your USDC balance",
+          "body": "It's the money available in your wallet to invest, in digital dollars (1 USDC = 1 dollar)."
+        },
+        "deposit": {
+          "title": "Deposit",
+          "body": "We show you your wallet address and the network. Send USDC only over that network: if you use another one, the funds may be lost."
+        },
+        "testFunds": {
+          "title": "Test funds",
+          "body": "We're on a test network: under Deposit you'll find “Test funds” to practice with play money. They don't exist on the real network."
+        },
+        "withdraw": {
+          "title": "Withdraw",
+          "body": "Send your USDC to another wallet or to an exchange. Double-check the address: blockchain transfers can't be reversed."
+        },
+        "dividends": {
+          "title": "Dividends",
+          "body": "When a project distributes profits, you get a share based on your tokens. It appears as “to claim” and you claim it in USDC from your investments."
+        },
+        "capital": {
+          "title": "Capital after liquidation",
+          "body": "When a project ends and is liquidated, you get back your share of the capital with “Claim capital”."
+        },
+        "movements": {
+          "title": "Transactions",
+          "body": "Your history: deposits, investments, dividends and withdrawals, each one recorded on the blockchain."
+        }
+      }
+    },
+    "token": {
+      "title": "BRIK token",
+      "summary": "What the platform token is, its sale rounds and its utilities.",
+      "steps": {
+        "intro": {
+          "title": "BRIK, the platform token",
+          "body": "BRIK is a utility token: it doesn't represent a real-world asset, but benefits within Brikme."
+        },
+        "sale": {
+          "title": "Sale rounds",
+          "body": "It's sold in rounds, each with its own price and allocation. The bar shows how much of the current round has been sold."
+        },
+        "utilities": {
+          "title": "What is it for?",
+          "body": "Here are its utilities within the platform. Read them before buying: its value can go up or down."
+        },
+        "buy": {
+          "title": "Buy BRIK",
+          "body": "When the sale is open, you'll be able to buy from here with USDC, confirming in your wallet."
+        },
+        "position": {
+          "title": "Your position",
+          "body": "Here you'll see how many BRIK you hold in your wallet."
+        }
+      }
+    },
+    "profile": {
+      "title": "Profile",
+      "summary": "Identity verification (KYC), on-chain identity, privacy and your company.",
+      "steps": {
+        "intro": {
+          "title": "Your profile",
+          "body": "This is where you manage your account: details, identity verification, documents, privacy and your company."
+        },
+        "kyc": {
+          "title": "Identity verification (KYC)",
+          "body": "Fill in your details just once under “Account and security”. Once approved, your wallet receives an on-chain identity: a seal that says “verified” without publishing your data."
+        },
+        "privacy": {
+          "title": "Your privacy",
+          "body": "Your personal data is never published on the blockchain. Under Privacy you choose whether other investors can see your name, your photo or which projects you invested in (never the amounts)."
+        },
+        "company": {
+          "title": "Your company",
+          "body": "If you want to tokenize an asset, register your company here. We verify it (KYB) before it can publish projects."
+        }
+      }
+    },
+    "tokenize": {
+      "title": "Tokenize an asset",
+      "summary": "How to request the tokenization of an asset and the status of your application.",
+      "steps": {
+        "intro": {
+          "title": "Tokenize your asset",
+          "body": "If your company has an income-generating asset, you can finance it by selling tokens to investors. It all starts with an application."
+        },
+        "steps": {
+          "title": "A step-by-step application",
+          "body": "Asset type, information, token structure, contact and review. Add documents that back the asset: they speed up the review."
+        },
+        "status": {
+          "title": "Track the status",
+          "body": "In “My applications” you'll see where each one stands: submitted, under review, approved or rejected. If anything is missing, we'll let you know."
+        },
+        "after": {
+          "title": "After approval",
+          "body": "Our team structures the token together with you and publishes the project in Tokenizations so investors can buy."
+        }
+      }
+    },
+    "companies": {
+      "title": "Companies",
+      "summary": "Company profiles, verification, following and how to register yours.",
+      "where": "Shown when you open a company's profile.",
+      "steps": {
+        "intro": {
+          "title": "Company profile",
+          "body": "Each company posts its projects and progress here. Check who's behind it before investing."
+        },
+        "verified": {
+          "title": "Verified company",
+          "body": "This badge means Brikme reviewed its legal documents (KYB, the company verification)."
+        },
+        "follow": {
+          "title": "Follow it",
+          "body": "When you follow a company, you see its updates in your feed and hear about its new projects."
+        },
+        "tabs": {
+          "title": "Projects, milestones and reviews",
+          "body": "Browse the tabs to see its projects, the milestones it has reached and what other investors think."
+        },
+        "own": {
+          "title": "Do you have a company?",
+          "body": "Register it from your Profile, under “Register my company”. Once it's verified, you can apply to tokenize an asset."
+        }
+      }
+    }
+  },
+  "glossary": {
+    "blockchain": {
+      "term": "Blockchain",
+      "definition": "A public, shared ledger that nobody can secretly delete or change. It records who holds each token and every transaction, so anyone can verify it."
+    },
+    "wallet": {
+      "term": "Wallet",
+      "aka": "Digital wallet",
+      "definition": "It's your account and your purse at the same time: you use it to sign in to Brikme (no password) and to keep your USDC and your tokens. Only you can authorize transactions from your wallet."
+    },
+    "direccion": {
+      "term": "Wallet address",
+      "definition": "Your wallet's \"account number\": a code that starts with 0x. Share it to receive funds; never share your secret phrase or your private key."
+    },
+    "firma": {
+      "term": "Signature",
+      "definition": "It's how you say \"yes, I authorize this\" from your wallet. A signature to sign in costs nothing; a signature that moves money becomes a transaction."
+    },
+    "usdc": {
+      "term": "USDC",
+      "aka": "Digital dollar",
+      "definition": "A digital dollar: each USDC is worth 1 US dollar and is backed 1 to 1. It's the currency you invest with and receive dividends in on Brikme."
+    },
+    "token": {
+      "term": "Token",
+      "definition": "A digital unit that represents a share of a real-world asset (for example, a fraction of a property or a harvest). Holding tokens entitles you to a proportional share of its returns."
+    },
+    "tokenizacion": {
+      "term": "Tokenization",
+      "definition": "Dividing a real-world asset into many tokens so several people can invest in it with small amounts. Ownership of each token is recorded on the blockchain."
+    },
+    "contrato": {
+      "term": "Smart contract",
+      "aka": "Self-executing contract",
+      "definition": "A program that lives on the blockchain and enforces rules automatically, without intermediaries: for example, delivering your tokens when you pay or distributing dividends among investors."
+    },
+    "red": {
+      "term": "Network",
+      "aka": "Test network",
+      "definition": "The blockchain where transactions are recorded. On a test network the money is play money: it's for practicing without risk and has no real value."
+    },
+    "gas": {
+      "term": "Gas",
+      "aka": "Network fee",
+      "definition": "A small fee the network charges to record a transaction. Brikme doesn't charge it; your wallet shows you the amount before you confirm."
+    },
+    "kyc": {
+      "term": "KYC / KYB",
+      "aka": "Identity verification",
+      "definition": "KYC (\"know your customer\") means verifying who you are; KYB is the same for companies. The law requires it to invest in real-world assets, and it protects everyone from fraud."
+    },
+    "identidad": {
+      "term": "On-chain identity",
+      "definition": "A seal on the blockchain that says \"this wallet is verified\", without publishing your personal data. It's what lets your wallet receive tokens of regulated assets."
+    },
+    "pool": {
+      "term": "Pool",
+      "definition": "Each project's fund: it gathers investors' money, delivers the tokens and then distributes the returns and the capital."
+    },
+    "apy": {
+      "term": "APY",
+      "aka": "Estimated annual return",
+      "definition": "How much your investment could return in a year, as a percentage. It's the project's estimate, not a promise: the actual result may be higher or lower."
+    },
+    "dividendo": {
+      "term": "Dividend",
+      "definition": "Your share of the asset's profits based on your tokens. It's paid in USDC and you claim it from My Holdings."
+    },
+    "liquidacion": {
+      "term": "Liquidation",
+      "definition": "The closing of a project: the asset is sold or its term ends, and the capital is distributed among investors according to their tokens."
+    },
+    "primario": {
+      "term": "Primary market",
+      "definition": "Where you buy tokens directly from the project when it raises funds (Tokenizations)."
+    },
+    "secundario": {
+      "term": "Secondary market",
+      "definition": "Where investors buy and sell tokens with each other after the issuance. The seller sets the price."
+    },
+    "faucet": {
+      "term": "Faucet",
+      "aka": "Test funds",
+      "definition": "A tap of play money for practicing on the test network. It never exists on the real network."
+    }
+  },
+  "onboarding": {
+    "title": "Welcome to Brikme",
+    "sub": "Complete your profile to start investing in real-world assets.",
+    "stepsLabel": "Steps",
+    "steps": {
+      "profile": "Your details",
+      "email": "Email",
+      "done": "Done"
+    },
+    "usage": {
+      "legend": "How will you use Brikme?",
+      "person": {
+        "title": "Individual",
+        "text": "I invest in real-world assets with my wallet."
+      },
+      "company": {
+        "title": "Company",
+        "text": "I'm registering my company to tokenize its assets."
+      }
+    },
+    "profile": {
+      "title": "Tell us about yourself",
+      "help": "We use these details for your account and to keep you posted on your investments. You can change them later from your profile.",
+      "name": "Name",
+      "namePlaceholder": "What should we call you?",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "country": "Country of residence",
+      "countryPlaceholder": "Select your country",
+      "companySection": "Company details",
+      "companyHelp": "We review it together with the company verification (KYB). Until we approve it, its page isn't public.",
+      "termsBefore": "I accept the ",
+      "terms": "Terms",
+      "termsMiddle": " and the ",
+      "privacy": "Privacy Policy",
+      "termsAfter": ".",
+      "saving": "Saving…",
+      "continue": "Continue"
+    },
+    "errors": {
+      "nameMin": "Enter at least 2 characters.",
+      "nameMax": "Use 80 characters at most.",
+      "nameChars": "The name contains characters that aren't allowed.",
+      "emailRequired": "Enter your email.",
+      "emailTooLong": "The email is too long.",
+      "emailInvalid": "Enter a valid email.",
+      "country": "Choose your country.",
+      "terms": "You need to accept the Terms and the Privacy Policy."
+    },
+    "email": {
+      "title": "Verify your email",
+      "helpBefore": "This confirms that ",
+      "helpAfter": " belongs to you. It's optional: you can do it later.",
+      "yourEmail": "your email",
+      "preparing": "Getting your email verification ready…",
+      "unavailable": "Email verification will be available soon. You can keep using the platform as usual.",
+      "continue": "Continue",
+      "sending": "Sending a 6-digit code…",
+      "sentBefore": "We sent a code to ",
+      "sentAfter": ". It expires in {{minutes}} minutes. Check your spam folder too.",
+      "codeLabel": "Verification code",
+      "codeAria": "6-digit verification code",
+      "enterCode": "Enter the 6 digits of the code.",
+      "skip": "Skip for now",
+      "resend": "Resend code",
+      "verifying": "Verifying…",
+      "verify": "Verify"
+    },
+    "done": {
+      "companyTitle": "We registered {{name}}",
+      "companyText": "Your company is pending verification. Complete the company verification (KYB) so we can approve it; in the meantime, you can already prepare the tokenization of your assets.",
+      "pendingTag": "Pending verification",
+      "pendingNote": "Until we approve it, the company's page isn't public.",
+      "toPanel": "Go to dashboard",
+      "completeKyb": "Complete KYB",
+      "titleNamed": "All set, {{name}}!",
+      "title": "All set!",
+      "configuredVerified": "Your account is set up and your email is verified.",
+      "configured": "Your account is set up.",
+      "needsKyc": "To invest, you need to verify your identity (KYC). It takes a few minutes and enables your wallet on-chain.",
+      "kycPending": "Your identity verification is under review: we'll let you know when it's ready.",
+      "kycDone": "Your identity is already verified: you can start investing.",
+      "kycTag": "KYC pending",
+      "kycNote": "Without KYC you can explore projects, but you can't invest or collect returns.",
+      "completeKyc": "Complete KYC"
+    },
+    "messages": {
+      "network": "We couldn't connect to the server. Check your connection and try again.",
+      "sessionExpired": "Your session expired. Reconnect your wallet to continue.",
+      "tooManyAttempts": "You made too many attempts. Wait a few minutes and try again.",
+      "termsUpdated": "The terms have been updated. Reload the page and accept them again.",
+      "emailInvalid": "The email isn't valid.",
+      "nameInvalid": "The name isn't valid: use between 2 and 80 characters.",
+      "countryInvalid": "Choose a country from the list.",
+      "checkData": "Check your details and try again.",
+      "saveError": "We couldn't save your details. Please try again in a few minutes.",
+      "noEmail": "Your account doesn't have an email yet. You can add one later from your profile.",
+      "codesTooFast": "You requested several codes in a row. Wait a few minutes before requesting another.",
+      "sendError": "We couldn't send the code. Please try again in a few minutes.",
+      "codeWrong": "The code is incorrect.",
+      "codeWrongNoAttempts": "The code is incorrect and you have no attempts left. Request a new code.",
+      "codeWrongLeft_one": "The code is incorrect. You have 1 attempt left.",
+      "codeWrongLeft_other": "The code is incorrect. You have {{count}} attempts left.",
+      "codeExpired": "The code expired or is no longer valid. Request a new one.",
+      "codeTooManyAttempts": "You've exceeded the allowed attempts. Request a new code.",
+      "emailChanged": "Your email changed while you were verifying. Request a new code.",
+      "tooManyAttemptsRow": "You made too many attempts in a row. Wait a few minutes and try again.",
+      "codeDigits": "The code has 6 digits.",
+      "verifyError": "We couldn't verify the code. Please try again."
+    }
+  }
+}

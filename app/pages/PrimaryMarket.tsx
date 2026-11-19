@@ -11,12 +11,13 @@ import { useMobile } from '~/hooks/useMobile';
 import { useMagnetScroll } from '~/hooks/useMagnetScroll';
 import GuideButton from '~/features/guide/GuideButton';
 import FeaturedDemoCard from '~/features/demo-flow/FeaturedDemoCard';
+import { useDataLabel } from '~/features/market/i18n';
+import { useT } from '~/i18n/useT';
 
 // ─── Filter options ───────────────────────────────────────────────────────────
 type FilterOptions = { cats: readonly string[]; countries: readonly string[]; companies: readonly string[]; issuers: readonly string[] };
 
 const ISSUER_ORDER: readonly AssetIssuer[] = ['keychain', 'verified', 'community'];
-const ISSUER_LABEL: Record<'Todos' | AssetIssuer, string> = { Todos: 'Todos', keychain: 'BRIKME', verified: 'Verificado', community: 'Comunidad' };
 const DEMO_OPTIONS: FilterOptions = { cats: RWA_CATS, countries: RWA_COUNTRIES, companies: RWA_COMPANIES, issuers: ['Todos', ...ISSUER_ORDER] };
 
 const uniqueSorted = (values: string[]) => [...new Set(values.filter(Boolean))].sort((x, y) => x.localeCompare(y, 'es'));
@@ -35,7 +36,10 @@ const ISSUER_KEYS: readonly string[] = ['Todos', ...ISSUER_ORDER];
 const isIssuerKey = (v: string): v is 'Todos' | AssetIssuer => ISSUER_KEYS.includes(v);
 
 /** On-chain badge: the asset's pool is deployed and accepting investments. */
-const OnchainTag = () => <PTag label="On-chain" color="purple" style={{ background:'rgba(130,71,229,0.92)', color:'#fff' }} />;
+function OnchainTag() {
+  const { t } = useT('market');
+  return <PTag label={t('primary.onchain')} color="purple" style={{ background:'rgba(130,71,229,0.92)', color:'#fff' }} />;
+}
 
 // ─── Search + filter bar ──────────────────────────────────────────────────────
 type FilterBarProps = {
@@ -51,7 +55,10 @@ type FilterBarProps = {
 
 function FilterBar({ search, setSearch, cat, setCat, country, setCountry, company, setCompany, issuer, setIssuer, options, pinned }: FilterBarProps) {
   const [open, setOpen] = useState(false);
+  const { t } = useT('market');
+  const dataLabel = useDataLabel();
   const hasFilters = cat !== 'Todos' || country !== 'Todos' || company !== 'Todos' || issuer !== 'Todos';
+  const issuerLabel = (k: 'Todos' | AssetIssuer) => (k === 'Todos' ? dataLabel('categories', k) : k === 'keychain' ? 'BRIKME' : t(`issuer.${k}`));
 
   return (
     <div data-guide="market-filters" style={{ marginBottom: pinned ? 0 : 22 }}>
@@ -63,19 +70,19 @@ function FilterBar({ search, setSearch, cat, setCat, country, setCountry, compan
           </span>
           <input
             value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar proyectos, tokens, empresas..."
+            placeholder={t('primary.searchPlaceholder')}
             style={{ width:'100%', boxSizing:'border-box', padding:'10px 14px 10px 38px', borderRadius:12, border:'1.5px solid var(--border)', background:'var(--surface)', color:'var(--text)', fontFamily:'var(--font-b)', fontSize:13.5, outline:'none' }}
           />
         </div>
         <button onClick={() => setOpen(o => !o)}
           style={{ display:'flex', alignItems:'center', gap:7, padding:'10px 16px', borderRadius:12, border:`1.5px solid ${hasFilters ? 'var(--accent)' : 'var(--border)'}`, background: hasFilters ? 'var(--accent-bg)' : 'var(--surface)', color: hasFilters ? 'var(--accent-text)' : 'var(--sec)', cursor:'pointer', fontFamily:'var(--font-b)', fontSize:13, fontWeight:600, flexShrink:0 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-          Filtros {hasFilters && <span style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', display:'inline-block' }}/>}
+          {t('filters.title')} {hasFilters && <span style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', display:'inline-block' }}/>}
         </button>
         {hasFilters && (
           <button onClick={() => { setCat('Todos'); setCountry('Todos'); setCompany('Todos'); setIssuer('Todos'); }}
             style={{ padding:'10px 14px', borderRadius:12, border:'1.5px solid var(--border)', background:'transparent', color:'var(--ter)', cursor:'pointer', fontSize:12, fontFamily:'var(--font-b)' }}>
-            Limpiar
+            {t('filters.clear')}
           </button>
         )}
       </div>
@@ -86,12 +93,12 @@ function FilterBar({ search, setSearch, cat, setCat, country, setCountry, compan
           <motion.div initial={{ height:0, opacity:0 }} animate={{ height:'auto', opacity:1 }} exit={{ height:0, opacity:0 }}
             style={{ overflow:'hidden' }}>
             <div style={{ padding:'16px 18px', background:'var(--surface)', border:'1.5px solid var(--border)', borderRadius:14, maxHeight: pinned ? '55vh' : undefined, overflowY: pinned ? 'auto' : undefined, display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:16 }}>
-              <FilterGroup label="Categoría" value={cat} onChange={setCat} options={options.cats} />
-              <FilterGroup label="País" value={country} onChange={setCountry} options={options.countries} />
-              <FilterGroup label="Empresa" value={company} onChange={setCompany} options={options.companies} />
-              <FilterGroup label="Tipo de emisor" value={issuer} onChange={setIssuer}
+              <FilterGroup label={t('filters.category')} value={cat} onChange={setCat} options={options.cats} labels={options.cats.map(c => dataLabel('categories', c))} />
+              <FilterGroup label={t('filters.country')} value={country} onChange={setCountry} options={options.countries} labels={options.countries.map(c => dataLabel('countries', c))} />
+              <FilterGroup label={t('filters.company')} value={company} onChange={setCompany} options={options.companies} labels={options.companies.map(c => (c === 'Todos' ? dataLabel('countries', c) : c))} />
+              <FilterGroup label={t('filters.issuerType')} value={issuer} onChange={setIssuer}
                 options={options.issuers}
-                labels={options.issuers.map(k => (isIssuerKey(k) ? ISSUER_LABEL[k] : k))} />
+                labels={options.issuers.map(k => (isIssuerKey(k) ? issuerLabel(k) : k))} />
             </div>
           </motion.div>
         )}
@@ -134,6 +141,8 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
   const [company, setCompany] = useState('Todos');
   const [issuer, setIssuer]   = useState('Todos');
   const mobile = useMobile();
+  const { t } = useT('market');
+  const dataLabel = useDataLabel();
 
   // Backend enabled: the catalog comes from the API (GET /v1/assets); otherwise the demo data.
   const live = useSession().status !== 'disabled';
@@ -231,11 +240,11 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
     <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:8 }}>
       <div style={{ fontFamily:'var(--font-b)', fontSize:11, fontWeight:600, color:'var(--sec)',
         background:'var(--surface2)', padding:'4px 10px', borderRadius:999, border:'1px solid var(--border-l)' }}>
-        Próximo en {heroCountdown}s
+        {t('primary.nextIn', { s: heroCountdown })}
       </div>
       <div style={{ display:'flex', gap:6 }}>
         {heroItems.map((item, i) => (
-          <button key={item.id} onClick={() => goToHero(i)} title={item.name} aria-label={`Destacado ${i + 1}: ${item.name}`} aria-current={i === heroIndex ? 'true' : undefined}
+          <button key={item.id} onClick={() => goToHero(i)} title={item.name} aria-label={t('primary.featuredAria', { n: i + 1, name: item.name })} aria-current={i === heroIndex ? 'true' : undefined}
             style={{
               width: i === heroIndex ? 20 : 7, height:7, borderRadius:999,
               border:'none', padding:0, cursor:'pointer',
@@ -262,8 +271,8 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
   return (
     <div className="g-page" style={{ padding:'28px 32px 40px', maxWidth:1200, margin:'0 auto' }}>
       <PSection
-        title="Mercado Primario"
-        sub="Proyectos tokenizados en el ecosistema Brikme. Invierte desde la emisión."
+        title={t('primary.title')}
+        sub={t('primary.sub')}
         help={<GuideButton tour="tokenizations" />}
         action={mobile ? null : heroCounter}
       />
@@ -297,22 +306,22 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.88) 100%)' }} />
                   <div style={{ position:'absolute', top:14, left:14, right:14, display:'flex', justifyContent:'space-between', gap:8 }}>
                     {featured.pool?.status === 'active'
-                      ? <div style={{ display:'flex', gap:8 }}><PTag label="Destacado" color="dark" /><OnchainTag /></div>
-                      : <PTag label="Destacado" color="dark" />}
-                    <PTag label={featured.stage} color="green" />
+                      ? <div style={{ display:'flex', gap:8 }}><PTag label={t('primary.featured')} color="dark" /><OnchainTag /></div>
+                      : <PTag label={t('primary.featured')} color="dark" />}
+                    <PTag label={dataLabel('stages', featured.stage)} color="green" />
                   </div>
                   <div style={{ position:'absolute', left:18, right:18, bottom:18, color:'#fff' }}>
                     <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:24, letterSpacing:'-0.03em', lineHeight:1.15, marginBottom:6 }}>{featured.name}</div>
                     <div style={{ fontFamily:'var(--font-b)', fontSize:13, color:'rgba(255,255,255,0.75)', marginBottom:14, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden', lineHeight:1.45 }}>{featured.desc}</div>
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(3, minmax(0,1fr))', gap:8, marginBottom:14 }}>
-                      {([['Token', fmtUSD(featured.tokenPrice)], ['APY est.', `${featured.apy}%`], ['Financiado', `${featured.sold}%`]] as const).map(([l, v]) => (
+                      {([[t('primary.token'), fmtUSD(featured.tokenPrice)], [t('primary.apy'), `${featured.apy}%`], [t('primary.funded'), `${featured.sold}%`]] as const).map(([l, v]) => (
                         <div key={l}>
                           <div style={{ fontFamily:'var(--font-b)', fontSize:10.5, textTransform:'uppercase', letterSpacing:'0.07em', color:'rgba(255,255,255,0.65)' }}>{l}</div>
                           <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:18 }}>{v}</div>
                         </div>
                       ))}
                     </div>
-                    <PBtn variant="accent" style={{ width:'100%', justifyContent:'center', background:'#fff', color:'#0b0b0f' }} onClick={e => { e.stopPropagation(); nav('detalle', featured); }}>Ver proyecto</PBtn>
+                    <PBtn variant="accent" style={{ width:'100%', justifyContent:'center', background:'#fff', color:'#0b0b0f' }} onClick={e => { e.stopPropagation(); nav('detalle', featured); }}>{t('primary.viewProject')}</PBtn>
                   </div>
                 </PImg>
               </PCard>
@@ -322,14 +331,14 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
                   ...(featured.issuer==='keychain' && { boxShadow:'var(--sh-lg)', background:'var(--surface)' }) }}>
                 <PImg src={featured.img} alt={featured.name} priority height="auto" style={{ width:'42%', height:'100%', minHeight:0, flex:'0 0 42%' }}>
                   <div style={{ position:'absolute', top:14, left:14, display:'flex', gap:8 }}>
-                    <PTag label="Destacado" color="dark" />
+                    <PTag label={t('primary.featured')} color="dark" />
                     {featured.pool?.status === 'active' && <OnchainTag />}
                   </div>
                 </PImg>
                 <div style={{ flex:1, minWidth:0, padding:'22px 28px', display:'flex', flexDirection:'column', justifyContent:'space-between', gap:12 }}>
                   <div>
                     <div style={{ display:'flex', gap:8, marginBottom:10 }}>
-                      <PTag label={featured.stage} color="green" />
+                      <PTag label={dataLabel('stages', featured.stage)} color="green" />
                     </div>
                     <div style={{ fontFamily:'var(--font-h)', fontWeight:800, fontSize:26, color:'var(--text)', letterSpacing:'-0.03em', lineHeight:1.15, marginBottom:8, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{featured.name}</div>
                     {featured.company && (
@@ -339,12 +348,12 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
                   </div>
                   <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:16, flexWrap:'wrap', marginTop:8 }}>
                     <div style={{ display:'flex', gap:'clamp(18px, 2.4vw, 36px)', flexWrap:'wrap', rowGap:12, minWidth:0 }}>
-                      <PStat label="Valuación" value={fmtUSD(featured.valuation)} />
-                      <PStat label="Token" value={fmtUSD(featured.tokenPrice)} />
-                      <PStat label="APY est." value={`${featured.apy}%`} accent />
-                      <PStat label="Financiado" value={`${featured.sold}%`} />
+                      <PStat label={t('primary.valuation')} value={fmtUSD(featured.valuation)} />
+                      <PStat label={t('primary.token')} value={fmtUSD(featured.tokenPrice)} />
+                      <PStat label={t('primary.apy')} value={`${featured.apy}%`} accent />
+                      <PStat label={t('primary.funded')} value={`${featured.sold}%`} />
                     </div>
-                    <PBtn variant="accent" onClick={e => { e.stopPropagation(); nav('detalle', featured); }}>Ver proyecto</PBtn>
+                    <PBtn variant="accent" onClick={e => { e.stopPropagation(); nav('detalle', featured); }}>{t('primary.viewProject')}</PBtn>
                   </div>
                 </div>
               </PCard>
@@ -357,7 +366,7 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
         <div style={{ display:'flex', justifyContent:'center', marginBottom:22 }}>
           <div style={{ display:'flex', gap:6 }}>
             {heroItems.map((item, i) => (
-              <button key={item.id} onClick={() => goToHero(i)} aria-label={`Destacado ${i + 1}: ${item.name}`} aria-current={i === heroIndex ? 'true' : undefined}
+              <button key={item.id} onClick={() => goToHero(i)} aria-label={t('primary.featuredAria', { n: i + 1, name: item.name })} aria-current={i === heroIndex ? 'true' : undefined}
                 style={{ width: i === heroIndex ? 20 : 7, height:7, borderRadius:999, border:'none', padding:0, cursor:'pointer',
                   background: i === heroIndex ? 'var(--accent)' : 'var(--border)', transition:'width 0.25s ease, background 0.25s ease' }} />
             ))}
@@ -370,8 +379,8 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
       {/* Filters */}
       {locked ? (
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:22 }}>
-          <PTag label={`Rubro: ${rubro}`} color="green" />
-          <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>Filtrado desde Personalización.</span>
+          <PTag label={t('primary.sector', { sector: dataLabel('categories', rubro) })} color="green" />
+          <span style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)' }}>{t('primary.filteredFromPrefs')}</span>
         </div>
       ) : (
         <>
@@ -391,8 +400,8 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
       {/* Results count */}
       <div role="status" style={{ fontFamily:'var(--font-b)', fontSize:12.5, color:'var(--ter)', marginBottom:16 }}>
         {waiting
-          ? 'Cargando proyectos…'
-          : <>{filtered.length} proyecto{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}</>}
+          ? t('primary.loading')
+          : t(filtered.length === 1 ? 'primary.foundOne' : 'primary.foundMany', { count: filtered.length })}
       </div>
 
       {/* Grid */}
@@ -409,8 +418,8 @@ export default function PrimaryMarket({ nav, rubro = 'Todos' }: PrimaryMarketPro
       {!waiting && filtered.length === 0 && (
         <div style={{ textAlign:'center', padding:'60px 0', color:'var(--ter)', fontFamily:'var(--font-b)', fontSize:14 }}>
           {live && assets.length === 0
-            ? 'Todavía no hay proyectos publicados. Vuelve pronto.'
-            : 'No se encontraron proyectos con los filtros seleccionados.'}
+            ? t('primary.emptyLive')
+            : t('primary.emptyFiltered')}
         </div>
       )}
     </div>

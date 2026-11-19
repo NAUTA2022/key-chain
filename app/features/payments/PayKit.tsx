@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMobile } from '~/hooks/useMobile';
 import { networkById, type PayNetwork, type PayToken } from '~/lib/wallet';
+import { useT } from '~/i18n/useT';
 import { T, Ico } from './payTheme';
 
 // Shared building blocks for Brikme's own payment flows (deposit,
@@ -34,6 +35,7 @@ type PayModalProps = {
 // Centered modal on desktop, bottom sheet on phones.
 export function PayModal({ open, onClose, title, onBack, children, footer, width = 460 }: PayModalProps) {
   const isMobile = useMobile();
+  const { t } = useT('market');
   useEffect(() => {
     if (!open) return undefined;
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -56,9 +58,9 @@ export function PayModal({ open, onClose, title, onBack, children, footer, width
               background: 'var(--surface)', border: '1px solid var(--border-l)', borderRadius: isMobile ? '24px 24px 0 0' : 24, boxShadow: 'var(--sh-lg)', overflow: 'hidden' }}>
             {isMobile && <div style={{ width: 40, height: 4, borderRadius: 4, background: 'var(--border)', margin: '10px auto 0' }} />}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: isMobile ? '12px 18px 12px' : '18px 22px 14px' }}>
-              {onBack ? <button type="button" aria-label="Volver" onClick={onBack} style={iconBtn}>{Ico.back}</button> : null}
+              {onBack ? <button type="button" aria-label={t('pay.back')} onClick={onBack} style={iconBtn}>{Ico.back}</button> : null}
               <h2 style={{ ...T.title, flex: 1, fontSize: 17, margin: 0 }}>{title}</h2>
-              <button type="button" aria-label="Cerrar" onClick={onClose} style={iconBtn}>{Ico.close}</button>
+              <button type="button" aria-label={t('pay.close')} onClick={onClose} style={iconBtn}>{Ico.close}</button>
             </div>
             <div style={{ padding: isMobile ? '4px 18px 18px' : '4px 22px 22px', overflowY: 'auto', flex: 1 }}>{children}</div>
             {footer && <div style={{ padding: isMobile ? '12px 18px calc(16px + env(safe-area-inset-bottom))' : '14px 22px 20px', borderTop: '1px solid var(--border-l)' }}>{footer}</div>}
@@ -134,25 +136,26 @@ type TokenNetworkPickerProps = {
 
 // Token + network pickers stacked, used by deposit and withdraw.
 export function TokenNetworkPicker({ tokens, networks, sym, setSym, net, setNet, balances, showBalance }: TokenNetworkPickerProps) {
-  const token = tokens.find(t => t.sym === sym) ?? tokens[0];
+  const { t, locale } = useT('market');
+  const token = tokens.find(tk => tk.sym === sym) ?? tokens[0];
   const networkOf = (id: string): PayNetwork => networks?.[id] ?? networkById(id);
   return (
     <>
-      <span style={T.label}>Moneda</span>
+      <span style={T.label}>{t('pay.currency')}</span>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
-        {tokens.map(t => (
-          <OptionRow key={t.sym} selected={sym === t.sym} onClick={() => { setSym(t.sym); if (!t.networks.includes(net)) setNet(t.networks[0]); }}
-            icon={<TokenIcon src={t.icon} size={32} />} title={t.sym} sub={t.name}
-            right={showBalance ? <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)', fontWeight: 600 }}>{(balances[t.sym] || 0).toLocaleString('es-AR', { maximumFractionDigits: t.decimals })}</span> : null} />
+        {tokens.map(tk => (
+          <OptionRow key={tk.sym} selected={sym === tk.sym} onClick={() => { setSym(tk.sym); if (!tk.networks.includes(net)) setNet(tk.networks[0]); }}
+            icon={<TokenIcon src={tk.icon} size={32} />} title={tk.sym} sub={tk.name}
+            right={showBalance ? <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)', fontWeight: 600 }}>{(balances[tk.sym] || 0).toLocaleString(locale, { maximumFractionDigits: tk.decimals })}</span> : null} />
         ))}
       </div>
-      <span style={T.label}>Red</span>
+      <span style={T.label}>{t('pay.network')}</span>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {token.networks.map(id => {
           const n = networkOf(id);
           return (
             <OptionRow key={id} selected={net === id} onClick={() => setNet(id)} icon={<TokenIcon src={n.icon} size={28} />}
-              title={n.name} sub={n.sub ?? `Llega en ${n.eta} · ${n.confirmations} confirmaciones`} />
+              title={n.name} sub={n.sub ?? t('pay.arrivesIn', { eta: n.eta, count: n.confirmations })} />
           );
         })}
       </div>
@@ -164,6 +167,7 @@ type CopyFieldProps = { value: string; label?: string; mono?: boolean };
 
 export function CopyField({ value, label, mono = true }: CopyFieldProps) {
   const [done, setDone] = useState(false);
+  const { t } = useT('market');
   const copy = () => {
     try { void navigator.clipboard?.writeText(value).catch(() => undefined); } catch { /* clipboard unavailable */ }
     setDone(true); setTimeout(() => setDone(false), 1400);
@@ -173,9 +177,9 @@ export function CopyField({ value, label, mono = true }: CopyFieldProps) {
       {label && <span style={T.label}>{label}</span>}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 12px 12px 14px', borderRadius: 14, background: 'var(--surface2)', border: '1px solid var(--border-l)' }}>
         <span style={{ ...(mono ? T.mono : {}), flex: 1, minWidth: 0, fontSize: 13, color: 'var(--text)', wordBreak: 'break-all', lineHeight: 1.45 }}>{value}</span>
-        <button type="button" onClick={copy} aria-label={label ? `Copiar ${label.toLowerCase()}` : 'Copiar'}
+        <button type="button" onClick={copy} aria-label={label ? t('pay.copyLabel', { label: label.toLowerCase() }) : t('pay.copy')}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'var(--text)', color: 'var(--surface)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 700, flexShrink: 0 }}>
-          {done ? Ico.check : Ico.copy}{done ? 'Copiado' : 'Copiar'}
+          {done ? Ico.check : Ico.copy}{done ? t('pay.copied') : t('pay.copy')}
         </button>
       </div>
     </div>
@@ -204,6 +208,7 @@ type QRCodeProps = { value: string; size?: number; logo?: string };
 // token/network badge in the middle. The encoder loads on demand.
 export function QRCode({ value, size = 188, logo }: QRCodeProps) {
   const [qr, setQr] = useState<{ value: string; svg: string } | null>(null);
+  const { t } = useT('market');
   useEffect(() => {
     let alive = true;
     import('qrcode')
@@ -213,7 +218,7 @@ export function QRCode({ value, size = 188, logo }: QRCodeProps) {
   }, [value]);
   const svg = qr?.value === value ? qr.svg : '';
   return (
-    <div role="img" aria-label={`Código QR de ${value}`} style={{ position: 'relative', width: size, height: size, borderRadius: 18, background: '#fff', padding: 10, boxSizing: 'border-box', boxShadow: '0 6px 24px rgba(0,0,0,0.12)' }}>
+    <div role="img" aria-label={t('pay.qrOf', { value })} style={{ position: 'relative', width: size, height: size, borderRadius: 18, background: '#fff', padding: 10, boxSizing: 'border-box', boxShadow: '0 6px 24px rgba(0,0,0,0.12)' }}>
       <div style={{ width: '100%', height: '100%' }} className="kc-qr" dangerouslySetInnerHTML={{ __html: svg }} />
       {logo && (
         <span style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: size * 0.2, height: size * 0.2, borderRadius: 12, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 4px #fff' }}>

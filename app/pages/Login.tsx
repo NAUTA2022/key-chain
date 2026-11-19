@@ -5,23 +5,23 @@ import { motion } from 'framer-motion';
 import { ConnectEmbed, darkTheme } from 'thirdweb/react';
 import { useSession } from '~/lib/session';
 import { client } from '~/lib/thirdweb';
+import { useT } from '~/i18n/useT';
 
 // Brikme's login gate: connecting a wallet is the single way into the
 // platform (KYC, investments, deposits and withdrawals hang from it). Dark,
 // like the landing it comes from. With the backend enabled, the shared
 // embedded sign-in also signs the SIWE message and opens the server session.
-type Benefit = { icon: ReactNode; title: string; desc: string };
+// Benefit texts live in the `help` namespace: login.benefits.<id>.title / .desc
+type Benefit = { id: 'kyc' | 'balance'; icon: ReactNode };
 
 const BENEFITS: Benefit[] = [
   {
+    id: 'kyc',
     icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" /><path d="M9 12l2 2 4-4" /></svg>,
-    title: 'Una sola verificación',
-    desc: 'Haces el KYC una vez y quedas habilitado para invertir, comprar en el mercado secundario y participar de la ICO.',
   },
   {
+    id: 'balance',
     icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="3" /><path d="M3 10h18M16 15h2" /></svg>,
-    title: 'Tu saldo y tus inversiones',
-    desc: 'Deposita y retira cripto, paga tus inversiones y cobra rentas en USDC desde un mismo lugar.',
   },
 ];
 
@@ -49,6 +49,7 @@ const LOGIN_THEME = darkTheme({
 
 export default function Login({ onSuccess, onBack }: LoginProps) {
   const { connectAuth } = useSession();
+  const { t, lang } = useT('help');
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 200, background: C.bg, overflowY: 'auto',
@@ -58,7 +59,7 @@ export default function Login({ onSuccess, onBack }: LoginProps) {
       <button type="button" onClick={onBack}
         style={{ position: 'absolute', top: 22, left: 22, display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: C.sec, fontFamily: 'var(--font-b)', fontSize: 13.5, fontWeight: 600 }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
-        Volver
+        {t('login.back')}
       </button>
 
       <motion.main initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
@@ -69,17 +70,17 @@ export default function Login({ onSuccess, onBack }: LoginProps) {
         <div className="kc-login-head" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 22 }}>
           <img src="/3ds.webp" alt="" width={84} height={84} style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 8, filter: 'drop-shadow(0 0 24px rgba(240,144,15,0.45))' }} />
           <img src="/logo-dark.png" alt="Brikme" style={{ height: 22, width: 'auto', marginBottom: 14 }} />
-          <h1 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', color: C.text, margin: '0 0 8px' }}>Entra a Brikme</h1>
-          <p style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: C.sec, lineHeight: 1.5, margin: 0, maxWidth: 320 }}>Conecta tu wallet para invertir en activos reales tokenizados.</p>
+          <h1 style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', color: C.text, margin: '0 0 8px' }}>{t('login.title')}</h1>
+          <p style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: C.sec, lineHeight: 1.5, margin: 0, maxWidth: 320 }}>{t('login.subtitle')}</p>
         </div>
 
         <ul className="kc-login-benefits" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 0, listStyle: 'none', padding: 0, marginTop: 0 }}>
           {BENEFITS.map(b => (
-            <li key={b.title} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '13px 14px', borderRadius: 16, background: C.surface, border: `1px solid ${C.border}` }}>
+            <li key={b.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '13px 14px', borderRadius: 16, background: C.surface, border: `1px solid ${C.border}` }}>
               <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(240,144,15,0.12)', color: '#F7A733' }}>{b.icon}</div>
               <div>
-                <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: C.text, margin: '0 0 3px' }}>{b.title}</h2>
-                <p style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: C.sec, lineHeight: 1.45, margin: 0 }}>{b.desc}</p>
+                <h2 style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: C.text, margin: '0 0 3px' }}>{t(`login.benefits.${b.id}.title`)}</h2>
+                <p style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: C.sec, lineHeight: 1.45, margin: 0 }}>{t(`login.benefits.${b.id}.desc`)}</p>
               </div>
             </li>
           ))}
@@ -93,14 +94,15 @@ export default function Login({ onSuccess, onBack }: LoginProps) {
           theme={LOGIN_THEME}
           auth={connectAuth}
           modalSize="compact"
-          locale="es_ES"
+          // thirdweb ships no Arabic UI: Arabic falls back to its English one.
+          locale={lang === 'es' ? 'es_ES' : 'en_US'}
           showThirdwebBranding={false}
           onConnect={onSuccess}
           style={{ width: '100%', maxWidth: '100%', border: 'none', background: 'transparent', boxShadow: 'none', borderRadius: 0, height: 'auto', minHeight: 0 }}
         />
 
         <p style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: C.ter, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.5 }}>
-          Al conectar tu wallet aceptas verificar tu identidad (KYC) para operar en Brikme.
+          {t('login.footnote')}
         </p>
         </div>
         </div>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useCatalog } from '~/lib/catalog';
 import { useSession } from '~/lib/session';
+import { useT } from '~/i18n/useT';
 import { demoSocialSource } from '~/lib/social/demo';
 import { createLiveSocialSource } from '~/lib/social/live';
 import type {
@@ -22,7 +23,9 @@ export const NO_FEED_FILTERS: FeedFilters = { q: '', cat: null, country: null, a
 export function useSocialSource(): SocialSource | null {
   const { status, user } = useSession();
   const { assets } = useCatalog();
-  const live = useMemo(() => (status === 'disabled' ? null : createLiveSocialSource({ user, assets })), [status, user, assets]);
+  // The source's messages follow the active language (it is rebuilt when it changes).
+  const { t } = useT('profile');
+  const live = useMemo(() => (status === 'disabled' ? null : createLiveSocialSource({ user, assets, t })), [status, user, assets, t]);
   return status === 'disabled' ? demoSocialSource : live;
 }
 

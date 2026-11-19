@@ -1,19 +1,21 @@
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PBtn } from '~/components/ui';
+import { useT } from '~/i18n/useT';
 import type { GuideContent } from './guide-content';
 import { usd, type GuideStep, type Hito } from './guide-data';
 
 /** The receipt of the chosen hito: where the 5 USD of profit come from. */
 export function HitoReceipt({ hito }: { hito: Hito }) {
+  const { t, locale } = useT('market');
   const total = hito.lines.reduce((a, [, v]) => a + v, 0);
   return (
     <div style={{ background: 'var(--surface2)', borderRadius: 12, padding: '10px 12px', fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', fontVariantNumeric: 'tabular-nums' }}>
       {hito.lines.map(([label, v]) => (
-        <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '2px 0' }}><span>{label}</span><span>{v < 0 ? '−' : ''}{usd(Math.abs(v))} USD</span></div>
+        <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '2px 0' }}><span>{label}</span><span>{v < 0 ? '−' : ''}{usd(Math.abs(v), locale)} USD</span></div>
       ))}
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, borderTop: '1px solid var(--border)', marginTop: 6, paddingTop: 6, color: 'var(--text)', fontWeight: 700 }}>
-        <span>Ganancia para repartir</span><span>{usd(total)} USD</span>
+        <span>{t('demo.guide.profitToShare')}</span><span>{usd(total, locale)} USD</span>
       </div>
     </div>
   );
@@ -34,6 +36,7 @@ export function Dots({ done, total = 5, label }: { done: number; total?: number;
 
 /** The small card the map shows next to the current step: what happens, and the way forward. */
 export function CoachCard({ content, step, ready, onGo }: { content: GuideContent; step: GuideStep; ready: boolean; onGo: (s: GuideStep) => void }) {
+  const { t } = useT('market');
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.section key={`${step}-${content.title}`} aria-live="polite" aria-label={content.title}
@@ -47,8 +50,8 @@ export function CoachCard({ content, step, ready, onGo }: { content: GuideConten
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
           <span aria-hidden style={{ display: 'flex', gap: 5 }}>{[1, 2, 3, 4, 5].map(i => <span key={i} style={{ width: i === step ? 16 : 6, height: 6, borderRadius: 999, background: i <= step ? 'var(--text)' : 'var(--border)' }} />)}</span>
           <div style={{ display: 'flex', gap: 6 }}>
-            {step > 1 && <PBtn variant="ghost" small onClick={() => onGo((step - 1) as GuideStep)}>Anterior</PBtn>}
-            <PBtn variant="accent" small disabled={!ready} onClick={() => onGo((step + 1) as GuideStep)}>{ready ? (step === 5 ? 'Ver el resumen' : 'Siguiente') : 'Esperando…'}</PBtn>
+            {step > 1 && <PBtn variant="ghost" small onClick={() => onGo((step - 1) as GuideStep)}>{t('demo.guide.previous')}</PBtn>}
+            <PBtn variant="accent" small disabled={!ready} onClick={() => onGo((step + 1) as GuideStep)}>{ready ? (step === 5 ? t('demo.guide.summary') : t('demo.guide.next')) : t('demo.guide.waiting')}</PBtn>
           </div>
         </div>
       </motion.section>

@@ -7,6 +7,7 @@ import { useMagnetScroll } from '~/hooks/useMagnetScroll';
 import { useFeedPage } from '~/lib/social/source';
 import type { NavFn } from '~/lib/navigation';
 import type { FeedMediaFilter, FeedQuery, FeedScope, SocialSource } from '~/lib/social/types';
+import { useT } from '~/i18n/useT';
 
 // Posts browser shared by the global Feed and the company profile: search +
 // filters and the list of square posts, with the "magnet" toolbar.
@@ -32,7 +33,7 @@ const hasFilters = (f: Filters) => FILTER_KEYS.some(k => f[k] !== NO_FILTERS[k])
 const orNull = (v: string) => (v === 'Todos' ? null : v);
 const mediaFilter = (v: string): FeedMediaFilter => (v === 'image' || v === 'video' ? v : 'all');
 
-type FilterOptions = { cat: string[]; country: string[]; author?: { values: string[]; labels: string[] }; following: boolean };
+type FilterOptions = { cat: string[]; catLabels: string[]; country: string[]; countryLabels: string[]; author?: { values: string[]; labels: string[] }; following: boolean };
 
 type FilterProps = {
   search: string;
@@ -50,59 +51,64 @@ type FilterProps = {
 // `floating`: pinned over the posts (desktop), so the input itself gets an
 // opaque glass background instead of a full-width bar behind it.
 function SearchInput({ search, setSearch, floating }: { search: string; setSearch: (v: string) => void; floating?: boolean }) {
+  const { t } = useT('profile');
   return (
     <div style={{ flex: 1, position: 'relative', borderRadius: 12, transition: 'box-shadow 0.2s ease',
       ...(floating && { background: 'var(--gl-panel-strong)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', boxShadow: 'var(--sh-lg)' }) }}>
       <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--ter)', pointerEvents: 'none', display: 'flex' }}>
         {Icons.search}
       </span>
-      <input value={search} onChange={e => setSearch(e.target.value)} aria-label="Buscar en el feed"
-        placeholder="Buscar en el feed..."
+      <input value={search} onChange={e => setSearch(e.target.value)} aria-label={t('social.feed.searchAria')}
+        placeholder={t('social.feed.searchPlaceholder')}
         style={{ width: '100%', boxSizing: 'border-box', padding: '10px 14px 10px 38px', borderRadius: 12, border: '1.5px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 13.5, outline: 'none' }} />
     </div>
   );
 }
 
 function FilterGroups({ filters, setFilter, options }: Pick<FilterProps, 'filters' | 'setFilter' | 'options'>) {
+  const { t } = useT('profile');
+  const { t: tc } = useT('common');
   return (
     <>
-      <FilterGroup label="Ordenar por" value={filters.sort} onChange={v => setFilter('sort', v)}
-        options={['recent', 'popular']} labels={['Más recientes', 'Más populares']} />
-      <FilterGroup label="Rubro" value={filters.cat} onChange={v => setFilter('cat', v)} options={options.cat} />
-      <FilterGroup label="País" value={filters.country} onChange={v => setFilter('country', v)} options={options.country} />
-      <FilterGroup label="Contenido" value={filters.media} onChange={v => setFilter('media', v)}
-        options={['Todos', 'image', 'video']} labels={['Todo', 'Con fotos', 'Con videos']} />
+      <FilterGroup label={t('social.feed.sortBy')} value={filters.sort} onChange={v => setFilter('sort', v)}
+        options={['recent', 'popular']} labels={[t('social.feed.sortRecent'), t('social.feed.sortPopular')]} />
+      <FilterGroup label={t('social.feed.category')} value={filters.cat} onChange={v => setFilter('cat', v)} options={options.cat} labels={options.catLabels} />
+      <FilterGroup label={t('social.feed.country')} value={filters.country} onChange={v => setFilter('country', v)} options={options.country} labels={options.countryLabels} />
+      <FilterGroup label={t('social.feed.content')} value={filters.media} onChange={v => setFilter('media', v)}
+        options={['Todos', 'image', 'video']} labels={[t('social.feed.mediaAll'), t('social.feed.mediaImages'), t('social.feed.mediaVideos')]} />
       {options.following && (
-        <FilterGroup label="Perfiles que sigo" value={filters.following} onChange={v => setFilter('following', v)}
-          options={['Todos', 'si']} labels={['Todos', 'Solo los que sigo']} />
+        <FilterGroup label={t('social.feed.followingGroup')} value={filters.following} onChange={v => setFilter('following', v)}
+          options={['Todos', 'si']} labels={[tc('all'), t('social.feed.followingOnly')]} />
       )}
       {options.author && (
-        <FilterGroup label="Perfil" value={filters.author} onChange={v => setFilter('author', v)} options={options.author.values} labels={options.author.labels} />
+        <FilterGroup label={t('social.feed.profile')} value={filters.author} onChange={v => setFilter('author', v)} options={options.author.values} labels={options.author.labels} />
       )}
     </>
   );
 }
 
 function ClearButton({ onClear }: { onClear: () => void }) {
+  const { t } = useT('profile');
   return (
     <button onClick={onClear}
       style={{ padding: '10px 14px', borderRadius: 12, border: '1.5px solid var(--border)', background: 'transparent', color: 'var(--ter)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-b)', flexShrink: 0 }}>
-      Limpiar
+      {t('social.feed.clear')}
     </button>
   );
 }
 
 // Desktop right column: filters only (the search box sits above the posts).
 function FeedFilterSidebar({ search, filters, setFilter, options, onClear }: FilterProps) {
+  const { t } = useT('profile');
   const active = hasFilters(filters) || !!search;
   return (
     <div data-guide="feed-filters" style={{ padding: '18px 18px 20px', background: 'var(--surface)', border: '1.5px solid var(--border-l)', borderRadius: 18, display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 15, color: 'var(--text)' }}>Filtros</span>
+        <span style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 15, color: 'var(--text)' }}>{t('social.feed.filters')}</span>
         {active && (
           <button onClick={onClear}
             style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>
-            Limpiar
+            {t('social.feed.clear')}
           </button>
         )}
       </div>
@@ -114,6 +120,7 @@ function FeedFilterSidebar({ search, filters, setFilter, options, onClear }: Fil
 // `compact`: pinned at the top, so an open panel scrolls inside itself
 // instead of covering the whole screen.
 function FeedFilterBar({ search, setSearch, filters, setFilter, options, onClear, compact }: FilterProps & { compact: boolean }) {
+  const { t } = useT('profile');
   const [open, setOpen] = useState(false);
   const active = hasFilters(filters);
   return (
@@ -123,7 +130,7 @@ function FeedFilterBar({ search, setSearch, filters, setFilter, options, onClear
         <button onClick={() => setOpen(o => !o)} aria-expanded={open}
           style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 16px', borderRadius: 12, border: `1.5px solid ${active ? 'var(--accent)' : 'var(--border)'}`, background: active ? 'var(--accent-bg)' : 'var(--surface)', color: active ? 'var(--accent-text)' : 'var(--sec)', cursor: 'pointer', fontFamily: 'var(--font-b)', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-          Filtros {active && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />}
+          {t('social.feed.filters')} {active && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />}
         </button>
         {(active || search) && <ClearButton onClear={onClear} />}
       </div>
@@ -171,6 +178,10 @@ type FeedBrowserProps = {
 };
 
 export default function FeedBrowser({ source, scope, nav, authors, showFollowing }: FeedBrowserProps) {
+  const { t } = useT('profile');
+  const { t: tc, raw: rawc } = useT('common');
+  // Data values (Spanish) shown in the active language; unknown values as they come.
+  const valueLabel = (group: 'categories' | 'countries', v: string) => (v === 'Todos' ? tc('all') : rawc<string | undefined>(`${group}.${v}`) ?? v);
   const isMobile = useMobile();
   const isDesktop = !useMobile(1100); // 2 + 1 column layout needs room for a big square post
   const [search, setSearch] = useState('');
@@ -210,14 +221,15 @@ export default function FeedBrowser({ source, scope, nav, authors, showFollowing
     search, setSearch: v => { setSearch(v); setShown(PAGE); },
     filters, setFilter: (k, v) => { setFilters(f => ({ ...f, [k]: v })); setShown(PAGE); },
     options: {
-      cat: cats, country: countries, following: !!showFollowing,
-      author: authors && { values: ['Todos', ...authors.map(a => a.slug)], labels: ['Todos', ...authors.map(a => a.name)] },
+      cat: cats, catLabels: cats.map(c => valueLabel('categories', c)),
+      country: countries, countryLabels: countries.map(c => valueLabel('countries', c)), following: !!showFollowing,
+      author: authors && { values: ['Todos', ...authors.map(a => a.slug)], labels: [tc('all'), ...authors.map(a => a.name)] },
     },
     onClear: () => { setFilters(NO_FILTERS); setSearch(''); setShown(PAGE); },
   };
-  const emptyText = feed.error ? 'No pudimos cargar las publicaciones.'
-    : feed.loading ? 'Cargando publicaciones…'
-    : search || hasFilters(filters) ? 'No hay publicaciones que coincidan con tu búsqueda.' : 'Todavía no hay publicaciones.';
+  const emptyText = feed.error ? t('social.feed.loadError')
+    : feed.loading ? t('social.feed.loading')
+    : search || hasFilters(filters) ? t('social.feed.noMatch') : t('social.feed.empty');
   const postList = (
     <>
       {visible.length === 0 && (
@@ -230,7 +242,7 @@ export default function FeedBrowser({ source, scope, nav, authors, showFollowing
       ))}
       {feed.hasMore && visible.length > 0 && (
         <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', marginTop: 4 }}>
-          <PBtn variant="secondary" disabled={feed.loading} onClick={() => setShown(s => s + PAGE)}>Cargar más</PBtn>
+          <PBtn variant="secondary" disabled={feed.loading} onClick={() => setShown(s => s + PAGE)}>{t('social.feed.loadMore')}</PBtn>
         </div>
       )}
     </>

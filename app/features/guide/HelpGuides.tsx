@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router';
 import { PCard, PTag } from '~/components/ui';
 import { useMobile } from '~/hooks/useMobile';
 import { useGuide, useGuidesSeen } from './context';
-import { GLOSSARY } from './glossary';
+import { GLOSSARY, glossaryKey } from './glossary';
 import { forgetGuide } from './store';
-import { GUIDE_PARAM, TOUR_IDS, TOURS, type GuideId } from './tours';
+import { GUIDE_PARAM, TOUR_IDS, TOURS, tourKey, type GuideId } from './tours';
+import { useT } from '~/i18n/useT';
 
 // Help Center sections (live mode only): the list of guided tours to replay, and the glossary.
 
@@ -24,13 +25,14 @@ export function GuidesCard({ style }: { style?: CSSProperties }) {
   const guides = useGuidesSeen();
   const navigate = useNavigate();
   const isMobile = useMobile();
+  const { t } = useT('help');
   const [rearmed, setRearmed] = useState<GuideId | null>(null);
   if (!enabled) return null;
 
   return (
     <PCard style={{ padding: isMobile ? '20px 18px' : '24px 28px', ...style }}>
-      <h2 id="guias" style={h2}>Guías paso a paso</h2>
-      <p style={lead}>Recorridos cortos que te muestran cómo funciona cada sección. Puedes verlos cuantas veces quieras.</p>
+      <h2 id="guias" style={h2}>{t('guide.list.title')}</h2>
+      <p style={lead}>{t('guide.list.lead')}</p>
       <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
         {TOUR_IDS.map((id, i) => {
           const tour = TOURS[id];
@@ -39,24 +41,24 @@ export function GuidesCard({ style }: { style?: CSSProperties }) {
             <li key={id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderTop: i === 0 ? 'none' : '1px solid var(--border-l)' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={rowTitle}>{tour.title}</span>
-                  {seen && <PTag label="Vista" />}
+                  <span style={rowTitle}>{t(tourKey(id, 'title'))}</span>
+                  {seen && <PTag label={t('guide.list.seen')} />}
                 </div>
                 <div style={rowSub}>
-                  {tour.summary}
-                  {tour.where && ` ${tour.where}`}
-                  {rearmed === id && ' Listo: la vas a ver la próxima vez.'}
+                  {t(tourKey(id, 'summary'))}
+                  {tour.where && ` ${t(tourKey(id, 'where'))}`}
+                  {rearmed === id && ` ${t('guide.list.rearmed')}`}
                 </div>
               </div>
               {tour.where ? (
                 seen && guides.userId ? (
                   <button type="button" style={linkBtn} onClick={() => { forgetGuide(id); setRearmed(id); }}>
-                    Volver a mostrar
+                    {t('guide.list.showAgain')}
                   </button>
                 ) : null
               ) : (
                 <button type="button" style={linkBtn} onClick={() => void navigate(`${tour.path}?${GUIDE_PARAM}=${id}`)}>
-                  Ver guía
+                  {t('guide.list.view')}
                 </button>
               )}
             </li>
@@ -73,28 +75,29 @@ const COLLAPSED = 8;
 export function GlossaryCard({ style }: { style?: CSSProperties }) {
   const { enabled } = useGuide();
   const isMobile = useMobile();
+  const { t } = useT('help');
   const [all, setAll] = useState(false);
   if (!enabled) return null;
   const entries = all ? GLOSSARY : GLOSSARY.slice(0, COLLAPSED);
 
   return (
     <PCard style={{ padding: isMobile ? '20px 18px' : '24px 28px', ...style }}>
-      <h2 id="glosario" style={h2}>Glosario</h2>
-      <p style={lead}>Las palabras nuevas que vas a encontrar en Brikme, explicadas sin tecnicismos.</p>
+      <h2 id="glosario" style={h2}>{t('guide.glossary.title')}</h2>
+      <p style={lead}>{t('guide.glossary.lead')}</p>
       <dl style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))', gap: isMobile ? 14 : '16px 28px', margin: 0 }}>
         {entries.map(e => (
           <div key={e.id} id={`glosario-${e.id}`} style={{ minWidth: 0 }}>
             <dt style={rowTitle}>
-              {e.term}
-              {e.aka && <span style={{ fontWeight: 400, color: 'var(--ter)' }}> · {e.aka}</span>}
+              {t(glossaryKey(e.id, 'term'))}
+              {e.aka && <span style={{ fontWeight: 400, color: 'var(--ter)' }}> · {t(glossaryKey(e.id, 'aka'))}</span>}
             </dt>
-            <dd style={{ ...rowSub, margin: '4px 0 0', fontSize: 13, color: 'var(--sec)' }}>{e.definition}</dd>
+            <dd style={{ ...rowSub, margin: '4px 0 0', fontSize: 13, color: 'var(--sec)' }}>{t(glossaryKey(e.id, 'definition'))}</dd>
           </div>
         ))}
       </dl>
       {GLOSSARY.length > COLLAPSED && (
         <button type="button" aria-expanded={all} onClick={() => setAll(v => !v)} style={{ ...linkBtn, marginTop: 18 }}>
-          {all ? 'Ver menos' : `Ver todo el glosario (${GLOSSARY.length})`}
+          {all ? t('guide.glossary.less') : t('guide.glossary.all', { count: GLOSSARY.length })}
         </button>
       )}
     </PCard>

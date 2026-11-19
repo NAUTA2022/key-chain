@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
 import { PTag } from '~/components/ui';
+import { useT } from '~/i18n/useT';
 import { DEMO_IMAGES } from './api';
 
 const CSS = `
@@ -22,21 +23,22 @@ const CSS = `
 
 /** Highlighted entry to the live demo project on the primary market (live mode only). */
 export default function FeaturedDemoCard({ style }: { style?: CSSProperties }) {
+  const { t } = useT('market');
   return (
     <div style={style}>
       <style>{CSS}</style>
-      <Link to="/demo-en-vivo" className="df-featured" aria-label="Proyecto destacado Villa Mirador: hacer la demo en vivo">
+      <Link to="/demo-en-vivo" className="df-featured" aria-label={t('demo.featured.aria')}>
         <div className="df-featured-in">
           <div className="df-featured-img">
             <img src={DEMO_IMAGES[0]} alt="" width={1600} height={900} loading="lazy" />
-            <div style={{ position: 'absolute', top: 12, left: 12 }}><PTag label="Destacado" color="dark" /></div>
+            <div style={{ position: 'absolute', top: 12, left: 12 }}><PTag label={t('demo.featured.tag')} color="dark" /></div>
           </div>
           <div style={{ flex: 1, minWidth: 0, padding: '18px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
-            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 21, letterSpacing: '-0.03em', color: 'var(--text)', lineHeight: 1.15 }}>Villa Mirador: la demo completa desde 1 USD</div>
+            <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 21, letterSpacing: '-0.03em', color: 'var(--text)', lineHeight: 1.15 }}>{t('demo.featured.title')}</div>
             <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.5, maxWidth: '62ch' }}>
-              Elige cuántas partes comprar (gratis, con Binance o con tu wallet), la casa genera ganancia y la ves llegar a tu wallet paso a paso, con voz.
+              {t('demo.featured.body')}
             </div>
-            <div style={{ marginTop: 4 }}><span className="df-featured-cta">Hacer la demo en vivo<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span></div>
+            <div style={{ marginTop: 4 }}><span className="df-featured-cta">{t('demo.featured.cta')}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span></div>
           </div>
         </div>
       </Link>

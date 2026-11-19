@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { RWA_ASSETS, type AssetCategory, type AssetStage, type RwaAsset } from '~/data';
 import { API_URL, api, apiEnabled } from '~/lib/api/client';
 import type { paths } from '~/lib/api/schema';
+import { useDataText } from '~/i18n/data';
 
 // The asset catalog. With the backend enabled it comes from GET /v1/assets (the
 // source of truth, including assets created by admins); otherwise the demo data.
@@ -98,10 +99,12 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   }, [tick]);
 
   const reload = useCallback(() => setTick(t => t + 1), []);
+  const text = useDataText();
   const value = useMemo<CatalogValue>(() => {
     // Until the API answers (and in the prerendered HTML, which crawlers read) the
     // build-time copy of the catalog is shown; it is the same seed the database starts from.
-    const assets = apiEnabled ? (state?.assets ?? demoCatalog) : demoCatalog;
+    // Demo assets are shown in the active language; live ones as the API serves them.
+    const assets = (apiEnabled ? (state?.assets ?? demoCatalog) : demoCatalog).map(text.asset);
     const index = new Map(assets.map(a => [a.id, a]));
     return {
       assets,
@@ -110,7 +113,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       loading: apiEnabled && state !== null && state.tick !== tick,
       reload,
     };
-  }, [state, tick, reload]);
+  }, [state, tick, reload, text]);
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;
 }

@@ -64,7 +64,9 @@ export function useFaucetStatus() {
   return useApiData<FaucetStatus>(status === 'authenticated' && user ? `${user.id}:faucet` : null, async () => (await api.GET('/v1/faucet')).data ?? null);
 }
 
-export type FaucetResult = { ok: true; usdc: number; gas: number } | { ok: false; message: string };
+/** Why a faucet request failed; its text is `portfolio:wallet.faucet.errors.<reason>`. */
+export type FaucetError = 'cooldown' | 'disabled' | 'failed' | 'network';
+export type FaucetResult = { ok: true; usdc: number; gas: number } | { ok: false; reason: FaucetError };
 
 /** Sends test USDC and gas to the signed-in wallet (testnets / devnet only). */
 export async function requestFaucet(): Promise<FaucetResult> {
@@ -73,11 +75,11 @@ export async function requestFaucet(): Promise<FaucetResult> {
     if (r.data) return { ok: true, usdc: r.data.usdc, gas: r.data.gas };
     const error: unknown = r.error;
     const reason = isProblem(error) ? error.reason : undefined;
-    if (reason === 'faucet_cooldown') return { ok: false, message: 'Ya pediste fondos de prueba en las últimas 24 horas.' };
-    if (reason === 'faucet_disabled') return { ok: false, message: 'Los fondos de prueba no están disponibles en esta red.' };
-    return { ok: false, message: 'No se pudieron enviar los fondos de prueba. Prueba de nuevo en unos minutos.' };
+    if (reason === 'faucet_cooldown') return { ok: false, reason: 'cooldown' };
+    if (reason === 'faucet_disabled') return { ok: false, reason: 'disabled' };
+    return { ok: false, reason: 'failed' };
   } catch {
-    return { ok: false, message: 'No se pudo contactar al servidor. Revisa tu conexión.' };
+    return { ok: false, reason: 'network' };
   }
 }
 
@@ -100,12 +102,11 @@ export function useNow(step = 1000): number {
   return useSyncExternalStore(clock(step), () => Math.floor(Date.now() / step) * step, () => 0);
 }
 
-/** "5 h 12 min" until `iso`, or null once it is past. */
-export function timeUntil(iso: string | null | undefined, now: number): string | null {
+/** Hours and minutes until `iso` (shown as "5 h 12 min"), or null once it is past. */
+export function timeUntil(iso: string | null | undefined, now: number): { h: number; min: number } | null {
   if (!iso || !now) return null;
   const ms = new Date(iso).getTime() - now;
   if (!(ms > 0)) return null;
   const min = Math.ceil(ms / 60_000);
-  const h = Math.floor(min / 60);
-  return h > 0 ? `${h} h ${min % 60} min` : `${min} min`;
+  return { h: Math.floor(min / 60), min: min % 60 };
 }

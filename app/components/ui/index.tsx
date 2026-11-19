@@ -6,6 +6,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { useT } from '~/i18n/useT';
 
 // Shared icon set lives next to the primitives that use it (e.g. PScanLink).
 // eslint-disable-next-line react-refresh/only-export-components
@@ -610,7 +611,9 @@ const HELP_GAP = 8;
  * overflow: hidden never clip it: it opens above the trigger (below when there is no
  * room) and is clamped to the viewport, following the trigger on scroll and resize.
  */
-export function PHelp({ text, label = 'Más información', size = 15 }: PHelpProps) {
+export function PHelp({ text, label: labelProp, size = 15 }: PHelpProps) {
+  const { t } = useT('common');
+  const label = labelProp ?? t('help.moreInfo');
   const [open, setOpen] = useState(false);
   const id = useId();
   const btnRef = useRef<HTMLButtonElement>(null);

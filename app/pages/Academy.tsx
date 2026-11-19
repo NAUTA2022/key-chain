@@ -7,11 +7,20 @@ import { useSession } from '~/lib/session';
 import { useMobile } from '~/hooks/useMobile';
 import { EmptyState } from '~/features/profile/kit';
 import { categoriesOf, toAcademyPost, useAcademyPosts, useAcademyReads } from '~/features/academy/api';
+import { useT, type Translator } from '~/i18n/useT';
+import { useDataText } from '~/i18n/data';
 
+// Category values are data (Spanish, as stored in the posts); labels come from `help:academy.cats`.
 const CATS = ['Todos', 'Tokenización', 'Guías', 'RWA', 'DeFi'];
 const NO_READS: ReadonlySet<string> = new Set();
 
 type AcademyProps = { nav: NavFn };
+
+/** Translated label of a post category; categories the dictionary doesn't know (live API) show as they come. */
+function academyCatLabel(raw: Translator['raw'], cat: string): string {
+  const label = raw<unknown>(`academy.cats.${cat}`);
+  return typeof label === 'string' ? label : cat;
+}
 
 export default function Academy({ nav }: AcademyProps) {
   const { status } = useSession();
@@ -34,13 +43,14 @@ function AcademyLive({ nav }: AcademyProps) {
 
 function AcademyEmpty() {
   const isMobile = useMobile();
+  const { t } = useT('help');
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 1200, margin: '0 auto' }}>
-      <PSection title="Academia" sub="Aprende sobre tokenización, RWA y finanzas descentralizadas." />
+      <PSection title={t('academy.title')} sub={t('academy.sub')} />
       <PCard style={{ padding: '8px 24px' }}>
         <EmptyState
-          title="Todavía no hay artículos publicados"
-          text="Muy pronto vas a encontrar aquí guías sobre tokenización, activos reales y finanzas descentralizadas."
+          title={t('academy.emptyTitle')}
+          text={t('academy.emptyText')}
         />
       </PCard>
     </div>
@@ -49,8 +59,12 @@ function AcademyEmpty() {
 
 type AcademyViewProps = AcademyProps & { posts: AcademyPost[]; cats: string[]; read?: ReadonlySet<string> };
 
-function AcademyView({ nav, posts, cats, read = NO_READS }: AcademyViewProps) {
+function AcademyView({ nav, posts: source, cats, read = NO_READS }: AcademyViewProps) {
   const isMobile = useMobile();
+  const { t, raw } = useT('help');
+  const dataText = useDataText();
+  const posts = source.map(dataText.post);
+  const catLabel = (c: string) => academyCatLabel(raw, c);
   const [selected, setCat] = useState('Todos');
   // The chip list can change when live posts replace the static ones.
   const cat = cats.includes(selected) ? selected : 'Todos';
@@ -60,7 +74,7 @@ function AcademyView({ nav, posts, cats, read = NO_READS }: AcademyViewProps) {
 
   return (
     <div style={{ padding: isMobile ? '16px 14px 80px' : '28px 32px 40px', maxWidth: 1200, margin: '0 auto' }}>
-      <PSection title="Academia" sub="Aprende sobre tokenización, RWA y finanzas descentralizadas." />
+      <PSection title={t('academy.title')} sub={t('academy.sub')} />
 
       {/* Featured */}
       {cat === 'Todos' && featured && (
@@ -68,18 +82,18 @@ function AcademyView({ nav, posts, cats, read = NO_READS }: AcademyViewProps) {
           <PCard onClick={() => nav('articulo', { slug: featured.slug })} style={{ display: 'flex', flexDirection: isMobile ? 'column' : undefined, marginBottom: 28, minHeight: 260, cursor: 'pointer' }}>
             <PImg src={featured.img} alt={featured.title} priority height="auto" style={isMobile ? { width: '100%', height: 200, minHeight: 200 } : { width: '46%', height: 'auto', minHeight: 260 }}>
               <div style={{ position: 'absolute', top: 14, left: 14 }}>
-                <PTag label="Artículo destacado" color="dark" />
+                <PTag label={t('academy.featured')} color="dark" />
               </div>
             </PImg>
             <div style={{ flex: 1, padding: isMobile ? '20px 18px 22px' : '30px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <PTag label={featured.cat} color="neutral" style={{ marginBottom: 12 }} />
+              <PTag label={catLabel(featured.cat)} color="neutral" style={{ marginBottom: 12 }} />
               <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: isMobile ? 21 : 26, color: 'var(--text)', letterSpacing: '-0.03em', marginBottom: 12, lineHeight: 1.2 }}>{featured.title}</div>
               <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: 'var(--sec)', lineHeight: 1.6, marginBottom: 20 }}>{featured.excerpt}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{featured.date}</span>
                 <span style={{ color: 'var(--ter)' }}>·</span>
-                <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{featured.read} de lectura</span>
-                {read.has(featured.slug) && <PTag label="Leído ✓" color="green" style={{ marginLeft: 'auto' }} />}
+                <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)' }}>{t('academy.readTime', { time: featured.read })}</span>
+                {read.has(featured.slug) && <PTag label={t('academy.read')} color="green" style={{ marginLeft: 'auto' }} />}
               </div>
             </div>
           </PCard>
@@ -88,7 +102,7 @@ function AcademyView({ nav, posts, cats, read = NO_READS }: AcademyViewProps) {
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 22, flexWrap: 'wrap' }}>
-        {cats.map(c => <PChip key={c} label={c} active={cat === c} onClick={() => setCat(c)} />)}
+        {cats.map(c => <PChip key={c} label={catLabel(c)} active={cat === c} onClick={() => setCat(c)} />)}
       </div>
 
       {/* Grid */}
@@ -104,14 +118,14 @@ function AcademyView({ nav, posts, cats, read = NO_READS }: AcademyViewProps) {
             <PCard onClick={() => nav('articulo', { slug: post.slug })} style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer', height: '100%' }}>
               <PImg src={post.img} height={170} />
               <div style={{ padding: '16px 18px 18px', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <PTag label={post.cat} color="neutral" />
+                <PTag label={catLabel(post.cat)} color="neutral" />
                 <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15.5, color: 'var(--text)', lineHeight: 1.3, letterSpacing: '-0.015em' }}>{post.title}</div>
                 <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.5, flex: 1 }}>{post.excerpt}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 'auto', paddingTop: 8, borderTop: '1px solid var(--border-l)' }}>
                   <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{post.date}</span>
                   <span style={{ color: 'var(--ter)' }}>·</span>
-                  <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{post.read} lectura</span>
-                  {read.has(post.slug) && <PTag label="Leído ✓" color="green" style={{ marginLeft: 'auto' }} />}
+                  <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{t('academy.readTimeShort', { time: post.read })}</span>
+                  {read.has(post.slug) && <PTag label={t('academy.read')} color="green" style={{ marginLeft: 'auto' }} />}
                 </div>
               </div>
             </PCard>

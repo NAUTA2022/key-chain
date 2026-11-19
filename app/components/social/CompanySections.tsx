@@ -7,7 +7,9 @@ import { UserAvatar, type AvatarUser } from '~/components/social/IdentityAvatar'
 import { fmtUSD } from '~/data';
 import { fmtCount } from '~/lib/projectFeed';
 import { hashOf } from '~/lib/people';
-import { companyMetrics, fmtShort, trustLabel, raisedOf, investorsOf, type CompanyMetrics } from '~/lib/companyStats';
+import { companyMetrics, fmtShort, raisedOf, investorsOf, type CompanyMetrics } from '~/lib/companyStats';
+import { localMonthLabel } from '~/lib/social/identity';
+import { useT, type Translator } from '~/i18n/useT';
 import type { NavFn } from '~/lib/navigation';
 import type { CompanyLive, CompanyProfile, FeedItem, Review, ReviewInput, SocialAsset } from '~/lib/social/types';
 
@@ -37,7 +39,7 @@ type ViewMetrics = Omit<CompanyMetrics, 'apy' | 'payments' | 'late' | 'onTime' |
   transparency: number | null;
   verifiedScore: number | null;
   trust: number | null;
-  /** [label, value]: "Fundada" (demo) or the month it joined Brikme (live). */
+  /** [label key, value]: "Fundada" (demo) or the month it joined Brikme (live, a "Mar 2025" label). */
   since: readonly [string, string];
   raisedBy: (a: SocialAsset) => number;
   investorsBy: (a: SocialAsset) => number;
@@ -76,7 +78,7 @@ function liveMetrics(profile: CompanyProfile, live: CompanyLive, reviews: readon
     trust: null,
     countries: s.countries,
     cats: s.categories,
-    since: ['En Brikme desde', monthYear(live.createdAt)],
+    since: ['social.company.sinceLive', monthYear(live.createdAt)],
     raisedBy: a => perAsset.get(a.id)?.raised ?? 0,
     investorsBy: a => perAsset.get(a.id)?.investors ?? 0,
     ownerKyc: null,
@@ -86,11 +88,19 @@ function liveMetrics(profile: CompanyProfile, live: CompanyLive, reviews: readon
 function metricsOf({ profile, posts, reviews }: SectionProps): ViewMetrics {
   if (profile.live) return liveMetrics(profile, profile.live, reviews);
   const m = companyMetrics(profile, posts, reviews);
-  return { ...m, since: ['Fundada', String(m.founded)], raisedBy: raisedOf, investorsBy: investorsOf, ownerKyc: true };
+  return { ...m, since: ['social.company.sinceFounded', String(m.founded)], raisedBy: raisedOf, investorsBy: investorsOf, ownerKyc: true };
 }
 
 const pct = (v: number | null, digits = 0) => (v === null ? '—' : `${v.toFixed(digits)}%`);
-const trustText = (t: number | null) => (t === null ? 'Sin calificar' : trustLabel(t));
+/** Trust index in words (same thresholds as lib/companyStats' trustLabel). */
+const trustText = (t: Translator['t'], v: number | null) =>
+  t(v === null ? 'social.company.trustUnrated' : v >= 85 ? 'social.company.trustExcellent' : v >= 70 ? 'social.company.trustVeryGood' : v >= 55 ? 'social.company.trustGood' : 'social.company.trustWatch');
+
+/** Data values (Spanish categories / countries) in the active language; unknown values as they come. */
+function useValueLabels() {
+  const { raw } = useT('common');
+  return (group: 'categories' | 'countries', v: string) => raw<string | undefined>(`${group}.${v}`) ?? v;
+}
 
 // ─── Small building blocks ────────────────────────────────────────────────────
 const H = ({ children, sub }: { children: ReactNode; sub?: string }) => (
@@ -117,8 +127,9 @@ function Kpis({ items, isMobile }: { items: readonly Kpi[]; isMobile: boolean })
 }
 
 export function Stars({ value, size = 14, onPick }: { value: number; size?: number; onPick?: (n: number) => void }) {
+  const { t } = useT('profile');
   return (
-    <span style={{ display: 'inline-flex', gap: 1 }} role="img" aria-label={`${value} de 5`}>
+    <span style={{ display: 'inline-flex', gap: 1 }} role="img" aria-label={t('social.company.starsAria', { value })}>
       {[1, 2, 3, 4, 5].map(n => (
         <span key={n} onClick={onPick ? () => onPick(n) : undefined}
           style={{ fontSize: size, lineHeight: 1, color: n <= Math.round(value) ? '#F5A623' : 'var(--border)', cursor: onPick ? 'pointer' : 'default' }}>★</span>
@@ -175,6 +186,8 @@ function HBarChart({ rows, fmt, tipFor }: { rows: readonly BarRow[]; fmt: (v: nu
 
 // Vertical columns over time, one series, recessive baseline + 2 gridlines.
 function ColumnChart({ points, fmt, height = 160 }: { points: ReadonlyArray<{ label: string; value: number }>; fmt: (v: number) => string; height?: number }) {
+  const { raw } = useT('profile');
+  const months = raw<string[]>('social.months');
   const [tip, setTip] = useState<TipState>(null);
   const max = Math.max(1, ...points.map(p => p.value)) * 1.15;
   return (
@@ -187,13 +200,13 @@ function ColumnChart({ points, fmt, height = 160 }: { points: ReadonlyArray<{ la
         ))}
         {points.map((p, i) => (
           <div key={p.label + i} style={{ flex: 1, height: '100%', display: 'flex', alignItems: 'flex-end', cursor: 'default', position: 'relative', zIndex: 1 }}
-            onMouseMove={e => setTip({ ...pointIn(e, e.currentTarget.parentElement?.parentElement), lines: [p.label, fmtUSD(p.value)] })}>
+            onMouseMove={e => setTip({ ...pointIn(e, e.currentTarget.parentElement?.parentElement), lines: [localMonthLabel(p.label, months), fmtUSD(p.value)] })}>
             <div style={{ width: '100%', height: `${(p.value / max) * 100}%`, minHeight: p.value ? 2 : 0, background: 'var(--accent)', borderRadius: '4px 4px 0 0' }} />
           </div>
         ))}
       </div>
       <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-        {points.map((p, i) => <span key={p.label + i} style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)' }}>{p.label}</span>)}
+        {points.map((p, i) => <span key={p.label + i} style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-b)', fontSize: 10.5, color: 'var(--ter)' }}>{localMonthLabel(p.label, months)}</span>)}
       </div>
       <Tip tip={tip} />
     </div>
@@ -220,28 +233,31 @@ type SummaryProps = SectionProps & {
 
 export function CompanySummary(props: SummaryProps) {
   const { profile, posts, reviews, owner, nav, isMobile, onOwner, onTab } = props;
+  const { t, raw } = useT('profile');
+  const valueLabel = useValueLabels();
+  const months = raw<string[]>('social.months');
   const m = metricsOf(props);
   const latest = posts.filter(p => p.post.milestone).slice(0, 3);
   return (
     <div>
       <Kpis isMobile={isMobile} items={[
-        [fmtShort(m.raised), 'Capital recaudado'],
-        [fmtCount(m.investors), 'Inversores'],
-        [`${m.assets.length}`, 'Proyectos', `${m.operating.length} operativos · ${m.assets.length - m.operating.length} en recaudación`],
-        [pct(m.apy, 1), 'APY promedio'],
+        [fmtShort(m.raised), t('social.company.raised')],
+        [fmtCount(m.investors), t('social.company.investors')],
+        [`${m.assets.length}`, t('social.company.projects'), t('social.company.projectsHint', { operating: m.operating.length, raising: m.assets.length - m.operating.length })],
+        [pct(m.apy, 1), t('social.company.avgApy')],
       ]} />
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1.6fr) minmax(0,1fr)', gap: 18 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
           <PCard style={{ padding: '20px 22px' }}>
-            <H>Sobre {profile.name}</H>
-            <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: profile.bio ? 'var(--sec)' : 'var(--ter)', lineHeight: 1.6, marginBottom: 16 }}>{profile.bio || 'Todavía no hay una descripción de la empresa.'}</div>
+            <H>{t('social.company.about', { name: profile.name })}</H>
+            <div style={{ fontFamily: 'var(--font-b)', fontSize: 14, color: profile.bio ? 'var(--sec)' : 'var(--ter)', lineHeight: 1.6, marginBottom: 16 }}>{profile.bio || t('social.company.noBio')}</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
               {[
-                m.since,
-                ['Países', m.countries.join(', ') || '—'],
-                ['Rubros', m.cats.join(', ') || '—'],
-                ['Verificación', profile.verified ? 'Empresa verificada (KYB)' : 'Sin verificar'],
+                [t(m.since[0]), localMonthLabel(m.since[1], months)],
+                [t('social.company.countries'), m.countries.map(c => valueLabel('countries', c)).join(', ') || '—'],
+                [t('social.company.categories'), m.cats.map(c => valueLabel('categories', c)).join(', ') || '—'],
+                [t('social.company.verification'), profile.verified ? t('social.company.verifiedKyb') : t('social.company.unverified')],
               ].map(([k, v]) => (
                 <div key={k}>
                   <div style={{ fontFamily: 'var(--font-b)', fontSize: 11, color: 'var(--ter)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{k}</div>
@@ -253,10 +269,10 @@ export function CompanySummary(props: SummaryProps) {
 
           <PCard style={{ padding: '20px 22px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <H>Últimos hitos</H>
-              <button onClick={() => onTab('hitos')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>Ver todos →</button>
+              <H>{t('social.company.latestMilestones')}</H>
+              <button onClick={() => onTab('hitos')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontFamily: 'var(--font-b)', fontSize: 12.5, fontWeight: 600 }}>{t('social.company.viewAll')}</button>
             </div>
-            {latest.length === 0 && <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>Todavía no publicó hitos.</div>}
+            {latest.length === 0 && <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{t('social.company.noMilestones')}</div>}
             {latest.map(({ post, asset }, i) => (
               <button key={post.id} onClick={() => nav('detalle', { ...asset, focusPostId: post.id })}
                 style={{ display: 'flex', gap: 12, width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 0', color: 'inherit', borderTop: i ? '1px solid var(--border-l)' : 'none' }}>
@@ -264,7 +280,7 @@ export function CompanySummary(props: SummaryProps) {
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                     <ProjectCode asset={asset} />
-                    <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{asset.name} · {post.date}</span>
+                    <span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{asset.name} · {localMonthLabel(post.date, months)}</span>
                   </div>
                   <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--text)', marginTop: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{post.text}</div>
                 </div>
@@ -275,7 +291,7 @@ export function CompanySummary(props: SummaryProps) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
           <PCard style={{ padding: '20px 22px' }}>
-            <H>Dueño</H>
+            <H>{t('social.company.owner')}</H>
             {owner ? (
               <button onClick={onOwner} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', color: 'inherit' }}>
                 {owner.avatarUrl || owner.anonymous
@@ -283,27 +299,27 @@ export function CompanySummary(props: SummaryProps) {
                   : <div style={{ width: 44, height: 44, borderRadius: '50%', background: owner.gradient, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 18, flexShrink: 0 }}>{owner.initial}</div>}
                 <div>
                   <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{owner.name}</div>
-                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{profile.live ? 'Responsable de la empresa · Ver perfil' : 'Fundador y CEO · Ver perfil'}</div>
+                  <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)' }}>{profile.live ? t('social.company.ownerLive') : t('social.company.ownerDemo')}</div>
                 </div>
               </button>
             ) : (
-              <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>Todavía no tiene un responsable asignado.</div>
+              <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{t('social.company.noOwner')}</div>
             )}
           </PCard>
 
           <PCard style={{ padding: '20px 22px' }}>
-            <H>Confianza</H>
+            <H>{t('social.company.trust')}</H>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <TrustRing value={m.trust} size={72} />
               <div>
-                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{trustText(m.trust)}</div>
+                <div style={{ fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{trustText(t, m.trust)}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                  <Stars value={m.rating} /> <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>{m.rating.toFixed(1)} · {reviews.length} reseñas</span>
+                  <Stars value={m.rating} /> <span style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>{t(reviews.length === 1 ? 'social.company.ratingReviewsOne' : 'social.company.ratingReviewsOther', { rating: m.rating.toFixed(1), count: reviews.length })}</span>
                 </div>
-                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 4 }}>{m.onTime === null ? 'Puntualidad de pagos: sin datos todavía' : `${m.onTime.toFixed(0)}% de pagos a tiempo`}</div>
+                <div style={{ fontFamily: 'var(--font-b)', fontSize: 12, color: 'var(--ter)', marginTop: 4 }}>{m.onTime === null ? t('social.company.onTimeNoData') : t('social.company.onTimePct', { pct: m.onTime.toFixed(0) })}</div>
               </div>
             </div>
-            <PBtn variant="secondary" small style={{ marginTop: 14 }} onClick={() => onTab('confianza')}>Ver rentabilidad y confianza</PBtn>
+            <PBtn variant="secondary" small style={{ marginTop: 14 }} onClick={() => onTab('confianza')}>{t('social.company.viewTrust')}</PBtn>
           </PCard>
 
         </div>
@@ -311,18 +327,19 @@ export function CompanySummary(props: SummaryProps) {
 
       {/* Projects — mini marketplace with search and filters (first 6) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '24px 0 12px' }}>
-        <h3 style={{ margin: 0, fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>Proyectos <span style={{ color: 'var(--ter)', fontWeight: 600 }}>({m.assets.length})</span></h3>
+        <h3 style={{ margin: 0, fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{t('social.company.projects')} <span style={{ color: 'var(--ter)', fontWeight: 600 }}>({m.assets.length})</span></h3>
       </div>
-      <ProjectBrowser items={m.assets.map(asset => ({ asset }))} nav={nav} isMobile={isMobile} showCode minCard={300} limit={6} onMore={() => onTab('proyectos')} placeholder="Buscar proyectos de la empresa…" />
+      <ProjectBrowser items={m.assets.map(asset => ({ asset }))} nav={nav} isMobile={isMobile} showCode minCard={300} limit={6} onMore={() => onTab('proyectos')} placeholder={t('social.company.searchProjects')} />
     </div>
   );
 }
 
 // `value` null: not enough data yet (live) — empty ring with a dash.
 function TrustRing({ value, size = 72 }: { value: number | null; size?: number }) {
+  const { t } = useT('profile');
   const r = (size - 8) / 2, c = 2 * Math.PI * r;
   return (
-    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }} role="img" aria-label={value === null ? 'Índice de confianza sin datos' : `Índice de confianza ${value} de 100`}>
+    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }} role="img" aria-label={value === null ? t('social.company.trustIndexNoDataAria') : t('social.company.trustIndexAria', { value })}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }} aria-hidden="true">
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--surface2)" strokeWidth="6" />
         {value !== null && <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${(value / 100) * c} ${c}`} />}
@@ -338,6 +355,7 @@ function TrustRing({ value, size = 72 }: { value: number | null; size?: number }
 // ─── Analítica ────────────────────────────────────────────────────────────────
 export function CompanyAnalytics(props: SectionProps) {
   const { isMobile } = props;
+  const { t } = useT('profile');
   const m = metricsOf(props);
   const rows: BarRow[] = [...m.assets].sort((x, y) => m.raisedBy(y) - m.raisedBy(x)).map(a => ({
     key: a.id, value: m.raisedBy(a), asset: a, label: <ProjectCode asset={a} />,
@@ -348,24 +366,24 @@ export function CompanyAnalytics(props: SectionProps) {
   return (
     <div>
       <Kpis isMobile={isMobile} items={[
-        [fmtShort(m.raised), 'Capital recaudado', `${m.funded.toFixed(0)}% financiado en promedio`],
-        [fmtShort(m.distributed), 'Distribuido a inversores'],
-        [fmtCount(m.investors), 'Inversores'],
-        [`${m.milestones}`, 'Hitos publicados', `${fmtCount(m.likes)} me gusta · ${m.comments} comentarios`],
+        [fmtShort(m.raised), t('social.company.raised'), t('social.company.fundedAvg', { pct: m.funded.toFixed(0) })],
+        [fmtShort(m.distributed), t('social.company.distributedToInvestors')],
+        [fmtCount(m.investors), t('social.company.investors')],
+        [`${m.milestones}`, t('social.company.milestonesPublished'), t('social.company.engagement', { likes: fmtCount(m.likes), comments: m.comments })],
       ]} />
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'repeat(2, minmax(0,1fr))', gap: 18 }}>
         <PCard style={{ padding: '20px 22px' }}>
-          <H sub="USD recaudados por proyecto">Capital por proyecto</H>
+          <H sub={t('social.company.capitalByProjectSub')}>{t('social.company.capitalByProject')}</H>
           <HBarChart rows={rows} fmt={fmtShort}
-            tipFor={r => [r.asset.name, `${fmtUSD(r.value)} · ${r.asset.sold}% financiado`]} />
+            tipFor={r => [r.asset.name, t('social.company.tipFunded', { amount: fmtUSD(r.value), pct: r.asset.sold })]} />
         </PCard>
         <PCard style={{ padding: '20px 22px' }}>
-          <H sub="Personas con tokens de cada proyecto">Inversores por proyecto</H>
+          <H sub={t('social.company.investorsByProjectSub')}>{t('social.company.investorsByProject')}</H>
           <HBarChart rows={investorRows} fmt={v => fmtCount(v)}
-            tipFor={r => [r.asset.name, `${fmtCount(r.value)} inversores`]} />
+            tipFor={r => [r.asset.name, t('social.company.tipInvestors', { count: fmtCount(r.value) })]} />
         </PCard>
         <PCard style={{ padding: '20px 22px', gridColumn: isMobile ? 'auto' : '1 / -1' }}>
-          <H sub="Rentas pagadas a los inversores, últimos 12 meses (USD)">Distribuciones por mes</H>
+          <H sub={t('social.company.distributionsSub')}>{t('social.company.distributions')}</H>
           <ColumnChart points={m.monthly} fmt={fmtShort} />
         </PCard>
       </div>
@@ -376,39 +394,41 @@ export function CompanyAnalytics(props: SectionProps) {
 // ─── Rentabilidad y confianza ─────────────────────────────────────────────────
 export function CompanyTrust(props: SectionProps) {
   const { profile, posts, reviews, nav, isMobile } = props;
+  const { t } = useT('profile');
+  const { t: tc } = useT('common');
   const m = metricsOf(props);
   const round = (v: number | null) => (v === null ? null : Math.round(v));
   const posted = profile.live ? profile.live.stats.posts : posts.length;
   const factors: ReadonlyArray<readonly [string, number | null, string]> = [
-    ['Verificación de la empresa', m.verifiedScore, profile.verified ? 'KYB aprobado por Brikme' : 'Pendiente de verificación'],
-    ['Pagos a tiempo', round(m.onTime), m.payments && m.late !== null ? `${m.payments - m.late} de ${m.payments} distribuciones en fecha` : 'Sin distribuciones todavía'],
-    ['Financiamiento de proyectos', Math.round(m.funded), 'Promedio vendido de sus proyectos'],
-    ['Reseñas de inversores', Math.round((m.rating / 5) * 100), `${m.rating.toFixed(1)} de 5 en ${reviews.length} reseñas`],
-    ['Transparencia', round(m.transparency), `${posted} actualizaciones publicadas`],
+    [t('social.company.factorVerification'), m.verifiedScore, profile.verified ? t('social.company.kybApproved') : t('social.company.pendingVerification')],
+    [t('social.company.onTime'), round(m.onTime), m.payments && m.late !== null ? t('social.company.onTimeHint', { ok: m.payments - m.late, total: m.payments }) : t('social.company.noDistributions')],
+    [t('social.company.factorFunding'), Math.round(m.funded), t('social.company.factorFundingHint')],
+    [t('social.company.factorReviews'), Math.round((m.rating / 5) * 100), t(reviews.length === 1 ? 'social.company.factorReviewsHintOne' : 'social.company.factorReviewsHintOther', { rating: m.rating.toFixed(1), count: reviews.length })],
+    [t('social.company.factorTransparency'), round(m.transparency), t(posted === 1 ? 'social.company.factorTransparencyHintOne' : 'social.company.factorTransparencyHintOther', { count: posted })],
   ];
   const signals: ReadonlyArray<readonly [boolean | null, string]> = [
-    [profile.verified, 'Empresa verificada (KYB)'],
-    [m.ownerKyc, 'Dueño con identidad verificada (KYC)'],
-    [m.assets.every(a => a.contract), 'Contratos inteligentes publicados'],
-    [m.late === null ? null : m.late === 0, 'Sin pagos atrasados'],
-    [m.milestones > 0, 'Reporta hitos de avance'],
+    [profile.verified, t('social.company.verifiedKyb')],
+    [m.ownerKyc, t('social.company.signalOwnerKyc')],
+    [m.assets.every(a => a.contract), t('social.company.signalContracts')],
+    [m.late === null ? null : m.late === 0, t('social.company.signalNoLate')],
+    [m.milestones > 0, t('social.company.signalMilestones')],
   ];
   return (
     <div>
       <Kpis isMobile={isMobile} items={[
-        [pct(m.apy, 1), 'APY promedio', 'Ponderado por capital'],
-        [fmtShort(m.distributed), 'Rentas distribuidas'],
-        m.onTime === null ? ['—', 'Pagos a tiempo', 'Sin datos todavía'] : [pct(m.onTime), 'Pagos a tiempo'],
-        [m.trust === null ? '—' : `${m.trust}/100`, 'Índice de confianza', trustText(m.trust)],
+        [pct(m.apy, 1), t('social.company.avgApy'), t('social.company.avgApyHint')],
+        [fmtShort(m.distributed), t('social.company.rentsDistributed')],
+        m.onTime === null ? ['—', t('social.company.onTime'), t('social.company.noDataYet')] : [pct(m.onTime), t('social.company.onTime')],
+        [m.trust === null ? '—' : `${m.trust}/100`, t('social.company.trustIndex'), trustText(t, m.trust)],
       ]} />
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) minmax(0,1fr)', gap: 18, marginBottom: 18 }}>
         <PCard style={{ padding: '20px 22px' }}>
-          <H sub="Cómo se calcula el índice">Índice de confianza</H>
+          <H sub={t('social.company.trustIndexSub')}>{t('social.company.trustIndex')}</H>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
             <TrustRing value={m.trust} size={84} />
             <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--sec)', lineHeight: 1.5 }}>
-              <b style={{ color: 'var(--text)' }}>{trustText(m.trust)}</b>. {m.trust === null ? 'Todavía no hay datos suficientes para calcularlo: necesita historial de pagos de la empresa.' : 'Combina verificación, puntualidad de pagos, financiamiento, reseñas y transparencia.'}
+              <b style={{ color: 'var(--text)' }}>{trustText(t, m.trust)}</b>. {m.trust === null ? t('social.company.trustNoData') : t('social.company.trustExplain')}
             </div>
           </div>
           {factors.map(([label, v, hint]) => (
@@ -426,30 +446,30 @@ export function CompanyTrust(props: SectionProps) {
         </PCard>
 
         <PCard style={{ padding: '20px 22px' }}>
-          <H>Señales de confianza</H>
+          <H>{t('social.company.signals')}</H>
           {signals.map(([ok, label]) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid var(--border-l)' }}>
               <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0,
                 background: ok ? 'color-mix(in oklab, var(--pos) 15%, transparent)' : 'var(--surface2)', color: ok ? 'var(--pos)' : 'var(--ter)' }}>{ok ? '✓' : '–'}</span>
               <span style={{ fontFamily: 'var(--font-b)', fontSize: 13.5, color: ok ? 'var(--text)' : 'var(--ter)' }}>{label}</span>
-              <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-b)', fontSize: 11.5, color: ok ? 'var(--pos)' : 'var(--ter)', fontWeight: 600 }}>{ok ? 'Cumple' : ok === null ? 'Sin datos' : 'No cumple'}</span>
+              <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-b)', fontSize: 11.5, color: ok ? 'var(--pos)' : 'var(--ter)', fontWeight: 600 }}>{ok ? t('social.company.meets') : ok === null ? t('social.company.noData') : t('social.company.notMeets')}</span>
             </div>
           ))}
           {profile.verified && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--sec)' }}>
-              <VerifiedBadge /> Verificada por Brikme
+              <VerifiedBadge /> {t('social.company.verifiedByBrikme')}
             </div>
           )}
         </PCard>
       </div>
 
       <PCard style={{ padding: '20px 22px' }}>
-        <H sub="Rendimiento de cada proyecto de la empresa">Rentabilidad por proyecto</H>
+        <H sub={t('social.company.returnsSub')}>{t('social.company.returns')}</H>
         <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-b)', fontSize: 13, minWidth: 620 }}>
             <thead>
               <tr style={{ color: 'var(--ter)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left' }}>
-                {['Proyecto', 'Estado', 'APY', 'Financiado', 'Valor 12 m', 'Tendencia'].map(h => <th key={h} scope="col" style={{ padding: '6px 8px', fontWeight: 600 }}>{h}</th>)}
+                {[t('social.company.colProject'), t('social.company.colStatus'), t('social.company.colApy'), t('social.company.colFunded'), t('social.company.colValue12m'), t('social.company.colTrend')].map(h => <th key={h} scope="col" style={{ padding: '6px 8px', fontWeight: 600 }}>{h}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -461,7 +481,7 @@ export function CompanyTrust(props: SectionProps) {
                     <td style={{ padding: '10px 8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><ProjectCode asset={a} /><span style={{ color: 'var(--text)', fontWeight: 600 }}>{a.name}</span></div>
                     </td>
-                    <td style={{ padding: '10px 8px', color: 'var(--sec)' }}>{a.stage}</td>
+                    <td style={{ padding: '10px 8px', color: 'var(--sec)' }}>{tc(`stages.${a.stage}`)}</td>
                     <td style={{ padding: '10px 8px', color: 'var(--text)', fontWeight: 700 }}>{a.apy}%</td>
                     <td style={{ padding: '10px 8px', color: 'var(--sec)' }}>{a.sold}%</td>
                     <td style={{ padding: '10px 8px', color: chg >= 0 ? 'var(--pos)' : 'var(--neg)', fontWeight: 600 }}>{chg >= 0 ? '+' : ''}{chg.toFixed(1)}%</td>
@@ -497,6 +517,8 @@ type ReviewsProps = Omit<SectionProps, 'posts'> & {
 type ReviewDraft = { assetId: number | undefined; rating: number; text: string };
 
 export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, isMobile, reviewable, onEdit, onDelete, error }: ReviewsProps) {
+  const { t, raw } = useT('profile');
+  const months = raw<string[]>('social.months');
   const [filter, setFilter] = useState<number | 'all'>('all');
   const [draft, setDraft] = useState<ReviewDraft>({ assetId: profile.allAssets[0]?.id, rating: 5, text: '' });
   const [busy, setBusy] = useState(false);
@@ -542,7 +564,7 @@ export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, i
         <PCard style={{ padding: '20px 22px' }}>
           <div style={{ fontFamily: 'var(--font-h)', fontWeight: 800, fontSize: 40, color: 'var(--text)', lineHeight: 1 }}>{avg.toFixed(1)}</div>
           <div style={{ margin: '6px 0 4px' }}><Stars value={avg} size={18} /></div>
-          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 14 }}>{reviews.length} reseñas de inversores</div>
+          <div style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--ter)', marginBottom: 14 }}>{t(reviews.length === 1 ? 'social.company.investorReviewsOne' : 'social.company.investorReviewsOther', { count: reviews.length })}</div>
           {[5, 4, 3, 2, 1].map(n => {
             const c = reviews.filter(r => r.rating === n).length;
             return (
@@ -559,23 +581,23 @@ export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, i
 
         {!isMine && viewer && (
           <PCard style={{ padding: '20px 22px' }}>
-            <H sub="Cuenta tu experiencia como inversor">Escribir una reseña</H>
+            <H sub={t('social.company.writeReviewSub')}>{t('social.company.writeReview')}</H>
             {options.length === 0 ? (
               <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)', lineHeight: 1.5 }}>
                 {reviewable && reviewable.length === 0
-                  ? 'Puedes reseñar los proyectos de esta empresa en los que invertiste.'
-                  : 'Ya reseñaste todos tus proyectos de esta empresa. Puedes editar tus reseñas desde la lista.'}
+                  ? t('social.company.canReviewInvested')
+                  : t('social.company.allReviewed')}
               </div>
             ) : (
               <>
-                <select value={selectedId ?? ''} onChange={e => setDraft(d => ({ ...d, assetId: Number(e.target.value) }))} aria-label="Proyecto"
+                <select value={selectedId ?? ''} onChange={e => setDraft(d => ({ ...d, assetId: Number(e.target.value) }))} aria-label={t('social.company.projectAria')}
                   style={{ width: '100%', padding: '9px 10px', borderRadius: 10, border: '1px solid var(--border-l)', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'var(--font-b)', fontSize: 13, marginBottom: 10 }}>
                   {options.map(a => <option key={a.id} value={a.id}>{`${a.name}`}</option>)}
                 </select>
                 <div style={{ marginBottom: 10 }}><Stars value={draft.rating} size={22} onPick={n => setDraft(d => ({ ...d, rating: n }))} /></div>
-                <textarea value={draft.text} onChange={e => setDraft(d => ({ ...d, text: e.target.value }))} rows={3} maxLength={1000} placeholder="¿Cómo fue tu experiencia con este proyecto?" aria-label="Tu reseña"
+                <textarea value={draft.text} onChange={e => setDraft(d => ({ ...d, text: e.target.value }))} rows={3} maxLength={1000} placeholder={t('social.company.reviewPlaceholder')} aria-label={t('social.company.yourReview')}
                   style={fieldStyle} />
-                <PBtn variant="accent" small style={{ marginTop: 10, opacity: draft.text.trim() && !busy ? 1 : 0.5 }} disabled={!draft.text.trim() || busy} onClick={submit}>Publicar reseña</PBtn>
+                <PBtn variant="accent" small style={{ marginTop: 10, opacity: draft.text.trim() && !busy ? 1 : 0.5 }} disabled={!draft.text.trim() || busy} onClick={submit}>{t('social.company.publishReview')}</PBtn>
               </>
             )}
             {error && <div role="alert" style={{ fontFamily: 'var(--font-b)', fontSize: 12.5, color: 'var(--neg)', marginTop: 10, lineHeight: 1.45 }}>{error}</div>}
@@ -585,7 +607,7 @@ export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, i
 
       <div style={{ minWidth: 0 }}>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-          {chip('all', 'Todos los proyectos')}
+          {chip('all', t('social.company.allProjects'))}
           {projects.map(a => chip(a.id, a.name))}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -593,11 +615,11 @@ export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, i
             <PCard key={r.id} style={{ padding: '16px 18px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 {r.authorAvatarUrl || r.authorAnonymous ? (
-                  <button onClick={() => openAuthor(r)} aria-label={`Ver perfil de ${r.author}`} style={{ border: 'none', padding: 0, background: 'none', cursor: 'pointer', flexShrink: 0, display: 'flex' }}>
+                  <button onClick={() => openAuthor(r)} aria-label={t('social.avatar.viewProfileOf', { name: r.author })} style={{ border: 'none', padding: 0, background: 'none', cursor: 'pointer', flexShrink: 0, display: 'flex' }}>
                     <UserAvatar size={34} user={{ name: r.author, initial: r.author.slice(0, 1), gradient: 'var(--surface2)', id: r.authorId, avatarUrl: r.authorAvatarUrl, anonymous: r.authorAnonymous }} />
                   </button>
                 ) : (
-                  <button onClick={() => openAuthor(r)} aria-label={`Ver perfil de ${r.author}`}
+                  <button onClick={() => openAuthor(r)} aria-label={t('social.avatar.viewProfileOf', { name: r.author })}
                     style={{ width: 34, height: 34, borderRadius: '50%', border: 'none', cursor: 'pointer', flexShrink: 0, color: '#fff', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14,
                       background: isViewer(r) && viewer ? viewer.gradient : `hsl(${hashOf(r.author) % 360} 55% 50%)` }}>
                     {r.author.slice(0, 1)}
@@ -605,12 +627,12 @@ export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, i
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: 'var(--font-b)', fontWeight: 700, fontSize: 13.5, color: 'var(--text)' }}>{r.author}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Stars value={r.rating} size={12} /><span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{r.date}</span></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Stars value={r.rating} size={12} /><span style={{ fontFamily: 'var(--font-b)', fontSize: 11.5, color: 'var(--ter)' }}>{localMonthLabel(r.date, months)}</span></div>
                 </div>
                 {r.isMine && editing?.id !== r.id && (onEdit || onDelete) && (
                   <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
-                    {onEdit && <button style={smallLink} onClick={() => setEditing({ id: r.id, rating: r.rating, text: r.text })}>Editar</button>}
-                    {onDelete && <button style={smallLink} onClick={() => onDelete(r)}>Eliminar</button>}
+                    {onEdit && <button style={smallLink} onClick={() => setEditing({ id: r.id, rating: r.rating, text: r.text })}>{t('social.company.edit')}</button>}
+                    {onDelete && <button style={smallLink} onClick={() => onDelete(r)}>{t('social.company.delete')}</button>}
                   </div>
                 )}
               </div>
@@ -621,10 +643,10 @@ export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, i
               {editing?.id === r.id ? (
                 <div>
                   <div style={{ marginBottom: 8 }}><Stars value={editing.rating} size={20} onPick={n => setEditing(e => (e ? { ...e, rating: n } : e))} /></div>
-                  <textarea value={editing.text} onChange={e => setEditing(x => (x ? { ...x, text: e.target.value } : x))} rows={3} maxLength={1000} aria-label="Editar reseña" style={fieldStyle} />
+                  <textarea value={editing.text} onChange={e => setEditing(x => (x ? { ...x, text: e.target.value } : x))} rows={3} maxLength={1000} aria-label={t('social.company.editReview')} style={fieldStyle} />
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <PBtn variant="accent" small disabled={!editing.text.trim() || busy} style={{ opacity: editing.text.trim() && !busy ? 1 : 0.5 }} onClick={() => saveEdit(r)}>Guardar</PBtn>
-                    <PBtn variant="secondary" small onClick={() => setEditing(null)}>Cancelar</PBtn>
+                    <PBtn variant="accent" small disabled={!editing.text.trim() || busy} style={{ opacity: editing.text.trim() && !busy ? 1 : 0.5 }} onClick={() => saveEdit(r)}>{t('social.company.save')}</PBtn>
+                    <PBtn variant="secondary" small onClick={() => setEditing(null)}>{t('social.company.cancel')}</PBtn>
                   </div>
                 </div>
               ) : (
@@ -632,7 +654,7 @@ export function CompanyReviews({ profile, reviews, onAdd, isMine, viewer, nav, i
               )}
             </PCard>
           ))}
-          {shown.length === 0 && <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>Todavía no hay reseñas.</div>}
+          {shown.length === 0 && <div style={{ fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--ter)' }}>{t('social.company.noReviews')}</div>}
         </div>
       </div>
     </div>
